@@ -10,7 +10,6 @@
 		<Copyright>Copyright © 2021</Copyright>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<FileVersion>0.1.0.1</FileVersion>
-		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
