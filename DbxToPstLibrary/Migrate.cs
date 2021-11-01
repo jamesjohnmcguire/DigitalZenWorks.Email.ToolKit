@@ -4,7 +4,14 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+using Common.Logging;
+using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Reflection;
+
+[assembly: CLSCompliant(true)]
 
 namespace DbxToPstLibrary
 {
@@ -13,6 +20,9 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public static class Migrate
 	{
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		/// <summary>
 		/// Dbx directory to pst.
 		/// </summary>
@@ -45,6 +55,7 @@ namespace DbxToPstLibrary
 			}
 			else
 			{
+				Log.Error("Invalid path");
 			}
 		}
 	}
