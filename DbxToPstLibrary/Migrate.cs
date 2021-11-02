@@ -29,6 +29,9 @@ namespace DbxToPstLibrary
 		/// <param name="directoryPath">The directory path to migrate.</param>
 		public static void DbxDirectoryToPst(string directoryPath)
 		{
+			string path = Path.Combine(directoryPath, "Folders.dbx");
+			DbxSet dbxSet = new DbxSet(path);
+
 		}
 
 		/// <summary>
@@ -37,6 +40,7 @@ namespace DbxToPstLibrary
 		/// <param name="filePath">The file path to migrate.</param>
 		public static void DbxFileToPst(string filePath)
 		{
+			DbxSet dbxSet = new DbxSet(filePath);
 		}
 
 		/// <summary>
