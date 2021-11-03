@@ -1,5 +1,5 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
-// <copyright file="DbxSet.cs" company="James John McGuire">
+// <copyright file="DbxTree.cs" company="James John McGuire">
 // Copyright © 2021 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
@@ -7,7 +7,6 @@
 using Common.Logging;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,17 +14,9 @@ using System.Threading.Tasks;
 namespace DbxToPstLibrary
 {
 	/// <summary>
-	/// Dbx set class.
+	/// Dbx tree class.
 	/// </summary>
-	public class DbxSet
+	public class DbxTree
 	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DbxSet"/> class.
-		/// </summary>
-		/// <param name="path">The path of the dbx set.</param>
-		public DbxSet(string path)
-		{
-			DbxFile foldersFile = new DbxFile(path);
-		}
 	}
 }
