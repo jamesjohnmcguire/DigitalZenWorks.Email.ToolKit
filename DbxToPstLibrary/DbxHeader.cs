@@ -19,12 +19,17 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public class DbxHeader
 	{
+		private const int FileInfoLengthIndex = 7;
+		private const int LastVariableSegmentIndex = 9;
+		private const int MainTreeRootNodeIndex = 0x3B;
+
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		private int fileInfoLength;
-		private DbxFileType fileType;
-		private int lastSegmentAddress;
+		private readonly int fileInfoLength;
+		private readonly DbxFileType fileType;
+		private readonly int[] headerArray;
+		private readonly int lastSegmentAddress;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxHeader"/> class.
@@ -33,27 +38,22 @@ namespace DbxToPstLibrary
 		/// file header.</param>
 		public DbxHeader(byte[] headerBytes)
 		{
-			byte[] checkBytes = new byte[] { 0xCF, 0xAD, 0x12, 0xFE, 0xC5,
-				0xFD, 0x74, 0x6F, 0x66, 0xE3, 0xD1, 0x11, 0x9A, 0x4E, 0x00,
-				0xC0, 0x4F, 0xA3, 0x09, 0xD4, 0x05, 0x00, 0x00, 0x00, 0x05,
-				0x00, 0x00, 0x00 };
-
 			if (headerBytes != null)
 			{
 				fileType = GetFileType(headerBytes);
 
-				for (int index = 0; index < checkBytes.Length; index++)
-				{
-					if (index == 4)
-					{
-						continue;
-					}
+				CheckInitialBytes(headerBytes);
 
-					ConfirmByte(headerBytes, index, checkBytes[index]);
-				}
+				// It will be easier to work with integers as opposed to bytes.
+				int size = headerBytes.Length / sizeof(int);
+				headerArray = new int[size];
+				Buffer.BlockCopy(
+					headerBytes, 0, headerArray, 0, headerBytes.Length);
 
-				fileInfoLength = BytesToInteger(headerBytes, 0x1C);
-				lastSegmentAddress = BytesToInteger(headerBytes, 0x24);
+				fileInfoLength = headerArray[FileInfoLengthIndex];
+				lastSegmentAddress = headerArray[LastVariableSegmentIndex];
+
+				int mainTreeAddress = headerArray[MainTreeRootNodeIndex];
 			}
 		}
 
@@ -72,6 +72,26 @@ namespace DbxToPstLibrary
 			result = BitConverter.ToInt32(testBytes, 0);
 
 			return result;
+		}
+
+		private static void CheckInitialBytes(byte[] headerBytes)
+		{
+			byte[] checkBytes = new byte[]
+			{
+				0xCF, 0xAD, 0x12, 0xFE, 0xC5, 0xFD, 0x74, 0x6F, 0x66, 0xE3,
+				0xD1, 0x11, 0x9A, 0x4E, 0x00, 0xC0, 0x4F, 0xA3, 0x09, 0xD4,
+				0x05, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00
+			};
+
+			for (int index = 0; index < checkBytes.Length; index++)
+			{
+				if (index == 4)
+				{
+					continue;
+				}
+
+				ConfirmByte(headerBytes, index, checkBytes[index]);
+			}
 		}
 
 		private static bool ConfirmByte(
