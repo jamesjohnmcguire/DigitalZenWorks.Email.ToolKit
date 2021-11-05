@@ -1,0 +1,50 @@
+﻿/////////////////////////////////////////////////////////////////////////////
+// <copyright file="DbxFile.cs" company="James John McGuire">
+// Copyright © 2021 James John McGuire. All Rights Reserved.
+// </copyright>
+/////////////////////////////////////////////////////////////////////////////
+
+using Common.Logging;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DbxToPstLibrary
+{
+	/// <summary>
+	/// Dbx file class.
+	/// </summary>
+	public class DbxFile
+	{
+		private byte[] fileBytes;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DbxFile"/> class.
+		/// </summary>
+		/// <param name="filePath">The path of the dbx file.</param>
+		public DbxFile(string filePath)
+		{
+			fileBytes = File.ReadAllBytes(filePath);
+
+			byte[] headerBytes = new byte[0x24bc];
+			Array.Copy(fileBytes, headerBytes, 0x24bc);
+
+			Header = new (headerBytes);
+		}
+
+		/// <summary>
+		/// Gets the file bytes.
+		/// </summary>
+		/// <value>The file bytes.</value>
+		public byte[] FileBytes { get { return fileBytes; } }
+
+		/// <summary>
+		/// Gets or sets the dbx file header.
+		/// </summary>
+		/// <value>The dbx file header.</value>
+		public DbxHeader Header { get; set; }
+	}
+}
