@@ -19,13 +19,40 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public class DbxSet
 	{
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxSet"/> class.
 		/// </summary>
 		/// <param name="path">The path of the dbx set.</param>
 		public DbxSet(string path)
 		{
-			DbxFile foldersFile = new DbxFile(path);
+			string foldersFilepath = Path.Combine(path, "Folders.dbx");
+
+			bool exists = File.Exists(foldersFilepath);
+
+			if (exists == false)
+			{
+				Log.Error("Folders.dbx not present");
+
+				// Attempt to process the individual files.
+			}
+			else
+			{
+				DbxFoldersFile foldersFile = new DbxFoldersFile(path);
+
+				if (foldersFile.Header.FileType != DbxFileType.FolderFile)
+				{
+					Log.Error("Folders.dbx not actually folders file");
+
+					// Attempt to process the individual files.
+				}
+				else
+				{
+					foldersFile.ReadTree();
+				}
+			}
 		}
 	}
 }
