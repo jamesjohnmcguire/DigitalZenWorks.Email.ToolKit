@@ -21,15 +21,18 @@ namespace DbxToPstLibrary
 	{
 		private const int FileInfoLengthIndex = 7;
 		private const int LastVariableSegmentIndex = 9;
+		private const int FolderCountIndex = 0x31;
 		private const int MainTreeRootNodeIndex = 0x3B;
 
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		private readonly int fileInfoLength;
+		private readonly int folderCount;
 		private readonly DbxFileType fileType;
 		private readonly int[] headerArray;
 		private readonly int lastSegmentAddress;
+		private readonly int mainTreeAddress;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxHeader"/> class.
@@ -53,9 +56,31 @@ namespace DbxToPstLibrary
 				fileInfoLength = headerArray[FileInfoLengthIndex];
 				lastSegmentAddress = headerArray[LastVariableSegmentIndex];
 
-				int mainTreeAddress = headerArray[MainTreeRootNodeIndex];
+				if (fileType == DbxFileType.FolderFile)
+				{
+					folderCount = headerArray[FolderCountIndex];
+					int mainTreeAddress = headerArray[MainTreeRootNodeIndex];
+				}
 			}
 		}
+
+		/// <summary>
+		/// Gets file type.
+		/// </summary>
+		/// <value>The file type.</value>
+		public DbxFileType FileType { get { return fileType; } }
+
+		/// <summary>
+		/// Gets the folder count.
+		/// </summary>
+		/// <value>The folder count.</value>
+		public int FolderCount { get { return folderCount; } }
+
+		/// <summary>
+		/// Gets the main tree address.
+		/// </summary>
+		/// <value>The main tree address.</value>
+		public int MainTreeAddress { get { return mainTreeAddress; } }
 
 		private static int BytesToInteger(byte[] bytes, int index)
 		{
