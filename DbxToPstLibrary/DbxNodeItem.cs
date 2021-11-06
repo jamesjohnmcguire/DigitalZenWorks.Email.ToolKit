@@ -21,18 +21,18 @@ namespace DbxToPstLibrary
 		/// Gets or sets the node children index.
 		/// </summary>
 		/// <value>The node children index.</value>
-		public int NodeChildrenIndex { get; set; }
+		public uint NodeChildrenIndex { get; set; }
 
 		/// <summary>
 		/// Gets or sets the node children count.
 		/// </summary>
 		/// <value>The node children count.</value>
-		public int NodeChildrenCount { get; set; }
+		public uint NodeChildrenCount { get; set; }
 
 		/// <summary>
 		/// Gets or sets the node value.
 		/// </summary>
 		/// <value>The node value.</value>
-		public int NodeValue { get; set; }
+		public uint NodeValue { get; set; }
 	}
 }
