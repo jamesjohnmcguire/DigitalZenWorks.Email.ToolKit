@@ -36,15 +36,18 @@ namespace DbxToPstLibrary
 		}
 
 		/// <summary>
-		/// Gets the file bytes.
-		/// </summary>
-		/// <value>The file bytes.</value>
-		public byte[] FileBytes { get { return fileBytes; } }
-
-		/// <summary>
 		/// Gets or sets the dbx file header.
 		/// </summary>
 		/// <value>The dbx file header.</value>
 		public DbxHeader Header { get; set; }
+
+		/// <summary>
+		/// Gets the file bytes.
+		/// </summary>
+		/// <returns>The file bytes.</returns>
+		public byte[] GetFileBytes()
+		{
+			return fileBytes;
+		}
 	}
 }
