@@ -27,12 +27,12 @@ namespace DbxToPstLibrary
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		private readonly int fileInfoLength;
-		private readonly int folderCount;
+		private readonly uint fileInfoLength;
+		private readonly uint folderCount;
 		private readonly DbxFileType fileType;
-		private readonly int[] headerArray;
-		private readonly int lastSegmentAddress;
-		private readonly int mainTreeAddress;
+		private readonly uint[] headerArray;
+		private readonly uint lastSegmentAddress;
+		private readonly uint mainTreeAddress;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxHeader"/> class.
@@ -48,8 +48,8 @@ namespace DbxToPstLibrary
 				CheckInitialBytes(headerBytes);
 
 				// It will be easier to work with integers as opposed to bytes.
-				int size = headerBytes.Length / sizeof(int);
-				headerArray = new int[size];
+				int size = headerBytes.Length / sizeof(uint);
+				headerArray = new uint[size];
 				Buffer.BlockCopy(
 					headerBytes, 0, headerArray, 0, headerBytes.Length);
 
@@ -59,7 +59,7 @@ namespace DbxToPstLibrary
 				if (fileType == DbxFileType.FolderFile)
 				{
 					folderCount = headerArray[FolderCountIndex];
-					int mainTreeAddress = headerArray[MainTreeRootNodeIndex];
+					mainTreeAddress = headerArray[MainTreeRootNodeIndex];
 				}
 			}
 		}
@@ -74,17 +74,17 @@ namespace DbxToPstLibrary
 		/// Gets the folder count.
 		/// </summary>
 		/// <value>The folder count.</value>
-		public int FolderCount { get { return folderCount; } }
+		public uint FolderCount { get { return folderCount; } }
 
 		/// <summary>
 		/// Gets the main tree address.
 		/// </summary>
 		/// <value>The main tree address.</value>
-		public int MainTreeAddress { get { return mainTreeAddress; } }
+		public uint MainTreeAddress { get { return mainTreeAddress; } }
 
-		private static int BytesToInteger(byte[] bytes, int index)
+		private static uint BytesToInteger(byte[] bytes, int index)
 		{
-			int result;
+			uint result;
 			byte[] testBytes = new byte[4];
 			Array.Copy(bytes, index, testBytes, 0, 4);
 
@@ -94,7 +94,7 @@ namespace DbxToPstLibrary
 				Array.Reverse(testBytes);
 			}
 
-			result = BitConverter.ToInt32(testBytes, 0);
+			result = BitConverter.ToUInt32(testBytes, 0);
 
 			return result;
 		}
