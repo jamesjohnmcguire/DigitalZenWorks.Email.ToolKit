@@ -40,7 +40,8 @@ namespace DbxToPstLibrary
 			}
 			else
 			{
-				DbxFoldersFile foldersFile = new DbxFoldersFile(path);
+				DbxFoldersFile foldersFile =
+					new DbxFoldersFile(foldersFilepath);
 
 				if (foldersFile.Header.FileType != DbxFileType.FolderFile)
 				{
