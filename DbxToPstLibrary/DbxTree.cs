@@ -18,8 +18,13 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public class DbxTree
 	{
+		private const int ItemsBase = 6;
 		private const int NodeBaseAddressIndex = 0;
+		private const int NodeIemCountIndex = 0x11;
 		private const int TreeNodeSize = 0x27c;
+
+		private readonly IList<uint> folderInformationIndexes =
+			new List<uint>();
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxTree"/> class.
@@ -27,21 +32,63 @@ namespace DbxToPstLibrary
 		/// <param name="treeBytes">The bytes of the tree in file.</param>
 		/// <param name="rootNodeAddress">The address of the root node.</param>
 		/// <param name="nodeCount">The count of nodes.</param>
-		public DbxTree(byte[] treeBytes, int rootNodeAddress, int nodeCount)
+		public DbxTree(byte[] treeBytes, uint rootNodeAddress, uint nodeCount)
+		{
+			ReadTree(treeBytes, rootNodeAddress);
+		}
+
+		/// <summary>
+		/// Gets the folder information indexes list.
+		/// </summary>
+		/// <value>The folder information indexes list.</value>
+		public IList<uint> FolderInformationIndexes
+			{ get { return folderInformationIndexes; } }
+
+		/// <summary>
+		/// Reads the given bytes into a tree structure.
+		/// </summary>
+		/// <param name="treeBytes">The bytes of the tree in file.</param>
+		/// <param name="rootNodeAddress">The address of the root node.</param>
+		public void ReadTree(byte[] treeBytes, uint rootNodeAddress)
 		{
 			if (treeBytes != null)
 			{
 				// It will be easier to work with integers as opposed to bytes.
-				int size = treeBytes.Length / sizeof(int);
-				int[] treeArray = new int[size];
+				int size = treeBytes.Length / sizeof(uint);
+				uint[] treeArray = new uint[size];
 				Buffer.BlockCopy(
 					treeBytes, 0, treeArray, 0, treeBytes.Length);
 
-				if (treeBytes[NodeBaseAddressIndex] != rootNodeAddress)
+				if (treeArray[0] != rootNodeAddress)
 				{
 					throw new DbxException("Wrong object marker!");
 				}
 
+				DbxTreeNode root = new ();
+				root.NodeFileIndex = treeArray[0];
+				root.ChildrenNodesIndex = treeArray[2];
+
+				// for root, should be 0
+				root.ParentNodeIndex = treeArray[3];
+
+				// recurse into sub tree.
+				ReadTree(treeBytes, root.ChildrenNodesIndex);
+
+				root.ItemCount = treeBytes[NodeIemCountIndex];
+
+				for (int index = 0; index < root.ItemCount; index++)
+				{
+					// Each of the items occupy 3 ints (12 bytes) each,
+					// starting from the 6th element.
+					int offset = index * 3;
+					offset += ItemsBase;
+
+					DbxNodeItem item = new ();
+					item.NodeValue = treeArray[offset];
+
+					// also, add this to our list
+					folderInformationIndexes.Add(item.NodeValue);
+				}
 			}
 		}
 	}

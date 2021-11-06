@@ -11,7 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 
-[assembly: CLSCompliant(true)]
+[assembly: CLSCompliant(false)]
 
 namespace DbxToPstLibrary
 {
