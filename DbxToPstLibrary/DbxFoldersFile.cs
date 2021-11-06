@@ -29,14 +29,19 @@ namespace DbxToPstLibrary
 		{
 		}
 
+		/// <summary>
+		/// Read the tree method.
+		/// </summary>
 		public void ReadTree()
 		{
 			byte[] treeBytes = new byte[TreeNodeSize];
-			Array.Copy(
-				FileBytes, Header.MainTreeAddress, treeBytes, 0, TreeNodeSize);
+			byte[] fileBytes = GetFileBytes();
 
-			DbxTree tree = new DbxTree(
-				treeBytes, Header.MainTreeAddress, Header.FolderCount);
+			Array.Copy(
+				fileBytes, Header.MainTreeAddress, treeBytes, 0, TreeNodeSize);
+
+			DbxTree tree =
+				new (treeBytes, Header.MainTreeAddress, Header.FolderCount);
 		}
 	}
 }
