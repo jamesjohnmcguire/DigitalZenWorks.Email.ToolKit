@@ -34,14 +34,10 @@ namespace DbxToPstLibrary
 		/// </summary>
 		public void ReadTree()
 		{
-			byte[] treeBytes = new byte[TreeNodeSize];
 			byte[] fileBytes = GetFileBytes();
 
-			Array.Copy(
-				fileBytes, Header.MainTreeAddress, treeBytes, 0, TreeNodeSize);
-
 			DbxTree tree =
-				new (treeBytes, Header.MainTreeAddress, Header.FolderCount);
+				new (fileBytes, Header.MainTreeAddress, Header.FolderCount);
 		}
 	}
 }
