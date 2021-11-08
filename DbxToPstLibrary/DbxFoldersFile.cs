@@ -19,6 +19,7 @@ namespace DbxToPstLibrary
 	public class DbxFoldersFile : DbxFile
 	{
 		private const int TreeNodeSize = 0x27c;
+		private DbxTree tree;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxFoldersFile"/> class.
@@ -29,6 +30,17 @@ namespace DbxToPstLibrary
 		{
 		}
 
+		public void List()
+		{
+			if (tree != null)
+			{
+				foreach (uint index in tree.FolderInformationIndexes)
+				{
+
+				}
+			}
+		}
+
 		/// <summary>
 		/// Read the tree method.
 		/// </summary>
@@ -36,8 +48,7 @@ namespace DbxToPstLibrary
 		{
 			byte[] fileBytes = GetFileBytes();
 
-			DbxTree tree =
-				new (fileBytes, Header.MainTreeAddress, Header.FolderCount);
+			tree = new (fileBytes, Header.MainTreeAddress, Header.FolderCount);
 		}
 	}
 }
