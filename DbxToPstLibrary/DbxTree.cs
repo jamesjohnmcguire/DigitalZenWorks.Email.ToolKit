@@ -69,7 +69,7 @@ namespace DbxToPstLibrary
 
 				if (treeArray[0] != rootNodeAddress)
 				{
-//					throw new DbxException("Wrong object marker!");
+					throw new DbxException("Wrong object marker!");
 				}
 
 				DbxTreeNode root = new ();
