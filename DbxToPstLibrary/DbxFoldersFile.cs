@@ -34,9 +34,11 @@ namespace DbxToPstLibrary
 		{
 			if (tree != null)
 			{
+				byte[] fileBytes = GetFileBytes();
+
 				foreach (uint index in tree.FolderInformationIndexes)
 				{
-
+					DbxIndexedItem item = new(fileBytes, index);
 				}
 			}
 		}
