@@ -82,23 +82,6 @@ namespace DbxToPstLibrary
 		/// <value>The main tree address.</value>
 		public uint MainTreeAddress { get { return mainTreeAddress; } }
 
-		private static uint BytesToInteger(byte[] bytes, int index)
-		{
-			uint result;
-			byte[] testBytes = new byte[4];
-			Array.Copy(bytes, index, testBytes, 0, 4);
-
-			// Dbx files are apprentely stored as little endian.
-			if (BitConverter.IsLittleEndian == false)
-			{
-				Array.Reverse(testBytes);
-			}
-
-			result = BitConverter.ToUInt32(testBytes, 0);
-
-			return result;
-		}
-
 		private static void CheckInitialBytes(byte[] headerBytes)
 		{
 			byte[] checkBytes = new byte[]
