@@ -52,6 +52,7 @@ namespace DbxToPstLibrary
 				else
 				{
 					foldersFile.ReadTree();
+					foldersFile.List();
 				}
 			}
 		}
