@@ -5,6 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Text;
 
 namespace DbxToPstLibrary
 {
@@ -82,6 +83,61 @@ namespace DbxToPstLibrary
 					SetIndex(index2, value);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Get a string value from the indexed item.
+		/// </summary>
+		/// <param name="index">The index item to retrieve.</param>
+		/// <returns>The value of the itemed item.</returns>
+		public string GetString(uint index)
+		{
+			string item = null;
+			uint subIndex = indexes[index];
+
+			if (subIndex > 0)
+			{
+				uint end = subIndex;
+				byte check;
+
+				do
+				{
+					check = bodyBytes[end];
+
+					if (check == 0)
+					{
+						break;
+					}
+
+					end++;
+				}
+				while (check > 0);
+
+				int length = (int)(end - subIndex);
+
+				item =
+					Encoding.ASCII.GetString(bodyBytes, (int)subIndex, length);
+			}
+
+			return item;
+		}
+
+		/// <summary>
+		/// Get the values from the indexed item.
+		/// </summary>
+		/// <param name="index">The index item to retrieve.</param>
+		/// <returns>The value of the itemed item.</returns>
+		public uint GetValue(uint index)
+		{
+			uint item = 0;
+			uint subIndex = indexes[index];
+
+			if (subIndex > 0)
+			{
+				item = bodyBytes[subIndex];
+			}
+
+			return item;
 		}
 
 		private void SetIndex(uint index, uint value)
