@@ -32,10 +32,11 @@ namespace DbxToPstLibrary
 		/// </summary>
 		public const int Flags = 0x06;
 
+		private const int TreeNodeSize = 0x27c;
+
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		private const int TreeNodeSize = 0x27c;
 		private DbxTree tree;
 
 		/// <summary>
@@ -47,6 +48,9 @@ namespace DbxToPstLibrary
 		{
 		}
 
+		/// <summary>
+		/// List folders method.
+		/// </summary>
 		public void List()
 		{
 			if (tree != null)
@@ -55,7 +59,7 @@ namespace DbxToPstLibrary
 
 				foreach (uint index in tree.FolderInformationIndexes)
 				{
-					DbxIndexedItem item = new(fileBytes, index);
+					DbxIndexedItem item = new (fileBytes, index);
 
 					uint value = item.GetValue(Id);
 
@@ -83,7 +87,6 @@ namespace DbxToPstLibrary
 						Name,
 						name);
 					Log.Info(message);
-					break;
 				}
 			}
 		}
