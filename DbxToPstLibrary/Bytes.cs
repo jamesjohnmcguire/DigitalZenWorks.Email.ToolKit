@@ -42,7 +42,7 @@ namespace DbxToPstLibrary
 		/// <param name="bytes">The source bytes.</param>
 		/// <param name="index">The index with in the bytes to copy.</param>
 		/// <returns>An integer of the bytes values.</returns>
-		public static uint ToInteger(byte[] bytes, int index)
+		public static uint ToInteger(byte[] bytes, uint index)
 		{
 			uint result = ToIntegerLimit(bytes, index, 4);
 
@@ -56,10 +56,12 @@ namespace DbxToPstLibrary
 		/// <param name="index">The index with in the bytes to copy.</param>
 		/// <param name="limit">The amount of bytes to copy.</param>
 		/// <returns>An integer of the bytes values.</returns>
-		public static uint ToIntegerLimit(byte[] bytes, int index, int limit)
+		public static uint ToIntegerLimit(byte[] bytes, uint index, int limit)
 		{
 			uint result;
-			byte[] testBytes = new byte[limit];
+
+			// The converter still needs 4 bytes to act on.
+			byte[] testBytes = new byte[4];
 			Array.Copy(bytes, index, testBytes, 0, limit);
 
 			// Dbx files are apprentely stored as little endian.
