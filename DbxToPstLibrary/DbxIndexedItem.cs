@@ -18,8 +18,8 @@ namespace DbxToPstLibrary
 		// notes indicate this may not enough.
 		private const int MaximumIndexes = 0x40;
 
-		private byte[] bodyBytes;
-		private uint[] indexes;
+		private readonly byte[] bodyBytes;
+		private readonly uint[] indexes;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxIndexedItem"/>
@@ -45,21 +45,14 @@ namespace DbxToPstLibrary
 			}
 
 			uint bodyLength = initialArray[1];
-			ushort indexLength = Bytes.ToShort(initialBytes, 8);
 			byte itemsCount = initialBytes[10];
-			byte itemsChangedCount = initialBytes[11];
 
 			uint offset = address + 12;
 
 			bodyBytes = new byte[bodyLength];
 			Array.Copy(fileBytes, offset, bodyBytes, 0, bodyLength);
 
-			// why is this needed? what the rationale?
-			var shifter = itemsCount << 2;
-
-			uint pointer = bodyBytes[shifter];
-
-			int itemsCountBytes = itemsCount * 4;
+			uint itemsCountBytes = (uint)itemsCount * 4;
 
 			for (uint index = 0; index < itemsCountBytes; index += 4)
 			{
@@ -67,7 +60,6 @@ namespace DbxToPstLibrary
 				bool isDirect = Bytes.GetBit(rawValue, 7);
 
 				byte index2 = (byte)(rawValue & 0x7F);
-				// uint value = Bytes.ToIntegerLimit(bodyBytes, index + 1, 3);
 				uint value = index;
 
 				if (isDirect == true)
@@ -78,7 +70,7 @@ namespace DbxToPstLibrary
 				else
 				{
 					value = bodyBytes[index + 1];
-					offset = 16;
+					offset = itemsCountBytes;
 					value = offset + value;
 					SetIndex(index2, value);
 				}
@@ -135,6 +127,7 @@ namespace DbxToPstLibrary
 			if (subIndex > 0)
 			{
 				item = bodyBytes[subIndex];
+				item = Bytes.ToIntegerLimit(bodyBytes, subIndex, 3);
 			}
 
 			return item;
