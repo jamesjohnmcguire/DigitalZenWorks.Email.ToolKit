@@ -45,20 +45,27 @@ namespace DbxToPstLibrary
 		/// Dbx to pst.
 		/// </summary>
 		/// <param name="path">the path of the dbx element.</param>
-		public static void DbxToPst(string path)
+		/// <returns>A value indicating success or not.</returns>
+		public static bool DbxToPst(string path)
 		{
+			bool result = false;
+
 			if (Directory.Exists(path))
 			{
 				DbxDirectoryToPst(path);
+				result = true;
 			}
 			else if (File.Exists(path))
 			{
 				DbxFileToPst(path);
+				result = true;
 			}
 			else
 			{
 				Log.Error("Invalid path");
 			}
+
+			return result;
 		}
 	}
 }
