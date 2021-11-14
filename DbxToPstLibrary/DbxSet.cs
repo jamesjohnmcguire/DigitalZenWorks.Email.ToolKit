@@ -30,19 +30,24 @@ namespace DbxToPstLibrary
 		/// <param name="path">The path of the dbx set.</param>
 		public DbxSet(string path)
 		{
-			string foldersFilepath = Path.Combine(path, "Folders.dbx");
+			string extension = Path.GetExtension(path);
 
-			bool exists = File.Exists(foldersFilepath);
+			if (string.IsNullOrEmpty(extension))
+			{
+				path = Path.Combine(path, "Folders.dbx");
+			}
+
+			bool exists = File.Exists(path);
 
 			if (exists == false)
 			{
-				Log.Error("Folders.dbx not present");
+				Log.Error( path + " not present");
 
 				// Attempt to process the individual files.
 			}
 			else
 			{
-				foldersFile = new (foldersFilepath);
+				foldersFile = new (path);
 
 				if (foldersFile.Header.FileType != DbxFileType.FolderFile)
 				{
