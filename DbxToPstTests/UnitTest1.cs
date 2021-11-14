@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using DbxToPstLibrary;
+using System;
 
 namespace DbxToPstTests
 {
@@ -42,5 +43,21 @@ namespace DbxToPstTests
 			string expected = "discussion.fastandfurius.com";
 			Assert.That(name, Is.EqualTo(expected));
 		}
+
+
+		[Test]
+		public void TestDbxToPst()
+		{
+			string applicationDataDirectory = @"DigitalZenWorks\DbxToPst";
+			string baseDataDirectory = Environment.GetFolderPath(
+				Environment.SpecialFolder.ApplicationData,
+				Environment.SpecialFolderOption.Create) + @"\" +
+				applicationDataDirectory;
+
+			string path = baseDataDirectory + "\\TestFolder";
+			bool result = Migrate.DbxToPst(path);
+			Assert.IsTrue(result);
+		}
+
 	}
 }
