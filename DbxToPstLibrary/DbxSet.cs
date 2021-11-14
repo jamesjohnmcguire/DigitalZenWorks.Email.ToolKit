@@ -22,6 +22,8 @@ namespace DbxToPstLibrary
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		private readonly DbxFoldersFile foldersFile;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxSet"/> class.
 		/// </summary>
@@ -40,7 +42,7 @@ namespace DbxToPstLibrary
 			}
 			else
 			{
-				DbxFoldersFile foldersFile = new (foldersFilepath);
+				foldersFile = new (foldersFilepath);
 
 				if (foldersFile.Header.FileType != DbxFileType.FolderFile)
 				{
@@ -51,7 +53,6 @@ namespace DbxToPstLibrary
 				else
 				{
 					foldersFile.ReadTree();
-					foldersFile.List();
 				}
 			}
 		}
@@ -59,8 +60,9 @@ namespace DbxToPstLibrary
 		/// <summary>
 		/// List method.
 		/// </summary>
-		public static void List()
+		public void List()
 		{
+			foldersFile.List();
 		}
 	}
 }
