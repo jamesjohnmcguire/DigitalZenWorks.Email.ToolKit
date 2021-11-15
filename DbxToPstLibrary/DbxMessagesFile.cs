@@ -39,16 +39,16 @@ namespace DbxToPstLibrary
 
 				foreach (uint index in Tree.FolderInformationIndexes)
 				{
-					DbxFolderIndexedItem item = new(fileBytes, index);
+					DbxMessageIndexedItem item = new (fileBytes, index);
 					item.ReadIndex(fileBytes, index);
 
-					DbxFolderIndex folderIndex = item.FolderIndex;
+					DbxMessageIndex messageIndex = item.MessageIndex;
 
 					string message = string.Format(
 						CultureInfo.InvariantCulture,
 						"item value[{0}] is {1}",
 						"some",
-						folderIndex.FolderFileName);
+						messageIndex.MessageId);
 					Log.Info(message);
 				}
 			}
