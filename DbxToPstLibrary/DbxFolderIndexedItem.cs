@@ -37,21 +37,22 @@ namespace DbxToPstLibrary
 		/// </summary>
 		public const int ParentId = 0x01;
 
-		private DbxFolderIndex folderIndex;
+		private readonly DbxFolderIndex folderIndex;
 
 		/// <summary>
 		/// Initializes a new instance of the
 		/// <see cref="DbxFolderIndexedItem"/> class.
 		/// </summary>
-		/// <param name="fileBytes">The bytes of the file.</param>
-		/// <param name="address">The address of the item with in
-		/// the file.</param>
-		public DbxFolderIndexedItem(byte[] fileBytes, uint address)
-			: base(fileBytes, address)
+		public DbxFolderIndexedItem()
+			: base()
 		{
 			folderIndex = new DbxFolderIndex();
 		}
 
+		/// <summary>
+		/// Gets the dbx folder index.
+		/// </summary>
+		/// <value>The dbx folder index.</value>
 		public DbxFolderIndex FolderIndex { get { return folderIndex; } }
 
 		/// <summary>

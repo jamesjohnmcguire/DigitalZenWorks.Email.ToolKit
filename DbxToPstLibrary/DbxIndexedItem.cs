@@ -18,17 +18,15 @@ namespace DbxToPstLibrary
 		// notes indicate this may not enough.
 		private const int MaximumIndexes = 0x40;
 
-		private byte[] bodyBytes;
 		private readonly uint[] indexes;
+
+		private byte[] bodyBytes;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxIndexedItem"/>
 		/// class.
 		/// </summary>
-		/// <param name="fileBytes">The bytes of the file.</param>
-		/// <param name="address">The address of the item with in
-		/// the file.</param>
-		public DbxIndexedItem(byte[] fileBytes, uint address)
+		public DbxIndexedItem()
 		{
 			indexes = new uint[MaximumIndexes];
 		}
@@ -68,20 +66,20 @@ namespace DbxToPstLibrary
 				byte rawValue = bodyBytes[index];
 				bool isDirect = Bytes.GetBit(rawValue, 7);
 
-				byte index2 = (byte)(rawValue & 0x7F);
+				byte indexOffset = (byte)(rawValue & 0x7F);
 				uint value = index;
 
 				if (isDirect == true)
 				{
 					value++;
-					SetIndex(index2, value);
+					SetIndex(indexOffset, value);
 				}
 				else
 				{
 					value = bodyBytes[index + 1];
 					offset = itemsCountBytes;
 					value = offset + value;
-					SetIndex(index2, value);
+					SetIndex(indexOffset, value);
 				}
 			}
 		}
@@ -135,7 +133,6 @@ namespace DbxToPstLibrary
 
 			if (subIndex > 0)
 			{
-				item = bodyBytes[subIndex];
 				item = Bytes.ToIntegerLimit(bodyBytes, subIndex, 3);
 			}
 
