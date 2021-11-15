@@ -19,8 +19,8 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public class DbxFile
 	{
-		private byte[] fileBytes;
-		private string folderPath;
+		private readonly byte[] fileBytes;
+		private readonly string folderPath;
 		private DbxTree tree;
 
 		/// <summary>
@@ -73,7 +73,7 @@ namespace DbxToPstLibrary
 		{
 			byte[] fileBytes = GetFileBytes();
 
-			tree = new (fileBytes, Header.MainTreeAddress, Header.FolderCount);
+			tree = new (fileBytes, Header.MainTreeAddress);
 		}
 	}
 }
