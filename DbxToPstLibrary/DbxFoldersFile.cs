@@ -51,7 +51,7 @@ namespace DbxToPstLibrary
 				}
 				else
 				{
-					DbxMessagesFile messagesFile = new(filePath);
+					DbxMessagesFile messagesFile = new (filePath);
 
 					DbxFileType check = messagesFile.Header.FileType;
 
@@ -80,7 +80,7 @@ namespace DbxToPstLibrary
 
 				foreach (uint index in Tree.FolderInformationIndexes)
 				{
-					DbxFolderIndexedItem item = new (fileBytes, index);
+					DbxFolderIndexedItem item = new ();
 					item.ReadIndex(fileBytes, index);
 
 					DbxFolderIndex folderIndex = item.FolderIndex;
@@ -127,7 +127,7 @@ namespace DbxToPstLibrary
 
 				foreach (uint index in Tree.FolderInformationIndexes)
 				{
-					DbxFolderIndexedItem item = new(fileBytes, index);
+					DbxFolderIndexedItem item = new ();
 					item.ReadIndex(fileBytes, index);
 
 					DbxFolderIndex folderIndex = item.FolderIndex;

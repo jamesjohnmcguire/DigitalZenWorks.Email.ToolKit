@@ -73,7 +73,7 @@ namespace DbxToPstLibrary
 		{
 			byte[] fileBytes = GetFileBytes();
 
-			tree = new (fileBytes, Header.MainTreeAddress, Header.FolderCount);
+			tree = new (fileBytes, Header.MainTreeAddress);
 		}
 	}
 }
