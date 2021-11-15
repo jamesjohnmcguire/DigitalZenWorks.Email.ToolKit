@@ -22,21 +22,22 @@ namespace DbxToPstLibrary
 		/// </summary>
 		public const int Name = 0x02;
 
-		private DbxMessageIndex messageIndex;
+		private readonly DbxMessageIndex messageIndex;
 
 		/// <summary>
 		/// Initializes a new instance of the
 		/// <see cref="DbxMessageIndexedItem"/> class.
 		/// </summary>
-		/// <param name="fileBytes">The bytes of the file.</param>
-		/// <param name="address">The address of the item with in
-		/// the file.</param>
-		public DbxMessageIndexedItem(byte[] fileBytes, uint address)
-			: base(fileBytes, address)
+		public DbxMessageIndexedItem()
+			: base()
 		{
 			messageIndex = new DbxMessageIndex();
 		}
 
+		/// <summary>
+		/// Gets the dbx message index.
+		/// </summary>
+		/// <value>The dbx message index.</value>
 		public DbxMessageIndex MessageIndex { get { return messageIndex; } }
 	}
 }

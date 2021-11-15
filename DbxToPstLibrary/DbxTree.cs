@@ -18,13 +18,13 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public class DbxTree
 	{
-		private static readonly ILog Log = LogManager.GetLogger(
-			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
 		private const int ItemsBase = 6;
 		private const int NodeBaseAddressIndex = 0;
 		private const int NodeIemCountIndex = 0x11;
 		private const int TreeNodeSize = 0x27c;
+
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		private readonly IList<uint> folderInformationIndexes =
 			new List<uint>();
@@ -34,8 +34,7 @@ namespace DbxToPstLibrary
 		/// </summary>
 		/// <param name="fileBytes">The bytes of the file.</param>
 		/// <param name="rootNodeAddress">The address of the root node.</param>
-		/// <param name="nodeCount">The count of nodes.</param>
-		public DbxTree(byte[] fileBytes, uint rootNodeAddress, uint nodeCount)
+		public DbxTree(byte[] fileBytes, uint rootNodeAddress)
 		{
 			ReadTree(fileBytes, rootNodeAddress);
 		}
@@ -73,7 +72,7 @@ namespace DbxToPstLibrary
 				}
 
 				DbxTreeNode root = new ();
-				root.NodeFileIndex = treeArray[0];
+				root.NodeFileIndex = treeArray[NodeBaseAddressIndex];
 				root.ChildrenNodesIndex = treeArray[2];
 
 				// for root, should be 0

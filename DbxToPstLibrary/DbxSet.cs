@@ -41,7 +41,7 @@ namespace DbxToPstLibrary
 
 			if (exists == false)
 			{
-				Log.Error( path + " not present");
+				Log.Error(path + " not present");
 
 				// Attempt to process the individual files.
 			}
