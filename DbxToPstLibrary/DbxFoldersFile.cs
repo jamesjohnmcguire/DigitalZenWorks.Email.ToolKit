@@ -59,33 +59,37 @@ namespace DbxToPstLibrary
 
 				foreach (uint index in tree.FolderInformationIndexes)
 				{
-					DbxIndexedItem item = new (fileBytes, index);
+					DbxFolderIndexedItem item = new (fileBytes, index);
+					item.ReadIndex(fileBytes, index);
 
-					uint value = item.GetValue(Id);
+					DbxFolderIndex folderIndex = item.FolderIndex;
 
 					string message = string.Format(
 						CultureInfo.InvariantCulture,
 						"item value[{0}] is {1}",
 						Id,
-						value);
+						folderIndex.FolderId);
 					Log.Info(message);
-
-					value = item.GetValue(ParentId);
 
 					message = string.Format(
 						CultureInfo.InvariantCulture,
 						"item value[{0}] is {1}",
 						ParentId,
-						value);
+						folderIndex.FolderParentId);
 					Log.Info(message);
-
-					string name = item.GetString(Name);
 
 					message = string.Format(
 						CultureInfo.InvariantCulture,
 						"item value[{0}] is {1}",
 						Name,
-						name);
+						folderIndex.FolderName);
+					Log.Info(message);
+
+					message = string.Format(
+						CultureInfo.InvariantCulture,
+						"item value[{0}] is {1}",
+						Name,
+						folderIndex.FolderFileName);
 					Log.Info(message);
 				}
 			}
