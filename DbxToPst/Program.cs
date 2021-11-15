@@ -31,9 +31,9 @@ namespace DbxToPst
 		/// </summary>
 		/// <param name="arguments">The arguments given to the program.</param>
 		/// <returns>A value indicating success or not.</returns>
-		public static bool Main(string[] arguments)
+		public static int Main(string[] arguments)
 		{
-			bool result = false;
+			int result = -1;
 
 			try
 			{
@@ -44,7 +44,12 @@ namespace DbxToPst
 
 				if (arguments != null && arguments.Length > 0)
 				{
-					result = Migrate.DbxToPst(arguments[0]);
+					bool success = Migrate.DbxToPst(arguments[0]);
+
+					if (success == true)
+					{
+						result = 0;
+					}
 				}
 				else
 				{
