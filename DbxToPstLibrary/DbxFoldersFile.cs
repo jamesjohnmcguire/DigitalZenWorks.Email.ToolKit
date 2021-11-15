@@ -16,23 +16,6 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public class DbxFoldersFile : DbxFile
 	{
-		/// <summary>
-		/// The id index of the folder.
-		/// </summary>
-		public const int Id = 0x00;
-		/// <summary>
-		/// The parent id index of the folder.
-		/// </summary>
-		public const int ParentId = 0x01;
-		/// <summary>
-		/// The name index of the folder.
-		/// </summary>
-		public const int Name = 0x02;
-		/// <summary>
-		/// The flags index of the folder.
-		/// </summary>
-		public const int Flags = 0x06;
-
 		private const int TreeNodeSize = 0x27c;
 
 		private static readonly ILog Log = LogManager.GetLogger(
@@ -105,28 +88,28 @@ namespace DbxToPstLibrary
 					string message = string.Format(
 						CultureInfo.InvariantCulture,
 						"item value[{0}] is {1}",
-						Id,
+						DbxFolderIndexedItem.Id,
 						folderIndex.FolderId);
 					Log.Info(message);
 
 					message = string.Format(
 						CultureInfo.InvariantCulture,
 						"item value[{0}] is {1}",
-						ParentId,
+						DbxFolderIndexedItem.ParentId,
 						folderIndex.FolderParentId);
 					Log.Info(message);
 
 					message = string.Format(
 						CultureInfo.InvariantCulture,
 						"item value[{0}] is {1}",
-						Name,
+						DbxFolderIndexedItem.Name,
 						folderIndex.FolderName);
 					Log.Info(message);
 
 					message = string.Format(
 						CultureInfo.InvariantCulture,
 						"item value[{0}] is {1}",
-						Name,
+						DbxFolderIndexedItem.FileName,
 						folderIndex.FolderFileName);
 					Log.Info(message);
 				}
@@ -152,7 +135,7 @@ namespace DbxToPstLibrary
 					string message = string.Format(
 						CultureInfo.InvariantCulture,
 						"item value[{0}] is {1}",
-						Name,
+						DbxFolderIndexedItem.Name,
 						folderIndex.FolderName);
 					Log.Info(message);
 				}
