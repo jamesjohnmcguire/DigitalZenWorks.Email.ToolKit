@@ -9,7 +9,7 @@ using System;
 namespace DbxToPstLibrary
 {
 	/// <summary>
-	/// Dbx folder tree class.
+	/// Dbx folder index class.
 	/// </summary>
 	public class DbxFolderIndex
 	{
@@ -36,6 +36,5 @@ namespace DbxToPstLibrary
 		/// </summary>
 		/// <value>The folder parent id.</value>
 		public uint FolderParentId { get; set; }
-
 	}
 }
