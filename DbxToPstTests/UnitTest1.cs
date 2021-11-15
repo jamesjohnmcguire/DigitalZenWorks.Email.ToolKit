@@ -33,13 +33,13 @@ namespace DbxToPstTests
 
 			DbxIndexedItem item = new(testBytes, 0);
 
-			uint value = item.GetValue(DbxFoldersFile.Id);
+			uint value = item.GetValue(DbxFolderIndexedItem.Id);
 			Assert.AreEqual(value, 0x11);
 
-			value = item.GetValue(DbxFoldersFile.ParentId);
+			value = item.GetValue(DbxFolderIndexedItem.ParentId);
 			Assert.AreEqual(value, 0);
 
-			string name = item.GetString(DbxFoldersFile.Name);
+			string name = item.GetString(DbxFolderIndexedItem.Name);
 			string expected = "discussion.fastandfurius.com";
 			Assert.That(name, Is.EqualTo(expected));
 		}
