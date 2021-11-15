@@ -86,29 +86,50 @@ namespace DbxToPstLibrary
 
 				for (int index = 0; index < root.ItemCount; index++)
 				{
-					// Each of the items occupy 3 ints (12 bytes) each,
-					// starting from the 6th element.
-					int offset = index * 3;
-					offset += ItemsBase;
-
-					DbxNodeItem item = new ();
-					item.NodeValue = treeArray[offset];
-
-					if (item.NodeValue == 0)
-					{
-						Log.Warn("item node value is 0");
-					}
-
-					// also, add this to our list
-					folderInformationIndexes.Add(item.NodeValue);
-
-					offset++;
-					item.NodeChildrenIndex = treeArray[offset];
+					DbxNodeItem item = SetIndexedValue(index, treeArray);
 
 					// recurse into sub tree.
 					ReadTree(fileBytes, item.NodeChildrenIndex);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Set indexed value method.
+		/// </summary>
+		/// <param name="index">The index of the item.</param>
+		/// <param name="treeArray">The tree array of values.</param>
+		/// <returns>A DbxNodeItem.</returns>
+		public virtual DbxNodeItem SetIndexedValue(int index, uint[] treeArray)
+		{
+			// Each of the items occupy 3 ints (12 bytes) each,
+			// starting from the 6th element.
+			int offset = index * 3;
+			offset += ItemsBase;
+
+			DbxNodeItem item = new ();
+
+			if (treeArray == null)
+			{
+				Log.Warn("tree arry is null");
+			}
+			else
+			{
+				item.NodeValue = treeArray[offset];
+
+				if (item.NodeValue == 0)
+				{
+					Log.Warn("item node value is 0");
+				}
+
+				// also, add this to our list
+				folderInformationIndexes.Add(item.NodeValue);
+
+				offset++;
+				item.NodeChildrenIndex = treeArray[offset];
+			}
+
+			return item;
 		}
 	}
 }
