@@ -20,6 +20,7 @@ namespace DbxToPstLibrary
 	public class DbxFile
 	{
 		private byte[] fileBytes;
+		private string folderPath;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxFile"/> class.
@@ -27,6 +28,8 @@ namespace DbxToPstLibrary
 		/// <param name="filePath">The path of the dbx file.</param>
 		public DbxFile(string filePath)
 		{
+			folderPath = filePath;
+
 			fileBytes = File.ReadAllBytes(filePath);
 
 			byte[] headerBytes = new byte[0x24bc];
@@ -40,6 +43,12 @@ namespace DbxToPstLibrary
 		/// </summary>
 		/// <value>The dbx file header.</value>
 		public DbxHeader Header { get; set; }
+
+		/// <summary>
+		/// Gets the dbx folder file path.
+		/// </summary>
+		/// <value>The dbx folder file path.</value>
+		public string FolderPath { get { return folderPath; } }
 
 		/// <summary>
 		/// Gets the file bytes.
