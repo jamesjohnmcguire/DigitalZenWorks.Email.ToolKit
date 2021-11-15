@@ -18,7 +18,7 @@ namespace DbxToPstLibrary
 		// notes indicate this may not enough.
 		private const int MaximumIndexes = 0x40;
 
-		private readonly byte[] bodyBytes;
+		private byte[] bodyBytes;
 		private readonly uint[] indexes;
 
 		/// <summary>
@@ -31,7 +31,16 @@ namespace DbxToPstLibrary
 		public DbxIndexedItem(byte[] fileBytes, uint address)
 		{
 			indexes = new uint[MaximumIndexes];
+		}
 
+		/// <summary>
+		/// Reads the indexed item and saves the values.
+		/// </summary>
+		/// <param name="fileBytes">The bytes of the file.</param>
+		/// <param name="address">The address of the item with in
+		/// the file.</param>
+		public virtual void ReadIndex(byte[] fileBytes, uint address)
+		{
 			byte[] initialBytes = new byte[12];
 
 			Array.Copy(fileBytes, address, initialBytes, 0, 12);
