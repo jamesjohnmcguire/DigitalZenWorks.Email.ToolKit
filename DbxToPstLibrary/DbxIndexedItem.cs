@@ -139,6 +139,24 @@ namespace DbxToPstLibrary
 			return item;
 		}
 
+		/// <summary>
+		/// Get the values from the indexed item.
+		/// </summary>
+		/// <param name="index">The index item to retrieve.</param>
+		/// <returns>The value of the itemed item.</returns>
+		public ulong GetValueLong(uint index)
+		{
+			ulong item = 0;
+			uint subIndex = indexes[index];
+
+			if (subIndex > 0)
+			{
+				item = Bytes.ToLong(bodyBytes, subIndex);
+			}
+
+			return item;
+		}
+
 		private void SetIndex(uint index, uint value)
 		{
 			indexes[index] = value;
