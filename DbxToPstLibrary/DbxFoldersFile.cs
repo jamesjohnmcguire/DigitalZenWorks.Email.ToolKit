@@ -32,44 +32,6 @@ namespace DbxToPstLibrary
 		}
 
 		/// <summary>
-		/// Migrate folder method.
-		/// </summary>
-		/// <param name="folderName">The path of the dbx folder file.</param>
-		public static void MigrateFolder(string folderName)
-		{
-			if (!string.IsNullOrWhiteSpace(folderName))
-			{
-				string foldersPath = Path.GetDirectoryName(folderName);
-				string filePath = Path.Combine(foldersPath, folderName);
-
-				bool exists = File.Exists(filePath);
-
-				if (exists == false)
-				{
-					Log.Warn(
-						filePath + " specified in Folders.dbx not present");
-				}
-				else
-				{
-					DbxMessagesFile messagesFile = new (filePath);
-
-					DbxFileType check = messagesFile.Header.FileType;
-
-					if (check != DbxFileType.MessageFile)
-					{
-						Log.Error(filePath + " not actually a messagess file");
-
-						// Attempt to process the individual files.
-					}
-					else
-					{
-						messagesFile.ReadTree();
-					}
-				}
-			}
-		}
-
-		/// <summary>
 		/// List folders method.
 		/// </summary>
 		public void List()
@@ -117,6 +79,45 @@ namespace DbxToPstLibrary
 		}
 
 		/// <summary>
+		/// Migrate folder method.
+		/// </summary>
+		/// <param name="folderName">The path of the dbx folder file.</param>
+		public void MigrateFolder(string folderName)
+		{
+			if (!string.IsNullOrWhiteSpace(folderName))
+			{
+				string foldersPath = Path.GetDirectoryName(FolderPath);
+				string filePath = Path.Combine(foldersPath, folderName);
+
+				bool exists = File.Exists(filePath);
+
+				if (exists == false)
+				{
+					Log.Warn(
+						filePath + " specified in Folders.dbx not present");
+				}
+				else
+				{
+					DbxMessagesFile messagesFile = new (filePath);
+
+					DbxFileType check = messagesFile.Header.FileType;
+
+					if (check != DbxFileType.MessageFile)
+					{
+						Log.Error(filePath + " not actually a messagess file");
+
+						// Attempt to process the individual files.
+					}
+					else
+					{
+						messagesFile.ReadTree();
+						messagesFile.MigrateMessages();
+					}
+				}
+			}
+		}
+
+		/// <summary>
 		/// Migrate folders method.
 		/// </summary>
 		public void MigrateFolders()
@@ -134,10 +135,11 @@ namespace DbxToPstLibrary
 
 					string message = string.Format(
 						CultureInfo.InvariantCulture,
-						"item value[{0}] is {1}",
-						DbxFolderIndexedItem.Name,
+						"Migrating folder {0}",
 						folderIndex.FolderName);
 					Log.Info(message);
+
+					MigrateFolder(folderIndex.FolderFileName);
 				}
 			}
 		}
