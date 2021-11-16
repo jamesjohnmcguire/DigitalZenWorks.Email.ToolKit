@@ -5,6 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Globalization;
 
 namespace DbxToPstLibrary
 {
@@ -142,6 +143,17 @@ namespace DbxToPstLibrary
 		public override void ReadIndex(byte[] fileBytes, uint address)
 		{
 			base.ReadIndex(fileBytes, address);
+
+			messageIndex.SenderName = GetString(SenderName);
+			messageIndex.SenderEmailAddress = GetString(SenderEmailAddress);
+
+			long rawTime = (long)GetValueLong(ReceivedTime);
+			messageIndex.ReceivedTime = DateTime.FromFileTime(rawTime);
+
+			messageIndex.Subject = GetString(Subject);
+			messageIndex.ReceiptentName = GetString(ReceiptentName);
+			messageIndex.ReceiptentEmailAddress =
+				GetString(ReceiptentEmailAddress);
 		}
 	}
 }
