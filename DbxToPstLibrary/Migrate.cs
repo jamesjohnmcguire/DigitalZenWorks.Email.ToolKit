@@ -30,7 +30,7 @@ namespace DbxToPstLibrary
 		public static void DbxDirectoryToPst(string directoryPath)
 		{
 			DbxSet dbxSet = new (directoryPath);
-			dbxSet.List();
+			dbxSet.Migrate();
 		}
 
 		/// <summary>

@@ -69,5 +69,13 @@ namespace DbxToPstLibrary
 		{
 			foldersFile.List();
 		}
+
+		/// <summary>
+		/// Migrate method.
+		/// </summary>
+		public void Migrate()
+		{
+			foldersFile.MigrateFolders();
+		}
 	}
 }
