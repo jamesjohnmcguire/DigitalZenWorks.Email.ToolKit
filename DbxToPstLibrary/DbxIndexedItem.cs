@@ -65,18 +65,17 @@ namespace DbxToPstLibrary
 			{
 				byte rawValue = bodyBytes[index];
 				bool isDirect = Bytes.GetBit(rawValue, 7);
-
 				byte indexOffset = (byte)(rawValue & 0x7F);
-				uint value = index;
 
 				if (isDirect == true)
 				{
+					uint value = index;
 					value++;
 					SetIndex(indexOffset, value);
 				}
 				else
 				{
-					value = bodyBytes[index + 1];
+					uint value = Bytes.ToIntegerLimit(bodyBytes, index + 1, 2);
 					offset = itemsCountBytes;
 					value = offset + value;
 					SetIndex(indexOffset, value);
