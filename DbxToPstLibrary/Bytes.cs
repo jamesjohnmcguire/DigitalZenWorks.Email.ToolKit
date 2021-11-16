@@ -95,6 +95,31 @@ namespace DbxToPstLibrary
 		}
 
 		/// <summary>
+		/// To integer method.
+		/// </summary>
+		/// <param name="bytes">The source bytes.</param>
+		/// <param name="index">The index with in the bytes to copy.</param>
+		/// <returns>An integer of the bytes values.</returns>
+		public static ulong ToLong(byte[] bytes, uint index)
+		{
+			ulong result;
+
+			// The converter still needs 8 bytes to act on.
+			byte[] testBytes = new byte[8];
+			Array.Copy(bytes, index, testBytes, 0, 8);
+
+			// Dbx files are apprentely stored as little endian.
+			if (BitConverter.IsLittleEndian == false)
+			{
+				Array.Reverse(testBytes);
+			}
+
+			result = BitConverter.ToUInt64(testBytes, 0);
+
+			return result;
+		}
+
+		/// <summary>
 		/// To short method.
 		/// </summary>
 		/// <param name="bytes">The source bytes.</param>
