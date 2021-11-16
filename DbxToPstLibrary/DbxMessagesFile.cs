@@ -48,7 +48,7 @@ namespace DbxToPstLibrary
 						CultureInfo.InvariantCulture,
 						"item value[{0}] is {1}",
 						"some",
-						messageIndex.MessageId);
+						messageIndex.Id);
 					Log.Info(message);
 				}
 			}
