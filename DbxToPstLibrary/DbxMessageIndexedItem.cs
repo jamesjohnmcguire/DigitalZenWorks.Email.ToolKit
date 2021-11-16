@@ -4,6 +4,7 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+using Common.Logging;
 using System;
 using System.Globalization;
 
@@ -14,6 +15,9 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public class DbxMessageIndexedItem : DbxIndexedItem
 	{
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		/// <summary>
 		/// The OE mail or news account name.
 		/// </summary>
@@ -148,7 +152,14 @@ namespace DbxToPstLibrary
 			messageIndex.SenderEmailAddress = GetString(SenderEmailAddress);
 
 			long rawTime = (long)GetValueLong(ReceivedTime);
-			messageIndex.ReceivedTime = DateTime.FromFileTime(rawTime);
+			try
+			{
+				messageIndex.ReceivedTime = DateTime.FromFileTime(rawTime);
+			}
+			catch (ArgumentOutOfRangeException exception)
+			{
+				Log.Error(exception.ToString());
+			}
 
 			messageIndex.Subject = GetString(Subject);
 			messageIndex.ReceiptentName = GetString(ReceiptentName);
