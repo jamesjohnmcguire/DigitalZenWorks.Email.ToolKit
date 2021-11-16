@@ -23,6 +23,7 @@ namespace DbxToPstLibrary
 		private const int LastVariableSegmentIndex = 9;
 		private const int FolderCountIndex = 0x31;
 		private const int MainTreeRootNodeIndex = 0x3B;
+		private const int MessageTreeRootNodeIndex = 0x39;
 
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -60,6 +61,11 @@ namespace DbxToPstLibrary
 				{
 					folderCount = headerArray[FolderCountIndex];
 					mainTreeAddress = headerArray[MainTreeRootNodeIndex];
+				}
+				else if (fileType == DbxFileType.MessageFile)
+				{
+					folderCount = headerArray[FolderCountIndex];
+					mainTreeAddress = headerArray[MessageTreeRootNodeIndex];
 				}
 			}
 		}
