@@ -111,7 +111,8 @@ namespace DbxToPstLibrary
 					else
 					{
 						messagesFile.ReadTree();
-						messagesFile.MigrateMessages();
+						// messagesFile.MigrateMessages();
+						messagesFile.List();
 					}
 				}
 			}
