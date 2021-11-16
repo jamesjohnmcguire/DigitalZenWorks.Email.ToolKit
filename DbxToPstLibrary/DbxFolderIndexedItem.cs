@@ -27,6 +27,12 @@ namespace DbxToPstLibrary
 		/// The id index of the folder.
 		/// </summary>
 		public const int Id = 0x00;
+
+		/// <summary>
+		/// The subfolder index of the folder.
+		/// </summary>
+		public const int Index = 0x09;
+
 		/// <summary>
 		/// The name index of the folder.
 		/// </summary>
