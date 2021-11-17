@@ -94,11 +94,11 @@ namespace DbxToPstLibrary
 				if (exists == false)
 				{
 					Log.Warn(
-						filePath + " specified in Folders.dbx not present");
+						folderName + " specified in Folders.dbx not present");
 				}
 				else
 				{
-					DbxMessagesFile messagesFile = new (filePath);
+					DbxMessagesFile messagesFile = new(filePath);
 
 					DbxFileType check = messagesFile.Header.FileType;
 
@@ -110,7 +110,9 @@ namespace DbxToPstLibrary
 					}
 					else
 					{
+						Log.Info("Checking folder: " + folderName);
 						messagesFile.ReadTree();
+
 						// messagesFile.MigrateMessages();
 						messagesFile.List();
 					}
