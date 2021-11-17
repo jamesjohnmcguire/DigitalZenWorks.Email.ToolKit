@@ -57,6 +57,8 @@ namespace DbxToPstLibrary
 				fileInfoLength = headerArray[FileInfoLengthIndex];
 				lastSegmentAddress = headerArray[LastVariableSegmentIndex];
 
+				DeletedItems = headerArray[0x12];
+
 				if (fileType == DbxFileType.FolderFile)
 				{
 					folderCount = headerArray[FolderCountIndex];
@@ -69,6 +71,8 @@ namespace DbxToPstLibrary
 				}
 			}
 		}
+
+		public uint DeletedItems { get; set; }
 
 		/// <summary>
 		/// Gets file type.
