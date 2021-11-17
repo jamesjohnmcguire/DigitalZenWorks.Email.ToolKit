@@ -39,8 +39,8 @@ namespace DbxToPstLibrary
 
 				foreach (uint index in Tree.FolderInformationIndexes)
 				{
-					DbxMessageIndexedItem item = new();
-					item.ReadIndex(fileBytes, index);
+					DbxMessageIndexedItem item = new (fileBytes);
+					item.ReadIndex(index);
 
 					DbxMessageIndex messageIndex = item.MessageIndex;
 
@@ -100,8 +100,8 @@ namespace DbxToPstLibrary
 
 				foreach (uint index in Tree.FolderInformationIndexes)
 				{
-					DbxMessageIndexedItem item = new ();
-					item.ReadIndex(fileBytes, index);
+					DbxMessageIndexedItem item = new (fileBytes);
+					item.ReadIndex(index);
 
 					DbxMessageIndex messageIndex = item.MessageIndex;
 
