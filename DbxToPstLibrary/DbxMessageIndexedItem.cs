@@ -159,10 +159,14 @@ namespace DbxToPstLibrary
 				byte[] headerBytes = new byte[0x10];
 				Array.Copy(fileBytes, address, headerBytes, 0, 0x10);
 
-				// skip header
+				uint length = Bytes.ToInteger(headerBytes, 8);
+
+				// skip over header
 				address += 0x10;
 
-				string section = GetStringDirect(fileBytes, address);
+				string section = Encoding.ASCII.GetString(
+					fileBytes, (int)address, (int)length);
+
 				builder.Append(section);
 
 				// prep next section
