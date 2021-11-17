@@ -26,10 +26,16 @@ namespace DbxToPstLibrary
 		public int AnswerId { get; set; }
 
 		/// <summary>
+		/// Gets or sets the body of the message.
+		/// </summary>
+		/// <value>The body of the message.</value>
+		public string Body { get; set; }
+
+		/// <summary>
 		/// Gets or sets the pointer to the corresponding message.
 		/// </summary>
 		/// <value>The pointer to the corresponding message.</value>
-		public int CorrespoindingMessage { get; set; }
+		public string CorrespoindingMessage { get; set; }
 
 		/// <summary>
 		/// Gets or sets the flags of the message.
