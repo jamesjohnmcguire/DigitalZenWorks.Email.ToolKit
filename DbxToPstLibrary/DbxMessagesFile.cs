@@ -7,6 +7,7 @@
 using Common.Logging;
 using System;
 using System.Globalization;
+using System.Text;
 
 namespace DbxToPstLibrary
 {
@@ -93,6 +94,36 @@ namespace DbxToPstLibrary
 						messageIndex.Body);
 					Log.Info(message);
 				}
+			}
+		}
+
+		public void ListDeletedSegments()
+		{
+			byte[] fileBytes = GetFileBytes();
+
+			uint address = Header.DeletedItems;
+
+			while (address != 0)
+			{
+				byte[] headerBytes = new byte[0x10];
+				Array.Copy(fileBytes, address, headerBytes, 0, 0x10);
+
+				uint length = Bytes.ToInteger(headerBytes, 8);
+
+				// skip over header
+				address += 0x10;
+
+				string section = Encoding.ASCII.GetString(
+					fileBytes, (int)address, (int)length);
+
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"deleted item value is {0}",
+					section);
+				Log.Info(message);
+
+				// prep next section
+				address = Bytes.ToInteger(headerBytes, 12);
 			}
 		}
 
