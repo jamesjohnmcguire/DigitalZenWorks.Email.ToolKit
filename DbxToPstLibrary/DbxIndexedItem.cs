@@ -21,23 +21,44 @@ namespace DbxToPstLibrary
 		private readonly uint[] indexes;
 
 		private byte[] bodyBytes;
+		private byte[] fileBytes;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxIndexedItem"/>
 		/// class.
 		/// </summary>
-		public DbxIndexedItem()
+		/// <param name="fileBytes">The bytes of the file.</param>
+		public DbxIndexedItem(byte[] fileBytes)
 		{
+			this.fileBytes = fileBytes;
+
 			indexes = new uint[MaximumIndexes];
+		}
+
+		/// <summary>
+		/// Gets the file body bytes.
+		/// </summary>
+		/// <returns>The file body bytes.</returns>
+		public byte[] GetBodyBytes()
+		{
+			return bodyBytes;
+		}
+
+		/// <summary>
+		/// Gets the file bytes.
+		/// </summary>
+		/// <returns>The file bytes.</returns>
+		public byte[] GetFileBytes()
+		{
+			return fileBytes;
 		}
 
 		/// <summary>
 		/// Reads the indexed item and saves the values.
 		/// </summary>
-		/// <param name="fileBytes">The bytes of the file.</param>
 		/// <param name="address">The address of the item with in
 		/// the file.</param>
-		public virtual void ReadIndex(byte[] fileBytes, uint address)
+		public virtual void ReadIndex(uint address)
 		{
 			byte[] initialBytes = new byte[12];
 

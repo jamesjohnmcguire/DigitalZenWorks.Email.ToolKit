@@ -15,9 +15,6 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public class DbxMessageIndexedItem : DbxIndexedItem
 	{
-		private static readonly ILog Log = LogManager.GetLogger(
-			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
 		/// <summary>
 		/// The OE mail or news account name.
 		/// </summary>
@@ -120,14 +117,18 @@ namespace DbxToPstLibrary
 		/// </summary>
 		public const int Subject = 0x08;
 
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		private readonly DbxMessageIndex messageIndex;
 
 		/// <summary>
 		/// Initializes a new instance of the
 		/// <see cref="DbxMessageIndexedItem"/> class.
 		/// </summary>
-		public DbxMessageIndexedItem()
-			: base()
+		/// <param name="fileBytes">The bytes of the file.</param>
+		public DbxMessageIndexedItem(byte[] fileBytes)
+			: base(fileBytes)
 		{
 			messageIndex = new DbxMessageIndex();
 		}
@@ -141,12 +142,11 @@ namespace DbxToPstLibrary
 		/// <summary>
 		/// Reads the indexed item and saves the values.
 		/// </summary>
-		/// <param name="fileBytes">The bytes of the file.</param>
 		/// <param name="address">The address of the item with in
 		/// the file.</param>
-		public override void ReadIndex(byte[] fileBytes, uint address)
+		public override void ReadIndex(uint address)
 		{
-			base.ReadIndex(fileBytes, address);
+			base.ReadIndex(address);
 
 			messageIndex.SenderName = GetString(SenderName);
 			messageIndex.SenderEmailAddress = GetString(SenderEmailAddress);

@@ -49,8 +49,9 @@ namespace DbxToPstLibrary
 		/// Initializes a new instance of the
 		/// <see cref="DbxFolderIndexedItem"/> class.
 		/// </summary>
-		public DbxFolderIndexedItem()
-			: base()
+		/// <param name="fileBytes">The bytes of the file.</param>
+		public DbxFolderIndexedItem(byte[] fileBytes)
+			: base(fileBytes)
 		{
 			folderIndex = new DbxFolderIndex();
 		}
@@ -64,12 +65,11 @@ namespace DbxToPstLibrary
 		/// <summary>
 		/// Reads the indexed item and saves the values.
 		/// </summary>
-		/// <param name="fileBytes">The bytes of the file.</param>
 		/// <param name="address">The address of the item with in
 		/// the file.</param>
-		public override void ReadIndex(byte[] fileBytes, uint address)
+		public override void ReadIndex(uint address)
 		{
-			base.ReadIndex(fileBytes, address);
+			base.ReadIndex(address);
 
 			folderIndex.FolderId = this.GetValue(Id);
 			folderIndex.FolderParentId = this.GetValue(ParentId);
