@@ -1,0 +1,3 @@
+[submodule "UTF-unknown"]
+	path = UTF-unknown
+	url = https://github.com/CharsetDetector/UTF-unknown
