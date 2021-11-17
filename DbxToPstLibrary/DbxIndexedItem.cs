@@ -111,17 +111,31 @@ namespace DbxToPstLibrary
 		/// <returns>The value of the itemed item.</returns>
 		public string GetString(uint index)
 		{
-			string item = null;
 			uint subIndex = indexes[index];
 
-			if (subIndex > 0)
+			string item = GetStringDirect(bodyBytes, subIndex);
+
+			return item;
+		}
+
+		/// <summary>
+		/// Get a string value directly from the file buffer.
+		/// </summary>
+		/// <param name="buffer">The byte buffer to check within.</param>
+		/// <param name="address">The address of the item to retrieve.</param>
+		/// <returns>The value of the itemed item.</returns>
+		public string GetStringDirect(byte[] buffer, uint address)
+		{
+			string item = null;
+
+			if (address > 0)
 			{
-				uint end = subIndex;
+				uint end = address;
 				byte check;
 
 				do
 				{
-					check = bodyBytes[end];
+					check = buffer[end];
 
 					if (check == 0)
 					{
@@ -132,10 +146,10 @@ namespace DbxToPstLibrary
 				}
 				while (check > 0);
 
-				int length = (int)(end - subIndex);
+				int length = (int)(end - address);
 
 				item =
-					Encoding.ASCII.GetString(bodyBytes, (int)subIndex, length);
+					Encoding.ASCII.GetString(buffer, (int)address, length);
 			}
 
 			return item;
