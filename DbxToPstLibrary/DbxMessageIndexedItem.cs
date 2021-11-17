@@ -7,6 +7,8 @@
 using Common.Logging;
 using System;
 using System.Globalization;
+using System.IO;
+using System.Text;
 
 namespace DbxToPstLibrary
 {
@@ -140,6 +142,39 @@ namespace DbxToPstLibrary
 		public DbxMessageIndex MessageIndex { get { return messageIndex; } }
 
 		/// <summary>
+		/// Gets the message body.
+		/// </summary>
+		/// <returns>The message body.</returns>
+		public string GetBody()
+		{
+			string body = null;
+
+			uint address = GetValue(CorrespoindingMessage);
+
+			StringBuilder builder = new StringBuilder();
+			byte[] fileBytes = GetFileBytes();
+
+			while (address != 0)
+			{
+				byte[] headerBytes = new byte[0x10];
+				Array.Copy(fileBytes, address, headerBytes, 0, 0x10);
+
+				// skip header
+				address += 0x10;
+
+				string section = GetStringDirect(fileBytes, address);
+				builder.Append(section);
+
+				// prep next section
+				address = Bytes.ToInteger(headerBytes, 12);
+			}
+
+			body = builder.ToString();
+
+			return body;
+		}
+
+		/// <summary>
 		/// Reads the indexed item and saves the values.
 		/// </summary>
 		/// <param name="address">The address of the item with in
@@ -165,6 +200,8 @@ namespace DbxToPstLibrary
 			messageIndex.ReceiptentName = GetString(ReceiptentName);
 			messageIndex.ReceiptentEmailAddress =
 				GetString(ReceiptentEmailAddress);
+
+			messageIndex.Body = GetBody();
 		}
 	}
 }
