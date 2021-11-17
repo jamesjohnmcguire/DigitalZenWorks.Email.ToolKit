@@ -36,6 +36,43 @@ namespace DbxToPstLibrary
 		}
 
 		/// <summary>
+		/// Get a string value directly from the file buffer.
+		/// </summary>
+		/// <param name="buffer">The byte buffer to check within.</param>
+		/// <param name="address">The address of the item to retrieve.</param>
+		/// <returns>The value of the itemed item.</returns>
+		public static string GetStringDirect(byte[] buffer, uint address)
+		{
+			string item = null;
+
+			if (address > 0)
+			{
+				uint end = address;
+				byte check;
+
+				do
+				{
+					check = buffer[end];
+
+					if (check == 0)
+					{
+						break;
+					}
+
+					end++;
+				}
+				while (check > 0);
+
+				int length = (int)(end - address);
+
+				item =
+					Encoding.ASCII.GetString(buffer, (int)address, length);
+			}
+
+			return item;
+		}
+
+		/// <summary>
 		/// Gets the file body bytes.
 		/// </summary>
 		/// <returns>The file body bytes.</returns>
@@ -114,43 +151,6 @@ namespace DbxToPstLibrary
 			uint subIndex = indexes[index];
 
 			string item = GetStringDirect(bodyBytes, subIndex);
-
-			return item;
-		}
-
-		/// <summary>
-		/// Get a string value directly from the file buffer.
-		/// </summary>
-		/// <param name="buffer">The byte buffer to check within.</param>
-		/// <param name="address">The address of the item to retrieve.</param>
-		/// <returns>The value of the itemed item.</returns>
-		public string GetStringDirect(byte[] buffer, uint address)
-		{
-			string item = null;
-
-			if (address > 0)
-			{
-				uint end = address;
-				byte check;
-
-				do
-				{
-					check = buffer[end];
-
-					if (check == 0)
-					{
-						break;
-					}
-
-					end++;
-				}
-				while (check > 0);
-
-				int length = (int)(end - address);
-
-				item =
-					Encoding.ASCII.GetString(buffer, (int)address, length);
-			}
 
 			return item;
 		}
