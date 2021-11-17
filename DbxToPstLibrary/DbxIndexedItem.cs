@@ -4,8 +4,10 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+using Common.Logging;
 using System;
 using System.Text;
+using UtfUnknown;
 
 namespace DbxToPstLibrary
 {
@@ -17,6 +19,9 @@ namespace DbxToPstLibrary
 		// Somewhat arbitrary, as other references have this as 0x20, but other
 		// notes indicate this may not enough.
 		private const int MaximumIndexes = 0x40;
+
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		private readonly uint[] indexes;
 
@@ -65,8 +70,35 @@ namespace DbxToPstLibrary
 
 				int length = (int)(end - address);
 
-				item =
-					Encoding.ASCII.GetString(buffer, (int)address, length);
+				byte[] stringBytes = new byte[length];
+
+				Array.Copy(buffer, address, stringBytes, 0, length);
+
+				DetectionResult results =
+					CharsetDetector.DetectFromBytes(stringBytes);
+
+				// Fall out case
+				Encoding encoding = Encoding.UTF8;
+
+				if (results.Detected != null)
+				{
+					DetectionDetail resultDetected = results.Detected;
+					string encodingName = resultDetected.EncodingName;
+
+					encoding = resultDetected.Encoding;
+				}
+				else
+				{
+					Log.Warn("Failed detecting encoding, trying Shift JIS");
+
+					// Personal preference... For me, most of these types wil
+					// likely be Japansese.
+					Encoding.RegisterProvider(
+						CodePagesEncodingProvider.Instance);
+					encoding = Encoding.GetEncoding("Shift-JIS");
+				}
+
+				item = encoding.GetString(buffer, (int)address, length);
 			}
 
 			return item;
