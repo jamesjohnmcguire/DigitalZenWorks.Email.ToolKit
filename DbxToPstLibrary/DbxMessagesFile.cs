@@ -85,6 +85,13 @@ namespace DbxToPstLibrary
 						DbxMessageIndexedItem.ReceiptentEmailAddress,
 						messageIndex.ReceiptentEmailAddress);
 					Log.Info(message);
+
+					message = string.Format(
+						CultureInfo.InvariantCulture,
+						"item value[{0}] is {1}",
+						DbxMessageIndexedItem.CorrespoindingMessage,
+						messageIndex.Body);
+					Log.Info(message);
 				}
 			}
 		}
