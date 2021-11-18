@@ -1,6 +1,3 @@
-[submodule "UTF-unknown"]
-	path = UTF-unknown
-	url = https://github.com/CharsetDetector/UTF-unknown
 [submodule "DbxOutlookExpress"]
 	path = DbxOutlookExpress
 	url = https://github.com/jamesjohnmcguire/DbxOutlookExpress
