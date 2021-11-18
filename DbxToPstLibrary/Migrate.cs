@@ -5,6 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 using Common.Logging;
+using DigitalZenWorks.Email.DbxOutlookExpress;
 using System;
 using System.Diagnostics;
 using System.Globalization;
