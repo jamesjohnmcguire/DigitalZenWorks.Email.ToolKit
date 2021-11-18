@@ -22,26 +22,32 @@ namespace DbxToPstLibrary
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		private readonly DbxFoldersFile foldersFile;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxSet"/> class.
 		/// </summary>
 		/// <param name="path">The path of the dbx set.</param>
 		public DbxSet(string path)
 		{
-			string foldersFilepath = Path.Combine(path, "Folders.dbx");
+			string extension = Path.GetExtension(path);
 
-			bool exists = File.Exists(foldersFilepath);
+			if (string.IsNullOrEmpty(extension))
+			{
+				path = Path.Combine(path, "Folders.dbx");
+			}
+
+			bool exists = File.Exists(path);
 
 			if (exists == false)
 			{
-				Log.Error("Folders.dbx not present");
+				Log.Error(path + " not present");
 
 				// Attempt to process the individual files.
 			}
 			else
 			{
-				DbxFoldersFile foldersFile =
-					new DbxFoldersFile(foldersFilepath);
+				foldersFile = new (path);
 
 				if (foldersFile.Header.FileType != DbxFileType.FolderFile)
 				{
@@ -54,6 +60,22 @@ namespace DbxToPstLibrary
 					foldersFile.ReadTree();
 				}
 			}
+		}
+
+		/// <summary>
+		/// List method.
+		/// </summary>
+		public void List()
+		{
+			foldersFile.List();
+		}
+
+		/// <summary>
+		/// Migrate method.
+		/// </summary>
+		public void Migrate()
+		{
+			foldersFile.MigrateFolders();
 		}
 	}
 }

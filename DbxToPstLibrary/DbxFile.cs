@@ -19,7 +19,9 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public class DbxFile
 	{
-		private byte[] fileBytes;
+		private readonly byte[] fileBytes;
+		private readonly string folderPath;
+		private DbxTree tree;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxFile"/> class.
@@ -27,6 +29,8 @@ namespace DbxToPstLibrary
 		/// <param name="filePath">The path of the dbx file.</param>
 		public DbxFile(string filePath)
 		{
+			folderPath = filePath;
+
 			fileBytes = File.ReadAllBytes(filePath);
 
 			byte[] headerBytes = new byte[0x24bc];
@@ -42,12 +46,34 @@ namespace DbxToPstLibrary
 		public DbxHeader Header { get; set; }
 
 		/// <summary>
+		/// Gets the dbx folder file path.
+		/// </summary>
+		/// <value>The dbx folder file path.</value>
+		public string FolderPath { get { return folderPath; } }
+
+		/// <summary>
+		/// Gets the dbx tree.
+		/// </summary>
+		/// <value>The dbx tree.</value>
+		public DbxTree Tree { get { return tree; } }
+
+		/// <summary>
 		/// Gets the file bytes.
 		/// </summary>
 		/// <returns>The file bytes.</returns>
 		public byte[] GetFileBytes()
 		{
 			return fileBytes;
+		}
+
+		/// <summary>
+		/// Read the tree method.
+		/// </summary>
+		public virtual void ReadTree()
+		{
+			byte[] fileBytes = GetFileBytes();
+
+			tree = new (fileBytes, Header.MainTreeAddress);
 		}
 	}
 }

@@ -30,8 +30,11 @@ namespace DbxToPst
 		/// The program's main entry point.
 		/// </summary>
 		/// <param name="arguments">The arguments given to the program.</param>
-		public static void Main(string[] arguments)
+		/// <returns>A value indicating success or not.</returns>
+		public static int Main(string[] arguments)
 		{
+			int result = -1;
+
 			try
 			{
 				LogInitialization();
@@ -41,7 +44,12 @@ namespace DbxToPst
 
 				if (arguments != null && arguments.Length > 0)
 				{
-					Migrate.DbxToPst(arguments[0]);
+					bool success = Migrate.DbxToPst(arguments[0]);
+
+					if (success == true)
+					{
+						result = 0;
+					}
 				}
 				else
 				{
@@ -54,6 +62,8 @@ namespace DbxToPst
 
 				throw;
 			}
+
+			return result;
 		}
 
 		private static string GetVersion()
