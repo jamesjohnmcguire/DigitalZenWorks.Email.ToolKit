@@ -23,18 +23,20 @@ namespace DbxToPstLibrary
 		private const int NodeIemCountIndex = 0x11;
 		private const int TreeNodeSize = 0x27c;
 
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		private readonly IList<uint> folderInformationIndexes =
 			new List<uint>();
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DbxTree"/> class.
 		/// </summary>
-		/// <param name="treeBytes">The bytes of the tree in file.</param>
+		/// <param name="fileBytes">The bytes of the file.</param>
 		/// <param name="rootNodeAddress">The address of the root node.</param>
-		/// <param name="nodeCount">The count of nodes.</param>
-		public DbxTree(byte[] treeBytes, uint rootNodeAddress, uint nodeCount)
+		public DbxTree(byte[] fileBytes, uint rootNodeAddress)
 		{
-			ReadTree(treeBytes, rootNodeAddress);
+			ReadTree(fileBytes, rootNodeAddress);
 		}
 
 		/// <summary>
@@ -47,12 +49,17 @@ namespace DbxToPstLibrary
 		/// <summary>
 		/// Reads the given bytes into a tree structure.
 		/// </summary>
-		/// <param name="treeBytes">The bytes of the tree in file.</param>
+		/// <param name="fileBytes">The bytes of the file.</param>
 		/// <param name="rootNodeAddress">The address of the root node.</param>
-		public void ReadTree(byte[] treeBytes, uint rootNodeAddress)
+		public void ReadTree(byte[] fileBytes, uint rootNodeAddress)
 		{
-			if (treeBytes != null)
+			if (fileBytes != null && rootNodeAddress != 0)
 			{
+				byte[] treeBytes = new byte[TreeNodeSize];
+
+				Array.Copy(
+					fileBytes, rootNodeAddress, treeBytes, 0, TreeNodeSize);
+
 				// It will be easier to work with integers as opposed to bytes.
 				int size = treeBytes.Length / sizeof(uint);
 				uint[] treeArray = new uint[size];
@@ -65,31 +72,63 @@ namespace DbxToPstLibrary
 				}
 
 				DbxTreeNode root = new ();
-				root.NodeFileIndex = treeArray[0];
+				root.NodeFileIndex = treeArray[NodeBaseAddressIndex];
 				root.ChildrenNodesIndex = treeArray[2];
 
 				// for root, should be 0
 				root.ParentNodeIndex = treeArray[3];
 
 				// recurse into sub tree.
-				ReadTree(treeBytes, root.ChildrenNodesIndex);
+				ReadTree(fileBytes, root.ChildrenNodesIndex);
 
 				root.ItemCount = treeBytes[NodeIemCountIndex];
 
 				for (int index = 0; index < root.ItemCount; index++)
 				{
-					// Each of the items occupy 3 ints (12 bytes) each,
-					// starting from the 6th element.
-					int offset = index * 3;
-					offset += ItemsBase;
+					DbxNodeItem item = SetIndexedValue(index, treeArray);
 
-					DbxNodeItem item = new ();
-					item.NodeValue = treeArray[offset];
-
-					// also, add this to our list
-					folderInformationIndexes.Add(item.NodeValue);
+					// recurse into sub tree.
+					ReadTree(fileBytes, item.NodeChildrenIndex);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Set indexed value method.
+		/// </summary>
+		/// <param name="index">The index of the item.</param>
+		/// <param name="treeArray">The tree array of values.</param>
+		/// <returns>A DbxNodeItem.</returns>
+		public virtual DbxNodeItem SetIndexedValue(int index, uint[] treeArray)
+		{
+			// Each of the items occupy 3 ints (12 bytes) each,
+			// starting from the 6th element.
+			int offset = index * 3;
+			offset += ItemsBase;
+
+			DbxNodeItem item = new ();
+
+			if (treeArray == null)
+			{
+				Log.Warn("tree arry is null");
+			}
+			else
+			{
+				item.NodeValue = treeArray[offset];
+
+				if (item.NodeValue == 0)
+				{
+					Log.Warn("item node value is 0");
+				}
+
+				// also, add this to our list
+				folderInformationIndexes.Add(item.NodeValue);
+
+				offset++;
+				item.NodeChildrenIndex = treeArray[offset];
+			}
+
+			return item;
 		}
 	}
 }

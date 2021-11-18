@@ -6,10 +6,8 @@
 
 using Common.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
+using System.IO;
 
 namespace DbxToPstLibrary
 {
@@ -20,8 +18,12 @@ namespace DbxToPstLibrary
 	{
 		private const int TreeNodeSize = 0x27c;
 
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DbxFoldersFile"/> class.
+		/// Initializes a new instance of the
+		/// <see cref="DbxFoldersFile"/> class.
 		/// </summary>
 		/// <param name="filePath">The path of the dbx file.</param>
 		public DbxFoldersFile(string filePath)
@@ -30,18 +32,119 @@ namespace DbxToPstLibrary
 		}
 
 		/// <summary>
-		/// Read the tree method.
+		/// List folders method.
 		/// </summary>
-		public void ReadTree()
+		public void List()
 		{
-			byte[] treeBytes = new byte[TreeNodeSize];
-			byte[] fileBytes = GetFileBytes();
+			if (Tree != null)
+			{
+				byte[] fileBytes = GetFileBytes();
 
-			Array.Copy(
-				fileBytes, Header.MainTreeAddress, treeBytes, 0, TreeNodeSize);
+				foreach (uint index in Tree.FolderInformationIndexes)
+				{
+					DbxFolderIndexedItem item = new (fileBytes);
+					item.ReadIndex(index);
 
-			DbxTree tree =
-				new (treeBytes, Header.MainTreeAddress, Header.FolderCount);
+					DbxFolderIndex folderIndex = item.FolderIndex;
+
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"item value[{0}] is {1}",
+						DbxFolderIndexedItem.Id,
+						folderIndex.FolderId);
+					Log.Info(message);
+
+					message = string.Format(
+						CultureInfo.InvariantCulture,
+						"item value[{0}] is {1}",
+						DbxFolderIndexedItem.ParentId,
+						folderIndex.FolderParentId);
+					Log.Info(message);
+
+					message = string.Format(
+						CultureInfo.InvariantCulture,
+						"item value[{0}] is {1}",
+						DbxFolderIndexedItem.Name,
+						folderIndex.FolderName);
+					Log.Info(message);
+
+					message = string.Format(
+						CultureInfo.InvariantCulture,
+						"item value[{0}] is {1}",
+						DbxFolderIndexedItem.FileName,
+						folderIndex.FolderFileName);
+					Log.Info(message);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Migrate folder method.
+		/// </summary>
+		/// <param name="folderName">The path of the dbx folder file.</param>
+		public void MigrateFolder(string folderName)
+		{
+			if (!string.IsNullOrWhiteSpace(folderName))
+			{
+				string foldersPath = Path.GetDirectoryName(FolderPath);
+				string filePath = Path.Combine(foldersPath, folderName);
+
+				bool exists = File.Exists(filePath);
+
+				if (exists == false)
+				{
+					Log.Warn(
+						folderName + " specified in Folders.dbx not present");
+				}
+				else
+				{
+					DbxMessagesFile messagesFile = new(filePath);
+
+					DbxFileType check = messagesFile.Header.FileType;
+
+					if (check != DbxFileType.MessageFile)
+					{
+						Log.Error(filePath + " not actually a messagess file");
+
+						// Attempt to process the individual files.
+					}
+					else
+					{
+						Log.Info("Checking folder: " + folderName);
+						messagesFile.ReadTree();
+
+						// messagesFile.MigrateMessages();
+						messagesFile.List();
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Migrate folders method.
+		/// </summary>
+		public void MigrateFolders()
+		{
+			if (Tree != null)
+			{
+				byte[] fileBytes = GetFileBytes();
+
+				foreach (uint index in Tree.FolderInformationIndexes)
+				{
+					DbxFolderIndexedItem item = new (fileBytes);
+					item.ReadIndex(index);
+
+					DbxFolderIndex folderIndex = item.FolderIndex;
+
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Migrating folder {0}",
+						folderIndex.FolderName);
+					Log.Info(message);
+
+					MigrateFolder(folderIndex.FolderFileName);
+				}
+			}
 		}
 	}
 }

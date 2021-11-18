@@ -23,6 +23,7 @@ namespace DbxToPstLibrary
 		private const int LastVariableSegmentIndex = 9;
 		private const int FolderCountIndex = 0x31;
 		private const int MainTreeRootNodeIndex = 0x3B;
+		private const int MessageTreeRootNodeIndex = 0x39;
 
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -56,13 +57,22 @@ namespace DbxToPstLibrary
 				fileInfoLength = headerArray[FileInfoLengthIndex];
 				lastSegmentAddress = headerArray[LastVariableSegmentIndex];
 
+				DeletedItems = headerArray[0x12];
+
 				if (fileType == DbxFileType.FolderFile)
 				{
 					folderCount = headerArray[FolderCountIndex];
 					mainTreeAddress = headerArray[MainTreeRootNodeIndex];
 				}
+				else if (fileType == DbxFileType.MessageFile)
+				{
+					folderCount = headerArray[FolderCountIndex];
+					mainTreeAddress = headerArray[MessageTreeRootNodeIndex];
+				}
 			}
 		}
+
+		public uint DeletedItems { get; set; }
 
 		/// <summary>
 		/// Gets file type.
@@ -81,23 +91,6 @@ namespace DbxToPstLibrary
 		/// </summary>
 		/// <value>The main tree address.</value>
 		public uint MainTreeAddress { get { return mainTreeAddress; } }
-
-		private static uint BytesToInteger(byte[] bytes, int index)
-		{
-			uint result;
-			byte[] testBytes = new byte[4];
-			Array.Copy(bytes, index, testBytes, 0, 4);
-
-			// Dbx files are apprentely stored as little endian.
-			if (BitConverter.IsLittleEndian == false)
-			{
-				Array.Reverse(testBytes);
-			}
-
-			result = BitConverter.ToUInt32(testBytes, 0);
-
-			return result;
-		}
 
 		private static void CheckInitialBytes(byte[] headerBytes)
 		{
