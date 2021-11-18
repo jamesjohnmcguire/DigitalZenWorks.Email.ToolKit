@@ -29,7 +29,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\UTF-unknown\src\UTF-unknown.csproj" />
+		<ProjectReference Include="..\DbxOutlookExpress\DbxOutlookExpressLibrary\DbxOutlookExpressLibrary.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
