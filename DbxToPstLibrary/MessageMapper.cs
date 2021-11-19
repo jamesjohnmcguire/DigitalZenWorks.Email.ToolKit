@@ -9,7 +9,7 @@ using System;
 namespace DbxToPstLibrary
 {
 	/// <summary>
-	/// Message mapper class.
+	/// Represents a mapping between a dbx message and an Outlook MAPI message.
 	/// </summary>
 	public class MessageMapper
 	{
