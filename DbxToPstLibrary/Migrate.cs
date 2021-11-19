@@ -15,6 +15,12 @@ using System.IO;
 namespace DbxToPstLibrary
 {
 	/// <summary>
+	/// The transfer folder call back type.
+	/// </summary>
+	/// <param name="id">The folder id.</param>
+	public delegate void TransferFolderCallBackType(int id);
+
+	/// <summary>
 	/// Migrate Dbx to Pst class.
 	/// </summary>
 	public static class Migrate
@@ -66,6 +72,15 @@ namespace DbxToPstLibrary
 			}
 
 			return result;
+		}
+
+		/// <summary>
+		/// Transfers a folder from a data source to a destination source.
+		/// </summary>
+		/// <param name="id">The folder id.</param>
+		public static void TransferFolder(int id)
+		{
+
 		}
 	}
 }
