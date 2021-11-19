@@ -7,12 +7,10 @@
 using Common.Logging;
 using DigitalZenWorks.Email.DbxOutlookExpress;
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 
-[assembly: CLSCompliant(false)]
+[assembly: CLSCompliant(true)]
 
 namespace DbxToPstLibrary
 {
