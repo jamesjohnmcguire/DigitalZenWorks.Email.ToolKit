@@ -35,7 +35,32 @@ namespace DbxToPstLibrary
 		public static void DbxDirectoryToPst(string directoryPath)
 		{
 			DbxSet dbxSet = new (directoryPath);
-			dbxSet.Migrate();
+			DbxFolder dbxFolder;
+
+			do
+			{
+				dbxFolder = dbxSet.GetNextFolder();
+
+				if (dbxFolder != null)
+				{
+					// add folder to pst
+
+					// for each message
+					DbxMessage dbxMessage;
+
+					do
+					{
+						dbxMessage = dbxFolder.GetNextMessage();
+
+						if (dbxMessage != null)
+						{
+							// add message to pst
+						}
+					}
+					while (dbxMessage != null);
+				}
+			}
+			while (dbxFolder != null);
 		}
 
 		/// <summary>
@@ -80,7 +105,6 @@ namespace DbxToPstLibrary
 		/// <param name="id">The folder id.</param>
 		public static void TransferFolder(int id)
 		{
-
 		}
 	}
 }
