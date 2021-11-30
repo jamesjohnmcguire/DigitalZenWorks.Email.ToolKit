@@ -3,11 +3,16 @@ using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
 using System;
 
-namespace DbxToPstTests
+[assembly: CLSCompliant(true)]
+
+namespace DigitalZenWorks.Email.DbxToPstTests.Tests
 {
-	public class Tests
+	/// <summary>
+	/// Test class.
+	/// </summary>
+	public class DbxToPstTestsTests
 	{
-		private static readonly string applicationDataDirectory =
+		private const string applicationDataDirectory =
 			@"DigitalZenWorks\DbxToPst";
 		private static readonly string baseDataDirectory =
 			Environment.GetFolderPath(
@@ -15,17 +20,26 @@ namespace DbxToPstTests
 				Environment.SpecialFolderOption.Create) + @"\" +
 				applicationDataDirectory;
 
+		/// <summary>
+		/// Set up method.
+		/// </summary>
 		[SetUp]
 		public void Setup()
 		{
 		}
 
+		/// <summary>
+		/// Test for sanity check.
+		/// </summary>
 		[Test]
 		public void TestSanityCheck()
 		{
 			Assert.Pass();
 		}
 
+		/// <summary>
+		/// Test for create pst store.
+		/// </summary>
 		[Test]
 		public void TestCreatePstStore()
 		{
@@ -37,6 +51,9 @@ namespace DbxToPstTests
 			Assert.NotNull(store);
 		}
 
+		/// <summary>
+		/// Test for dbx to pst.
+		/// </summary>
 		[Test]
 		public void TestDbxToPst()
 		{
