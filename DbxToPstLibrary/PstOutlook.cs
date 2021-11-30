@@ -22,7 +22,7 @@ namespace DbxToPstLibrary
 		/// <returns>A store object.</returns>
 		public Store CreateStore(string path)
 		{
-			Application outlookApplication = new Application();
+			Application outlookApplication = new ();
 
 			Store newPst = null;
 

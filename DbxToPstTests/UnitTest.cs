@@ -7,9 +7,9 @@ namespace DbxToPstTests
 {
 	public class Tests
 	{
-		private static string applicationDataDirectory =
+		private static readonly string applicationDataDirectory =
 			@"DigitalZenWorks\DbxToPst";
-		private static string baseDataDirectory =
+		private static readonly string baseDataDirectory =
 			Environment.GetFolderPath(
 				Environment.SpecialFolder.ApplicationData,
 				Environment.SpecialFolderOption.Create) + @"\" +
@@ -30,7 +30,7 @@ namespace DbxToPstTests
 		public void TestCreatePstStore()
 		{
 			string path = baseDataDirectory + "\\NewTest.pst";
-			PstOutlook pstOutlook = new PstOutlook();
+			PstOutlook pstOutlook = new ();
 
 			Microsoft.Office.Interop.Outlook.Store store = pstOutlook.CreateStore(path);
 
