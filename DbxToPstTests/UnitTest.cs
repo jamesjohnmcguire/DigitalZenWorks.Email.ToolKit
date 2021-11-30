@@ -50,17 +50,5 @@ namespace DigitalZenWorks.Email.DbxToPstTests.Tests
 
 			Assert.NotNull(store);
 		}
-
-		/// <summary>
-		/// Test for dbx to pst.
-		/// </summary>
-		[Test]
-		public void TestDbxToPst()
-		{
-			string path = baseDataDirectory + "\\TestFolder";
-			bool result = Migrate.DbxToPst(path);
-			Assert.IsTrue(result);
-		}
-
 	}
 }
