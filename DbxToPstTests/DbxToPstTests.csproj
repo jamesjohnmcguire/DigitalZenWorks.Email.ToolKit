@@ -7,6 +7,27 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<COMReference Include="Microsoft.Office.Core">
+			<WrapperTool>tlbimp</WrapperTool>
+			<VersionMinor>8</VersionMinor>
+			<VersionMajor>2</VersionMajor>
+			<Guid>2df8d04c-5bfa-101b-bde5-00aa0044de52</Guid>
+			<Lcid>0</Lcid>
+			<Isolated>false</Isolated>
+			<EmbedInteropTypes>true</EmbedInteropTypes>
+		</COMReference>
+		<COMReference Include="Microsoft.Office.Interop.Outlook">
+			<WrapperTool>tlbimp</WrapperTool>
+			<VersionMinor>6</VersionMinor>
+			<VersionMajor>9</VersionMajor>
+			<Guid>00062fff-0000-0000-c000-000000000046</Guid>
+			<Lcid>0</Lcid>
+			<Isolated>false</Isolated>
+			<EmbedInteropTypes>true</EmbedInteropTypes>
+		</COMReference>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
 		<PackageReference Include="NUnit" Version="3.13.1" />
 		<PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
