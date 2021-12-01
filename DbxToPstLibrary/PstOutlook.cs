@@ -20,6 +20,19 @@ namespace DbxToPstLibrary
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		private Application outlookApplication;
+		private NameSpace outlookNamespace;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PstOutlook"/> class.
+		/// </summary>
+		public PstOutlook()
+		{
+			outlookApplication = new ();
+
+			outlookNamespace = outlookApplication.GetNamespace("mapi");
+		}
+
 		/// <summary>
 		/// Create a new pst storage file.
 		/// </summary>
@@ -34,11 +47,7 @@ namespace DbxToPstLibrary
 				Log.Warn("File already exists!: " + path);
 			}
 
-			Application outlookApplication = new ();
-
 			Store newPst = null;
-
-			NameSpace outlookNamespace = outlookApplication.GetNamespace("mapi");
 
 			outlookNamespace.Session.AddStore(path);
 
