@@ -6,6 +6,7 @@
 
 using Common.Logging;
 using DigitalZenWorks.Email.DbxOutlookExpress;
+using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Globalization;
 using System.IO;
@@ -31,11 +32,17 @@ namespace DbxToPstLibrary
 		/// <summary>
 		/// Dbx directory to pst.
 		/// </summary>
-		/// <param name="directoryPath">The directory path to migrate.</param>
-		public static void DbxDirectoryToPst(string directoryPath)
+		/// <param name="dbxFoldersPath">The path to dbx folders to
+		/// migrate.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		public static void DbxDirectoryToPst(
+			string dbxFoldersPath, string pstPath)
 		{
-			DbxSet dbxSet = new (directoryPath);
+			DbxSet dbxSet = new (dbxFoldersPath);
 			DbxFolder dbxFolder;
+
+			PstOutlook pstOutlook = new PstOutlook();
+			Store pstStore = pstOutlook.CreateStore(pstPath);
 
 			do
 			{
@@ -77,13 +84,14 @@ namespace DbxToPstLibrary
 		/// </summary>
 		/// <param name="path">the path of the dbx element.</param>
 		/// <returns>A value indicating success or not.</returns>
-		public static bool DbxToPst(string path)
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		public static bool DbxToPst(string path, string pstPath)
 		{
 			bool result = false;
 
 			if (Directory.Exists(path))
 			{
-				DbxDirectoryToPst(path);
+				DbxDirectoryToPst(path, pstPath);
 				result = true;
 			}
 			else if (File.Exists(path))
