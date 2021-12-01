@@ -8,6 +8,7 @@ using Common.Logging;
 using DigitalZenWorks.Email.DbxOutlookExpress;
 using Microsoft.Office.Interop.Outlook;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
@@ -41,8 +42,12 @@ namespace DbxToPstLibrary
 			DbxSet dbxSet = new (dbxFoldersPath);
 			DbxFolder dbxFolder;
 
-			PstOutlook pstOutlook = new PstOutlook();
+			PstOutlook pstOutlook = new ();
 			Store pstStore = pstOutlook.CreateStore(pstPath);
+
+			MAPIFolder rootFolder = pstStore.GetRootFolder();
+
+			IDictionary<uint, string> mappings = new Dictionary<uint, string>();
 
 			do
 			{
@@ -51,6 +56,37 @@ namespace DbxToPstLibrary
 				if (dbxFolder != null)
 				{
 					// add folder to pst
+					if (dbxFolder.FolderParentId == 0)
+					{
+						// top level folder
+						MAPIFolder pstFolder =
+							rootFolder.Folders.Add(dbxFolder.FolderName);
+
+						mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
+					}
+					else
+					{
+						// need to figure out parent in pst
+						bool keyExists =
+							mappings.ContainsKey(dbxFolder.FolderParentId);
+
+						if (keyExists == false)
+						{
+							Log.Warn("Parent key not found in mappings: " +
+								dbxFolder.FolderParentId);
+						}
+						else
+						{
+							string entryId = mappings[dbxFolder.FolderParentId];
+							MAPIFolder parentFolder =
+								pstOutlook.GetFolderFromID(entryId, pstStore);
+
+							MAPIFolder pstFolder =
+								parentFolder.Folders.Add(dbxFolder.FolderName);
+
+							mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
+						}
+					}
 
 					// for each message
 					DbxMessage dbxMessage;
