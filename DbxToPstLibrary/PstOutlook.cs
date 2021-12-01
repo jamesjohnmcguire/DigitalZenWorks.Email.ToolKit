@@ -62,5 +62,24 @@ namespace DbxToPstLibrary
 
 			return newPst;
 		}
+
+		/// <summary>
+		/// Gets folder from entry id.
+		/// </summary>
+		/// <param name="entryId">The entry id.</param>
+		/// <param name="store">The store to check.</param>
+		/// <returns>The folder.</returns>
+		public MAPIFolder GetFolderFromID(string entryId, Store store)
+		{
+			MAPIFolder folder = null;
+
+			if (store != null)
+			{
+				folder =
+					outlookNamespace.GetFolderFromID(entryId, store.StoreID);
+			}
+
+			return folder;
+		}
 	}
 }
