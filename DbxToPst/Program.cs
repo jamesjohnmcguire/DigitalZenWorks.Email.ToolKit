@@ -42,9 +42,10 @@ namespace DbxToPst
 
 				Log.Info("Starting DbxToPst Version: " + version);
 
-				if (arguments != null && arguments.Length > 0)
+				if (arguments != null && arguments.Length > 1)
 				{
-					bool success = Migrate.DbxToPst(arguments[0]);
+					bool success =
+						Migrate.DbxToPst(arguments[0], arguments[1]);
 
 					if (success == true)
 					{
