@@ -17,7 +17,7 @@ namespace DbxToPstLibrary
 		/// Gets or sets the dbx folder id.
 		/// </summary>
 		/// <value>The dbx folder id.</value>
-		public int DbxFolderId { get; set; }
+		public uint DbxFolderId { get; set; }
 
 		/// <summary>
 		/// Gets or sets the MAPI entry id.
