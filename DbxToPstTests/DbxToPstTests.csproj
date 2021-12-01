@@ -44,4 +44,10 @@
 		<ProjectReference Include="..\DbxToPstLibrary\DbxToPstLibrary.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<AdditionalFiles Include="../stylecop.json" />
+		<CodeAnalysisDictionary Include="../CodeAnalysis.ruleset" />
+		<None Include="../.editorconfig" Link="../.editorconfig" />
+	</ItemGroup>
+
 </Project>
