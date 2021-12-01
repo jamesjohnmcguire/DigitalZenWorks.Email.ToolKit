@@ -4,8 +4,10 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace DbxToPstLibrary
@@ -15,6 +17,9 @@ namespace DbxToPstLibrary
 	/// </summary>
 	public class PstOutlook
 	{
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		/// <summary>
 		/// Create a new pst storage file.
 		/// </summary>
@@ -22,6 +27,13 @@ namespace DbxToPstLibrary
 		/// <returns>A store object.</returns>
 		public Store CreateStore(string path)
 		{
+			bool exists = File.Exists(path);
+
+			if (exists == true)
+			{
+				Log.Warn("File already exists!: " + path);
+			}
+
 			Application outlookApplication = new ();
 
 			Store newPst = null;
