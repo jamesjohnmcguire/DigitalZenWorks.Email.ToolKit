@@ -20,8 +20,8 @@ namespace DbxToPstLibrary
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		private Application outlookApplication;
-		private NameSpace outlookNamespace;
+		private readonly Application outlookApplication;
+		private readonly NameSpace outlookNamespace;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PstOutlook"/> class.
@@ -38,10 +38,6 @@ namespace DbxToPstLibrary
 		/// </summary>
 		/// <param name="filePath">The file path to create.</param>
 		/// <returns>The message as a stream.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage(
-			"Reliability",
-			"CA2000:Dispose objects before losing scope",
-			Justification = "The caller will dispose")]
 		public static Stream GetMsgFileStream(string filePath)
 		{
 			FileStream stream = new (filePath, FileMode.CreateNew);
