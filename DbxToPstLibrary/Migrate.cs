@@ -7,6 +7,7 @@
 using Common.Logging;
 using DigitalZenWorks.Email.DbxOutlookExpress;
 using Microsoft.Office.Interop.Outlook;
+using MsgKit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -55,11 +56,13 @@ namespace DbxToPstLibrary
 
 				if (dbxFolder != null)
 				{
+					MAPIFolder pstFolder = null;
+
 					// add folder to pst
 					if (dbxFolder.FolderParentId == 0)
 					{
 						// top level folder
-						MAPIFolder pstFolder =
+						pstFolder =
 							rootFolder.Folders.Add(dbxFolder.FolderName);
 
 						mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
@@ -81,7 +84,7 @@ namespace DbxToPstLibrary
 							MAPIFolder parentFolder =
 								pstOutlook.GetFolderFromID(entryId, pstStore);
 
-							MAPIFolder pstFolder =
+							pstFolder =
 								parentFolder.Folders.Add(dbxFolder.FolderName);
 
 							mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
@@ -97,7 +100,22 @@ namespace DbxToPstLibrary
 
 						if (dbxMessage != null)
 						{
-							// add message to pst
+							// Need to get the rfc email as a stream, then
+							// convert the stream to a MSG file, import the
+							// MSG file into the Pst, finally move the message
+							Stream emailStream = dbxMessage.GetMessageStream();
+
+							string msgFile = Path.GetTempFileName();
+							msgFile = Path.ChangeExtension(msgFile, ".msg");
+
+							using Stream msgStream =
+								PstOutlook.GetMsgFileStream(msgFile);
+
+							Converter.ConvertEmlToMsg(emailStream, msgStream);
+
+							pstOutlook.AddMsgFile(pstFolder, msgFile);
+
+							File.Delete(msgFile);
 						}
 					}
 					while (dbxMessage != null);
