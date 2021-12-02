@@ -34,6 +34,37 @@ namespace DbxToPstLibrary
 		}
 
 		/// <summary>
+		/// Gets the message as a stream.
+		/// </summary>
+		/// <param name="filePath">The file path to create.</param>
+		/// <returns>The message as a stream.</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage(
+			"Reliability",
+			"CA2000:Dispose objects before losing scope",
+			Justification = "The caller will dispose")]
+		public static Stream GetMsgFileStream(string filePath)
+		{
+			FileStream stream = new (filePath, FileMode.CreateNew);
+
+			return stream;
+		}
+
+		/// <summary>
+		/// Add MSG file as MailItem in folder.
+		/// </summary>
+		/// <param name="pstFolder">The MSG file path.</param>
+		/// <param name="filePath">The folder to add to.</param>
+		public void AddMsgFile(MAPIFolder pstFolder, string filePath)
+		{
+			if (pstFolder != null)
+			{
+				MailItem item = outlookNamespace.OpenSharedItem(filePath);
+
+				pstFolder.Items.Add(item);
+			}
+		}
+
+		/// <summary>
 		/// Create a new pst storage file.
 		/// </summary>
 		/// <param name="path">The path to the pst file.</param>
