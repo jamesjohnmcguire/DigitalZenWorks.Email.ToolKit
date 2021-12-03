@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31702.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxToPst", "DbxToPst\DbxToPst.csproj", "{6971D486-5B3F-497F-86E8-47C98BF7FD70}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpressLibrary", "DbxOutlookExpress\DbxOutlookExpressLibrary\DbxOutlookExpressLibrary.csproj", "{68961552-71D5-4CDC-943D-34A762E74699}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpressTests", "DbxOutlookExpress\DbxOutlookExpressTests\DbxOutlookExpressTests.csproj", "{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsoleApp", "TestConsoleApp\TestConsoleApp.csproj", "{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +89,18 @@ Global
 		{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}.Release|x64.Build.0 = Release|x64
 		{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}.Release|x86.ActiveCfg = Release|x86
 		{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}.Release|x86.Build.0 = Release|x86
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Debug|x64.ActiveCfg = Debug|x64
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Debug|x64.Build.0 = Debug|x64
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Debug|x86.Build.0 = Debug|Any CPU
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Release|x64.ActiveCfg = Release|Any CPU
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Release|x64.Build.0 = Release|Any CPU
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Release|x86.ActiveCfg = Release|Any CPU
+		{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
