@@ -46,6 +46,44 @@ namespace DbxToPstLibrary
 		}
 
 		/// <summary>
+		/// Add folder in safe context.
+		/// </summary>
+		/// <param name="parentFolder">The parent folder.</param>
+		/// <param name="folderName">The new folder name.</param>
+		/// <returns>The added folder.</returns>
+		public static MAPIFolder AddFolderSafe(
+			MAPIFolder parentFolder, string folderName)
+		{
+			MAPIFolder pstFolder = null;
+
+			if (parentFolder != null)
+			{
+				try
+				{
+					pstFolder =
+						parentFolder.Folders.Add(folderName);
+				}
+				catch (COMException exception)
+				{
+					Log.Warn(exception.ToString());
+
+					// Possibly already exists... ?
+					try
+					{
+						pstFolder =
+							parentFolder.Folders[folderName];
+					}
+					catch (COMException addionalException)
+					{
+						Log.Warn(addionalException.ToString());
+					}
+				}
+			}
+
+			return pstFolder;
+		}
+
+		/// <summary>
 		/// Add MSG file as MailItem in folder.
 		/// </summary>
 		/// <param name="pstFolder">The MSG file path.</param>
