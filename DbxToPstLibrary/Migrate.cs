@@ -115,6 +115,8 @@ namespace DbxToPstLibrary
 
 							Converter.ConvertEmlToMsg(emailStream, msgStream);
 
+							msgStream.Dispose();
+
 							pstOutlook.AddMsgFile(pstFolder, msgFile);
 
 							File.Delete(msgFile);
