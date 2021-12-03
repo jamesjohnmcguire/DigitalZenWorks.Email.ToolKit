@@ -94,7 +94,7 @@ namespace DbxToPstLibrary
 			{
 				MailItem item = outlookNamespace.OpenSharedItem(filePath);
 
-				pstFolder.Items.Add(item);
+				item.Move(pstFolder);
 			}
 		}
 
