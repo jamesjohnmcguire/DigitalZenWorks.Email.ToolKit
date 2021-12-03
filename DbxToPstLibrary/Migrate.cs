@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 
 [assembly: CLSCompliant(false)]
 
@@ -62,10 +63,8 @@ namespace DbxToPstLibrary
 					if (dbxFolder.FolderParentId == 0)
 					{
 						// top level folder
-						pstFolder =
-							rootFolder.Folders.Add(dbxFolder.FolderName);
-
-						mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
+						pstFolder = PstOutlook.AddFolderSafe(
+							rootFolder, dbxFolder.FolderName);
 					}
 					else
 					{
@@ -84,11 +83,14 @@ namespace DbxToPstLibrary
 							MAPIFolder parentFolder =
 								pstOutlook.GetFolderFromID(entryId, pstStore);
 
-							pstFolder =
-								parentFolder.Folders.Add(dbxFolder.FolderName);
-
-							mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
+							pstFolder = PstOutlook.AddFolderSafe(
+								parentFolder, dbxFolder.FolderName);
 						}
+					}
+
+					if (pstFolder != null)
+					{
+						mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
 					}
 
 					// for each message
