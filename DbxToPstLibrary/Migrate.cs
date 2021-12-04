@@ -56,81 +56,15 @@ namespace DbxToPstLibrary
 
 			MAPIFolder rootFolder = pstStore.GetRootFolder();
 
-			IDictionary<uint, string> mappings = new Dictionary<uint, string>();
+			IDictionary<uint, string> mappings =
+				new Dictionary<uint, string>();
 
 			do
 			{
 				dbxFolder = dbxSet.GetNextFolder();
 
-				if (dbxFolder != null)
-				{
-					MAPIFolder pstFolder = null;
-
-					// add folder to pst
-					if (dbxFolder.FolderParentId == 0)
-					{
-						// top level folder
-						pstFolder = PstOutlook.AddFolderSafe(
-							rootFolder, dbxFolder.FolderName);
-					}
-					else
-					{
-						// need to figure out parent in pst
-						bool keyExists =
-							mappings.ContainsKey(dbxFolder.FolderParentId);
-
-						if (keyExists == false)
-						{
-							Log.Warn("Parent key not found in mappings: " +
-								dbxFolder.FolderParentId);
-						}
-						else
-						{
-							string entryId = mappings[dbxFolder.FolderParentId];
-							MAPIFolder parentFolder =
-								pstOutlook.GetFolderFromID(entryId, pstStore);
-
-							pstFolder = PstOutlook.AddFolderSafe(
-								parentFolder, dbxFolder.FolderName);
-						}
-					}
-
-					if (pstFolder != null)
-					{
-						mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
-					}
-
-					// for each message
-					DbxMessage dbxMessage;
-
-					do
-					{
-						dbxMessage = dbxFolder.GetNextMessage();
-
-						if (dbxMessage != null)
-						{
-							// Need to get the rfc email as a stream, then
-							// convert the stream to a MSG file, import the
-							// MSG file into the Pst, finally move the message
-							Stream emailStream = dbxMessage.GetMessageStream();
-
-							string msgFile = Path.GetTempFileName();
-							msgFile = Path.ChangeExtension(msgFile, ".msg");
-
-							using Stream msgStream =
-								PstOutlook.GetMsgFileStream(msgFile);
-
-							Converter.ConvertEmlToMsg(emailStream, msgStream);
-
-							msgStream.Dispose();
-
-							pstOutlook.AddMsgFile(pstFolder, msgFile);
-
-							File.Delete(msgFile);
-						}
-					}
-					while (dbxMessage != null);
-				}
+				CopyFolderToPst(
+					mappings, pstOutlook, pstStore, rootFolder, dbxFolder);
 			}
 			while (dbxFolder != null);
 		}
@@ -176,6 +110,109 @@ namespace DbxToPstLibrary
 			}
 
 			return result;
+		}
+
+		private static MAPIFolder CopyChildFolderToPst(
+			IDictionary<uint, string> mappings,
+			PstOutlook pstOutlook,
+			Store pstStore,
+			MAPIFolder rootFolder,
+			DbxFolder dbxFolder)
+		{
+			MAPIFolder pstFolder = null;
+
+			// need to figure out parent in pst
+			bool keyExists =
+				mappings.ContainsKey(dbxFolder.FolderParentId);
+
+			if (keyExists == false)
+			{
+				Log.Warn("Parent key not found in mappings: " +
+					dbxFolder.FolderParentId);
+			}
+			else
+			{
+				string entryId = mappings[dbxFolder.FolderParentId];
+				MAPIFolder parentFolder =
+					pstOutlook.GetFolderFromID(entryId, pstStore);
+
+				pstFolder = PstOutlook.AddFolderSafe(
+					parentFolder, dbxFolder.FolderName);
+			}
+
+			return pstFolder;
+		}
+
+		private static void CopyFolderToPst(
+			IDictionary<uint, string> mappings,
+			PstOutlook pstOutlook,
+			Store pstStore,
+			MAPIFolder rootFolder,
+			DbxFolder dbxFolder)
+		{
+			if (dbxFolder != null)
+			{
+				MAPIFolder pstFolder = null;
+
+				// add folder to pst
+				if (dbxFolder.FolderParentId == 0)
+				{
+					// top level folder
+					pstFolder = PstOutlook.AddFolderSafe(
+						rootFolder, dbxFolder.FolderName);
+				}
+				else
+				{
+					pstFolder = CopyChildFolderToPst(
+						mappings,
+						pstOutlook,
+						pstStore,
+						rootFolder,
+						dbxFolder);
+				}
+
+				if (pstFolder != null)
+				{
+					mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
+				}
+
+				// for each message
+				DbxMessage dbxMessage;
+
+				do
+				{
+					dbxMessage = dbxFolder.GetNextMessage();
+
+					CopyMessageToPst(pstOutlook, pstFolder, dbxMessage);
+				}
+				while (dbxMessage != null);
+			}
+		}
+
+		private static void CopyMessageToPst(
+			PstOutlook pstOutlook, MAPIFolder pstFolder, DbxMessage dbxMessage)
+		{
+			if (dbxMessage != null)
+			{
+				// Need to get the rfc email as a stream, then
+				// convert the stream to a MSG file, import the
+				// MSG file into the Pst, finally move the message
+				Stream emailStream = dbxMessage.GetMessageStream();
+
+				string msgFile = Path.GetTempFileName();
+				msgFile = Path.ChangeExtension(msgFile, ".msg");
+
+				using Stream msgStream =
+					PstOutlook.GetMsgFileStream(msgFile);
+
+				Converter.ConvertEmlToMsg(emailStream, msgStream);
+
+				msgStream.Dispose();
+
+				pstOutlook.AddMsgFile(pstFolder, msgFile);
+
+				File.Delete(msgFile);
+			}
 		}
 	}
 }
