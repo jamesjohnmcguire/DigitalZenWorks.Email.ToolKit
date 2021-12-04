@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 
 [assembly: CLSCompliant(false)]
 
@@ -41,7 +42,13 @@ namespace DbxToPstLibrary
 		public static void DbxDirectoryToPst(
 			string dbxFoldersPath, string pstPath)
 		{
-			DbxSet dbxSet = new (dbxFoldersPath);
+			// Personal preference... For me, most of these types will
+			// likely be Japansese.
+			Encoding.RegisterProvider(
+				CodePagesEncodingProvider.Instance);
+			Encoding encoding = Encoding.GetEncoding("shift_jis");
+
+			DbxSet dbxSet = new (dbxFoldersPath, encoding);
 			DbxFolder dbxFolder;
 
 			PstOutlook pstOutlook = new ();
@@ -134,7 +141,13 @@ namespace DbxToPstLibrary
 		/// <param name="filePath">The file path to migrate.</param>
 		public static void DbxFileToPst(string filePath)
 		{
-			DbxSet dbxSet = new (filePath);
+			// Personal preference... For me, most of these types will
+			// likely be Japansese.
+			Encoding.RegisterProvider(
+				CodePagesEncodingProvider.Instance);
+			Encoding encoding = Encoding.GetEncoding("shift_jis");
+
+			DbxSet dbxSet = new (filePath, encoding);
 		}
 
 		/// <summary>
@@ -163,14 +176,6 @@ namespace DbxToPstLibrary
 			}
 
 			return result;
-		}
-
-		/// <summary>
-		/// Transfers a folder from a data source to a destination source.
-		/// </summary>
-		/// <param name="id">The folder id.</param>
-		public static void TransferFolder(int id)
-		{
 		}
 	}
 }
