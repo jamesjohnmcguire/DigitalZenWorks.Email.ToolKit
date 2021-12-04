@@ -14,6 +14,9 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Text;
+
+[assembly: CLSCompliant(true)]
 
 namespace DbxToPst.Test
 {
@@ -39,7 +42,9 @@ namespace DbxToPst.Test
 
 			if (arguments != null && arguments.Length > 0)
 			{
-				DbxSet dbxSet = new DbxSet(arguments[0]);
+				Encoding encoding = Encoding.UTF8;
+
+				DbxSet dbxSet = new (arguments[0], encoding);
 
 				dbxSet.List();
 			}
