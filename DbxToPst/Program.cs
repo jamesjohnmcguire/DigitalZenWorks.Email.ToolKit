@@ -12,6 +12,7 @@ using Serilog.Events;
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 
 [assembly: CLSCompliant(true)]
@@ -42,10 +43,33 @@ namespace DbxToPst
 
 				Log.Info("Starting DbxToPst Version: " + version);
 
-				if (arguments != null && arguments.Length > 1)
+				if (arguments != null && arguments.Length > 0)
 				{
-					bool success =
-						Migrate.DbxToPst(arguments[0], arguments[1]);
+					string dbxLocation = arguments[0];
+					string pstLocation = null;
+
+					if (arguments.Length > 1)
+					{
+						pstLocation = arguments[1];
+					}
+					else
+					{
+						if (Directory.Exists(dbxLocation))
+						{
+							pstLocation = dbxLocation + ".pst";
+						}
+						else if (File.Exists(dbxLocation))
+						{
+							pstLocation =
+								Path.ChangeExtension(dbxLocation, ".pst");
+						}
+						else
+						{
+							Log.Error("Invalid path for dbx location");
+						}
+					}
+
+					bool success = Migrate.DbxToPst(dbxLocation, pstLocation);
 
 					if (success == true)
 					{
