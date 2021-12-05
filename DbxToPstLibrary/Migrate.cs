@@ -116,7 +116,6 @@ namespace DbxToPstLibrary
 			IDictionary<uint, string> mappings,
 			PstOutlook pstOutlook,
 			Store pstStore,
-			MAPIFolder rootFolder,
 			DbxFolder dbxFolder)
 		{
 			MAPIFolder pstFolder = null;
@@ -152,7 +151,7 @@ namespace DbxToPstLibrary
 		{
 			if (dbxFolder != null)
 			{
-				MAPIFolder pstFolder = null;
+				MAPIFolder pstFolder;
 
 				// add folder to pst
 				if (dbxFolder.FolderParentId == 0)
@@ -167,7 +166,6 @@ namespace DbxToPstLibrary
 						mappings,
 						pstOutlook,
 						pstStore,
-						rootFolder,
 						dbxFolder);
 				}
 
