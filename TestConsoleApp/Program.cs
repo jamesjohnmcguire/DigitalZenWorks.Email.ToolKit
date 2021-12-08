@@ -57,6 +57,8 @@ namespace DbxToPst.Test
 					CodePagesEncodingProvider.Instance);
 				Encoding encoding = Encoding.GetEncoding("shift_jis");
 
+				TestStringToStream();
+
 				DbxSet dbxSet = new (arguments[0], encoding);
 
 				dbxSet.List();
@@ -89,6 +91,25 @@ namespace DbxToPst.Test
 
 			LogManager.Adapter =
 				new Common.Logging.Serilog.SerilogFactoryAdapter();
+		}
+
+		private static void TestStringToStream()
+		{
+			string test = "Testing 1-2-3";
+
+			// convert string to stream
+			byte[] byteArray = Encoding.UTF8.GetBytes(test);
+			MemoryStream stream = new MemoryStream(byteArray);
+
+			TestStream(stream);
+		}
+
+		private static void TestStream(Stream stream)
+		{
+			// convert stream to string
+			using StreamReader reader2 = new StreamReader(stream);
+			string text2 = reader2.ReadToEnd();
+			Log.Info(text2);
 		}
 	}
 }
