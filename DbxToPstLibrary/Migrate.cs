@@ -198,6 +198,9 @@ namespace DbxToPstLibrary
 				Stream emailStream = dbxMessage.GetMessageStream();
 
 				string msgFile = Path.GetTempFileName();
+
+				// A 0 byte sized file is created.  Need to remove it.
+				File.Delete(msgFile);
 				msgFile = Path.ChangeExtension(msgFile, ".msg");
 
 				using Stream msgStream =
