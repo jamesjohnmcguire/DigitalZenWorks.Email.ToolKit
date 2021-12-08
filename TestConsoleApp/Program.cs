@@ -7,6 +7,7 @@
 using Common.Logging;
 using DbxToPstLibrary;
 using DigitalZenWorks.Email.DbxOutlookExpress;
+using MsgKit;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
@@ -42,7 +43,9 @@ namespace DbxToPst.Test
 
 			if (arguments != null && arguments.Length > 0)
 			{
-				Encoding encoding = Encoding.UTF8;
+				Encoding.RegisterProvider(
+					CodePagesEncodingProvider.Instance);
+				Encoding encoding = Encoding.GetEncoding("shift_jis");
 
 				DbxSet dbxSet = new (arguments[0], encoding);
 
