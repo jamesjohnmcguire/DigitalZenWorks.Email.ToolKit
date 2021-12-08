@@ -57,6 +57,16 @@ namespace DbxToPst.Test
 					CodePagesEncodingProvider.Instance);
 				Encoding encoding = Encoding.GetEncoding("shift_jis");
 
+				string applicationDataDirectory = @"DigitalZenWorks\DbxToPst";
+				string baseDataDirectory =
+					Environment.GetFolderPath(
+						Environment.SpecialFolder.ApplicationData,
+						Environment.SpecialFolderOption.Create) + @"\" +
+						applicationDataDirectory;
+				string path = baseDataDirectory + @"\TestFolder\gf.dbx";
+
+				DbxMessagesFile messagesFile = new (path, encoding);
+
 				TestStringToStream();
 
 				DbxSet dbxSet = new (arguments[0], encoding);
