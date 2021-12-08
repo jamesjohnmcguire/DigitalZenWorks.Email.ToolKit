@@ -41,6 +41,16 @@ namespace DbxToPst.Test
 
 			Log.Info("Test console app");
 
+#if NET5_0_OR_GREATER
+			Log.Info("NET 5.0 or greater Supported framworks");
+#endif
+#if NETCOREAPP3_0_OR_GREATER
+			Log.Info("NETCOREAPP 3.0 or greater Supported framworks");
+#endif
+#if NETSTANDARD1_1_OR_GREATER
+			Log.Info("NET Standard 1.1 or greater Supported framworks");
+#endif
+
 			if (arguments != null && arguments.Length > 0)
 			{
 				Encoding.RegisterProvider(
