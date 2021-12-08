@@ -40,7 +40,7 @@ namespace DbxToPstLibrary
 		/// <returns>The message as a stream.</returns>
 		public static Stream GetMsgFileStream(string filePath)
 		{
-			FileStream stream = new (filePath, FileMode.CreateNew);
+			FileStream stream = new (filePath, FileMode.Create);
 
 			return stream;
 		}
