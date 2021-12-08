@@ -69,9 +69,19 @@ namespace DbxToPst.Test
 
 				TestStringToStream();
 
-				DbxSet dbxSet = new (arguments[0], encoding);
+				DbxMessage message = messagesFile.GetMessage(36);
 
-				dbxSet.List();
+				Stream dbxStream = message.GetMessageStream();
+
+				string msgPath = baseDataDirectory + @"\test.msg";
+
+				File.Delete(msgPath);
+
+				using Stream msgStream =
+					PstOutlook.GetMsgFileStream(msgPath);
+				Converter.ConvertEmlToMsg(dbxStream, msgStream);
+
+				messagesFile.List();
 			}
 			else
 			{
