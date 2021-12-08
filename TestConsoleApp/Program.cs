@@ -71,7 +71,7 @@ namespace DbxToPst.Test
 
 				DbxMessage message = messagesFile.GetMessage(36);
 
-				Stream dbxStream = message.GetMessageStream();
+				Stream dbxStream = message.MessageStream;
 
 				string msgPath = baseDataDirectory + @"\test.msg";
 
@@ -117,19 +117,17 @@ namespace DbxToPst.Test
 		{
 			string test = "Testing 1-2-3";
 
-			// convert string to stream
 			byte[] byteArray = Encoding.UTF8.GetBytes(test);
-			MemoryStream stream = new MemoryStream(byteArray);
+			MemoryStream stream = new (byteArray);
 
 			TestStream(stream);
 		}
 
 		private static void TestStream(Stream stream)
 		{
-			// convert stream to string
-			using StreamReader reader2 = new StreamReader(stream);
-			string text2 = reader2.ReadToEnd();
-			Log.Info(text2);
+			using StreamReader reader = new (stream);
+			string text = reader.ReadToEnd();
+			Log.Info(text);
 		}
 	}
 }

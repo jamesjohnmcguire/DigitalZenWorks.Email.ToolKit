@@ -195,7 +195,7 @@ namespace DbxToPstLibrary
 				// Need to get the rfc email as a stream, then
 				// convert the stream to a MSG file, import the
 				// MSG file into the Pst, finally move the message
-				Stream emailStream = dbxMessage.GetMessageStream();
+				using Stream emailStream = dbxMessage.MessageStream;
 
 				string msgFile = Path.GetTempFileName();
 
