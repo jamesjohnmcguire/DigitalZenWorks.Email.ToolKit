@@ -101,6 +101,8 @@ namespace DbxToPstLibrary
 					item.Move(pstFolder);
 
 					item.UnRead = false;
+
+					Marshal.ReleaseComObject(item);
 				}
 			}
 		}
