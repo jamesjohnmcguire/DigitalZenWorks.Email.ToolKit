@@ -90,13 +90,18 @@ namespace DbxToPstLibrary
 		/// <param name="filePath">The folder to add to.</param>
 		public void AddMsgFile(MAPIFolder pstFolder, string filePath)
 		{
-			if (pstFolder != null)
+			if (pstFolder != null && !string.IsNullOrWhiteSpace(filePath))
 			{
-				MailItem item = outlookNamespace.OpenSharedItem(filePath);
+				bool exists = File.Exists(filePath);
 
-				item.Move(pstFolder);
+				if (exists == true)
+				{
+					MailItem item = outlookNamespace.OpenSharedItem(filePath);
 
-				item.UnRead = false;
+					item.Move(pstFolder);
+
+					item.UnRead = false;
+				}
 			}
 		}
 
