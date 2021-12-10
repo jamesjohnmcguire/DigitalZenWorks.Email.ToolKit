@@ -95,6 +95,8 @@ namespace DbxToPstLibrary
 				MailItem item = outlookNamespace.OpenSharedItem(filePath);
 
 				item.Move(pstFolder);
+
+				item.UnRead = false;
 			}
 		}
 
