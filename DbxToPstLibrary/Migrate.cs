@@ -187,6 +187,8 @@ namespace DbxToPstLibrary
 					CopyMessageToPst(pstOutlook, pstFolder, dbxMessage);
 				}
 				while (dbxMessage != null);
+
+				Marshal.ReleaseComObject(pstFolder);
 			}
 		}
 
