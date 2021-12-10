@@ -56,6 +56,9 @@ namespace DbxToPstLibrary
 
 			MAPIFolder rootFolder = pstStore.GetRootFolder();
 
+			FileInfo fileInfo = new FileInfo(pstPath);
+			rootFolder.Name = fileInfo.Name;
+
 			IDictionary<uint, string> mappings =
 				new Dictionary<uint, string>();
 
