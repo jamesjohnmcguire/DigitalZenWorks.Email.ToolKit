@@ -126,7 +126,7 @@ namespace DbxToPst
 				new Common.Logging.Serilog.SerilogFactoryAdapter();
 		}
 
-		private static void ShowHelp(string additionalMessage)
+		private static void ShowHelp(string additionalMessage = null)
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly();
 			string location = assembly.Location;
