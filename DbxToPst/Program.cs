@@ -79,6 +79,8 @@ namespace DbxToPst
 				else
 				{
 					Log.Error("Invalid arguments");
+
+					ShowHelp();
 				}
 			}
 			catch (Exception exception)
