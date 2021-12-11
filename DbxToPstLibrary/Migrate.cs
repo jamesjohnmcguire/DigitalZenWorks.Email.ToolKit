@@ -177,19 +177,25 @@ namespace DbxToPstLibrary
 					mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
 				}
 
-				// for each message
-				DbxMessage dbxMessage;
-
-				do
-				{
-					dbxMessage = dbxFolder.GetNextMessage();
-
-					CopyMessageToPst(pstOutlook, pstFolder, dbxMessage);
-				}
-				while (dbxMessage != null);
-
-				Marshal.ReleaseComObject(pstFolder);
+				CopyMessages(pstOutlook, pstFolder, dbxFolder);
 			}
+		}
+
+		private static void CopyMessages(
+			PstOutlook pstOutlook, MAPIFolder pstFolder, DbxFolder dbxFolder)
+		{
+			// for each message
+			DbxMessage dbxMessage;
+
+			do
+			{
+				dbxMessage = dbxFolder.GetNextMessage();
+
+				CopyMessageToPst(pstOutlook, pstFolder, dbxMessage);
+			}
+			while (dbxMessage != null);
+
+			Marshal.ReleaseComObject(pstFolder);
 		}
 
 		private static void CopyMessageToPst(
