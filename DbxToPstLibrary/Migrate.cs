@@ -76,7 +76,8 @@ namespace DbxToPstLibrary
 		/// Dbx files to pst.
 		/// </summary>
 		/// <param name="filePath">The file path to migrate.</param>
-		public static void DbxFileToPst(string filePath)
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		public static void DbxFileToPst(string filePath, string pstPath)
 		{
 			// Personal preference... For me, most of these types will
 			// likely be Japansese.
@@ -84,7 +85,30 @@ namespace DbxToPstLibrary
 				CodePagesEncodingProvider.Instance);
 			Encoding encoding = Encoding.GetEncoding("shift_jis");
 
-			DbxSet dbxSet = new (filePath, encoding);
+			FileInfo fileInfo = new(filePath);
+
+			if (fileInfo.Name.Equals(
+				"Folders.dbx", StringComparison.Ordinal))
+			{
+				DbxDirectoryToPst(filePath, pstPath);
+			}
+			else
+			{
+				PstOutlook pstOutlook = new();
+				Store pstStore = pstOutlook.CreateStore(pstPath);
+
+				MAPIFolder rootFolder = pstStore.GetRootFolder();
+
+				string baseName = Path.GetFileNameWithoutExtension(pstPath);
+				rootFolder.Name = baseName;
+
+				DbxFolder dbxFolder = new(filePath, baseName, encoding);
+
+				MAPIFolder pstFolder = PstOutlook.AddFolderSafe(
+					rootFolder, rootFolder.Name);
+
+				CopyMessages(pstOutlook, pstFolder, dbxFolder);
+			}
 		}
 
 		/// <summary>
@@ -104,7 +128,7 @@ namespace DbxToPstLibrary
 			}
 			else if (File.Exists(path))
 			{
-				DbxFileToPst(path);
+				DbxFileToPst(path, pstPath);
 				result = true;
 			}
 			else
