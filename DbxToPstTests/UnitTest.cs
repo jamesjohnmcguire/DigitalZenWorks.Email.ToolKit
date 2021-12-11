@@ -49,6 +49,8 @@ namespace DigitalZenWorks.Email.DbxToPstTests.Tests
 			Microsoft.Office.Interop.Outlook.Store store = pstOutlook.CreateStore(path);
 
 			Assert.NotNull(store);
+
+			pstOutlook.RemoveStore(store);
 		}
 	}
 }
