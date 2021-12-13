@@ -121,6 +121,8 @@ namespace DbxToPstLibrary
 		{
 			bool result = false;
 
+			Log.Info("Checking file: " + path);
+
 			if (Directory.Exists(path))
 			{
 				DbxDirectoryToPst(path, pstPath);
