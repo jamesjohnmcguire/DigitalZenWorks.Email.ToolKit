@@ -163,9 +163,12 @@ namespace DbxToPstLibrary
 		/// <param name="store">The store to check.</param>
 		public void RemoveStore(Store store)
 		{
-			MAPIFolder rootFolder = store.GetRootFolder();
+			if (store != null)
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
 
-			outlookNamespace.Session.RemoveStore(rootFolder);
+				outlookNamespace.Session.RemoveStore(rootFolder);
+			}
 		}
 	}
 }
