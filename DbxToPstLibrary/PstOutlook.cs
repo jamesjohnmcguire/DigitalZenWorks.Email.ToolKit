@@ -105,6 +105,10 @@ namespace DbxToPstLibrary
 
 					Marshal.ReleaseComObject(item);
 				}
+				else
+				{
+					Log.Warn("File doesn't exist: " + filePath);
+				}
 			}
 		}
 
