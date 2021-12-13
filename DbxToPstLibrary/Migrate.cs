@@ -199,9 +199,13 @@ namespace DbxToPstLibrary
 				if (pstFolder != null)
 				{
 					mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
-				}
 
-				CopyMessages(pstOutlook, pstFolder, dbxFolder);
+					CopyMessages(pstOutlook, pstFolder, dbxFolder);
+				}
+				else
+				{
+					Log.Warn("pstFolder is null: " + dbxFolder.FolderName);
+				}
 			}
 		}
 
