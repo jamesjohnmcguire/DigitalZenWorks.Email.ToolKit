@@ -147,8 +147,8 @@ namespace DbxToPstLibrary
 			Store pstStore,
 			DbxFolder dbxFolder)
 		{
-			MAPIFolder parentFolder = null;
-			MAPIFolder pstFolder = null;
+			MAPIFolder parentFolder;
+			MAPIFolder pstFolder;
 
 			// need to figure out parent in pst
 			bool keyExists =
