@@ -147,6 +147,7 @@ namespace DbxToPstLibrary
 			Store pstStore,
 			DbxFolder dbxFolder)
 		{
+			MAPIFolder parentFolder = null;
 			MAPIFolder pstFolder = null;
 
 			// need to figure out parent in pst
@@ -157,16 +158,17 @@ namespace DbxToPstLibrary
 			{
 				Log.Warn("Parent key not found in mappings: " +
 					dbxFolder.FolderParentId);
+
+				parentFolder = pstStore.GetRootFolder();
 			}
 			else
 			{
 				string entryId = mappings[dbxFolder.FolderParentId];
-				MAPIFolder parentFolder =
-					pstOutlook.GetFolderFromID(entryId, pstStore);
-
-				pstFolder = PstOutlook.AddFolderSafe(
-					parentFolder, dbxFolder.FolderName);
+				parentFolder = pstOutlook.GetFolderFromID(entryId, pstStore);
 			}
+
+			pstFolder = PstOutlook.AddFolderSafe(
+				parentFolder, dbxFolder.FolderName);
 
 			return pstFolder;
 		}
