@@ -85,7 +85,7 @@ namespace DbxToPstLibrary
 				CodePagesEncodingProvider.Instance);
 			Encoding encoding = Encoding.GetEncoding("shift_jis");
 
-			FileInfo fileInfo = new(filePath);
+			FileInfo fileInfo = new (filePath);
 
 			if (fileInfo.Name.Equals(
 				"Folders.dbx", StringComparison.Ordinal))
@@ -94,7 +94,7 @@ namespace DbxToPstLibrary
 			}
 			else
 			{
-				PstOutlook pstOutlook = new();
+				PstOutlook pstOutlook = new ();
 				Store pstStore = pstOutlook.CreateStore(pstPath);
 
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
@@ -102,7 +102,7 @@ namespace DbxToPstLibrary
 				string baseName = Path.GetFileNameWithoutExtension(pstPath);
 				rootFolder.Name = baseName;
 
-				DbxFolder dbxFolder = new(filePath, baseName, encoding);
+				DbxFolder dbxFolder = new (filePath, baseName, encoding);
 
 				MAPIFolder pstFolder = PstOutlook.AddFolderSafe(
 					rootFolder, rootFolder.Name);
