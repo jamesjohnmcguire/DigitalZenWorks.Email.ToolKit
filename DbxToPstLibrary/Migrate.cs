@@ -249,7 +249,14 @@ namespace DbxToPstLibrary
 				using Stream msgStream =
 					PstOutlook.GetMsgFileStream(msgFile);
 
-				Converter.ConvertEmlToMsg(emailStream, msgStream);
+				try
+				{
+					Converter.ConvertEmlToMsg(emailStream, msgStream);
+				}
+				catch (InvalidCastException exception)
+				{
+					Log.Error(exception.ToString());
+				}
 
 				msgStream.Dispose();
 
