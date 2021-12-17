@@ -2,6 +2,7 @@ using DbxToPstLibrary;
 using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
 using System;
+using System.IO;
 
 [assembly: CLSCompliant(true)]
 
@@ -12,14 +13,6 @@ namespace DigitalZenWorks.Email.DbxToPstTests.Tests
 	/// </summary>
 	public class DbxToPstTestsTests
 	{
-		private const string applicationDataDirectory =
-			@"DigitalZenWorks\DbxToPst";
-		private static readonly string baseDataDirectory =
-			Environment.GetFolderPath(
-				Environment.SpecialFolder.ApplicationData,
-				Environment.SpecialFolderOption.Create) + @"\" +
-				applicationDataDirectory;
-
 		/// <summary>
 		/// Set up method.
 		/// </summary>
@@ -43,10 +36,20 @@ namespace DigitalZenWorks.Email.DbxToPstTests.Tests
 		[Test]
 		public void TestCreatePstStore()
 		{
-			string path = baseDataDirectory + "\\NewTest.pst";
+			string basePath = Path.GetTempPath();
+			string path = basePath + "Test.pst";
 			PstOutlook pstOutlook = new ();
 
-			Microsoft.Office.Interop.Outlook.Store store = pstOutlook.CreateStore(path);
+			// PST provider in Outlook keeps the PST file open for 30 minutes
+			// after closing it for the performance reasons.
+			try
+			{
+				File.Delete(path);
+
+			}
+			catch (IOException) { }
+
+			Store store = pstOutlook.CreateStore(path);
 
 			Assert.NotNull(store);
 
