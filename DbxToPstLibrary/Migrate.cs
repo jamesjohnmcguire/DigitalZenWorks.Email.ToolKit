@@ -54,22 +54,29 @@ namespace DbxToPstLibrary
 			PstOutlook pstOutlook = new ();
 			Store pstStore = pstOutlook.CreateStore(pstPath);
 
-			MAPIFolder rootFolder = pstStore.GetRootFolder();
-
-			string baseName = Path.GetFileNameWithoutExtension(pstPath);
-			rootFolder.Name = baseName;
-
-			IDictionary<uint, string> mappings =
-				new Dictionary<uint, string>();
-
-			do
+			if (pstStore == null)
 			{
-				dbxFolder = dbxSet.GetNextFolder();
-
-				CopyFolderToPst(
-					mappings, pstOutlook, pstStore, rootFolder, dbxFolder);
+				Log.Error("PST store not created");
 			}
-			while (dbxFolder != null);
+			else
+			{
+				MAPIFolder rootFolder = pstStore.GetRootFolder();
+
+				string baseName = Path.GetFileNameWithoutExtension(pstPath);
+				rootFolder.Name = baseName;
+
+				IDictionary<uint, string> mappings =
+					new Dictionary<uint, string>();
+
+				do
+				{
+					dbxFolder = dbxSet.GetNextFolder();
+
+					CopyFolderToPst(
+						mappings, pstOutlook, pstStore, rootFolder, dbxFolder);
+				}
+				while (dbxFolder != null);
+			}
 		}
 
 		/// <summary>
