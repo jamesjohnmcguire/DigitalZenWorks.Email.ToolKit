@@ -209,7 +209,23 @@ namespace DbxToPstLibrary
 
 				if (pstFolder != null)
 				{
-					mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
+					bool keyExists =
+						mappings.ContainsKey(dbxFolder.FolderParentId);
+
+					if (keyExists == true)
+					{
+						string message = string.Format(
+							CultureInfo.InvariantCulture,
+							"Duplicate key mapping! folder[{0}] id {1}",
+							dbxFolder.FolderName,
+							dbxFolder.FolderId);
+
+						Log.Info(message);
+					}
+					else
+					{
+						mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
+					}
 
 					CopyMessages(pstOutlook, pstFolder, dbxFolder);
 				}
