@@ -216,31 +216,37 @@ namespace DbxToPstLibrary
 			{
 				MAPIFolder pstFolder;
 
-				// add folder to pst
-				if (dbxFolder.FolderParentId == 0)
+				// The search folder doesn't seem to contain any actual
+				// message content, so it would be justa a waste of time.
+				if (!dbxFolder.FolderName.Equals(
+					"Search Folder", StringComparison.Ordinal))
 				{
-					// top level folder
-					pstFolder = PstOutlook.AddFolderSafe(
-						rootFolder, dbxFolder.FolderName);
-				}
-				else
-				{
-					pstFolder = CopyChildFolderToPst(
-						mappings,
-						pstOutlook,
-						pstStore,
-						dbxFolder);
-				}
+					// add folder to pst
+					if (dbxFolder.FolderParentId == 0)
+					{
+						// top level folder
+						pstFolder = PstOutlook.AddFolderSafe(
+							rootFolder, dbxFolder.FolderName);
+					}
+					else
+					{
+						pstFolder = CopyChildFolderToPst(
+							mappings,
+							pstOutlook,
+							pstStore,
+							dbxFolder);
+					}
 
-				if (pstFolder != null)
-				{
-					AddMappingSafe(mappings, pstFolder, dbxFolder);
+					if (pstFolder != null)
+					{
+						AddMappingSafe(mappings, pstFolder, dbxFolder);
 
-					CopyMessages(pstOutlook, pstFolder, dbxFolder);
-				}
-				else
-				{
-					Log.Warn("pstFolder is null: " + dbxFolder.FolderName);
+						CopyMessages(pstOutlook, pstFolder, dbxFolder);
+					}
+					else
+					{
+						Log.Warn("pstFolder is null: " + dbxFolder.FolderName);
+					}
 				}
 			}
 		}
