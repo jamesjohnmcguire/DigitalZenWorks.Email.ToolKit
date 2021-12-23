@@ -148,6 +148,31 @@ namespace DbxToPstLibrary
 			return result;
 		}
 
+		private static void AddMappingSafe(
+			IDictionary<uint, string> mappings,
+			MAPIFolder pstFolder,
+			DbxFolder dbxFolder)
+		{
+			bool keyExists =
+				mappings.ContainsKey(dbxFolder.FolderParentId);
+
+			if (keyExists == true)
+			{
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"Duplicate key mapping! folder[{0}] id {1}",
+					dbxFolder.FolderName,
+					dbxFolder.FolderId);
+
+				Log.Info(message);
+			}
+			else
+			{
+				mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
+			}
+
+		}
+
 		private static MAPIFolder CopyChildFolderToPst(
 			IDictionary<uint, string> mappings,
 			PstOutlook pstOutlook,
@@ -209,23 +234,7 @@ namespace DbxToPstLibrary
 
 				if (pstFolder != null)
 				{
-					bool keyExists =
-						mappings.ContainsKey(dbxFolder.FolderParentId);
-
-					if (keyExists == true)
-					{
-						string message = string.Format(
-							CultureInfo.InvariantCulture,
-							"Duplicate key mapping! folder[{0}] id {1}",
-							dbxFolder.FolderName,
-							dbxFolder.FolderId);
-
-						Log.Info(message);
-					}
-					else
-					{
-						mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
-					}
+					AddMappingSafe(mappings, pstFolder, dbxFolder);
 
 					CopyMessages(pstOutlook, pstFolder, dbxFolder);
 				}
