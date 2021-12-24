@@ -148,6 +148,14 @@ namespace DbxToPstLibrary
 			return result;
 		}
 
+		/// <summary>
+		/// Copy folder to pst store.
+		/// </summary>
+		/// <param name="mappings">The mappings file to add to.</param>
+		/// <param name="pstOutlook">The pst object to use.</param>
+		/// <param name="pstStore">The store to use.</param>
+		/// <param name="rootFolder">The root folder of the store.</param>
+		/// <param name="dbxFolder">The dbx folder to add.</param>
 		public static void CopyFolderToPst(
 			IDictionary<uint, string> mappings,
 			PstOutlook pstOutlook,
