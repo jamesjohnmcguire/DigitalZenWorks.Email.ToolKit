@@ -163,7 +163,8 @@ namespace DbxToPstLibrary
 			MAPIFolder rootFolder,
 			DbxFolder dbxFolder)
 		{
-			if (dbxFolder != null)
+			if (mappings != null && pstOutlook != null &&
+				pstStore != null && dbxFolder != null)
 			{
 				MAPIFolder pstFolder;
 
