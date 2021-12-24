@@ -170,7 +170,6 @@ namespace DbxToPstLibrary
 			{
 				mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
 			}
-
 		}
 
 		private static MAPIFolder CopyChildFolderToPst(
@@ -205,7 +204,7 @@ namespace DbxToPstLibrary
 			return pstFolder;
 		}
 
-		private static void CopyFolderToPst(
+		public static void CopyFolderToPst(
 			IDictionary<uint, string> mappings,
 			PstOutlook pstOutlook,
 			Store pstStore,
