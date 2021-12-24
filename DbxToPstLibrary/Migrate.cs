@@ -148,6 +148,52 @@ namespace DbxToPstLibrary
 			return result;
 		}
 
+		public static void CopyFolderToPst(
+			IDictionary<uint, string> mappings,
+			PstOutlook pstOutlook,
+			Store pstStore,
+			MAPIFolder rootFolder,
+			DbxFolder dbxFolder)
+		{
+			if (dbxFolder != null)
+			{
+				MAPIFolder pstFolder;
+
+				// The search folder doesn't seem to contain any actual
+				// message content, so it would be justa a waste of time.
+				if (!dbxFolder.FolderName.Equals(
+					"Search Folder", StringComparison.Ordinal))
+				{
+					// add folder to pst
+					if (dbxFolder.FolderParentId == 0)
+					{
+						// top level folder
+						pstFolder = PstOutlook.AddFolderSafe(
+							rootFolder, dbxFolder.FolderName);
+					}
+					else
+					{
+						pstFolder = CopyChildFolderToPst(
+							mappings,
+							pstOutlook,
+							pstStore,
+							dbxFolder);
+					}
+
+					if (pstFolder != null)
+					{
+						AddMappingSafe(mappings, pstFolder, dbxFolder);
+
+						CopyMessages(pstOutlook, pstFolder, dbxFolder);
+					}
+					else
+					{
+						Log.Warn("pstFolder is null: " + dbxFolder.FolderName);
+					}
+				}
+			}
+		}
+
 		private static void AddMappingSafe(
 			IDictionary<uint, string> mappings,
 			MAPIFolder pstFolder,
@@ -202,52 +248,6 @@ namespace DbxToPstLibrary
 				parentFolder, dbxFolder.FolderName);
 
 			return pstFolder;
-		}
-
-		public static void CopyFolderToPst(
-			IDictionary<uint, string> mappings,
-			PstOutlook pstOutlook,
-			Store pstStore,
-			MAPIFolder rootFolder,
-			DbxFolder dbxFolder)
-		{
-			if (dbxFolder != null)
-			{
-				MAPIFolder pstFolder;
-
-				// The search folder doesn't seem to contain any actual
-				// message content, so it would be justa a waste of time.
-				if (!dbxFolder.FolderName.Equals(
-					"Search Folder", StringComparison.Ordinal))
-				{
-					// add folder to pst
-					if (dbxFolder.FolderParentId == 0)
-					{
-						// top level folder
-						pstFolder = PstOutlook.AddFolderSafe(
-							rootFolder, dbxFolder.FolderName);
-					}
-					else
-					{
-						pstFolder = CopyChildFolderToPst(
-							mappings,
-							pstOutlook,
-							pstStore,
-							dbxFolder);
-					}
-
-					if (pstFolder != null)
-					{
-						AddMappingSafe(mappings, pstFolder, dbxFolder);
-
-						CopyMessages(pstOutlook, pstFolder, dbxFolder);
-					}
-					else
-					{
-						Log.Warn("pstFolder is null: " + dbxFolder.FolderName);
-					}
-				}
-			}
 		}
 
 		private static void CopyMessages(
