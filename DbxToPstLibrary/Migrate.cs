@@ -148,71 +148,23 @@ namespace DbxToPstLibrary
 			return result;
 		}
 
-		private static void AddMappingSafe(
-			IDictionary<uint, string> mappings,
-			MAPIFolder pstFolder,
-			DbxFolder dbxFolder)
-		{
-			bool keyExists =
-				mappings.ContainsKey(dbxFolder.FolderParentId);
-
-			if (keyExists == true)
-			{
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
-					"Duplicate key mapping! folder[{0}] id {1}",
-					dbxFolder.FolderName,
-					dbxFolder.FolderId);
-
-				Log.Info(message);
-			}
-			else
-			{
-				mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
-			}
-
-		}
-
-		private static MAPIFolder CopyChildFolderToPst(
-			IDictionary<uint, string> mappings,
-			PstOutlook pstOutlook,
-			Store pstStore,
-			DbxFolder dbxFolder)
-		{
-			MAPIFolder parentFolder;
-			MAPIFolder pstFolder;
-
-			// need to figure out parent in pst
-			bool keyExists =
-				mappings.ContainsKey(dbxFolder.FolderParentId);
-
-			if (keyExists == false)
-			{
-				Log.Warn("Parent key not found in mappings: " +
-					dbxFolder.FolderParentId);
-
-				parentFolder = pstStore.GetRootFolder();
-			}
-			else
-			{
-				string entryId = mappings[dbxFolder.FolderParentId];
-				parentFolder = pstOutlook.GetFolderFromID(entryId, pstStore);
-			}
-
-			pstFolder = PstOutlook.AddFolderSafe(
-				parentFolder, dbxFolder.FolderName);
-
-			return pstFolder;
-		}
-
-		private static void CopyFolderToPst(
+		/// <summary>
+		/// Copy folder to pst store.
+		/// </summary>
+		/// <param name="mappings">The mappings file to add to.</param>
+		/// <param name="pstOutlook">The pst object to use.</param>
+		/// <param name="pstStore">The store to use.</param>
+		/// <param name="rootFolder">The root folder of the store.</param>
+		/// <param name="dbxFolder">The dbx folder to add.</param>
+		public static void CopyFolderToPst(
 			IDictionary<uint, string> mappings,
 			PstOutlook pstOutlook,
 			Store pstStore,
 			MAPIFolder rootFolder,
 			DbxFolder dbxFolder)
 		{
-			if (dbxFolder != null)
+			if (mappings != null && pstOutlook != null &&
+				pstStore != null && dbxFolder != null)
 			{
 				MAPIFolder pstFolder;
 
@@ -249,6 +201,62 @@ namespace DbxToPstLibrary
 					}
 				}
 			}
+		}
+
+		private static void AddMappingSafe(
+			IDictionary<uint, string> mappings,
+			MAPIFolder pstFolder,
+			DbxFolder dbxFolder)
+		{
+			bool keyExists =
+				mappings.ContainsKey(dbxFolder.FolderParentId);
+
+			if (keyExists == true)
+			{
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"Duplicate key mapping! folder[{0}] id {1}",
+					dbxFolder.FolderName,
+					dbxFolder.FolderId);
+
+				Log.Info(message);
+			}
+			else
+			{
+				mappings.Add(dbxFolder.FolderId, pstFolder.EntryID);
+			}
+		}
+
+		private static MAPIFolder CopyChildFolderToPst(
+			IDictionary<uint, string> mappings,
+			PstOutlook pstOutlook,
+			Store pstStore,
+			DbxFolder dbxFolder)
+		{
+			MAPIFolder parentFolder;
+			MAPIFolder pstFolder;
+
+			// need to figure out parent in pst
+			bool keyExists =
+				mappings.ContainsKey(dbxFolder.FolderParentId);
+
+			if (keyExists == false)
+			{
+				Log.Warn("Parent key not found in mappings: " +
+					dbxFolder.FolderParentId);
+
+				parentFolder = pstStore.GetRootFolder();
+			}
+			else
+			{
+				string entryId = mappings[dbxFolder.FolderParentId];
+				parentFolder = pstOutlook.GetFolderFromID(entryId, pstStore);
+			}
+
+			pstFolder = PstOutlook.AddFolderSafe(
+				parentFolder, dbxFolder.FolderName);
+
+			return pstFolder;
 		}
 
 		private static void CopyMessages(
