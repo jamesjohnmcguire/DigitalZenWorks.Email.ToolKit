@@ -7,6 +7,7 @@
 using Common.Logging;
 using DbxToPstLibrary;
 using DigitalZenWorks.Email.DbxOutlookExpress;
+using Microsoft.Office.Interop.Outlook;
 using MsgKit;
 using Serilog;
 using Serilog.Configuration;
@@ -67,6 +68,8 @@ namespace DbxToPst.Test
 
 				DbxMessagesFile messagesFile = new (path, encoding);
 
+				DbxFolder dbxFolder = new (path, "TmpHold", encoding);
+
 				TestStringToStream();
 
 				DbxMessage message = messagesFile.GetMessage(36);
@@ -111,6 +114,24 @@ namespace DbxToPst.Test
 
 			LogManager.Adapter =
 				new Common.Logging.Serilog.SerilogFactoryAdapter();
+		}
+
+		private static void TestCreateFolder(
+			string pstPath, DbxFolder dbxFolder)
+		{
+			IDictionary<uint, string> mappings =
+				new Dictionary<uint, string>();
+
+			PstOutlook pstOutlook = new ();
+			Store pstStore = pstOutlook.CreateStore(pstPath);
+			MAPIFolder rootFolder = pstStore.GetRootFolder();
+
+			Migrate.CopyFolderToPst(
+				mappings,
+				pstOutlook,
+				pstStore,
+				rootFolder,
+				dbxFolder);
 		}
 
 		private static void TestStringToStream()
