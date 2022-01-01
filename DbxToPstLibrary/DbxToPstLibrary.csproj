@@ -13,7 +13,6 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
-		<Platforms>x86;x64</Platforms>
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<Version>1.0.0.9</Version>
 	</PropertyGroup>
