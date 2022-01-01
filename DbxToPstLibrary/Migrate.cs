@@ -279,7 +279,7 @@ namespace DbxToPstLibrary
 		private static void CopyMessageToPst(
 			PstOutlook pstOutlook, MAPIFolder pstFolder, DbxMessage dbxMessage)
 		{
-			if (dbxMessage != null)
+			if (dbxMessage != null && dbxMessage.Message.Length > 0)
 			{
 				// Need to get the rfc email as a stream, then
 				// convert the stream to a MSG file, import the
