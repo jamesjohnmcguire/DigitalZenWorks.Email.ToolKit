@@ -61,24 +61,25 @@ namespace DbxToPst.Test
 			Log.Info("NET Standard 1.1 or greater Supported framworks");
 #endif
 
+			Encoding.RegisterProvider(
+				CodePagesEncodingProvider.Instance);
+			Encoding encoding = Encoding.GetEncoding("shift_jis");
+
+			string path = BaseDataDirectory + @"\TestFolder\Inbox.dbx";
+
+			TestStringToStream();
+
+			TestFolder(path, encoding);
+
+			TestConvertToMsgFile(path, encoding);
+
+			TestListMessagesFile(path, encoding);
+
+			path = BaseDataDirectory + @"\TestFolder";
+			TestListSet(path, encoding);
+
 			if (arguments != null && arguments.Length > 0)
 			{
-				Encoding.RegisterProvider(
-					CodePagesEncodingProvider.Instance);
-				Encoding encoding = Encoding.GetEncoding("shift_jis");
-
-				string path = BaseDataDirectory + @"\TestFolder\Inbox.dbx";
-
-				TestStringToStream();
-
-				TestFolder(path, encoding);
-
-				TestConvertToMsgFile(path, encoding);
-
-				TestListMessagesFile(path, encoding);
-
-				path = BaseDataDirectory + @"\TestFolder";
-				TestListSet(path, encoding);
 			}
 			else
 			{
