@@ -67,11 +67,11 @@ namespace DbxToPst.Test
 					CodePagesEncodingProvider.Instance);
 				Encoding encoding = Encoding.GetEncoding("shift_jis");
 
-				string path = BaseDataDirectory + @"\TestFolder\gf.dbx";
-
-				DbxFolder dbxFolder = new (path, "TmpHold", encoding);
+				string path = BaseDataDirectory + @"\TestFolder\Inbox.dbx";
 
 				TestStringToStream();
+
+				TestFolder(path, encoding);
 
 				TestConvertToMsgFile(path, encoding);
 
@@ -138,6 +138,11 @@ namespace DbxToPst.Test
 				pstStore,
 				rootFolder,
 				dbxFolder);
+		}
+
+		private static void TestFolder(string path, Encoding encoding)
+		{
+			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
 		}
 
 		private static void TestListMessagesFile(
