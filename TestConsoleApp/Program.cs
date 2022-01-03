@@ -88,13 +88,7 @@ namespace DbxToPst.Test
 
 		private static void LogInitialization()
 		{
-			string applicationDataDirectory = @"DigitalZenWorks\DbxToPst";
-			string baseDataDirectory = Environment.GetFolderPath(
-				Environment.SpecialFolder.ApplicationData,
-				Environment.SpecialFolderOption.Create) + @"\" +
-				applicationDataDirectory;
-
-			string logFilePath = baseDataDirectory + "\\DbxToPst.log";
+			string logFilePath = BaseDataDirectory + "\\DbxToPst.log";
 			string outputTemplate =
 				"[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] " +
 				"{Message:lj}{NewLine}{Exception}";
