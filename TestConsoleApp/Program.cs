@@ -69,23 +69,11 @@ namespace DbxToPst.Test
 
 				string path = BaseDataDirectory + @"\TestFolder\gf.dbx";
 
-				DbxMessagesFile messagesFile = new (path, encoding);
-
 				DbxFolder dbxFolder = new (path, "TmpHold", encoding);
 
 				TestStringToStream();
 
-				DbxMessage message = messagesFile.GetMessage(36);
-
-				Stream dbxStream = message.MessageStream;
-
-				string msgPath = BaseDataDirectory + @"\test.msg";
-
-				File.Delete(msgPath);
-
-				using Stream msgStream =
-					PstOutlook.GetMsgFileStream(msgPath);
-				Converter.ConvertEmlToMsg(dbxStream, msgStream);
+				TestConvertToMsgFile(path, encoding);
 
 				TestListMessagesFile(path, encoding);
 			}
@@ -117,6 +105,24 @@ namespace DbxToPst.Test
 
 			LogManager.Adapter =
 				new Common.Logging.Serilog.SerilogFactoryAdapter();
+		}
+
+		private static void TestConvertToMsgFile(
+			string path, Encoding encoding)
+		{
+			DbxMessagesFile messagesFile = new (path, encoding);
+
+			DbxMessage message = messagesFile.GetMessage(1);
+
+			Stream dbxStream = message.MessageStream;
+
+			string msgPath = BaseDataDirectory + @"\test.msg";
+
+			File.Delete(msgPath);
+
+			using Stream msgStream =
+				PstOutlook.GetMsgFileStream(msgPath);
+			Converter.ConvertEmlToMsg(dbxStream, msgStream);
 		}
 
 		private static void TestCreateFolder(
