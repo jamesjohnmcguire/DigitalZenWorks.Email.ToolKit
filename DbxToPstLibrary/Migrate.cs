@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="Migrate.cs" company="James John McGuire">
-// Copyright © 2021 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -209,13 +209,13 @@ namespace DbxToPstLibrary
 			DbxFolder dbxFolder)
 		{
 			bool keyExists =
-				mappings.ContainsKey(dbxFolder.FolderParentId);
+				mappings.ContainsKey(dbxFolder.FolderId);
 
 			if (keyExists == true)
 			{
 				string message = string.Format(
 					CultureInfo.InvariantCulture,
-					"Duplicate key mapping! folder[{0}] id {1}",
+					"Duplicate key mapping! Folder Id: {1} Name: {0} ",
 					dbxFolder.FolderName,
 					dbxFolder.FolderId);
 
