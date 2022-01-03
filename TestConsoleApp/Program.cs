@@ -27,6 +27,15 @@ namespace DbxToPst.Test
 	/// </summary>
 	public static class Program
 	{
+		private const string ApplicationDataDirectory =
+			@"DigitalZenWorks\DbxToPst";
+
+		private static readonly string BaseDataDirectory =
+			Environment.GetFolderPath(
+				Environment.SpecialFolder.ApplicationData,
+				Environment.SpecialFolderOption.Create) + @"\" +
+				ApplicationDataDirectory;
+
 		private static readonly ILog Log = LogManager.GetLogger(
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 			MethodBase.GetCurrentMethod().DeclaringType);
@@ -58,13 +67,7 @@ namespace DbxToPst.Test
 					CodePagesEncodingProvider.Instance);
 				Encoding encoding = Encoding.GetEncoding("shift_jis");
 
-				string applicationDataDirectory = @"DigitalZenWorks\DbxToPst";
-				string baseDataDirectory =
-					Environment.GetFolderPath(
-						Environment.SpecialFolder.ApplicationData,
-						Environment.SpecialFolderOption.Create) + @"\" +
-						applicationDataDirectory;
-				string path = baseDataDirectory + @"\TestFolder\gf.dbx";
+				string path = BaseDataDirectory + @"\TestFolder\gf.dbx";
 
 				DbxMessagesFile messagesFile = new (path, encoding);
 
@@ -76,7 +79,7 @@ namespace DbxToPst.Test
 
 				Stream dbxStream = message.MessageStream;
 
-				string msgPath = baseDataDirectory + @"\test.msg";
+				string msgPath = BaseDataDirectory + @"\test.msg";
 
 				File.Delete(msgPath);
 
