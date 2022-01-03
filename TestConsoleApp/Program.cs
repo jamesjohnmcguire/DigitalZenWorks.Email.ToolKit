@@ -76,6 +76,9 @@ namespace DbxToPst.Test
 				TestConvertToMsgFile(path, encoding);
 
 				TestListMessagesFile(path, encoding);
+
+				path = BaseDataDirectory + @"\TestFolder";
+				TestListSet(path, encoding);
 			}
 			else
 			{
@@ -149,6 +152,14 @@ namespace DbxToPst.Test
 			DbxMessagesFile messagesFile = new (path, encoding);
 
 			messagesFile.List();
+		}
+
+		private static void TestListSet(
+			string path, Encoding encoding)
+		{
+			DbxSet set = new (path, encoding);
+
+			set.List();
 		}
 
 		private static void TestStringToStream()
