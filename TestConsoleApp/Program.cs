@@ -87,7 +87,7 @@ namespace DbxToPst.Test
 					PstOutlook.GetMsgFileStream(msgPath);
 				Converter.ConvertEmlToMsg(dbxStream, msgStream);
 
-				messagesFile.List();
+				TestListMessagesFile(path, encoding);
 			}
 			else
 			{
@@ -135,6 +135,14 @@ namespace DbxToPst.Test
 				pstStore,
 				rootFolder,
 				dbxFolder);
+		}
+
+		private static void TestListMessagesFile(
+			string path, Encoding encoding)
+		{
+			DbxMessagesFile messagesFile = new (path, encoding);
+
+			messagesFile.List();
 		}
 
 		private static void TestStringToStream()
