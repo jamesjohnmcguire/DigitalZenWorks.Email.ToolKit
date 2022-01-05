@@ -61,33 +61,25 @@ namespace DbxToPst.Test
 			Log.Info("NET Standard 1.1 or greater Supported framworks");
 #endif
 
+			Encoding.RegisterProvider(
+				CodePagesEncodingProvider.Instance);
+			Encoding encoding = Encoding.GetEncoding("shift_jis");
+
+			string path = BaseDataDirectory + @"\TestFolder\Inbox.dbx";
+
+			TestStringToStream();
+
+			TestFolder(path, encoding);
+
+			TestConvertToMsgFile(path, encoding);
+
+			TestListMessagesFile(path, encoding);
+
+			path = BaseDataDirectory + @"\TestFolder";
+			TestListSet(path, encoding);
+
 			if (arguments != null && arguments.Length > 0)
 			{
-				Encoding.RegisterProvider(
-					CodePagesEncodingProvider.Instance);
-				Encoding encoding = Encoding.GetEncoding("shift_jis");
-
-				string path = BaseDataDirectory + @"\TestFolder\gf.dbx";
-
-				DbxMessagesFile messagesFile = new (path, encoding);
-
-				DbxFolder dbxFolder = new (path, "TmpHold", encoding);
-
-				TestStringToStream();
-
-				DbxMessage message = messagesFile.GetMessage(36);
-
-				Stream dbxStream = message.MessageStream;
-
-				string msgPath = BaseDataDirectory + @"\test.msg";
-
-				File.Delete(msgPath);
-
-				using Stream msgStream =
-					PstOutlook.GetMsgFileStream(msgPath);
-				Converter.ConvertEmlToMsg(dbxStream, msgStream);
-
-				messagesFile.List();
 			}
 			else
 			{
@@ -97,13 +89,7 @@ namespace DbxToPst.Test
 
 		private static void LogInitialization()
 		{
-			string applicationDataDirectory = @"DigitalZenWorks\DbxToPst";
-			string baseDataDirectory = Environment.GetFolderPath(
-				Environment.SpecialFolder.ApplicationData,
-				Environment.SpecialFolderOption.Create) + @"\" +
-				applicationDataDirectory;
-
-			string logFilePath = baseDataDirectory + "\\DbxToPst.log";
+			string logFilePath = BaseDataDirectory + "\\DbxToPst.log";
 			string outputTemplate =
 				"[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] " +
 				"{Message:lj}{NewLine}{Exception}";
@@ -117,6 +103,24 @@ namespace DbxToPst.Test
 
 			LogManager.Adapter =
 				new Common.Logging.Serilog.SerilogFactoryAdapter();
+		}
+
+		private static void TestConvertToMsgFile(
+			string path, Encoding encoding)
+		{
+			DbxMessagesFile messagesFile = new (path, encoding);
+
+			DbxMessage message = messagesFile.GetMessage(1);
+
+			Stream dbxStream = message.MessageStream;
+
+			string msgPath = BaseDataDirectory + @"\test.msg";
+
+			File.Delete(msgPath);
+
+			using Stream msgStream =
+				PstOutlook.GetMsgFileStream(msgPath);
+			Converter.ConvertEmlToMsg(dbxStream, msgStream);
 		}
 
 		private static void TestCreateFolder(
@@ -135,6 +139,27 @@ namespace DbxToPst.Test
 				pstStore,
 				rootFolder,
 				dbxFolder);
+		}
+
+		private static void TestFolder(string path, Encoding encoding)
+		{
+			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
+		}
+
+		private static void TestListMessagesFile(
+			string path, Encoding encoding)
+		{
+			DbxMessagesFile messagesFile = new (path, encoding);
+
+			messagesFile.List();
+		}
+
+		private static void TestListSet(
+			string path, Encoding encoding)
+		{
+			DbxSet set = new (path, encoding);
+
+			set.List();
 		}
 
 		private static void TestStringToStream()
