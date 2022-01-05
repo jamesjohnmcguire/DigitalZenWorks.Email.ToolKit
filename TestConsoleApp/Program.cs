@@ -76,6 +76,7 @@ namespace DbxToPst.Test
 			TestListMessagesFile(path, encoding);
 
 			path = BaseDataDirectory + @"\TestFolder";
+			TestSetTree(path, encoding);
 			TestListSet(path, encoding);
 
 			if (arguments != null && arguments.Length > 0)
@@ -141,7 +142,6 @@ namespace DbxToPst.Test
 				dbxFolder);
 		}
 
-<<<<<<< Updated upstream
 		private static void TestFolder(string path, Encoding encoding)
 		{
 			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
@@ -155,21 +155,21 @@ namespace DbxToPst.Test
 			messagesFile.List();
 		}
 
-		private static void TestListSet(
-			string path, Encoding encoding)
+		private static void TestListSet(string path, Encoding encoding)
 		{
 			DbxSet set = new (path, encoding);
 
 			set.List();
 		}
 
-=======
-		private static void TestSetTree()
+		private static void TestSetTree(string path, Encoding encoding)
 		{
-			SetTreeInOrder();
+			path = path + @"\Folders.dbx";
+			DbxFoldersFile foldersFile = new (path, encoding);
 
+			foldersFile.SetTreeInOrder();
 		}
->>>>>>> Stashed changes
+
 		private static void TestStringToStream()
 		{
 			string test = "Testing 1-2-3";
