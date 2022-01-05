@@ -141,6 +141,7 @@ namespace DbxToPst.Test
 				dbxFolder);
 		}
 
+<<<<<<< Updated upstream
 		private static void TestFolder(string path, Encoding encoding)
 		{
 			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
@@ -162,6 +163,13 @@ namespace DbxToPst.Test
 			set.List();
 		}
 
+=======
+		private static void TestSetTree()
+		{
+			SetTreeInOrder();
+
+		}
+>>>>>>> Stashed changes
 		private static void TestStringToStream()
 		{
 			string test = "Testing 1-2-3";
