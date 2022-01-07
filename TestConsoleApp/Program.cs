@@ -159,6 +159,7 @@ namespace DbxToPst.Test
 			DbxFoldersFile foldersFile = new (path, encoding);
 
 			foldersFile.SetTreeInOrder();
+			foldersFile.List();
 		}
 
 		private static void TestStringToStream()
