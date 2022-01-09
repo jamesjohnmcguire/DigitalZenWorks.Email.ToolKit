@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxToPst", "DbxToPst\DbxToPst.csproj", "{6971D486-5B3F-497F-86E8-47C98BF7FD70}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Application", "ToolKit.Application\ToolKit.Application.csproj", "{6971D486-5B3F-497F-86E8-47C98BF7FD70}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxToPstLibrary", "DbxToPstLibrary\DbxToPstLibrary.csproj", "{6D6C30E1-9240-4A2E-A167-3F23E6316656}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Library", "ToolKit.Library\ToolKit.Library.csproj", "{6D6C30E1-9240-4A2E-A167-3F23E6316656}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxToPstTests", "DbxToPstTests\DbxToPstTests.csproj", "{66CA0D35-F2AF-430E-81D0-78506201ADCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Tests", "ToolKit.Tests\ToolKit.Tests.csproj", "{66CA0D35-F2AF-430E-81D0-78506201ADCD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UTF-unknown", "DbxOutlookExpress\UTF-unknown\src\UTF-unknown.csproj", "{5B3B81DE-CC32-485B-A523-6126551932ED}"
 EndProject
