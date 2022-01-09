@@ -67,6 +67,9 @@ namespace DbxToPst.Test
 			string path = BaseDataDirectory + @"\TestFolder\Inbox.dbx";
 
 			path = BaseDataDirectory + @"\TestFolder";
+
+			TestTree(path, encoding);
+
 			TestSetTree(path, encoding);
 			TestListSet(path, encoding);
 
@@ -158,7 +161,7 @@ namespace DbxToPst.Test
 			path = path + @"\Folders.dbx";
 			DbxFoldersFile foldersFile = new (path, encoding);
 
-			foldersFile.SetTreeInOrder();
+			foldersFile.SetTreeOrdered();
 			foldersFile.List();
 		}
 
@@ -177,6 +180,38 @@ namespace DbxToPst.Test
 			using StreamReader reader = new (stream);
 			string text = reader.ReadToEnd();
 			Log.Info(text);
+		}
+
+		private static void TestTree(string path, Encoding encoding)
+		{
+			IList<uint> indexes = new List<uint>();
+			indexes.Add(1);
+			indexes.Add(2);
+			indexes.Add(3);
+			indexes.Add(4);
+			indexes.Add(5);
+
+			DbxFolder folder1 = new DbxFolder(1, 0, "A", null);
+			DbxFolder folder2 = new DbxFolder(2, 4, "B", null);
+			DbxFolder folder3 = new DbxFolder(3, 0, "C", null);
+			DbxFolder folder4 = new DbxFolder(4, 5, "D", null);
+			DbxFolder folder5 = new DbxFolder(5, 0, "E", null);
+
+			IList<DbxFolder> folders = new List<DbxFolder>();
+			folders.Add(folder1);
+			folders.Add(folder2);
+			folders.Add(folder3);
+			folders.Add(folder4);
+			folders.Add(folder5);
+
+			byte[] fileBytes = new byte	[0];
+
+			DbxFolder folder = new DbxFolder(0, 0, "root", null);
+
+			folder.GetChildren(folders);
+
+			IList<uint> orderedIndexes = new List<uint>();
+			orderedIndexes = folder.SetOrderedIndexes(orderedIndexes);
 		}
 	}
 }
