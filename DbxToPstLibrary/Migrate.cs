@@ -49,7 +49,10 @@ namespace DbxToPstLibrary
 			Encoding encoding = Encoding.GetEncoding("shift_jis");
 
 			DbxSet dbxSet = new (dbxFoldersPath, encoding);
-			DbxFolder dbxFolder;
+
+			// Order the list, so that parents always come before their
+			// children.
+			dbxSet.SetTreeOrdered();
 
 			PstOutlook pstOutlook = new ();
 			Store pstStore = pstOutlook.CreateStore(pstPath);
@@ -60,6 +63,8 @@ namespace DbxToPstLibrary
 			}
 			else
 			{
+				DbxFolder dbxFolder;
+
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
 
 				string baseName = Path.GetFileNameWithoutExtension(pstPath);
