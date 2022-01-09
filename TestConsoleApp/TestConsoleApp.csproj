@@ -50,7 +50,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\DbxToPstLibrary\DbxToPstLibrary.csproj" />
+		<ProjectReference Include="..\ToolKit.Library\ToolKit.Library.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
