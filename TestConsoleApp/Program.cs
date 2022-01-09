@@ -60,34 +60,21 @@ namespace DbxToPst.Test
 #if NETSTANDARD1_1_OR_GREATER
 			Log.Info("NET Standard 1.1 or greater Supported framworks");
 #endif
+			Encoding.RegisterProvider(
+				CodePagesEncodingProvider.Instance);
+			Encoding encoding = Encoding.GetEncoding("shift_jis");
+
+			string path = BaseDataDirectory + @"\TestFolder\Inbox.dbx";
+
+			path = BaseDataDirectory + @"\TestFolder";
+
+			TestTree(path, encoding);
+
+			TestSetTree(path, encoding);
+			TestListSet(path, encoding);
 
 			if (arguments != null && arguments.Length > 0)
 			{
-				Encoding.RegisterProvider(
-					CodePagesEncodingProvider.Instance);
-				Encoding encoding = Encoding.GetEncoding("shift_jis");
-
-				string path = BaseDataDirectory + @"\TestFolder\gf.dbx";
-
-				DbxMessagesFile messagesFile = new (path, encoding);
-
-				DbxFolder dbxFolder = new (path, "TmpHold", encoding);
-
-				TestStringToStream();
-
-				DbxMessage message = messagesFile.GetMessage(36);
-
-				Stream dbxStream = message.MessageStream;
-
-				string msgPath = BaseDataDirectory + @"\test.msg";
-
-				File.Delete(msgPath);
-
-				using Stream msgStream =
-					PstOutlook.GetMsgFileStream(msgPath);
-				Converter.ConvertEmlToMsg(dbxStream, msgStream);
-
-				messagesFile.List();
 			}
 			else
 			{
@@ -97,13 +84,7 @@ namespace DbxToPst.Test
 
 		private static void LogInitialization()
 		{
-			string applicationDataDirectory = @"DigitalZenWorks\DbxToPst";
-			string baseDataDirectory = Environment.GetFolderPath(
-				Environment.SpecialFolder.ApplicationData,
-				Environment.SpecialFolderOption.Create) + @"\" +
-				applicationDataDirectory;
-
-			string logFilePath = baseDataDirectory + "\\DbxToPst.log";
+			string logFilePath = BaseDataDirectory + "\\DbxToPst.log";
 			string outputTemplate =
 				"[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] " +
 				"{Message:lj}{NewLine}{Exception}";
@@ -117,6 +98,24 @@ namespace DbxToPst.Test
 
 			LogManager.Adapter =
 				new Common.Logging.Serilog.SerilogFactoryAdapter();
+		}
+
+		private static void TestConvertToMsgFile(
+			string path, Encoding encoding)
+		{
+			DbxMessagesFile messagesFile = new (path, encoding);
+
+			DbxMessage message = messagesFile.GetMessage(1);
+
+			Stream dbxStream = message.MessageStream;
+
+			string msgPath = BaseDataDirectory + @"\test.msg";
+
+			File.Delete(msgPath);
+
+			using Stream msgStream =
+				PstOutlook.GetMsgFileStream(msgPath);
+			Converter.ConvertEmlToMsg(dbxStream, msgStream);
 		}
 
 		private static void TestCreateFolder(
@@ -137,6 +136,35 @@ namespace DbxToPst.Test
 				dbxFolder);
 		}
 
+		private static void TestFolder(string path, Encoding encoding)
+		{
+			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
+		}
+
+		private static void TestListMessagesFile(
+			string path, Encoding encoding)
+		{
+			DbxMessagesFile messagesFile = new (path, encoding);
+
+			messagesFile.List();
+		}
+
+		private static void TestListSet(string path, Encoding encoding)
+		{
+			DbxSet set = new (path, encoding);
+
+			set.List();
+		}
+
+		private static void TestSetTree(string path, Encoding encoding)
+		{
+			path = path + @"\Folders.dbx";
+			DbxFoldersFile foldersFile = new (path, encoding);
+
+			foldersFile.SetTreeOrdered();
+			foldersFile.List();
+		}
+
 		private static void TestStringToStream()
 		{
 			string test = "Testing 1-2-3";
@@ -152,6 +180,29 @@ namespace DbxToPst.Test
 			using StreamReader reader = new (stream);
 			string text = reader.ReadToEnd();
 			Log.Info(text);
+		}
+
+		private static void TestTree(string path, Encoding encoding)
+		{
+			DbxFolder folder1 = new DbxFolder(1, 0, "A", null);
+			DbxFolder folder2 = new DbxFolder(2, 4, "B", null);
+			DbxFolder folder3 = new DbxFolder(3, 0, "C", null);
+			DbxFolder folder4 = new DbxFolder(4, 5, "D", null);
+			DbxFolder folder5 = new DbxFolder(5, 0, "E", null);
+
+			IList<DbxFolder> folders = new List<DbxFolder>();
+			folders.Add(folder1);
+			folders.Add(folder2);
+			folders.Add(folder3);
+			folders.Add(folder4);
+			folders.Add(folder5);
+
+			DbxFolder folder = new DbxFolder(0, 0, "root", null);
+
+			folder.GetChildren(folders);
+
+			IList<uint> orderedIndexes = new List<uint>();
+			orderedIndexes = folder.SetOrderedIndexes(orderedIndexes);
 		}
 	}
 }

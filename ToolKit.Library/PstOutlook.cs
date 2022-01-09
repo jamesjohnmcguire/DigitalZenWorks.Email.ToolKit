@@ -58,6 +58,8 @@ namespace DbxToPstLibrary
 
 			if (parentFolder != null)
 			{
+				Log.Info("Adding outlook folder: " + folderName);
+
 				try
 				{
 					pstFolder =
