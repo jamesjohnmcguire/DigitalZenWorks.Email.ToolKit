@@ -184,13 +184,6 @@ namespace DbxToPst.Test
 
 		private static void TestTree(string path, Encoding encoding)
 		{
-			IList<uint> indexes = new List<uint>();
-			indexes.Add(1);
-			indexes.Add(2);
-			indexes.Add(3);
-			indexes.Add(4);
-			indexes.Add(5);
-
 			DbxFolder folder1 = new DbxFolder(1, 0, "A", null);
 			DbxFolder folder2 = new DbxFolder(2, 4, "B", null);
 			DbxFolder folder3 = new DbxFolder(3, 0, "C", null);
@@ -203,8 +196,6 @@ namespace DbxToPst.Test
 			folders.Add(folder3);
 			folders.Add(folder4);
 			folders.Add(folder5);
-
-			byte[] fileBytes = new byte	[0];
 
 			DbxFolder folder = new DbxFolder(0, 0, "root", null);
 
