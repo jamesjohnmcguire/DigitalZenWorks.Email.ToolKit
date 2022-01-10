@@ -10,9 +10,11 @@ using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 [assembly: CLSCompliant(true)]
@@ -46,35 +48,23 @@ namespace DbxToPst
 
 				if (arguments != null && arguments.Length > 0)
 				{
-					string dbxLocation = arguments[0];
-					string pstLocation = null;
-
-					if (arguments.Length > 1)
+					bool valid;
+					switch (arguments[0])
 					{
-						pstLocation = arguments[1];
-					}
-					else
-					{
-						if (Directory.Exists(dbxLocation))
-						{
-							pstLocation = dbxLocation + ".pst";
-						}
-						else if (File.Exists(dbxLocation))
-						{
-							pstLocation =
-								Path.ChangeExtension(dbxLocation, ".pst");
-						}
-						else
-						{
-							Log.Error("Invalid path for dbx location");
-						}
-					}
+						case "dbx-to-pst":
+							valid = ValidateLocationArguments(arguments);
+							string dbxLocation = arguments[1];
+							string pstLocation =
+								GetPstLocation(arguments, dbxLocation, 2);
 
-					bool success = Migrate.DbxToPst(dbxLocation, pstLocation);
-
-					if (success == true)
-					{
-						result = 0;
+							result = DbxToPst(dbxLocation, pstLocation);
+							break;
+						case "eml-to-pst":
+							valid = ValidateLocationArguments(arguments);
+							break;
+						default:
+							result = ProcessDirect(arguments);
+							break;
 					}
 				}
 				else
@@ -92,6 +82,45 @@ namespace DbxToPst
 			}
 
 			return result;
+		}
+
+		private static int DbxToPst(string dbxLocation, string pstLocation)
+		{
+			int result = -1;
+
+			bool success = Migrate.DbxToPst(dbxLocation, pstLocation);
+
+			if (success == true)
+			{
+				result = 0;
+			}
+
+			return result;
+		}
+
+		private static string GetPstLocation(string[] arguments, string source, int index)
+		{
+			string pstLocation = null;
+
+			if (arguments.Length > index)
+			{
+				pstLocation = arguments[index];
+			}
+
+			if (string.IsNullOrWhiteSpace(pstLocation))
+			{
+				if (Directory.Exists(source))
+				{
+					pstLocation = source + ".pst";
+				}
+				else if (File.Exists(source))
+				{
+					pstLocation =
+						Path.ChangeExtension(source, ".pst");
+				}
+			}
+
+			return pstLocation;
 		}
 
 		private static string GetVersion()
@@ -129,6 +158,79 @@ namespace DbxToPst
 				new Common.Logging.Serilog.SerilogFactoryAdapter();
 		}
 
+		private static int ProcessDirect(string[] arguments)
+		{
+			int result = -1;
+
+			if (arguments.Length > 0)
+			{
+				string location = arguments[0];
+
+				if (Directory.Exists(location))
+				{
+					result = ProcessDirectDirectory(arguments, location);
+				}
+				else if (File.Exists(location))
+				{
+					result = ProcessDirectFile(arguments, location);
+				}
+			}
+
+			return result;
+		}
+
+		private static int ProcessDirectDirectory(
+			string[] arguments, string location)
+		{
+			int result = -1;
+
+			string[] files = Directory.GetFiles(location, "*.dbx");
+
+			if (files.Length > 0)
+			{
+				string pstLocation = GetPstLocation(arguments, location, 1);
+
+				result = DbxToPst(arguments[0], pstLocation);
+			}
+			else
+			{
+				List<string> extensions =
+					new List<string> { "eml", "txt" };
+				IEnumerable<string> moreFiles =
+					Directory.EnumerateFiles(location, "*.*");
+
+				IEnumerable<string> query =
+					moreFiles.Where(file => extensions.Contains(file));
+
+				if (query.Any())
+				{
+				}
+			}
+
+			return result;
+		}
+
+		private static int ProcessDirectFile(
+			string[] arguments, string location)
+		{
+			int result = -1;
+
+			string extension = Path.GetExtension(location);
+
+			if (extension.Equals(".dbx", StringComparison.Ordinal))
+			{
+				string pstLocation = GetPstLocation(arguments, location, 1);
+
+				result = DbxToPst(arguments[1], pstLocation);
+			}
+			else if (extension.Equals(".eml", StringComparison.Ordinal) ||
+				extension.Equals(".txt", StringComparison.Ordinal))
+			{
+			}
+
+			return result;
+		}
+
 		private static void ShowHelp(string additionalMessage = null)
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly();
@@ -158,6 +260,30 @@ namespace DbxToPst
 			{
 				Log.Info(additionalMessage);
 			}
+		}
+
+		private static bool ValidateLocationArguments(string[] arguments)
+		{
+			bool valid = false;
+
+			if (arguments.Length > 1)
+			{
+				string location = arguments[1];
+
+				if (Directory.Exists(location) || File.Exists(location))
+				{
+					valid = true;
+				}
+			}
+
+			if (valid == false)
+			{
+				Log.Error("Invalid arguments");
+
+				ShowHelp();
+			}
+
+			return valid;
 		}
 	}
 }
