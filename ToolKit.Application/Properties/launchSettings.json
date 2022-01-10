@@ -2,7 +2,7 @@
   "profiles": {
     "DbxToPst": {
       "commandName": "Project",
-      "commandLineArgs": "%USERPROFILE%\\AppData\\Roaming\\DigitalZenWorks\\DbxToPst\\TestFolder"
+      "commandLineArgs": "dbx-to-pst %USERPROFILE%\\AppData\\Roaming\\DigitalZenWorks\\DbxToPst\\TestFolder"
     }
   }
 }
