@@ -62,6 +62,9 @@ namespace DbxToPst
 						case "eml-to-pst":
 							valid = ValidateLocationArguments(arguments);
 							break;
+						case "help":
+							ShowHelp();
+							break;
 						default:
 							result = ProcessDirect(arguments);
 							break;
@@ -268,6 +271,7 @@ namespace DbxToPst
 			Log.Info("Commands:");
 			Log.Info("dbx-to-pst Migrate dbx files to pst file");
 			Log.Info("eml-to-pst Migrate eml files to pst file");
+			Log.Info("help       Show this information");
 		}
 
 		private static bool ValidateLocationArguments(string[] arguments)
