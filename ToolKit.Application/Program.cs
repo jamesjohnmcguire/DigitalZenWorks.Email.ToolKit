@@ -260,6 +260,14 @@ namespace DbxToPst
 			{
 				Log.Info(additionalMessage);
 			}
+
+			Log.Info("Usage:");
+			Log.Info("DigitalZenWorks.Email.ToolKit & lt; " +
+				"command & gt; &lt; path & gt;");
+
+			Log.Info("Commands:");
+			Log.Info("dbx-to-pst Migrate dbx files to pst file");
+			Log.Info("eml-to-pst Migrate eml files to pst file");
 		}
 
 		private static bool ValidateLocationArguments(string[] arguments)
