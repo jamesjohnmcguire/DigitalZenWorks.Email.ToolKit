@@ -41,7 +41,8 @@ namespace DbxToPst
 				LogInitialization();
 				string version = GetVersion();
 
-				Log.Info("Starting DbxToPst Version: " + version);
+				Log.Info("Starting DigitalZenWorks.Email.ToolKit Version: " +
+					version);
 
 				if (arguments != null && arguments.Length > 0)
 				{
