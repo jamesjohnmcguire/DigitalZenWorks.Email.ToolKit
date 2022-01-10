@@ -61,9 +61,11 @@ namespace DbxToPst
 							break;
 						case "eml-to-pst":
 							valid = ValidateLocationArguments(arguments);
+							result = 0;
 							break;
 						case "help":
 							ShowHelp();
+							result = 0;
 							break;
 						default:
 							result = ProcessDirect(arguments);
