@@ -53,15 +53,24 @@ namespace DbxToPst
 					{
 						case "dbx-to-pst":
 							valid = ValidateLocationArguments(arguments);
-							string dbxLocation = arguments[1];
-							string pstLocation =
-								GetPstLocation(arguments, dbxLocation, 2);
 
-							result = DbxToPst(dbxLocation, pstLocation);
+							if (valid == true)
+							{
+								string dbxLocation = arguments[1];
+								string pstLocation =
+									GetPstLocation(arguments, dbxLocation, 2);
+
+								result = DbxToPst(dbxLocation, pstLocation);
+							}
+
 							break;
 						case "eml-to-pst":
 							valid = ValidateLocationArguments(arguments);
-							result = 0;
+							if (valid == true)
+							{
+								result = 0;
+							}
+
 							break;
 						case "help":
 							ShowHelp();
