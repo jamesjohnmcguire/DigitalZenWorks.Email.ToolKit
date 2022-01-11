@@ -208,8 +208,7 @@ namespace DbxToPst
 			}
 			else
 			{
-				List<string> extensions =
-					new List<string> { "eml", "txt" };
+				List<string> extensions = new () { "eml", "txt" };
 				IEnumerable<string> moreFiles =
 					Directory.EnumerateFiles(location, "*.*");
 
