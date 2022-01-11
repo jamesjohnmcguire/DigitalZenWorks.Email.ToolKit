@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<AssemblyName>DigitalZenWorks.DbxToPst</AssemblyName>
+		<AssemblyName>DigitalZenWorks.Email.ToolKit</AssemblyName>
 		<AssemblyVersion>1.1.0.11</AssemblyVersion>
 		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 		<Company>James John McGuire</Company>

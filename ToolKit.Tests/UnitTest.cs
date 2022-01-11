@@ -1,4 +1,4 @@
-using DbxToPstLibrary;
+using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
 using System;
@@ -6,7 +6,7 @@ using System.IO;
 
 [assembly: CLSCompliant(true)]
 
-namespace DigitalZenWorks.Email.DbxToPstTests.Tests
+namespace DigitalZenWorks.Email.ToolKit.Tests
 {
 	/// <summary>
 	/// Test class.

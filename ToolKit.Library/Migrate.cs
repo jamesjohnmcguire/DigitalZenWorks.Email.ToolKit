@@ -17,7 +17,7 @@ using System.Text;
 
 [assembly: CLSCompliant(false)]
 
-namespace DbxToPstLibrary
+namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
 	/// The transfer folder call back type.
