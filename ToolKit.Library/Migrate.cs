@@ -304,7 +304,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					Converter.ConvertEmlToMsg(emailStream, msgStream);
 				}
-				catch (InvalidCastException exception)
+				catch (System.Exception exception) when
+					(exception is InvalidCastException ||
+					exception is NullReferenceException)
 				{
 					Log.Error(exception.ToString());
 				}
