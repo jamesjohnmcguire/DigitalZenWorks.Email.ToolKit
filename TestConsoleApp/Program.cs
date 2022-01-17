@@ -68,6 +68,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			path = BaseDataDirectory + @"\TestFolder";
 
+			TestConvertToMsgFile(path, encoding);
+
 			TestTree(path, encoding);
 
 			TestSetTree(path, encoding);
@@ -105,7 +107,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 		{
 			DbxMessagesFile messagesFile = new (path, encoding);
 
-			DbxMessage message = messagesFile.GetMessage(1);
+			DbxMessage message = messagesFile.GetMessage(79);
 
 			Stream dbxStream = message.MessageStream;
 
