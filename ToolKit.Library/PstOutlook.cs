@@ -150,6 +150,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			Store newPst = null;
 
+			// If the .pst file does not exist, Microsoft Outlook creates it.
 			outlookNamespace.Session.AddStore(path);
 
 			foreach (Store store in outlookNamespace.Session.Stores)
