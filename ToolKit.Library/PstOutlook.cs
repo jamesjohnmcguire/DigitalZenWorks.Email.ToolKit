@@ -10,7 +10,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace DbxToPstLibrary
+namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
 	/// Provides support for interating with an Outlook PST file.

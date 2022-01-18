@@ -19,7 +19,7 @@ using ToolKit.Library;
 
 [assembly: CLSCompliant(false)]
 
-namespace DbxToPstLibrary
+namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
 	/// The transfer folder call back type.
@@ -358,7 +358,9 @@ namespace DbxToPstLibrary
 				{
 					Converter.ConvertEmlToMsg(emailStream, msgStream);
 				}
-				catch (InvalidCastException exception)
+				catch (System.Exception exception) when
+					(exception is InvalidCastException ||
+					exception is NullReferenceException)
 				{
 					Log.Error(exception.ToString());
 				}
