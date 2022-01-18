@@ -1,3 +1,9 @@
+﻿/////////////////////////////////////////////////////////////////////////////
+// <copyright file="EmailToolKitTests.cs" company="James John McGuire">
+// Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
+// </copyright>
+/////////////////////////////////////////////////////////////////////////////
+
 using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
@@ -11,7 +17,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 	/// <summary>
 	/// Test class.
 	/// </summary>
-	public class DbxToPstTestsTests
+	public class EmailToolKitTests
 	{
 		/// <summary>
 		/// Set up method.
@@ -45,9 +51,10 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			try
 			{
 				File.Delete(path);
-
 			}
-			catch (IOException) { }
+			catch (IOException)
+			{
+			}
 
 			Store store = pstOutlook.CreateStore(path);
 
