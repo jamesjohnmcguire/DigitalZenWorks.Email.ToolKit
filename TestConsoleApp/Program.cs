@@ -16,6 +16,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 
 [assembly: CLSCompliant(true)]
@@ -136,6 +137,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				pstStore,
 				rootFolder,
 				dbxFolder);
+
+			Marshal.ReleaseComObject(rootFolder);
 		}
 
 		private static void TestFolder(string path, Encoding encoding)

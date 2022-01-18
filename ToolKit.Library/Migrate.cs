@@ -83,6 +83,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						mappings, pstOutlook, pstStore, rootFolder, dbxFolder);
 				}
 				while (dbxFolder != null);
+
+				Marshal.ReleaseComObject(rootFolder);
 			}
 		}
 
@@ -122,6 +124,9 @@ namespace DigitalZenWorks.Email.ToolKit
 					rootFolder, rootFolder.Name);
 
 				CopyMessages(pstOutlook, pstFolder, dbxFolder);
+
+				Marshal.ReleaseComObject(pstFolder);
+				Marshal.ReleaseComObject(rootFolder);
 			}
 		}
 
@@ -293,6 +298,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			pstFolder = PstOutlook.AddFolderSafe(
 				parentFolder, dbxFolder.FolderName);
 
+			Marshal.ReleaseComObject(parentFolder);
+
 			return pstFolder;
 		}
 
@@ -403,6 +410,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						CopyEmlToPst(pstOutlook, pstFolder, file);
 					}
+
+					Marshal.ReleaseComObject(pstFolder);
 				}
 			}
 		}
@@ -423,6 +432,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				PstOutlook.GetTopLevelFolder(pstStore, baseName);
 
 			CopyEmlToPst(pstOutlook, pstFolder, filePath);
+
+			Marshal.ReleaseComObject(pstFolder);
 		}
 
 		private static string GetTemporaryMsgFile()
