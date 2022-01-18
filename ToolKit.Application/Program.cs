@@ -16,6 +16,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using ToolKit.Library;
 
 [assembly: CLSCompliant(true)]
 
@@ -68,7 +69,11 @@ namespace DbxToPst
 							valid = ValidateLocationArguments(arguments);
 							if (valid == true)
 							{
-								result = 0;
+								string emlLocation = arguments[1];
+								string pstLocation =
+									GetPstLocation(arguments, emlLocation, 2);
+
+								result = EmlToPst(emlLocation, pstLocation);
 							}
 
 							break;
@@ -103,6 +108,20 @@ namespace DbxToPst
 			int result = -1;
 
 			bool success = Migrate.DbxToPst(dbxLocation, pstLocation);
+
+			if (success == true)
+			{
+				result = 0;
+			}
+
+			return result;
+		}
+
+		private static int EmlToPst(string emlLocation, string pstLocation)
+		{
+			int result = -1;
+
+			bool success = Migrate.EmlToPst(emlLocation, pstLocation);
 
 			if (success == true)
 			{
@@ -208,15 +227,14 @@ namespace DbxToPst
 			}
 			else
 			{
-				List<string> extensions = new () { "eml", "txt" };
-				IEnumerable<string> moreFiles =
-					Directory.EnumerateFiles(location, "*.*");
+				IEnumerable<string> emlFiles = EmlMessages.GetFiles(location);
 
-				IEnumerable<string> query =
-					moreFiles.Where(file => extensions.Contains(file));
-
-				if (query.Any())
+				if (emlFiles.Any())
 				{
+					string pstLocation =
+						GetPstLocation(arguments, location, 2);
+
+					result = EmlToPst(location, pstLocation);
 				}
 			}
 
@@ -228,17 +246,18 @@ namespace DbxToPst
 		{
 			int result = -1;
 
+			string pstLocation = GetPstLocation(arguments, location, 1);
+
 			string extension = Path.GetExtension(location);
 
 			if (extension.Equals(".dbx", StringComparison.Ordinal))
 			{
-				string pstLocation = GetPstLocation(arguments, location, 1);
-
 				result = DbxToPst(arguments[1], pstLocation);
 			}
 			else if (extension.Equals(".eml", StringComparison.Ordinal) ||
 				extension.Equals(".txt", StringComparison.Ordinal))
 			{
+				result = EmlToPst(location, pstLocation);
 			}
 
 			return result;
