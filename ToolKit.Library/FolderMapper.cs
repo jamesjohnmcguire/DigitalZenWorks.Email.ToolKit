@@ -6,7 +6,7 @@
 
 using System;
 
-namespace DbxToPstLibrary
+namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
 	/// Represents a mapping between a dbx folder and an Outlook MAPI folder.

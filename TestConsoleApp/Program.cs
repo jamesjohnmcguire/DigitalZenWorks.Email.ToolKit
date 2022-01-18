@@ -5,8 +5,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 using Common.Logging;
-using DbxToPstLibrary;
 using DigitalZenWorks.Email.DbxOutlookExpress;
+using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using MsgKit;
 using Serilog;
@@ -20,7 +20,7 @@ using System.Text;
 
 [assembly: CLSCompliant(true)]
 
-namespace DbxToPst.Test
+namespace DigitalZenWorks.Email.ToolKit.Test
 {
 	/// <summary>
 	/// Dbx to pst test program class.
@@ -68,6 +68,8 @@ namespace DbxToPst.Test
 
 			path = BaseDataDirectory + @"\TestFolder";
 
+			TestConvertToMsgFile(path, encoding);
+
 			TestTree(path, encoding);
 
 			TestSetTree(path, encoding);
@@ -105,7 +107,7 @@ namespace DbxToPst.Test
 		{
 			DbxMessagesFile messagesFile = new (path, encoding);
 
-			DbxMessage message = messagesFile.GetMessage(1);
+			DbxMessage message = messagesFile.GetMessage(79);
 
 			Stream dbxStream = message.MessageStream;
 
@@ -158,7 +160,7 @@ namespace DbxToPst.Test
 
 		private static void TestSetTree(string path, Encoding encoding)
 		{
-			path = path + @"\Folders.dbx";
+			path += @"\Folders.dbx";
 			DbxFoldersFile foldersFile = new (path, encoding);
 
 			foldersFile.SetTreeOrdered();
@@ -184,11 +186,11 @@ namespace DbxToPst.Test
 
 		private static void TestTree(string path, Encoding encoding)
 		{
-			DbxFolder folder1 = new DbxFolder(1, 0, "A", null);
-			DbxFolder folder2 = new DbxFolder(2, 4, "B", null);
-			DbxFolder folder3 = new DbxFolder(3, 0, "C", null);
-			DbxFolder folder4 = new DbxFolder(4, 5, "D", null);
-			DbxFolder folder5 = new DbxFolder(5, 0, "E", null);
+			DbxFolder folder1 = new (1, 0, "A", null);
+			DbxFolder folder2 = new (2, 4, "B", null);
+			DbxFolder folder3 = new (3, 0, "C", null);
+			DbxFolder folder4 = new (4, 5, "D", null);
+			DbxFolder folder5 = new (5, 0, "E", null);
 
 			IList<DbxFolder> folders = new List<DbxFolder>();
 			folders.Add(folder1);
@@ -197,12 +199,12 @@ namespace DbxToPst.Test
 			folders.Add(folder4);
 			folders.Add(folder5);
 
-			DbxFolder folder = new DbxFolder(0, 0, "root", null);
+			DbxFolder folder = new (0, 0, "root", null);
 
 			folder.GetChildren(folders);
 
 			IList<uint> orderedIndexes = new List<uint>();
-			orderedIndexes = folder.SetOrderedIndexes(orderedIndexes);
+			folder.SetOrderedIndexes(orderedIndexes);
 		}
 	}
 }
