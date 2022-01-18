@@ -34,18 +34,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Gets the message as a stream.
-		/// </summary>
-		/// <param name="filePath">The file path to create.</param>
-		/// <returns>The message as a stream.</returns>
-		public static Stream GetMsgFileStream(string filePath)
-		{
-			FileStream stream = new (filePath, FileMode.Create);
-
-			return stream;
-		}
-
-		/// <summary>
 		/// Add folder in safe context.
 		/// </summary>
 		/// <param name="parentFolder">The parent folder.</param>
@@ -80,6 +68,38 @@ namespace DigitalZenWorks.Email.ToolKit
 						Log.Warn(addionalException.ToString());
 					}
 				}
+			}
+
+			return pstFolder;
+		}
+
+		/// <summary>
+		/// Gets the message as a stream.
+		/// </summary>
+		/// <param name="filePath">The file path to create.</param>
+		/// <returns>The message as a stream.</returns>
+		public static Stream GetMsgFileStream(string filePath)
+		{
+			FileStream stream = new (filePath, FileMode.Create);
+
+			return stream;
+		}
+
+		/// <summary>
+		/// Get top level folder by name.
+		/// </summary>
+		/// <param name="pstStore">The pst store to check.</param>
+		/// <param name="folderName">The folder name.</param>
+		/// <returns>The MAPIFolder object.</returns>
+		public static MAPIFolder GetTopLevelFolder(Store pstStore, string folderName)
+		{
+			MAPIFolder pstFolder = null;
+
+			if (pstStore != null)
+			{
+				MAPIFolder rootFolder = pstStore.GetRootFolder();
+
+				pstFolder = AddFolderSafe(rootFolder, folderName);
 			}
 
 			return pstFolder;

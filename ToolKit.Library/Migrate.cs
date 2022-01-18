@@ -12,8 +12,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using ToolKit.Library;
 
 [assembly: CLSCompliant(false)]
 
@@ -208,6 +210,36 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		/// <summary>
+		/// Dbx to pst.
+		/// </summary>
+		/// <param name="path">the path of the eml file.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <returns>A value indicating success or not.</returns>
+		public static bool EmlToPst(string path, string pstPath)
+		{
+			bool result = false;
+
+			Log.Info("Checking file: " + path);
+
+			if (Directory.Exists(path))
+			{
+				EmlDirectoryToPst(path, pstPath);
+				result = true;
+			}
+			else if (File.Exists(path))
+			{
+				EmlFileToPst(path, pstPath);
+				result = true;
+			}
+			else
+			{
+				Log.Error("Invalid path");
+			}
+
+			return result;
+		}
+
 		private static void AddMappingSafe(
 			IDictionary<uint, string> mappings,
 			MAPIFolder pstFolder,
@@ -264,6 +296,30 @@ namespace DigitalZenWorks.Email.ToolKit
 			return pstFolder;
 		}
 
+		private static void CopyEmlToPst(
+			PstOutlook pstOutlook, MAPIFolder pstFolder, string emlFile)
+		{
+			if (!string.IsNullOrWhiteSpace(emlFile) && File.Exists(emlFile))
+			{
+				string msgFile = GetTemporaryMsgFile();
+
+				try
+				{
+					Converter.ConvertEmlToMsg(emlFile, msgFile);
+				}
+				catch (System.Exception exception) when
+					(exception is InvalidCastException ||
+					exception is NullReferenceException)
+				{
+					Log.Error(exception.ToString());
+				}
+
+				pstOutlook.AddMsgFile(pstFolder, msgFile);
+
+				File.Delete(msgFile);
+			}
+		}
+
 		private static void CopyMessages(
 			PstOutlook pstOutlook, MAPIFolder pstFolder, DbxFolder dbxFolder)
 		{
@@ -291,11 +347,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				// MSG file into the Pst, finally move the message
 				using Stream emailStream = dbxMessage.MessageStream;
 
-				string msgFile = Path.GetTempFileName();
-
-				// A 0 byte sized file is created.  Need to remove it.
-				File.Delete(msgFile);
-				msgFile = Path.ChangeExtension(msgFile, ".msg");
+				string msgFile = GetTemporaryMsgFile();
 
 				using Stream msgStream =
 					PstOutlook.GetMsgFileStream(msgFile);
@@ -317,6 +369,71 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				File.Delete(msgFile);
 			}
+		}
+
+		/// <summary>
+		/// Dbx directory to pst.
+		/// </summary>
+		/// <param name="emlFilesPath">The path to dbx folders to
+		/// migrate.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		private static void EmlDirectoryToPst(
+			string emlFilesPath, string pstPath)
+		{
+			PstOutlook pstOutlook = new ();
+			Store pstStore = pstOutlook.CreateStore(pstPath);
+
+			if (pstStore == null)
+			{
+				Log.Error("PST store not created");
+			}
+			else
+			{
+				string baseName = Path.GetFileNameWithoutExtension(pstPath);
+
+				IEnumerable<string> emlFiles =
+					EmlMessages.GetFiles(emlFilesPath);
+
+				if (emlFiles.Any())
+				{
+					MAPIFolder pstFolder =
+						PstOutlook.GetTopLevelFolder(pstStore, baseName);
+
+					foreach (string file in emlFiles)
+					{
+						CopyEmlToPst(pstOutlook, pstFolder, file);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Dbx files to pst.
+		/// </summary>
+		/// <param name="filePath">The file path to migrate.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		private static void EmlFileToPst(string filePath, string pstPath)
+		{
+			PstOutlook pstOutlook = new ();
+			Store pstStore = pstOutlook.CreateStore(pstPath);
+
+			string baseName = Path.GetFileNameWithoutExtension(pstPath);
+
+			MAPIFolder pstFolder =
+				PstOutlook.GetTopLevelFolder(pstStore, baseName);
+
+			CopyEmlToPst(pstOutlook, pstFolder, filePath);
+		}
+
+		private static string GetTemporaryMsgFile()
+		{
+			string msgFile = Path.GetTempFileName();
+
+			// A 0 byte sized file is created.  Need to remove it.
+			File.Delete(msgFile);
+			msgFile = Path.ChangeExtension(msgFile, ".msg");
+
+			return msgFile;
 		}
 	}
 }
