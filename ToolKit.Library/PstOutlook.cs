@@ -185,6 +185,30 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Remove all empty folders.
+		/// </summary>
+		public void RemoveEmptyFolders()
+		{
+			foreach (Store store in outlookNamespace.Session.Stores)
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				for (int index = rootFolder.Folders.Count - 1;
+					index >= 0; index--)
+				{
+					MAPIFolder subFolder = rootFolder.Folders[index];
+					bool subFolderEmtpy = RemoveEmptyFolders(subFolder);
+
+					if (subFolderEmtpy == true)
+					{
+						Log.Info("Removing empty folder: " + subFolder.Name);
+						rootFolder.Folders.Remove(index);
+					}
+				}
+			}
+		}
+
+		/// <summary>
 		/// Create a new pst storage file.
 		/// </summary>
 		/// <param name="store">The store to check.</param>
@@ -196,6 +220,31 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				outlookNamespace.Session.RemoveStore(rootFolder);
 			}
+		}
+
+		private bool RemoveEmptyFolders(MAPIFolder folder)
+		{
+			bool isEmpty = false;
+
+			for (int index = folder.Folders.Count - 1; index >= 0; index--)
+			{
+				MAPIFolder subFolder = folder.Folders[index];
+
+				bool subFolderEmtpy = RemoveEmptyFolders(subFolder);
+
+				if (subFolderEmtpy == true)
+				{
+					Log.Info("Removing empty folder: " + subFolder.Name);
+					folder.Folders.Remove(index);
+				}
+			}
+
+			if (folder.Folders.Count == 0 && folder.Items.Count == 0)
+			{
+				isEmpty = true;
+			}
+
+			return isEmpty;
 		}
 	}
 }
