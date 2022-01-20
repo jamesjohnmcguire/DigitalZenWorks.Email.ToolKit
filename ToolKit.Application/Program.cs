@@ -20,7 +20,7 @@ using ToolKit.Library;
 
 [assembly: CLSCompliant(true)]
 
-namespace DbxToPst
+namespace DigitalZenWorks.Email.ToolKit.Application
 {
 	/// <summary>
 	/// Dbx to pst program class.
