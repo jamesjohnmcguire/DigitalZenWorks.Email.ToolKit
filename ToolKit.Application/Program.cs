@@ -81,6 +81,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							ShowHelp();
 							result = 0;
 							break;
+						case "remove-empty-folders":
+							PstOutlook pstOutlook = new ();
+							pstOutlook.RemoveEmptyFolders();
+
+							result = 0;
+							break;
 						default:
 							result = ProcessDirect(arguments);
 							break;
@@ -298,9 +304,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				"command & gt; &lt; path & gt;");
 
 			Log.Info("Commands:");
-			Log.Info("dbx-to-pst Migrate dbx files to pst file");
-			Log.Info("eml-to-pst Migrate eml files to pst file");
-			Log.Info("help       Show this information");
+			Log.Info("dbx-to-pst            Migrate dbx files to pst file");
+			Log.Info("eml-to-pst            Migrate eml files to pst file");
+			Log.Info("remove-empty-folders  Prune empty folders");
+			Log.Info("help                  Show this information");
 		}
 
 		private static bool ValidateLocationArguments(string[] arguments)
