@@ -207,7 +207,11 @@ namespace DigitalZenWorks.Email.ToolKit
 						Log.Info("Removing empty folder: " + subFolder.Name);
 						rootFolder.Folders.Remove(offset);
 					}
+
+					Marshal.ReleaseComObject(subFolder);
 				}
+
+				Marshal.ReleaseComObject(rootFolder);
 			}
 		}
 
@@ -243,6 +247,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					Log.Info("Removing empty folder: " + subFolder.Name);
 					folder.Folders.Remove(offset);
 				}
+
+				Marshal.ReleaseComObject(subFolder);
 			}
 
 			if (folder.Folders.Count == 0 && folder.Items.Count == 0)
