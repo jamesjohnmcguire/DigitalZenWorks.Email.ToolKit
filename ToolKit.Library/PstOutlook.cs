@@ -23,6 +23,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		private readonly Application outlookApplication;
 		private readonly NameSpace outlookNamespace;
 
+		private uint totalFolders;
+		private uint removedFolders;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PstOutlook"/> class.
 		/// </summary>
@@ -207,9 +210,11 @@ namespace DigitalZenWorks.Email.ToolKit
 						RemoveFolder(rootFolder, offset, subFolder, false);
 					}
 
+					totalFolders++;
 					Marshal.ReleaseComObject(subFolder);
 				}
 
+				totalFolders++;
 				Marshal.ReleaseComObject(rootFolder);
 			}
 		}
@@ -234,6 +239,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					Log.Info("Removing empty folder: " + subFolder.Name);
 					parentFolder.Folders.Remove(subFolderIndex);
+
+					removedFolders++;
 				}
 			}
 		}
@@ -270,6 +277,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					RemoveFolder(folder, offset, subFolder, false);
 				}
 
+				totalFolders++;
 				Marshal.ReleaseComObject(subFolder);
 			}
 
