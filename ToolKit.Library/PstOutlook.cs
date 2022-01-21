@@ -204,14 +204,37 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (subFolderEmtpy == true)
 					{
-						Log.Info("Removing empty folder: " + subFolder.Name);
-						rootFolder.Folders.Remove(offset);
+						RemoveFolder(rootFolder, offset, subFolder, false);
 					}
 
 					Marshal.ReleaseComObject(subFolder);
 				}
 
 				Marshal.ReleaseComObject(rootFolder);
+			}
+		}
+
+		/// <summary>
+		/// Remove folder from PST store.
+		/// </summary>
+		/// <param name="parentFolder">The parent folder.</param>
+		/// <param name="subFolderIndex">The index of the sub-folder.</param>
+		/// <param name="subFolder">The sub-folder.</param>
+		/// <param name="force">Whether to force the removal.</param>
+		public void RemoveFolder(
+			MAPIFolder parentFolder,
+			int subFolderIndex,
+			MAPIFolder subFolder,
+			bool force)
+		{
+			if (parentFolder != null && subFolder != null)
+			{
+				if (force == true || (subFolder.Folders.Count == 0 &&
+					subFolder.Items.Count == 0))
+				{
+					Log.Info("Removing empty folder: " + subFolder.Name);
+					parentFolder.Folders.Remove(subFolderIndex);
+				}
 			}
 		}
 
@@ -244,8 +267,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (subFolderEmtpy == true)
 				{
-					Log.Info("Removing empty folder: " + subFolder.Name);
-					folder.Folders.Remove(offset);
+					RemoveFolder(folder, offset, subFolder, false);
 				}
 
 				Marshal.ReleaseComObject(subFolder);
