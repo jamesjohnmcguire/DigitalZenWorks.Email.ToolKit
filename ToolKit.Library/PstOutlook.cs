@@ -8,6 +8,7 @@ using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace DigitalZenWorks.Email.ToolKit
@@ -192,6 +193,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void RemoveEmptyFolders()
 		{
+			string[] ignoreFolders =
+			{
+				"Deleted Items", "Search Folders"
+			};
+
 			foreach (Store store in outlookNamespace.Session.Stores)
 			{
 				MAPIFolder rootFolder = store.GetRootFolder();
@@ -207,6 +213,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (subFolderEmtpy == true)
 					{
+						if (!ignoreFolders.Contains(subFolder.Name))
+						{
+							Log.Warn("Not deleting reserved folder: " +
+								subFolder.Name);
+						}
+
 						RemoveFolder(rootFolder, offset, subFolder, false);
 					}
 
