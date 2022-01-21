@@ -83,5 +83,21 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			Assert.NotNull(store);
 		}
+
+		/// <summary>
+		/// Test for removing empty folder.
+		/// </summary>
+		[Test]
+		public void TestRemoveEmptyFolder()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			MAPIFolder subFolder = PstOutlook.AddFolderSafe(
+				rootFolder, "Temporary Test Folder");
+
+			pstOutlook.RemoveFolder(rootFolder, 2, subFolder, false);
+
+			Marshal.ReleaseComObject(subFolder);
+		}
 	}
 }
