@@ -196,13 +196,16 @@ namespace DigitalZenWorks.Email.ToolKit
 				for (int index = rootFolder.Folders.Count - 1;
 					index >= 0; index--)
 				{
-					MAPIFolder subFolder = rootFolder.Folders[index];
+					// Office uses 1 based indexes from VBA.
+					int offset = index + 1;
+
+					MAPIFolder subFolder = rootFolder.Folders[offset];
 					bool subFolderEmtpy = RemoveEmptyFolders(subFolder);
 
 					if (subFolderEmtpy == true)
 					{
 						Log.Info("Removing empty folder: " + subFolder.Name);
-						rootFolder.Folders.Remove(index);
+						rootFolder.Folders.Remove(offset);
 					}
 				}
 			}
@@ -228,14 +231,17 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			for (int index = folder.Folders.Count - 1; index >= 0; index--)
 			{
-				MAPIFolder subFolder = folder.Folders[index];
+				// Office uses 1 based indexes from VBA.
+				int offset = index + 1;
+
+				MAPIFolder subFolder = folder.Folders[offset];
 
 				bool subFolderEmtpy = RemoveEmptyFolders(subFolder);
 
 				if (subFolderEmtpy == true)
 				{
 					Log.Info("Removing empty folder: " + subFolder.Name);
-					folder.Folders.Remove(index);
+					folder.Folders.Remove(offset);
 				}
 			}
 
