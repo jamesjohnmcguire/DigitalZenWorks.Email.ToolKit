@@ -48,28 +48,31 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			MAPIFolder pstFolder = null;
 
-			if (parentFolder != null)
+			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
 			{
-				Log.Info("Adding outlook folder: " + folderName);
+				bool found = false;
 
-				try
+				foreach (MAPIFolder subFolder in parentFolder.Folders)
 				{
-					pstFolder =
-						parentFolder.Folders.Add(folderName);
+					if (folderName.Equals(
+						subFolder.Name, StringComparison.Ordinal))
+					{
+						found = true;
+						break;
+					}
 				}
-				catch (COMException exception)
-				{
-					Log.Warn(exception.ToString());
 
-					// Possibly already exists... ?
+				if (found == false)
+				{
+					Log.Info("Adding outlook folder: " + folderName);
+
 					try
 					{
-						pstFolder =
-							parentFolder.Folders[folderName];
+						pstFolder = parentFolder.Folders.Add(folderName);
 					}
-					catch (COMException addionalException)
+					catch (COMException exception)
 					{
-						Log.Warn(addionalException.ToString());
+						Log.Warn(exception.ToString());
 					}
 				}
 			}
