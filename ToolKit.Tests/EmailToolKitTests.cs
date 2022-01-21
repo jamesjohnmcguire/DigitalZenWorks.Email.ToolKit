@@ -9,6 +9,7 @@ using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 [assembly: CLSCompliant(true)]
 
@@ -19,6 +20,44 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 	/// </summary>
 	public class EmailToolKitTests
 	{
+		private PstOutlook pstOutlook;
+		private Store store;
+		private string storePath;
+
+		/// <summary>
+		/// One time set up method.
+		/// </summary>
+		[OneTimeSetUp]
+		public void OneTimeSetUp()
+		{
+			string basePath = Path.GetTempPath();
+			storePath = basePath + "Test.pst";
+
+			pstOutlook = new ();
+
+			// PST provider in Outlook keeps the PST file open for 30 minutes
+			// after closing it for the performance reasons. So, try to delete
+			// it now, as it may be more than 30 minutes since last access.
+			try
+			{
+				File.Delete(storePath);
+			}
+			catch (IOException)
+			{
+			}
+
+			store = pstOutlook.CreateStore(storePath);
+		}
+
+		/// <summary>
+		/// One time tear down method.
+		/// </summary>
+		[OneTimeTearDown]
+		public void OneTimeTearDown()
+		{
+			pstOutlook.RemoveStore(store);
+		}
+
 		/// <summary>
 		/// Set up method.
 		/// </summary>
@@ -42,25 +81,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[Test]
 		public void TestCreatePstStore()
 		{
-			string basePath = Path.GetTempPath();
-			string path = basePath + "Test.pst";
-			PstOutlook pstOutlook = new ();
-
-			// PST provider in Outlook keeps the PST file open for 30 minutes
-			// after closing it for the performance reasons.
-			try
-			{
-				File.Delete(path);
-			}
-			catch (IOException)
-			{
-			}
-
-			Store store = pstOutlook.CreateStore(path);
-
 			Assert.NotNull(store);
-
-			pstOutlook.RemoveStore(store);
 		}
 	}
 }
