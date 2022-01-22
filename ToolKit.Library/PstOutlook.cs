@@ -198,7 +198,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string[] ignoreFolders =
 			{
-				"Deleted Items", "RSS Feeds", "Search Folders"
+				"Calendar", "Contacts", "Conversation Action Settings",
+				"Deleted Items", "Drafts", "Junk E-mail", "Journal", "Notes",
+				"Outbox", "Quick Step Settings", "RSS Feeds", "Search Folders",
+				"Sent Items", "Tasks"
 			};
 
 			foreach (Store store in outlookNamespace.Session.Stores)
