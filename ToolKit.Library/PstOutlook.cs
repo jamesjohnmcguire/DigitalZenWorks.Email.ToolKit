@@ -250,6 +250,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				totalFolders++;
 				Marshal.ReleaseComObject(rootFolder);
 			}
+
+			Log.Info("Remove empty folder complete - total folder checked:" +
+				totalFolders);
 		}
 
 		/// <summary>
