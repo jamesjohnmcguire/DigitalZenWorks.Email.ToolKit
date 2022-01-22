@@ -198,7 +198,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string[] ignoreFolders =
 			{
-				"Deleted Items", "Search Folders"
+				"Deleted Items", "Quick Step Settings", "RSS Feeds",
+				"Search Folders", "Server Failures"
 			};
 
 			foreach (Store store in outlookNamespace.Session.Stores)
@@ -216,13 +217,15 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (subFolderEmtpy == true)
 					{
-						if (!ignoreFolders.Contains(subFolder.Name))
+						if (ignoreFolders.Contains(subFolder.Name))
 						{
 							Log.Warn("Not deleting reserved folder: " +
 								subFolder.Name);
 						}
-
-						RemoveFolder(rootFolder, offset, subFolder, false);
+						else
+						{
+							RemoveFolder(rootFolder, offset, subFolder, false);
+						}
 					}
 
 					totalFolders++;
