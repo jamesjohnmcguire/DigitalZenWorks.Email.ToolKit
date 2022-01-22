@@ -274,7 +274,15 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					path += "/" + subFolder.Name;
 					Log.Info("Removing empty folder: " + path);
-					parentFolder.Folders.Remove(subFolderIndex);
+
+					try
+					{
+						parentFolder.Folders.Remove(subFolderIndex);
+					}
+					catch (COMException exception)
+					{
+						Log.Error(exception.ToString());
+					}
 
 					removedFolders++;
 				}
