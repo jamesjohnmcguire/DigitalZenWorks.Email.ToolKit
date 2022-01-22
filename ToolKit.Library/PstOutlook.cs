@@ -8,6 +8,7 @@ using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace DigitalZenWorks.Email.ToolKit
@@ -22,6 +23,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private readonly Application outlookApplication;
 		private readonly NameSpace outlookNamespace;
+
+		private uint totalFolders;
+		private uint removedFolders;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PstOutlook"/> class.
@@ -44,28 +48,31 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			MAPIFolder pstFolder = null;
 
-			if (parentFolder != null)
+			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
 			{
-				Log.Info("Adding outlook folder: " + folderName);
+				bool found = false;
 
-				try
+				foreach (MAPIFolder subFolder in parentFolder.Folders)
 				{
-					pstFolder =
-						parentFolder.Folders.Add(folderName);
+					if (folderName.Equals(
+						subFolder.Name, StringComparison.Ordinal))
+					{
+						found = true;
+						break;
+					}
 				}
-				catch (COMException exception)
-				{
-					Log.Warn(exception.ToString());
 
-					// Possibly already exists... ?
+				if (found == false)
+				{
+					Log.Info("Adding outlook folder: " + folderName);
+
 					try
 					{
-						pstFolder =
-							parentFolder.Folders[folderName];
+						pstFolder = parentFolder.Folders.Add(folderName);
 					}
-					catch (COMException addionalException)
+					catch (COMException exception)
 					{
-						Log.Warn(addionalException.ToString());
+						Log.Warn(exception.ToString());
 					}
 				}
 			}
@@ -185,6 +192,107 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Remove all empty folders.
+		/// </summary>
+		public void RemoveEmptyFolders()
+		{
+			string[] ignoreFolders =
+			{
+				"Calendar", "Contacts", "Conversation Action Settings",
+				"Deleted Items", "Drafts", "Junk E-mail", "Journal", "Notes",
+				"Outbox", "Quick Step Settings", "RSS Feeds", "Search Folders",
+				"Sent Items", "Tasks"
+			};
+
+			foreach (Store store in outlookNamespace.Session.Stores)
+			{
+				string extension = Path.GetExtension(store.FilePath);
+
+				if (extension.Equals(".ost", StringComparison.Ordinal))
+				{
+					// for the time being, ignore ost files.
+					continue;
+				}
+
+				string storePath = GetStoreName(store) + "::";
+
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				for (int index = rootFolder.Folders.Count - 1;
+					index >= 0; index--)
+				{
+					string path = storePath + rootFolder.Name;
+
+					// Office uses 1 based indexes from VBA.
+					int offset = index + 1;
+
+					MAPIFolder subFolder = rootFolder.Folders[offset];
+					bool subFolderEmtpy = RemoveEmptyFolders(path, subFolder);
+
+					if (subFolderEmtpy == true)
+					{
+						if (ignoreFolders.Contains(subFolder.Name))
+						{
+							Log.Warn("Not deleting reserved folder: " +
+								subFolder.Name);
+						}
+						else
+						{
+							RemoveFolder(
+								rootFolder, offset, subFolder, path, false);
+						}
+					}
+
+					totalFolders++;
+					Marshal.ReleaseComObject(subFolder);
+				}
+
+				totalFolders++;
+				Marshal.ReleaseComObject(rootFolder);
+			}
+
+			Log.Info("Remove empty folder complete - total folder checked:" +
+				totalFolders);
+		}
+
+		/// <summary>
+		/// Remove folder from PST store.
+		/// </summary>
+		/// <param name="parentFolder">The parent folder.</param>
+		/// <param name="subFolderIndex">The index of the sub-folder.</param>
+		/// <param name="subFolder">The sub-folder.</param>
+		/// <param name="path">The path of current folder.</param>
+		/// <param name="force">Whether to force the removal.</param>
+		public void RemoveFolder(
+			MAPIFolder parentFolder,
+			int subFolderIndex,
+			MAPIFolder subFolder,
+			string path,
+			bool force)
+		{
+			if (parentFolder != null && subFolder != null)
+			{
+				if (force == true || (subFolder.Folders.Count == 0 &&
+					subFolder.Items.Count == 0))
+				{
+					path += "/" + subFolder.Name;
+					Log.Info("Removing empty folder: " + path);
+
+					try
+					{
+						parentFolder.Folders.Remove(subFolderIndex);
+					}
+					catch (COMException exception)
+					{
+						Log.Error(exception.ToString());
+					}
+
+					removedFolders++;
+				}
+			}
+		}
+
+		/// <summary>
 		/// Create a new pst storage file.
 		/// </summary>
 		/// <param name="store">The store to check.</param>
@@ -196,6 +304,50 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				outlookNamespace.Session.RemoveStore(rootFolder);
 			}
+		}
+
+		private static string GetStoreName(Store store)
+		{
+			string name = store.DisplayName;
+
+			if (string.IsNullOrWhiteSpace(name))
+			{
+				string path = Path.GetFileNameWithoutExtension(store.FilePath);
+			}
+
+			return name;
+		}
+
+		private bool RemoveEmptyFolders(string path, MAPIFolder folder)
+		{
+			bool isEmpty = false;
+
+			for (int index = folder.Folders.Count - 1; index >= 0; index--)
+			{
+				// Office uses 1 based indexes from VBA.
+				int offset = index + 1;
+
+				MAPIFolder subFolder = folder.Folders[offset];
+
+				string subPath = path + "/" + subFolder.Name;
+
+				bool subFolderEmtpy = RemoveEmptyFolders(subPath, subFolder);
+
+				if (subFolderEmtpy == true)
+				{
+					RemoveFolder(folder, offset, subFolder, subPath, false);
+				}
+
+				totalFolders++;
+				Marshal.ReleaseComObject(subFolder);
+			}
+
+			if (folder.Folders.Count == 0 && folder.Items.Count == 0)
+			{
+				isEmpty = true;
+			}
+
+			return isEmpty;
 		}
 	}
 }
