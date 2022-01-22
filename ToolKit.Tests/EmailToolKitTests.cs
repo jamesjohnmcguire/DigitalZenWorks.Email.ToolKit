@@ -95,7 +95,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder subFolder = PstOutlook.AddFolderSafe(
 				rootFolder, "Temporary Test Folder");
 
-			pstOutlook.RemoveFolder(rootFolder, 2, subFolder, false);
+			pstOutlook.RemoveFolder(
+				rootFolder, 2, subFolder, rootFolder.Name, false);
 
 			Marshal.ReleaseComObject(subFolder);
 		}
