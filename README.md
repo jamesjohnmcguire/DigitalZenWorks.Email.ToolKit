@@ -46,4 +46,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 James John McGuire - [@jamesmc](https://twitter.com/jamesmc) - jamesjohnmcguire@gmail.com
 
-Project Link: [https://github.com/jamesjohnmcguire/DbxOutlookExpress](https://github.com/jamesjohnmcguire/DbxOutlookExpress)
+Project Link: [https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit](https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)
