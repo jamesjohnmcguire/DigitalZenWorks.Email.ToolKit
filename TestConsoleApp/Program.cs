@@ -16,6 +16,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 
 [assembly: CLSCompliant(true)]
@@ -70,7 +71,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			TestConvertToMsgFile(path, encoding);
 
-			TestTree(path, encoding);
+			TestTree();
 
 			TestSetTree(path, encoding);
 			TestListSet(path, encoding);
@@ -136,6 +137,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				pstStore,
 				rootFolder,
 				dbxFolder);
+
+			Marshal.ReleaseComObject(rootFolder);
 		}
 
 		private static void TestFolder(string path, Encoding encoding)
@@ -184,7 +187,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			Log.Info(text);
 		}
 
-		private static void TestTree(string path, Encoding encoding)
+		private static void TestTree()
 		{
 			DbxFolder folder1 = new (1, 0, "A", null);
 			DbxFolder folder2 = new (2, 4, "B", null);
@@ -192,12 +195,14 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			DbxFolder folder4 = new (4, 5, "D", null);
 			DbxFolder folder5 = new (5, 0, "E", null);
 
-			IList<DbxFolder> folders = new List<DbxFolder>();
-			folders.Add(folder1);
-			folders.Add(folder2);
-			folders.Add(folder3);
-			folders.Add(folder4);
-			folders.Add(folder5);
+			IList<DbxFolder> folders = new List<DbxFolder>
+			{
+				folder1,
+				folder2,
+				folder3,
+				folder4,
+				folder5
+			};
 
 			DbxFolder folder = new (0, 0, "root", null);
 
