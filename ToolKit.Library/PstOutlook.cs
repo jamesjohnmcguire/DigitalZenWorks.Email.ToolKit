@@ -198,8 +198,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string[] ignoreFolders =
 			{
-				"Deleted Items", "Quick Step Settings", "RSS Feeds",
-				"Search Folders", "Server Failures"
+				"Deleted Items", "RSS Feeds", "Search Folders"
 			};
 
 			foreach (Store store in outlookNamespace.Session.Stores)
@@ -212,16 +211,20 @@ namespace DigitalZenWorks.Email.ToolKit
 					continue;
 				}
 
+				string storePath = GetStoreName(store) + "::";
+
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				for (int index = rootFolder.Folders.Count - 1;
 					index >= 0; index--)
 				{
+					string path = storePath + rootFolder.Name;
+
 					// Office uses 1 based indexes from VBA.
 					int offset = index + 1;
 
 					MAPIFolder subFolder = rootFolder.Folders[offset];
-					bool subFolderEmtpy = RemoveEmptyFolders(subFolder);
+					bool subFolderEmtpy = RemoveEmptyFolders(path, subFolder);
 
 					if (subFolderEmtpy == true)
 					{
@@ -232,7 +235,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						}
 						else
 						{
-							RemoveFolder(rootFolder, offset, subFolder, false);
+							RemoveFolder(
+								rootFolder, offset, subFolder, path, false);
 						}
 					}
 
@@ -251,11 +255,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="parentFolder">The parent folder.</param>
 		/// <param name="subFolderIndex">The index of the sub-folder.</param>
 		/// <param name="subFolder">The sub-folder.</param>
+		/// <param name="path">The path of current folder.</param>
 		/// <param name="force">Whether to force the removal.</param>
 		public void RemoveFolder(
 			MAPIFolder parentFolder,
 			int subFolderIndex,
 			MAPIFolder subFolder,
+			string path,
 			bool force)
 		{
 			if (parentFolder != null && subFolder != null)
@@ -263,7 +269,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (force == true || (subFolder.Folders.Count == 0 &&
 					subFolder.Items.Count == 0))
 				{
-					Log.Info("Removing empty folder: " + subFolder.Name);
+					path += "/" + subFolder.Name;
+					Log.Info("Removing empty folder: " + path);
 					parentFolder.Folders.Remove(subFolderIndex);
 
 					removedFolders++;
@@ -285,7 +292,19 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private bool RemoveEmptyFolders(MAPIFolder folder)
+		private static string GetStoreName(Store store)
+		{
+			string name = store.DisplayName;
+
+			if (string.IsNullOrWhiteSpace(name))
+			{
+				string path = Path.GetFileNameWithoutExtension(store.FilePath);
+			}
+
+			return name;
+		}
+
+		private bool RemoveEmptyFolders(string path, MAPIFolder folder)
 		{
 			bool isEmpty = false;
 
@@ -296,11 +315,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder subFolder = folder.Folders[offset];
 
-				bool subFolderEmtpy = RemoveEmptyFolders(subFolder);
+				string subPath = path + "/" + subFolder.Name;
+
+				bool subFolderEmtpy = RemoveEmptyFolders(subPath, subFolder);
 
 				if (subFolderEmtpy == true)
 				{
-					RemoveFolder(folder, offset, subFolder, false);
+					RemoveFolder(folder, offset, subFolder, subPath, false);
 				}
 
 				totalFolders++;
