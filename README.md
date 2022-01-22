@@ -14,13 +14,16 @@ git clone --recurse-submodules https://github.com/jamesjohnmcguire/DigitalZenWor
 
 ### Usage:
 
+NOTE: Always back up any data you might be modifying.  So, please back up your data before using this tool.  Did I mention that you should back up!  
+
 DigitalZenWorks.Email.ToolKit <command> <source-path> <destination-path>
 
-| Commands:   |                                |
-| ----------- | -----------------------------  |
-| dbx-to-pst  | Migrate dbx files to pst file  |
-| eml-to-pst  | Migrate eml files to pst file  |
-| help        | Display this information       |
+| Commands:            |                                |
+| -------------------- | -----------------------------  |
+| dbx-to-pst           | Migrate dbx files to pst file  |
+| eml-to-pst           | Migrate eml files to pst file  |
+| remove-empty-folders | Prune empty folders            |
+| help                 | Display this information       |
 
 
 ## Contributing
