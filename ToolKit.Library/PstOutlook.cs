@@ -204,6 +204,14 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			foreach (Store store in outlookNamespace.Session.Stores)
 			{
+				string extension = Path.GetExtension(store.FilePath);
+
+				if (extension.Equals(".ost", StringComparison.Ordinal))
+				{
+					// for the time being, ignore ost files.
+					continue;
+				}
+
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				for (int index = rootFolder.Folders.Count - 1;
