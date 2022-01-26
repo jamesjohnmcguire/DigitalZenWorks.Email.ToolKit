@@ -18,6 +18,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 [assembly: CLSCompliant(true)]
 
@@ -53,6 +54,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			Log.Info("Test console app");
 
 			TestTargetFrameworks();
+
+			TestMergeFolders();
 
 			Encoding.RegisterProvider(
 				CodePagesEncodingProvider.Instance);
@@ -152,6 +155,51 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			DbxSet set = new (path, encoding);
 
 			set.List();
+		}
+
+		private static void TestMergeFolders()
+		{
+			// Create test store.
+			string basePath = Path.GetTempPath();
+			string storePath = basePath + "Test.pst";
+
+			PstOutlook pstOutlook = new ();
+			Store store = pstOutlook.CreateStore(storePath);
+
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			MAPIFolder mainFolder = PstOutlook.AddFolderSafe(
+				rootFolder, "Main Test Folder");
+			// Create sub folders
+			MAPIFolder subFolder =
+				PstOutlook.AddFolderSafe(mainFolder, "Testing");
+			PstOutlook.AddFolderSafe(subFolder, "Testing2");
+			PstOutlook.AddFolderSafe(subFolder, "Testing2 (1)");
+
+			string emlFile = @"C:\Users\JamesMc\Data\ProgramData\Email\" +
+				@"EmailStores\Re_ Home Internet Connection.eml";
+			Migrate.EmlToPst(emlFile, storePath);
+			subFolder = PstOutlook.AddFolderSafe(
+				mainFolder, "Testing (1)");
+			PstOutlook.AddFolderSafe(subFolder, "Testing2");
+			PstOutlook.AddFolderSafe(subFolder, "Testing2 (1)");
+
+			// Test
+			string output = string.Empty;
+
+			if (Regex.IsMatch("Testing (1)", @"\s*\(\d*?\)", RegexOptions.IgnoreCase))
+			{
+				output = Regex.Replace(
+					"Testing (1)", @"\s*\(\d*?\)", string.Empty, RegexOptions.IgnoreCase);
+			}
+
+			// Review
+			pstOutlook.MergeFolders("Begin", mainFolder);
+
+			// Clean up
+			Marshal.ReleaseComObject(subFolder);
+			Marshal.ReleaseComObject(rootFolder);
 		}
 
 		private static void TestSetTree(string path, Encoding encoding)
