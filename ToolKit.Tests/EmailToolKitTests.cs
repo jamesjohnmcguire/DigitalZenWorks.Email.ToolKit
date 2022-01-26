@@ -99,6 +99,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				rootFolder, 2, subFolder, rootFolder.Name, false);
 
 			Marshal.ReleaseComObject(subFolder);
+			Marshal.ReleaseComObject(rootFolder);
 		}
 	}
 }
