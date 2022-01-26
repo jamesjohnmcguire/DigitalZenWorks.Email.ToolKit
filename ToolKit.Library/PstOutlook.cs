@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
-	/// Provides support for interating with an Outlook PST file.
+	/// Provides support for interacting with an Outlook PST file.
 	/// </summary>
 	public class PstOutlook
 	{
