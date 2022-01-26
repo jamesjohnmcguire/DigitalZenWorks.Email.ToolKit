@@ -58,6 +58,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						subFolder.Name, StringComparison.Ordinal))
 					{
 						found = true;
+						pstFolder = subFolder;
 						break;
 					}
 				}
