@@ -52,15 +52,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			Log.Info("Test console app");
 
-#if NET5_0_OR_GREATER
-			Log.Info("NET 5.0 or greater Supported framworks");
-#endif
-#if NETCOREAPP3_0_OR_GREATER
-			Log.Info("NETCOREAPP 3.0 or greater Supported framworks");
-#endif
-#if NETSTANDARD1_1_OR_GREATER
-			Log.Info("NET Standard 1.1 or greater Supported framworks");
-#endif
+			TestTargetFrameworks();
+
 			Encoding.RegisterProvider(
 				CodePagesEncodingProvider.Instance);
 			Encoding encoding = Encoding.GetEncoding("shift_jis");
@@ -185,6 +178,22 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			using StreamReader reader = new (stream);
 			string text = reader.ReadToEnd();
 			Log.Info(text);
+		}
+
+		private static void TestTargetFrameworks()
+		{
+#if NET5_0_OR_GREATER
+			Log.Info("NET 5.0 or greater Supported framworks");
+#endif
+#if NETCOREAPP3_0_OR_GREATER
+			Log.Info("NETCOREAPP 3.0 or greater Supported framworks");
+#endif
+#if NETSTANDARD2_0_OR_GREATER
+			Log.Info("NET Standard 1.1 or greater Supported framworks");
+#endif
+#if NETSTANDARD1_1_OR_GREATER
+			Log.Info("NET Standard 1.1 or greater Supported framworks");
+#endif
 		}
 
 		private static void TestTree()
