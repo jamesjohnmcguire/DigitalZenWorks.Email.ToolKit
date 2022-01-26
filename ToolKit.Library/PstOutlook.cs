@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -193,6 +194,68 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Merge folders.
+		/// </summary>
+		/// <param name="path">The path of the curent folder.</param>
+		/// <param name="folder">The current folder.</param>
+		public void MergeFolders(string path, MAPIFolder folder)
+		{
+			if (folder != null)
+			{
+				for (int index = folder.Folders.Count - 1; index >= 0; index--)
+				{
+					// Office uses 1 based indexes from VBA.
+					int offset = index + 1;
+
+					MAPIFolder subFolder = folder.Folders[offset];
+
+					string subPath = path + "/" + subFolder.Name;
+
+					MergeFolders(subPath, subFolder);
+
+					string output = string.Empty;
+
+					if (Regex.IsMatch(
+						subFolder.Name,
+						@"\s*\(\d*?\)",
+						RegexOptions.IgnoreCase))
+					{
+						output = Regex.Replace(
+							subFolder.Name,
+							@"\s*\(\d*?\)",
+							string.Empty,
+							RegexOptions.IgnoreCase);
+
+						bool folderExists =
+							DoesSiblingFolderExist(subFolder, output);
+
+						if (folderExists == true)
+						{
+							MAPIFolder parentFolder = subFolder.Parent;
+
+							// Move items
+							MAPIFolder destination = parentFolder.Folders[output];
+
+							MoveFolderContents(subFolder, destination);
+
+							// Once all the items have been moved,
+							// now remove the folder.
+							RemoveFolder(
+								parentFolder, offset, subFolder, path, false);
+						}
+						else
+						{
+							subFolder.Name = output;
+						}
+					}
+
+					totalFolders++;
+					Marshal.ReleaseComObject(subFolder);
+				}
+			}
+		}
+
+		/// <summary>
 		/// Remove all empty folders.
 		/// </summary>
 		public void RemoveEmptyFolders()
@@ -273,6 +336,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (parentFolder != null && subFolder != null)
 			{
+				if (subFolder.Folders.Count > 0 ||
+					subFolder.Items.Count > 0)
+				{
+					Log.Warn("Attempting to remove non empty folder: " + path);
+				}
+
 				if (force == true || (subFolder.Folders.Count == 0 &&
 					subFolder.Items.Count == 0))
 				{
@@ -307,6 +376,28 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		private static bool DoesSiblingFolderExist(
+			MAPIFolder folder, string folderName)
+		{
+			bool folderExists = false;
+
+			MAPIFolder parentFolder = folder.Parent;
+
+			foreach (MAPIFolder subFolder in parentFolder.Folders)
+			{
+				if (folderName.Equals(
+					subFolder.Name, StringComparison.Ordinal))
+				{
+					folderExists = true;
+					break;
+				}
+			}
+
+			Marshal.ReleaseComObject(parentFolder);
+
+			return folderExists;
+		}
+
 		private static string GetStoreName(Store store)
 		{
 			string name = store.DisplayName;
@@ -317,6 +408,86 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return name;
+		}
+
+		private static void MoveFolderContents(
+			MAPIFolder source, MAPIFolder destination)
+		{
+			MoveFolderItems(source, destination);
+			MoveFolderFolders(source, destination);
+		}
+
+		private static void MoveFolderFolders(
+			MAPIFolder source, MAPIFolder destination)
+		{
+			foreach (MAPIFolder subFolder in source.Folders)
+			{
+				subFolder.MoveTo(destination);
+			}
+		}
+
+		private static void MoveFolderItems(
+			MAPIFolder source, MAPIFolder destination)
+		{
+			Items items = source.Items;
+
+			foreach (object item in items)
+			{
+				switch (item)
+				{
+					case AppointmentItem appointmentItem:
+						appointmentItem.Move(destination);
+						break;
+					case ContactItem contactItem:
+						contactItem.Move(destination);
+						break;
+					case DistListItem distListItem:
+						distListItem.Move(destination);
+						break;
+					case DocumentItem documentItem:
+						documentItem.Move(destination);
+						break;
+					case JournalItem journalItem:
+						journalItem.Move(destination);
+						break;
+					case MailItem mailItem:
+						mailItem.Move(destination);
+						Marshal.ReleaseComObject(mailItem);
+						break;
+					case MeetingItem meetingItem:
+						meetingItem.Move(destination);
+						break;
+					case NoteItem noteItem:
+						noteItem.Move(destination);
+						break;
+					case PostItem postItem:
+						postItem.Move(destination);
+						break;
+					case RemoteItem remoteItem:
+						remoteItem.Move(destination);
+						break;
+					case ReportItem reportItem:
+						reportItem.Move(destination);
+						break;
+					case TaskItem taskItem:
+						taskItem.Move(destination);
+						break;
+					case TaskRequestAcceptItem taskRequestAcceptItem:
+						taskRequestAcceptItem.Move(destination);
+						break;
+					case TaskRequestDeclineItem taskRequestDeclineItem:
+						taskRequestDeclineItem.Move(destination);
+						break;
+					case TaskRequestItem taskRequestItem:
+						taskRequestItem.Move(destination);
+						break;
+					case TaskRequestUpdateItem taskRequestUpdateItem:
+						taskRequestUpdateItem.Move(destination);
+						break;
+				}
+
+				Marshal.ReleaseComObject(item);
+			}
 		}
 
 		private bool RemoveEmptyFolders(string path, MAPIFolder folder)
