@@ -7,6 +7,7 @@
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -51,20 +52,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
 			{
-				bool found = false;
+				pstFolder = GetSubFolder(parentFolder, folderName);
 
-				foreach (MAPIFolder subFolder in parentFolder.Folders)
-				{
-					if (folderName.Equals(
-						subFolder.Name, StringComparison.Ordinal))
-					{
-						found = true;
-						pstFolder = subFolder;
-						break;
-					}
-				}
-
-				if (found == false)
+				if (pstFolder == null)
 				{
 					Log.Info("Adding outlook folder: " + folderName);
 
@@ -114,6 +104,33 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return name;
+		}
+
+		/// <summary>
+		/// Get sub folder from parent.
+		/// </summary>
+		/// <param name="parentFolder">The parent folder.</param>
+		/// <param name="folderName">The new folder name.</param>
+		/// <returns>The added folder.</returns>
+		public static MAPIFolder GetSubFolder(
+			MAPIFolder parentFolder, string folderName)
+		{
+			MAPIFolder pstFolder = null;
+
+			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
+			{
+				foreach (MAPIFolder subFolder in parentFolder.Folders)
+				{
+					if (folderName.Equals(
+						subFolder.Name, StringComparison.Ordinal))
+					{
+						pstFolder = subFolder;
+						break;
+					}
+				}
+			}
+
+			return pstFolder;
 		}
 
 		/// <summary>
@@ -406,7 +423,32 @@ namespace DigitalZenWorks.Email.ToolKit
 				int offset = index + 1;
 				MAPIFolder subFolder = source.Folders[offset];
 
-				subFolder.MoveTo(destination);
+				MAPIFolder destinationSubFolder =
+					GetSubFolder(destination, subFolder.Name);
+
+				if (destinationSubFolder == null)
+				{
+					// Folder doesn't already exist, so just move it.
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Moving {0} to {1}",
+						subFolder.Name,
+						destination.Name);
+					Log.Info(message);
+					subFolder.MoveTo(destination);
+				}
+				else
+				{
+					// Folder exists, so if just moving it, it will get
+					// renamed something FolderName (2), so need to merge.
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Merging {0} to {1}",
+						subFolder.Name,
+						destination.Name);
+					Log.Info(message);
+					MoveFolderContents(subFolder, destinationSubFolder);
+				}
 			}
 		}
 
