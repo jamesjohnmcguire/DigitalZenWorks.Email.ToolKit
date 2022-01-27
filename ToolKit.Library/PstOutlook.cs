@@ -404,7 +404,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return folderExists;
 		}
 
-		private static string GetStoreName(Store store)
+		public static string GetStoreName(Store store)
 		{
 			string name = store.DisplayName;
 
