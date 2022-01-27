@@ -171,6 +171,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			MAPIFolder mainFolder = PstOutlook.AddFolderSafe(
 				rootFolder, "Main Test Folder");
+
 			// Create sub folders
 			MAPIFolder subFolder =
 				PstOutlook.AddFolderSafe(mainFolder, "Testing");
@@ -185,17 +186,11 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			PstOutlook.AddFolderSafe(subFolder, "Testing2");
 			PstOutlook.AddFolderSafe(subFolder, "Testing2 (1)");
 
-			// Test
-			string output = string.Empty;
-
-			if (Regex.IsMatch("Testing (1)", @"\s*\(\d*?\)", RegexOptions.IgnoreCase))
-			{
-				output = Regex.Replace(
-					"Testing (1)", @"\s*\(\d*?\)", string.Empty, RegexOptions.IgnoreCase);
-			}
-
 			// Review
-			pstOutlook.MergeFolders("Begin", mainFolder);
+			storePath = PstOutlook.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			pstOutlook.MergeFolders(path, rootFolder);
 
 			// Clean up
 			Marshal.ReleaseComObject(subFolder);
