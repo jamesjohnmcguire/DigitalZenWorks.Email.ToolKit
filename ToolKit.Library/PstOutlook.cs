@@ -95,6 +95,28 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get store name.
+		/// </summary>
+		/// <param name="store">The store to access.</param>
+		/// <returns>The store name.</returns>
+		public static string GetStoreName(Store store)
+		{
+			string name = null;
+
+			if (store != null)
+			{
+				name = store.DisplayName;
+
+				if (string.IsNullOrWhiteSpace(name))
+				{
+					name = Path.GetFileNameWithoutExtension(store.FilePath);
+				}
+			}
+
+			return name;
+		}
+
+		/// <summary>
 		/// Get top level folder by name.
 		/// </summary>
 		/// <param name="pstStore">The pst store to check.</param>
@@ -402,18 +424,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			Marshal.ReleaseComObject(parentFolder);
 
 			return folderExists;
-		}
-
-		public static string GetStoreName(Store store)
-		{
-			string name = store.DisplayName;
-
-			if (string.IsNullOrWhiteSpace(name))
-			{
-				name = Path.GetFileNameWithoutExtension(store.FilePath);
-			}
-
-			return name;
 		}
 
 		private static void MoveFolderContents(
