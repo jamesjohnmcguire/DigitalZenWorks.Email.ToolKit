@@ -337,6 +337,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (parentFolder != null && subFolder != null)
 			{
+				// Perhaps because interaction through COM interop, the count
+				// values sometimes seem a bit behind, so pause a little bit
+				// before moving on.
+				System.Threading.Thread.Sleep(100);
+
 				if (subFolder.Folders.Count > 0 ||
 					subFolder.Items.Count > 0)
 				{
