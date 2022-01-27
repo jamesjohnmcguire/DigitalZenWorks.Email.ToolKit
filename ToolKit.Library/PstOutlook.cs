@@ -491,6 +491,10 @@ namespace DigitalZenWorks.Email.ToolKit
 					case TaskRequestUpdateItem taskRequestUpdateItem:
 						taskRequestUpdateItem.Move(destination);
 						break;
+					default:
+						Log.Warn(
+							"folder item of unknown type: " + item.ToString());
+						break;
 				}
 
 				Marshal.ReleaseComObject(item);
