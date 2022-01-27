@@ -421,8 +421,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static void MoveFolderFolders(
 			MAPIFolder source, MAPIFolder destination)
 		{
-			foreach (MAPIFolder subFolder in source.Folders)
+			for (int index = source.Folders.Count - 1; index >= 0; index--)
 			{
+				int offset = index + 1;
+				MAPIFolder subFolder = source.Folders[offset];
+
 				subFolder.MoveTo(destination);
 			}
 		}
@@ -432,8 +435,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			Items items = source.Items;
 
-			foreach (object item in items)
+			for (int index = items.Count - 1; index >= 0; index--)
 			{
+				int offset = index + 1;
+				object item = items[offset];
+
 				switch (item)
 				{
 					case AppointmentItem appointmentItem:
