@@ -235,42 +235,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					MergeFolders(subPath, subFolder);
 
-					string duplicatePattern = @"\s*\(\d*?\)";
-
-					if (Regex.IsMatch(
-						subFolder.Name,
-						duplicatePattern,
-						RegexOptions.IgnoreCase))
-					{
-						string newFolderName = Regex.Replace(
-							subFolder.Name,
-							duplicatePattern,
-							string.Empty,
-							RegexOptions.IgnoreCase);
-
-						bool folderExists =
-							DoesSiblingFolderExist(subFolder, newFolderName);
-
-						if (folderExists == true)
-						{
-							MAPIFolder parentFolder = subFolder.Parent;
-
-							// Move items
-							MAPIFolder destination =
-								parentFolder.Folders[newFolderName];
-
-							MoveFolderContents(subFolder, destination);
-
-							// Once all the items have been moved,
-							// now remove the folder.
-							RemoveFolder(
-								parentFolder, offset, subFolder, path, false);
-						}
-						else
-						{
-							subFolder.Name = newFolderName;
-						}
-					}
+					MergeDuplicateFolder(path, offset, subFolder);
 
 					totalFolders++;
 					Marshal.ReleaseComObject(subFolder);
@@ -404,8 +369,15 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		private static void MoveFolderContents(
+			MAPIFolder source, MAPIFolder destination)
+		{
+			MoveFolderItems(source, destination);
+			MoveFolderFolders(source, destination);
+		}
+
 		private static bool DoesSiblingFolderExist(
-			MAPIFolder folder, string folderName)
+					MAPIFolder folder, string folderName)
 		{
 			bool folderExists = false;
 
@@ -424,13 +396,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			Marshal.ReleaseComObject(parentFolder);
 
 			return folderExists;
-		}
-
-		private static void MoveFolderContents(
-			MAPIFolder source, MAPIFolder destination)
-		{
-			MoveFolderItems(source, destination);
-			MoveFolderFolders(source, destination);
 		}
 
 		private static void MoveFolderFolders(
@@ -513,6 +478,44 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 
 				Marshal.ReleaseComObject(item);
+			}
+		}
+
+		private void MergeDuplicateFolder(
+			string path, int index, MAPIFolder folder)
+		{
+			string duplicatePattern = @"\s*\(\d*?\)";
+
+			if (Regex.IsMatch(
+				folder.Name, duplicatePattern, RegexOptions.IgnoreCase))
+			{
+				string newFolderName = Regex.Replace(
+					folder.Name,
+					duplicatePattern,
+					string.Empty,
+					RegexOptions.IgnoreCase);
+
+				bool folderExists =
+					DoesSiblingFolderExist(folder, newFolderName);
+
+				if (folderExists == true)
+				{
+					MAPIFolder parentFolder = folder.Parent;
+
+					// Move items
+					MAPIFolder destination =
+						parentFolder.Folders[newFolderName];
+
+					MoveFolderContents(folder, destination);
+
+					// Once all the items have been moved,
+					// now remove the folder.
+					RemoveFolder(parentFolder, index, folder, path, false);
+				}
+				else
+				{
+					folder.Name = newFolderName;
+				}
 			}
 		}
 
