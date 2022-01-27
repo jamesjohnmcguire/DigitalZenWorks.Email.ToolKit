@@ -405,7 +405,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (string.IsNullOrWhiteSpace(name))
 			{
-				string path = Path.GetFileNameWithoutExtension(store.FilePath);
+				name = Path.GetFileNameWithoutExtension(store.FilePath);
 			}
 
 			return name;
