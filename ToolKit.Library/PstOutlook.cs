@@ -213,28 +213,29 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					MergeFolders(subPath, subFolder);
 
-					string output = string.Empty;
+					string duplicatePattern = @"\s*\(\d*?\)";
 
 					if (Regex.IsMatch(
 						subFolder.Name,
-						@"\s*\(\d*?\)",
+						duplicatePattern,
 						RegexOptions.IgnoreCase))
 					{
-						output = Regex.Replace(
+						string newFolderName = Regex.Replace(
 							subFolder.Name,
-							@"\s*\(\d*?\)",
+							duplicatePattern,
 							string.Empty,
 							RegexOptions.IgnoreCase);
 
 						bool folderExists =
-							DoesSiblingFolderExist(subFolder, output);
+							DoesSiblingFolderExist(subFolder, newFolderName);
 
 						if (folderExists == true)
 						{
 							MAPIFolder parentFolder = subFolder.Parent;
 
 							// Move items
-							MAPIFolder destination = parentFolder.Folders[output];
+							MAPIFolder destination =
+								parentFolder.Folders[newFolderName];
 
 							MoveFolderContents(subFolder, destination);
 
@@ -245,7 +246,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						}
 						else
 						{
-							subFolder.Name = output;
+							subFolder.Name = newFolderName;
 						}
 					}
 
