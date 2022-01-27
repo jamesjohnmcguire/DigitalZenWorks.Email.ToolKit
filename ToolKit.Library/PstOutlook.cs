@@ -369,13 +369,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private static void MoveFolderContents(
-			MAPIFolder source, MAPIFolder destination)
-		{
-			MoveFolderItems(source, destination);
-			MoveFolderFolders(source, destination);
-		}
-
 		private static bool DoesSiblingFolderExist(
 					MAPIFolder folder, string folderName)
 		{
@@ -396,6 +389,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			Marshal.ReleaseComObject(parentFolder);
 
 			return folderExists;
+		}
+
+		private static void MoveFolderContents(
+			MAPIFolder source, MAPIFolder destination)
+		{
+			MoveFolderItems(source, destination);
+			MoveFolderFolders(source, destination);
 		}
 
 		private static void MoveFolderFolders(
