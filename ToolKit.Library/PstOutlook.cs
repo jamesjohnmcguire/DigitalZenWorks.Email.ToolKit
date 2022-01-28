@@ -233,6 +233,40 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Merge duplicate folders.
+		/// </summary>
+		public void MergeFolders()
+		{
+			foreach (Store store in outlookNamespace.Session.Stores)
+			{
+				string storePath = GetStoreName(store) + "::";
+
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				for (int index = rootFolder.Folders.Count - 1;
+					index >= 0; index--)
+				{
+					string path = storePath + rootFolder.Name;
+
+					// Office uses 1 based indexes from VBA.
+					int offset = index + 1;
+
+					MAPIFolder subFolder = rootFolder.Folders[offset];
+					MergeFolders(path, subFolder);
+
+					totalFolders++;
+					Marshal.ReleaseComObject(subFolder);
+				}
+
+				totalFolders++;
+				Marshal.ReleaseComObject(rootFolder);
+			}
+
+			Log.Info("Remove empty folder complete - total folder checked:" +
+				totalFolders);
+		}
+
+		/// <summary>
 		/// Merge folders.
 		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
