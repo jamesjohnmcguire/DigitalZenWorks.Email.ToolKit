@@ -197,6 +197,74 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			Marshal.ReleaseComObject(rootFolder);
 		}
 
+		private static void TestRegex()
+		{
+			string input = "123ABC79";
+			string pattern = @"\d+$";
+			string result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			input = "2000";
+			pattern = @"\d+$";
+			result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			input = "Testing9";
+			pattern = @"[A-Za-z](.*)\d+$";
+			result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			input = "Testing9";
+			pattern = @"[A-Za-z]+(?<test>\d+)$";
+			result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			input = "Testing9";
+			pattern = @"[A-Za-z](.*)\d{1,}$";
+			result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			string sample = "hello-world-";
+			Regex regex = new Regex("-(?<test>[^-]*)-");
+
+			Match match = regex.Match(sample);
+
+			if (match.Success)
+			{
+				Console.WriteLine(match.Groups["test"].Value);
+			}
+
+			input = "abc_123_def";
+			result = Regex.Replace(input, @"(?<=abc_)\d+(?=_def)", "999");
+
+			input = "abc_123_def";
+			result = Regex.Replace(input, @"(?<=[a-z](.*)_)\d+(?=_def)", "999");
+
+			input = "abc_123";
+			result = Regex.Replace(input, @"(?<=[a-z](.*)_)\d+", "999");
+
+			input = "abc123";
+			result = Regex.Replace(input, @"(?<=[a-z](.*))\d+", string.Empty);
+
+			input = "2000";
+			result = Regex.Replace(input, @"(?<=[a-z](.*))\d+", string.Empty);
+		}
+
 		private static void TestSetTree(string path, Encoding encoding)
 		{
 			path += @"\Folders.dbx";
