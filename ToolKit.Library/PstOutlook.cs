@@ -252,7 +252,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					MergeFolders(subPath, subFolder);
 
-					MergeDuplicateFolder(path, offset, subFolder);
+					CheckForDuplicateFolders(path, offset, subFolder);
 
 					totalFolders++;
 					Marshal.ReleaseComObject(subFolder);
@@ -479,6 +479,20 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		private void CheckForDuplicateFolders(
+			string path, int index, MAPIFolder folder)
+		{
+			string[] duplicatePatterns =
+			{
+				@"\s*\(\d*?\)", @"\s*-\s*Copy"
+			};
+
+			foreach (string duplicatePattern in duplicatePatterns)
+			{
+				MergeDuplicateFolder(path, index, folder, duplicatePattern);
+			}
+		}
+
 		private void MoveFolderContents(
 			string path, MAPIFolder source, MAPIFolder destination)
 		{
@@ -530,10 +544,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private void MergeDuplicateFolder(
-			string path, int index, MAPIFolder folder)
+			string path, int index, MAPIFolder folder, string duplicatePattern)
 		{
-			string duplicatePattern = @"\s*\(\d*?\)";
-
 			if (Regex.IsMatch(
 				folder.Name, duplicatePattern, RegexOptions.IgnoreCase))
 			{
@@ -541,7 +553,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					folder.Name,
 					duplicatePattern,
 					string.Empty,
-					RegexOptions.IgnoreCase);
+					RegexOptions.ExplicitCapture);
 
 				bool folderExists =
 					DoesSiblingFolderExist(folder, newFolderName);
