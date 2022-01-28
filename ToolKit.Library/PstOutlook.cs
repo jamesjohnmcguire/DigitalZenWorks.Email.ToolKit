@@ -408,50 +408,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return folderExists;
 		}
 
-		private static void MoveFolderContents(
-			MAPIFolder source, MAPIFolder destination)
-		{
-			MoveFolderItems(source, destination);
-			MoveFolderFolders(source, destination);
-		}
-
-		private static void MoveFolderFolders(
-			MAPIFolder source, MAPIFolder destination)
-		{
-			for (int index = source.Folders.Count - 1; index >= 0; index--)
-			{
-				int offset = index + 1;
-				MAPIFolder subFolder = source.Folders[offset];
-
-				MAPIFolder destinationSubFolder =
-					GetSubFolder(destination, subFolder.Name);
-
-				if (destinationSubFolder == null)
-				{
-					// Folder doesn't already exist, so just move it.
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"Moving {0} to {1}",
-						subFolder.Name,
-						destination.Name);
-					Log.Info(message);
-					subFolder.MoveTo(destination);
-				}
-				else
-				{
-					// Folder exists, so if just moving it, it will get
-					// renamed something FolderName (2), so need to merge.
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"Merging {0} to {1}",
-						subFolder.Name,
-						destination.Name);
-					Log.Info(message);
-					MoveFolderContents(subFolder, destinationSubFolder);
-				}
-			}
-		}
-
 		private static void MoveFolderItems(
 			MAPIFolder source, MAPIFolder destination)
 		{
@@ -523,6 +479,56 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		private void MoveFolderContents(
+			string path, MAPIFolder source, MAPIFolder destination)
+		{
+			MoveFolderItems(source, destination);
+			MoveFolderFolders(path, source, destination);
+		}
+
+		private void MoveFolderFolders(
+			string path, MAPIFolder source, MAPIFolder destination)
+		{
+			for (int index = source.Folders.Count - 1; index >= 0; index--)
+			{
+				int offset = index + 1;
+				MAPIFolder subFolder = source.Folders[offset];
+
+				MAPIFolder destinationSubFolder =
+					GetSubFolder(destination, subFolder.Name);
+
+				if (destinationSubFolder == null)
+				{
+					// Folder doesn't already exist, so just move it.
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"at: {0} Moving {1} to {2}",
+						path,
+						subFolder.Name,
+						destination.Name);
+					Log.Info(message);
+					subFolder.MoveTo(destination);
+				}
+				else
+				{
+					// Folder exists, so if just moving it, it will get
+					// renamed something FolderName (2), so need to merge.
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"at: {0} Merging {1} to {2}",
+						path,
+						subFolder.Name,
+						destination.Name);
+					Log.Info(message);
+					MoveFolderContents(path, subFolder, destinationSubFolder);
+
+					// Once all the items have been moved,
+					// now remove the folder.
+					RemoveFolder(source, offset, subFolder, path, false);
+				}
+			}
+		}
+
 		private void MergeDuplicateFolder(
 			string path, int index, MAPIFolder folder)
 		{
@@ -548,7 +554,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					MAPIFolder destination =
 						parentFolder.Folders[newFolderName];
 
-					MoveFolderContents(folder, destination);
+					MoveFolderContents(path, folder, destination);
 
 					// Once all the items have been moved,
 					// now remove the folder.
