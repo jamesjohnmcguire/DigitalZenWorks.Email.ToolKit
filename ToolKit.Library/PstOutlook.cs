@@ -359,6 +359,50 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Remove all empty folders.
+		/// </summary>
+		/// <param name="path">The path of the curent folder.</param>
+		/// <param name="folder">The current folder.</param>
+		/// <returns>Indicates whether the current folder is empty
+		/// or not.</returns>
+		public bool RemoveEmptyFolders(string path, MAPIFolder folder)
+		{
+			bool isEmpty = false;
+
+			if (folder != null)
+			{
+				for (int index = folder.Folders.Count - 1; index >= 0; index--)
+				{
+					// Office uses 1 based indexes from VBA.
+					int offset = index + 1;
+
+					MAPIFolder subFolder = folder.Folders[offset];
+
+					string subPath = path + "/" + subFolder.Name;
+
+					bool subFolderEmtpy =
+						RemoveEmptyFolders(subPath, subFolder);
+
+					if (subFolderEmtpy == true)
+					{
+						RemoveFolder(
+							folder, offset, subFolder, subPath, false);
+					}
+
+					totalFolders++;
+					Marshal.ReleaseComObject(subFolder);
+				}
+
+				if (folder.Folders.Count == 0 && folder.Items.Count == 0)
+				{
+					isEmpty = true;
+				}
+			}
+
+			return isEmpty;
+		}
+
+		/// <summary>
 		/// Remove folder from PST store.
 		/// </summary>
 		/// <param name="parentFolder">The parent folder.</param>
@@ -611,38 +655,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					folder.Name = newFolderName;
 				}
 			}
-		}
-
-		private bool RemoveEmptyFolders(string path, MAPIFolder folder)
-		{
-			bool isEmpty = false;
-
-			for (int index = folder.Folders.Count - 1; index >= 0; index--)
-			{
-				// Office uses 1 based indexes from VBA.
-				int offset = index + 1;
-
-				MAPIFolder subFolder = folder.Folders[offset];
-
-				string subPath = path + "/" + subFolder.Name;
-
-				bool subFolderEmtpy = RemoveEmptyFolders(subPath, subFolder);
-
-				if (subFolderEmtpy == true)
-				{
-					RemoveFolder(folder, offset, subFolder, subPath, false);
-				}
-
-				totalFolders++;
-				Marshal.ReleaseComObject(subFolder);
-			}
-
-			if (folder.Folders.Count == 0 && folder.Items.Count == 0)
-			{
-				isEmpty = true;
-			}
-
-			return isEmpty;
 		}
 	}
 }
