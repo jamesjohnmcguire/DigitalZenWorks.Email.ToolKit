@@ -104,7 +104,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			FileInfo fileInfo = new (filePath);
 
 			if (fileInfo.Name.Equals(
-				"Folders.dbx", StringComparison.Ordinal))
+				"Folders.dbx", StringComparison.OrdinalIgnoreCase))
 			{
 				DbxDirectoryToPst(filePath, pstPath);
 			}
@@ -183,7 +183,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				// The search folder doesn't seem to contain any actual
 				// message content, so it would be justa a waste of time.
 				if (!dbxFolder.FolderName.Equals(
-					"Search Folder", StringComparison.Ordinal))
+					"Search Folder", StringComparison.OrdinalIgnoreCase))
 				{
 					// add folder to pst
 					if (dbxFolder.FolderParentId == 0)
