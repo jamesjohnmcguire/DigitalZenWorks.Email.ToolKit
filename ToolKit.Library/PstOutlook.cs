@@ -362,8 +362,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						}
 						else
 						{
-							RemoveFolder(
-								rootFolder, offset, subFolder, path, false);
+							RemoveFolder(path, offset, subFolder, false);
 						}
 					}
 
@@ -406,8 +405,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (subFolderEmtpy == true)
 					{
-						RemoveFolder(
-							folder, offset, subFolder, subPath, false);
+						RemoveFolder(subPath, offset, subFolder, false);
 					}
 
 					totalFolders++;
@@ -426,19 +424,49 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Remove folder from PST store.
 		/// </summary>
-		/// <param name="parentFolder">The parent folder.</param>
-		/// <param name="subFolderIndex">The index of the sub-folder.</param>
-		/// <param name="subFolder">The sub-folder.</param>
 		/// <param name="path">The path of current folder.</param>
+		/// <param name="subFolder">The sub-folder.</param>
 		/// <param name="force">Whether to force the removal.</param>
 		public void RemoveFolder(
-			MAPIFolder parentFolder,
-			int subFolderIndex,
-			MAPIFolder subFolder,
 			string path,
+			MAPIFolder subFolder,
 			bool force)
 		{
-			if (parentFolder != null && subFolder != null)
+			if (subFolder != null)
+			{
+				MAPIFolder parentFolder = subFolder.Parent;
+
+				int count = parentFolder.Folders.Count;
+				int index;
+				for (index = 1; index <= count; index++)
+				{
+					MAPIFolder folder = parentFolder.Folders[index];
+
+					if (folder.Name.Equals(
+						subFolder.Name, StringComparison.Ordinal))
+					{
+						break;
+					}
+				}
+
+				RemoveFolder(path, index, subFolder, false);
+			}
+		}
+
+		/// <summary>
+		/// Remove folder from PST store.
+		/// </summary>
+		/// <param name="path">The path of current folder.</param>
+		/// <param name="subFolderIndex">The index of the sub-folder.</param>
+		/// <param name="subFolder">The sub-folder.</param>
+		/// <param name="force">Whether to force the removal.</param>
+		public void RemoveFolder(
+			string path,
+			int subFolderIndex,
+			MAPIFolder subFolder,
+			bool force)
+		{
+			if (subFolder != null)
 			{
 				// Perhaps because interaction through COM interop, the count
 				// values sometimes seem a bit behind, so pause a little bit
@@ -459,6 +487,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					try
 					{
+						MAPIFolder parentFolder = subFolder.Parent;
+
 						parentFolder.Folders.Remove(subFolderIndex);
 					}
 					catch (COMException exception)
@@ -637,7 +667,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					// Once all the items have been moved,
 					// now remove the folder.
-					RemoveFolder(source, offset, subFolder, path, false);
+					RemoveFolder(path, offset, subFolder, false);
 				}
 			}
 		}
@@ -669,7 +699,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					// Once all the items have been moved,
 					// now remove the folder.
-					RemoveFolder(parentFolder, index, folder, path, false);
+					RemoveFolder(path, index, folder, false);
 				}
 				else
 				{
