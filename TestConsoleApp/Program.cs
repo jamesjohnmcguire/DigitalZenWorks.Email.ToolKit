@@ -178,9 +178,12 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			PstOutlook.AddFolderSafe(subFolder, "Testing2");
 			PstOutlook.AddFolderSafe(subFolder, "Testing2 (1)");
 
-			string emlFile = @"C:\Users\JamesMc\Data\ProgramData\Email\" +
-				@"EmailStores\Re_ Home Internet Connection.eml";
-			Migrate.EmlToPst(emlFile, storePath);
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(subFolder);
+
 			subFolder = PstOutlook.AddFolderSafe(
 				mainFolder, "Testing (1)");
 			PstOutlook.AddFolderSafe(subFolder, "Testing2");
