@@ -703,7 +703,19 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
-					folder.Name = newFolderName;
+					try
+					{
+						folder.Name = newFolderName;
+					}
+					catch (COMException)
+					{
+						string message = string.Format(
+							CultureInfo.InvariantCulture,
+							"Failed renaming {0} to {1} with COMException",
+							folder.Name,
+							newFolderName);
+						Log.Error(message);
+					}
 				}
 			}
 		}
