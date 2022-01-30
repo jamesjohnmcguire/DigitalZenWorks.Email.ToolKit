@@ -122,7 +122,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				foreach (MAPIFolder subFolder in parentFolder.Folders)
 				{
 					if (folderName.Equals(
-						subFolder.Name, StringComparison.Ordinal))
+						subFolder.Name, StringComparison.OrdinalIgnoreCase))
 					{
 						pstFolder = subFolder;
 						break;
@@ -332,7 +332,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				string extension = Path.GetExtension(store.FilePath);
 
-				if (extension.Equals(".ost", StringComparison.Ordinal))
+				if (extension.Equals(
+					".ost", StringComparison.OrdinalIgnoreCase))
 				{
 					// for the time being, ignore ost files.
 					continue;
@@ -443,7 +444,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					MAPIFolder folder = parentFolder.Folders[index];
 
 					if (folder.Name.Equals(
-						subFolder.Name, StringComparison.Ordinal))
+						subFolder.Name, StringComparison.OrdinalIgnoreCase))
 					{
 						break;
 					}
@@ -525,7 +526,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			foreach (MAPIFolder subFolder in parentFolder.Folders)
 			{
 				if (folderName.Equals(
-					subFolder.Name, StringComparison.Ordinal))
+					subFolder.Name, StringComparison.OrdinalIgnoreCase))
 				{
 					folderExists = true;
 					break;
