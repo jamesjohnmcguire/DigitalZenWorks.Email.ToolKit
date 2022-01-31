@@ -38,12 +38,17 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			// PST provider in Outlook keeps the PST file open for 30 minutes
 			// after closing it for the performance reasons. So, try to delete
 			// it now, as it may be more than 30 minutes since last access.
-			try
+			bool exists = File.Exists(storePath);
+
+			if (exists == true)
 			{
-				File.Delete(storePath);
-			}
-			catch (IOException)
-			{
+				try
+				{
+					File.Delete(storePath);
+				}
+				catch (IOException)
+				{
+				}
 			}
 
 			store = pstOutlook.CreateStore(storePath);
@@ -95,10 +100,96 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder subFolder = PstOutlook.AddFolderSafe(
 				rootFolder, "Temporary Test Folder");
 
-			pstOutlook.RemoveFolder(
-				rootFolder, 2, subFolder, rootFolder.Name, false);
+			pstOutlook.RemoveFolder(rootFolder.Name, subFolder, false);
 
 			Marshal.ReleaseComObject(subFolder);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				PstOutlook.GetSubFolder(rootFolder, "Temporary Test Folder");
+
+			Assert.IsNull(subFolder);
+
+			if (subFolder != null)
+			{
+				Marshal.ReleaseComObject(subFolder);
+			}
+
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folder.
+		/// </summary>
+		[Test]
+		public void TestRemoveEmptyFolders()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			MAPIFolder subFolder = PstOutlook.AddFolderSafe(
+				rootFolder, "Temporary Test Folder");
+			Marshal.ReleaseComObject(subFolder);
+
+			storePath = PstOutlook.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			pstOutlook.RemoveEmptyFolders(path, rootFolder);
+
+			subFolder =
+				PstOutlook.GetSubFolder(rootFolder, "Temporary Test Folder");
+
+			Assert.IsNull(subFolder);
+
+			if (subFolder != null)
+			{
+				Marshal.ReleaseComObject(subFolder);
+			}
+
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		[Test]
+		public void TestMergeFolders()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = PstOutlook.AddFolderSafe(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				PstOutlook.AddFolderSafe(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			subFolder = PstOutlook.AddFolderSafe(mainFolder, "Testing (1)");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(subFolder);
+
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(subFolder);
+
+			// Review
+			storePath = PstOutlook.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			pstOutlook.MergeFolders(path, rootFolder);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				PstOutlook.GetSubFolder(mainFolder, "Testing (1)");
+
+			Assert.IsNull(subFolder);
+
+			// Clean up
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
 		}
 	}
 }
