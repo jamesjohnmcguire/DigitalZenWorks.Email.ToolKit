@@ -50,6 +50,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				if (arguments != null && arguments.Length > 0)
 				{
 					bool valid;
+					PstOutlook pstOutlook;
+
 					switch (arguments[0])
 					{
 						case "dbx-to-pst":
@@ -81,8 +83,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							ShowHelp();
 							result = 0;
 							break;
+						case "merge-folders":
+							pstOutlook = new ();
+							pstOutlook.MergeFolders();
+							result = 0;
+							break;
 						case "remove-empty-folders":
-							PstOutlook pstOutlook = new ();
+							pstOutlook = new ();
 							pstOutlook.RemoveEmptyFolders();
 
 							result = 0;
@@ -306,6 +313,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Log.Info("Commands:");
 			Log.Info("dbx-to-pst            Migrate dbx files to pst file");
 			Log.Info("eml-to-pst            Migrate eml files to pst file");
+			Log.Info("merge-folders         Merge duplicate folders");
 			Log.Info("remove-empty-folders  Prune empty folders");
 			Log.Info("help                  Show this information");
 		}

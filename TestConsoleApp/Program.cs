@@ -18,6 +18,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 [assembly: CLSCompliant(true)]
 
@@ -53,6 +54,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			Log.Info("Test console app");
 
 			TestTargetFrameworks();
+
+			TestMergeFolders();
 
 			Encoding.RegisterProvider(
 				CodePagesEncodingProvider.Instance);
@@ -152,6 +155,117 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			DbxSet set = new (path, encoding);
 
 			set.List();
+		}
+
+		private static void TestMergeFolders()
+		{
+			// Create test store.
+			string basePath = Path.GetTempPath();
+			string storePath = basePath + "Test.pst";
+
+			PstOutlook pstOutlook = new ();
+			Store store = pstOutlook.CreateStore(storePath);
+
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			MAPIFolder mainFolder = PstOutlook.AddFolderSafe(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				PstOutlook.AddFolderSafe(mainFolder, "Testing");
+			PstOutlook.AddFolderSafe(subFolder, "Testing2");
+			PstOutlook.AddFolderSafe(subFolder, "Testing2 (1)");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(subFolder);
+
+			subFolder = PstOutlook.AddFolderSafe(
+				mainFolder, "Testing (1)");
+			PstOutlook.AddFolderSafe(subFolder, "Testing2");
+			PstOutlook.AddFolderSafe(subFolder, "Testing2 (1)");
+
+			// Review
+			storePath = PstOutlook.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			pstOutlook.MergeFolders(path, rootFolder);
+
+			// Clean up
+			Marshal.ReleaseComObject(subFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		private static void TestRegex()
+		{
+			string input = "123ABC79";
+			string pattern = @"\d+$";
+			string result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			input = "2000";
+			pattern = @"\d+$";
+			result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			input = "Testing9";
+			pattern = @"[A-Za-z](.*)\d+$";
+			result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			input = "Testing9";
+			pattern = @"[A-Za-z]+(?<test>\d+)$";
+			result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			input = "Testing9";
+			pattern = @"[A-Za-z](.*)\d{1,}$";
+			result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			string sample = "hello-world-";
+			Regex regex = new Regex("-(?<test>[^-]*)-");
+
+			Match match = regex.Match(sample);
+
+			if (match.Success)
+			{
+				Console.WriteLine(match.Groups["test"].Value);
+			}
+
+			input = "abc_123_def";
+			result = Regex.Replace(input, @"(?<=abc_)\d+(?=_def)", "999");
+
+			input = "abc_123_def";
+			result = Regex.Replace(input, @"(?<=[a-z](.*)_)\d+(?=_def)", "999");
+
+			input = "abc_123";
+			result = Regex.Replace(input, @"(?<=[a-z](.*)_)\d+", "999");
+
+			input = "abc123";
+			result = Regex.Replace(input, @"(?<=[a-z](.*))\d+", string.Empty);
+
+			input = "2000";
+			result = Regex.Replace(input, @"(?<=[a-z](.*))\d+", string.Empty);
 		}
 
 		private static void TestSetTree(string path, Encoding encoding)
