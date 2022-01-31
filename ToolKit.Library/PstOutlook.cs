@@ -139,7 +139,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstStore">The pst store to check.</param>
 		/// <param name="folderName">The folder name.</param>
 		/// <returns>The MAPIFolder object.</returns>
-		public static MAPIFolder GetTopLevelFolder(Store pstStore, string folderName)
+		public static MAPIFolder GetTopLevelFolder(
+			Store pstStore, string folderName)
 		{
 			MAPIFolder pstFolder = null;
 
@@ -264,15 +265,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				for (int index = rootFolder.Folders.Count - 1;
-					index >= 0; index--)
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int index = rootFolder.Folders.Count; index > 0; index--)
 				{
 					string path = storePath + rootFolder.Name;
 
-					// Office uses 1 based indexes from VBA.
-					int offset = index + 1;
-
-					MAPIFolder subFolder = rootFolder.Folders[offset];
+					MAPIFolder subFolder = rootFolder.Folders[index];
 					MergeFolders(path, subFolder);
 
 					totalFolders++;
@@ -296,18 +295,17 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
-				for (int index = folder.Folders.Count - 1; index >= 0; index--)
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int index = folder.Folders.Count; index > 0; index--)
 				{
-					// Office uses 1 based indexes from VBA.
-					int offset = index + 1;
-
-					MAPIFolder subFolder = folder.Folders[offset];
+					MAPIFolder subFolder = folder.Folders[index];
 
 					string subPath = path + "/" + subFolder.Name;
 
 					MergeFolders(subPath, subFolder);
 
-					CheckForDuplicateFolders(path, offset, subFolder);
+					CheckForDuplicateFolders(path, index, subFolder);
 
 					totalFolders++;
 					Marshal.ReleaseComObject(subFolder);
@@ -343,15 +341,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				for (int index = rootFolder.Folders.Count - 1;
-					index >= 0; index--)
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int index = rootFolder.Folders.Count; index > 0; index--)
 				{
 					string path = storePath + rootFolder.Name;
 
-					// Office uses 1 based indexes from VBA.
-					int offset = index + 1;
-
-					MAPIFolder subFolder = rootFolder.Folders[offset];
+					MAPIFolder subFolder = rootFolder.Folders[index];
 					bool subFolderEmtpy = RemoveEmptyFolders(path, subFolder);
 
 					if (subFolderEmtpy == true)
@@ -363,7 +359,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						}
 						else
 						{
-							RemoveFolder(path, offset, subFolder, false);
+							RemoveFolder(path, index, subFolder, false);
 						}
 					}
 
@@ -392,12 +388,11 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (folder != null)
 			{
-				for (int index = folder.Folders.Count - 1; index >= 0; index--)
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int index = folder.Folders.Count; index > 0; index--)
 				{
-					// Office uses 1 based indexes from VBA.
-					int offset = index + 1;
-
-					MAPIFolder subFolder = folder.Folders[offset];
+					MAPIFolder subFolder = folder.Folders[index];
 
 					string subPath = path + "/" + subFolder.Name;
 
@@ -406,7 +401,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (subFolderEmtpy == true)
 					{
-						RemoveFolder(subPath, offset, subFolder, false);
+						RemoveFolder(subPath, index, subFolder, false);
 					}
 
 					totalFolders++;
@@ -474,8 +469,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				// before moving on.
 				System.Threading.Thread.Sleep(100);
 
-				if (subFolder.Folders.Count > 0 ||
-					subFolder.Items.Count > 0)
+				if (subFolder.Folders.Count > 0 || subFolder.Items.Count > 0)
 				{
 					Log.Warn("Attempting to remove non empty folder: " + path);
 				}
@@ -543,10 +537,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			Items items = source.Items;
 
-			for (int index = items.Count - 1; index >= 0; index--)
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int index = items.Count; index > 0; index--)
 			{
-				int offset = index + 1;
-				object item = items[offset];
+				object item = items[index];
 
 				switch (item)
 				{
@@ -633,10 +628,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		private void MoveFolderFolders(
 			string path, MAPIFolder source, MAPIFolder destination)
 		{
-			for (int index = source.Folders.Count - 1; index >= 0; index--)
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int index = source.Folders.Count; index > 0; index--)
 			{
-				int offset = index + 1;
-				MAPIFolder subFolder = source.Folders[offset];
+				MAPIFolder subFolder = source.Folders[index];
 
 				MAPIFolder destinationSubFolder =
 					GetSubFolder(destination, subFolder.Name);
@@ -657,18 +653,20 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					// Folder exists, so if just moving it, it will get
 					// renamed something FolderName (2), so need to merge.
+					string subPath = path + "/" + subFolder.Name;
+
 					string message = string.Format(
 						CultureInfo.InvariantCulture,
 						"at: {0} Merging {1} to {2}",
-						path,
+						subPath,
 						subFolder.Name,
 						destination.Name);
 					Log.Info(message);
-					MoveFolderContents(path, subFolder, destinationSubFolder);
+					MoveFolderContents(subPath, subFolder, destinationSubFolder);
 
 					// Once all the items have been moved,
 					// now remove the folder.
-					RemoveFolder(path, offset, subFolder, false);
+					RemoveFolder(path, index, subFolder, false);
 				}
 			}
 		}
