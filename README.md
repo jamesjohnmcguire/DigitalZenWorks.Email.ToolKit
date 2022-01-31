@@ -1,6 +1,6 @@
 # DigitalZenWorks.Email.ToolKit
 
-This is a C# library for interacting with email messages and storage.
+This is a C# application and library for interacting with email messages and storage.
 
 ## Getting Started
 
