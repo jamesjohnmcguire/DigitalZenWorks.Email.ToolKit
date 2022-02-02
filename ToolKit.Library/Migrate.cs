@@ -161,61 +161,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Copy folder to pst store.
-		/// </summary>
-		/// <param name="mappings">The mappings file to add to.</param>
-		/// <param name="pstOutlook">The pst object to use.</param>
-		/// <param name="pstStore">The store to use.</param>
-		/// <param name="rootFolder">The root folder of the store.</param>
-		/// <param name="dbxFolder">The dbx folder to add.</param>
-		public static void CopyFolderToPst(
-			IDictionary<uint, string> mappings,
-			PstOutlook pstOutlook,
-			Store pstStore,
-			MAPIFolder rootFolder,
-			DbxFolder dbxFolder)
-		{
-			if (mappings != null && pstOutlook != null &&
-				pstStore != null && dbxFolder != null)
-			{
-				MAPIFolder pstFolder;
-
-				// The search folder doesn't seem to contain any actual
-				// message content, so it would be justa a waste of time.
-				if (!dbxFolder.FolderName.Equals(
-					"Search Folder", StringComparison.OrdinalIgnoreCase))
-				{
-					// add folder to pst
-					if (dbxFolder.FolderParentId == 0)
-					{
-						// top level folder
-						pstFolder = PstOutlook.AddFolderSafe(
-							rootFolder, dbxFolder.FolderName);
-					}
-					else
-					{
-						pstFolder = CopyChildFolderToPst(
-							mappings,
-							pstOutlook,
-							pstStore,
-							dbxFolder);
-					}
-
-					if (pstFolder != null)
-					{
-						AddMappingSafe(mappings, pstFolder, dbxFolder);
-
-						CopyMessages(pstOutlook, pstFolder, dbxFolder);
-					}
-					else
-					{
-						Log.Warn("pstFolder is null: " + dbxFolder.FolderName);
-					}
-				}
-			}
-		}
-
-		/// <summary>
 		/// Dbx to pst.
 		/// </summary>
 		/// <param name="path">the path of the eml file.</param>
@@ -324,6 +269,61 @@ namespace DigitalZenWorks.Email.ToolKit
 				pstOutlook.AddMsgFile(pstFolder, msgFile);
 
 				File.Delete(msgFile);
+			}
+		}
+
+		/// <summary>
+		/// Copy folder to pst store.
+		/// </summary>
+		/// <param name="mappings">The mappings file to add to.</param>
+		/// <param name="pstOutlook">The pst object to use.</param>
+		/// <param name="pstStore">The store to use.</param>
+		/// <param name="rootFolder">The root folder of the store.</param>
+		/// <param name="dbxFolder">The dbx folder to add.</param>
+		private static void CopyFolderToPst(
+			IDictionary<uint, string> mappings,
+			PstOutlook pstOutlook,
+			Store pstStore,
+			MAPIFolder rootFolder,
+			DbxFolder dbxFolder)
+		{
+			if (mappings != null && pstOutlook != null &&
+				pstStore != null && dbxFolder != null)
+			{
+				MAPIFolder pstFolder;
+
+				// The search folder doesn't seem to contain any actual
+				// message content, so it would be justa a waste of time.
+				if (!dbxFolder.FolderName.Equals(
+					"Search Folder", StringComparison.OrdinalIgnoreCase))
+				{
+					// add folder to pst
+					if (dbxFolder.FolderParentId == 0)
+					{
+						// top level folder
+						pstFolder = PstOutlook.AddFolderSafe(
+							rootFolder, dbxFolder.FolderName);
+					}
+					else
+					{
+						pstFolder = CopyChildFolderToPst(
+							mappings,
+							pstOutlook,
+							pstStore,
+							dbxFolder);
+					}
+
+					if (pstFolder != null)
+					{
+						AddMappingSafe(mappings, pstFolder, dbxFolder);
+
+						CopyMessages(pstOutlook, pstFolder, dbxFolder);
+					}
+					else
+					{
+						Log.Warn("pstFolder is null: " + dbxFolder.FolderName);
+					}
+				}
 			}
 		}
 
