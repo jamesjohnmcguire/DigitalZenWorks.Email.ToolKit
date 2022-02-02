@@ -117,26 +117,6 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			Converter.ConvertEmlToMsg(dbxStream, msgStream);
 		}
 
-		private static void TestCreateFolder(
-			string pstPath, DbxFolder dbxFolder)
-		{
-			IDictionary<uint, string> mappings =
-				new Dictionary<uint, string>();
-
-			PstOutlook pstOutlook = new ();
-			Store pstStore = pstOutlook.CreateStore(pstPath);
-			MAPIFolder rootFolder = pstStore.GetRootFolder();
-
-			Migrate.CopyFolderToPst(
-				mappings,
-				pstOutlook,
-				pstStore,
-				rootFolder,
-				dbxFolder);
-
-			Marshal.ReleaseComObject(rootFolder);
-		}
-
 		private static void TestFolder(string path, Encoding encoding)
 		{
 			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
