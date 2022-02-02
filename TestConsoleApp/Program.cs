@@ -61,9 +61,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				CodePagesEncodingProvider.Instance);
 			Encoding encoding = Encoding.GetEncoding("shift_jis");
 
-			string path = BaseDataDirectory + @"\TestFolder\Inbox.dbx";
-
-			path = BaseDataDirectory + @"\TestFolder";
+			string path = BaseDataDirectory + @"\TestFolder";
 
 			TestConvertToMsgFile(path, encoding);
 
@@ -223,7 +221,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				RegexOptions.ExplicitCapture);
 
 			string sample = "hello-world-";
-			Regex regex = new Regex("-(?<test>[^-]*)-");
+			Regex regex = new ("-(?<test>[^-]*)-");
 
 			Match match = regex.Match(sample);
 
@@ -231,15 +229,6 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			{
 				Console.WriteLine(match.Groups["test"].Value);
 			}
-
-			input = "abc_123_def";
-			result = Regex.Replace(input, @"(?<=abc_)\d+(?=_def)", "999");
-
-			input = "abc_123_def";
-			result = Regex.Replace(input, @"(?<=[a-z](.*)_)\d+(?=_def)", "999");
-
-			input = "abc_123";
-			result = Regex.Replace(input, @"(?<=[a-z](.*)_)\d+", "999");
 
 			input = "abc123";
 			result = Regex.Replace(input, @"(?<=[a-z](.*))\d+", string.Empty);
