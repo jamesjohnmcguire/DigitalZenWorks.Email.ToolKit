@@ -1,5 +1,5 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
-// <copyright file="PstOutlook.cs" company="James John McGuire">
+// <copyright file="OutlookStorage.cs" company="James John McGuire">
 // Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <summary>
 	/// Provides support for interacting with an Outlook PST file.
 	/// </summary>
-	public class PstOutlook
+	public class OutlookStorage
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -30,9 +30,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		private uint removedFolders;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="PstOutlook"/> class.
+		/// Initializes a new instance of the <see cref="OutlookStorage"/> class.
 		/// </summary>
-		public PstOutlook()
+		public OutlookStorage()
 		{
 			outlookApplication = new ();
 
