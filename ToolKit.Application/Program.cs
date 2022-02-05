@@ -50,7 +50,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				if (arguments != null && arguments.Length > 0)
 				{
 					bool valid;
-					PstOutlook pstOutlook;
+					OutlookStorage pstOutlook;
 
 					switch (arguments[0])
 					{

@@ -111,7 +111,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			File.Delete(msgPath);
 
 			using Stream msgStream =
-				PstOutlook.GetMsgFileStream(msgPath);
+				OutlookStorage.GetMsgFileStream(msgPath);
 			Converter.ConvertEmlToMsg(dbxStream, msgStream);
 		}
 
@@ -141,20 +141,20 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			string basePath = Path.GetTempPath();
 			string storePath = basePath + "Test.pst";
 
-			PstOutlook pstOutlook = new ();
+			OutlookStorage pstOutlook = new ();
 			Store store = pstOutlook.CreateStore(storePath);
 
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder mainFolder = PstOutlook.AddFolderSafe(
+			MAPIFolder mainFolder = OutlookStorage.AddFolderSafe(
 				rootFolder, "Main Test Folder");
 
 			// Create sub folders
 			MAPIFolder subFolder =
-				PstOutlook.AddFolderSafe(mainFolder, "Testing");
-			PstOutlook.AddFolderSafe(subFolder, "Testing2");
-			PstOutlook.AddFolderSafe(subFolder, "Testing2 (1)");
+				OutlookStorage.AddFolderSafe(mainFolder, "Testing");
+			OutlookStorage.AddFolderSafe(subFolder, "Testing2");
+			OutlookStorage.AddFolderSafe(subFolder, "Testing2 (1)");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
 				"someone@example.com",
@@ -162,13 +162,13 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem.Move(subFolder);
 
-			subFolder = PstOutlook.AddFolderSafe(
+			subFolder = OutlookStorage.AddFolderSafe(
 				mainFolder, "Testing (1)");
-			PstOutlook.AddFolderSafe(subFolder, "Testing2");
-			PstOutlook.AddFolderSafe(subFolder, "Testing2 (1)");
+			OutlookStorage.AddFolderSafe(subFolder, "Testing2");
+			OutlookStorage.AddFolderSafe(subFolder, "Testing2 (1)");
 
 			// Review
-			storePath = PstOutlook.GetStoreName(store) + "::";
+			storePath = OutlookStorage.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
 			pstOutlook.MergeFolders(path, rootFolder);
