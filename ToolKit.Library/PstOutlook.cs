@@ -136,17 +136,17 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Get top level folder by name.
 		/// </summary>
-		/// <param name="pstStore">The pst store to check.</param>
+		/// <param name="store">The store to check.</param>
 		/// <param name="folderName">The folder name.</param>
 		/// <returns>The MAPIFolder object.</returns>
 		public static MAPIFolder GetTopLevelFolder(
-			Store pstStore, string folderName)
+			Store store, string folderName)
 		{
 			MAPIFolder pstFolder = null;
 
-			if (pstStore != null)
+			if (store != null)
 			{
-				MAPIFolder rootFolder = pstStore.GetRootFolder();
+				MAPIFolder rootFolder = store.GetRootFolder();
 
 				pstFolder = AddFolderSafe(rootFolder, folderName);
 			}
