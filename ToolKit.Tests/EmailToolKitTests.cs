@@ -97,7 +97,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder subFolder = OutlookStorage.AddFolderSafe(
+			MAPIFolder subFolder = OutlookStorage.AddFolder(
 				rootFolder, "Temporary Test Folder");
 
 			pstOutlook.RemoveFolder(rootFolder.Name, subFolder, false);
@@ -126,7 +126,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder subFolder = OutlookStorage.AddFolderSafe(
+			MAPIFolder subFolder = OutlookStorage.AddFolder(
 				rootFolder, "Temporary Test Folder");
 			Marshal.ReleaseComObject(subFolder);
 
@@ -156,15 +156,15 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
-			MAPIFolder mainFolder = OutlookStorage.AddFolderSafe(
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			// Create sub folders
 			MAPIFolder subFolder =
-				OutlookStorage.AddFolderSafe(mainFolder, "Testing");
+				OutlookStorage.AddFolder(mainFolder, "Testing");
 			Marshal.ReleaseComObject(subFolder);
 
-			subFolder = OutlookStorage.AddFolderSafe(mainFolder, "Testing (1)");
+			subFolder = OutlookStorage.AddFolder(mainFolder, "Testing (1)");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
 				"someone@example.com",
