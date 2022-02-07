@@ -20,7 +20,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 	/// </summary>
 	public class EmailToolKitTests
 	{
-		private PstOutlook pstOutlook;
+		private OutlookStorage pstOutlook;
 		private Store store;
 		private string storePath;
 
@@ -97,7 +97,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder subFolder = PstOutlook.AddFolderSafe(
+			MAPIFolder subFolder = OutlookStorage.AddFolder(
 				rootFolder, "Temporary Test Folder");
 
 			pstOutlook.RemoveFolder(rootFolder.Name, subFolder, false);
@@ -106,7 +106,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
-				PstOutlook.GetSubFolder(rootFolder, "Temporary Test Folder");
+				OutlookStorage.GetSubFolder(rootFolder, "Temporary Test Folder");
 
 			Assert.IsNull(subFolder);
 
@@ -126,17 +126,17 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder subFolder = PstOutlook.AddFolderSafe(
+			MAPIFolder subFolder = OutlookStorage.AddFolder(
 				rootFolder, "Temporary Test Folder");
 			Marshal.ReleaseComObject(subFolder);
 
-			storePath = PstOutlook.GetStoreName(store) + "::";
+			storePath = OutlookStorage.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
 			pstOutlook.RemoveEmptyFolders(path, rootFolder);
 
 			subFolder =
-				PstOutlook.GetSubFolder(rootFolder, "Temporary Test Folder");
+				OutlookStorage.GetSubFolder(rootFolder, "Temporary Test Folder");
 
 			Assert.IsNull(subFolder);
 
@@ -156,15 +156,15 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
-			MAPIFolder mainFolder = PstOutlook.AddFolderSafe(
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			// Create sub folders
 			MAPIFolder subFolder =
-				PstOutlook.AddFolderSafe(mainFolder, "Testing");
+				OutlookStorage.AddFolder(mainFolder, "Testing");
 			Marshal.ReleaseComObject(subFolder);
 
-			subFolder = PstOutlook.AddFolderSafe(mainFolder, "Testing (1)");
+			subFolder = OutlookStorage.AddFolder(mainFolder, "Testing (1)");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
 				"someone@example.com",
@@ -176,14 +176,14 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Marshal.ReleaseComObject(subFolder);
 
 			// Review
-			storePath = PstOutlook.GetStoreName(store) + "::";
+			storePath = OutlookStorage.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
 			pstOutlook.MergeFolders(path, rootFolder);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
-				PstOutlook.GetSubFolder(mainFolder, "Testing (1)");
+				OutlookStorage.GetSubFolder(mainFolder, "Testing (1)");
 
 			Assert.IsNull(subFolder);
 

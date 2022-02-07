@@ -1,5 +1,5 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
-// <copyright file="PstOutlook.cs" company="James John McGuire">
+// <copyright file="OutlookStorage.cs" company="James John McGuire">
 // Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <summary>
 	/// Provides support for interacting with an Outlook PST file.
 	/// </summary>
-	public class PstOutlook
+	public class OutlookStorage
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -30,9 +30,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		private uint removedFolders;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="PstOutlook"/> class.
+		/// Initializes a new instance of the <see cref="OutlookStorage"/> class.
 		/// </summary>
-		public PstOutlook()
+		public OutlookStorage()
 		{
 			outlookApplication = new ();
 
@@ -42,10 +42,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Add folder in safe context.
 		/// </summary>
+		/// <remarks>If there is a folder already existing with the given
+		/// folder name, this method will return that folder.</remarks>
 		/// <param name="parentFolder">The parent folder.</param>
 		/// <param name="folderName">The new folder name.</param>
-		/// <returns>The added folder.</returns>
-		public static MAPIFolder AddFolderSafe(
+		/// <returns>The added or existing folder.</returns>
+		public static MAPIFolder AddFolder(
 			MAPIFolder parentFolder, string folderName)
 		{
 			MAPIFolder pstFolder = null;
@@ -148,7 +150,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				pstFolder = AddFolderSafe(rootFolder, folderName);
+				pstFolder = AddFolder(rootFolder, folderName);
 			}
 
 			return pstFolder;
