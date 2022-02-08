@@ -4,10 +4,10 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -87,6 +87,41 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		public void TestCreatePstStore()
 		{
 			Assert.NotNull(store);
+		}
+
+		/// <summary>
+		/// Test for checking of duplicate items.
+		/// </summary>
+		[Test]
+		public void TestDuplicateItems()
+		{
+			bool result = false;
+
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			MailItem mailItem2 = pstOutlook.CreateMailItem(
+				"someoneelse@example.com",
+				"This is another subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			mailItem.Save();
+			mailItem2.Save();
+
+			var tester = mailItem.EntryID;
+			var tester2 = mailItem2.EntryID;
+
+			Assert.AreNotEqual(tester, tester2);
+
+			Assert.IsTrue(result);
 		}
 
 		/// <summary>
