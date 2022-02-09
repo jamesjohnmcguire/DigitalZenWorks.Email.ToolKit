@@ -72,21 +72,56 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
-		/// Test for sanity check.
-		/// </summary>
-		[Test]
-		public void TestSanityCheck()
-		{
-			Assert.Pass();
-		}
-
-		/// <summary>
 		/// Test for create pst store.
 		/// </summary>
 		[Test]
 		public void TestCreatePstStore()
 		{
 			Assert.NotNull(store);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		[Test]
+		public void TestMergeFolders()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookStorage.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			subFolder = OutlookStorage.AddFolder(mainFolder, "Testing (1)");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(subFolder);
+
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(subFolder);
+
+			// Review
+			storePath = OutlookStorage.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			pstOutlook.MergeFolders(path, rootFolder);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				OutlookStorage.GetSubFolder(mainFolder, "Testing (1)");
+
+			Assert.IsNull(subFolder);
+
+			// Clean up
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
 		}
 
 		/// <summary>
@@ -149,47 +184,12 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
-		/// Test for removing empty folders.
+		/// Test for sanity check.
 		/// </summary>
 		[Test]
-		public void TestMergeFolders()
+		public void TestSanityCheck()
 		{
-			// Create top level folders
-			MAPIFolder rootFolder = store.GetRootFolder();
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
-				rootFolder, "Main Test Folder");
-
-			// Create sub folders
-			MAPIFolder subFolder =
-				OutlookStorage.AddFolder(mainFolder, "Testing");
-			Marshal.ReleaseComObject(subFolder);
-
-			subFolder = OutlookStorage.AddFolder(mainFolder, "Testing (1)");
-
-			MailItem mailItem = pstOutlook.CreateMailItem(
-				"someone@example.com",
-				"This is the subject",
-				"This is the message.");
-			mailItem.Move(subFolder);
-
-			Marshal.ReleaseComObject(mailItem);
-			Marshal.ReleaseComObject(subFolder);
-
-			// Review
-			storePath = OutlookStorage.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
-
-			pstOutlook.MergeFolders(path, rootFolder);
-
-			System.Threading.Thread.Sleep(200);
-			subFolder =
-				OutlookStorage.GetSubFolder(mainFolder, "Testing (1)");
-
-			Assert.IsNull(subFolder);
-
-			// Clean up
-			Marshal.ReleaseComObject(mainFolder);
-			Marshal.ReleaseComObject(rootFolder);
+			Assert.Pass();
 		}
 	}
 }
