@@ -24,6 +24,17 @@ namespace ToolKit.Library
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		/// <summary>
+		/// Gets the item's hash.
+		/// </summary>
+		/// <param name="item">The items to compute.</param>
+		/// <returns>The item's hash.</returns>
+		public static byte[] GetItemHash(MailItem item)
+		{
+
+			return null;
+		}
+
 		[System.Diagnostics.CodeAnalysis.SuppressMessage(
 			"StyleCop.CSharp.NamingRules",
 			"SA1305:Field names should not use Hungarian notation",
