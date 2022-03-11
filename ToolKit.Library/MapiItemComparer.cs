@@ -4,7 +4,6 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
@@ -17,7 +16,7 @@ namespace ToolKit.Library
 	/// <summary>
 	/// Provides comparision support for Outlook MAPI items.
 	/// </summary>
-	public class MapiItemComparer
+	public static class MapiItemComparer
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -29,7 +28,6 @@ namespace ToolKit.Library
 		/// <returns>The item's hash.</returns>
 		public static byte[] GetItemHash(MailItem item)
 		{
-
 			return null;
 		}
 
@@ -50,9 +48,9 @@ namespace ToolKit.Library
 		private static string GetRecipients(MailItem mailItem)
 		{
 			string recipients = string.Empty;
-			List<string> toList = new List<string> ();
-			List<string> ccList = new List<string>();
-			List<string> bccList = new List<string>();
+			List<string> toList = new ();
+			List<string> ccList = new ();
+			List<string> bccList = new ();
 
 			foreach (Recipient recipient in mailItem.Recipients)
 			{

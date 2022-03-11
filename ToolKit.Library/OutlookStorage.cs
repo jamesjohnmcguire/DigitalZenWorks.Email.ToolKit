@@ -447,7 +447,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 				}
 
-				RemoveFolder(path, index, subFolder, false);
+				RemoveFolder(path, index, subFolder, force);
 			}
 		}
 
