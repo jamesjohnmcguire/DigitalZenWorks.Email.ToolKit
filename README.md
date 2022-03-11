@@ -18,7 +18,7 @@ NOTE: Always back up any data you might be modifying.  So, please back up your d
 
 #### Command line usage:
 
-DigitalZenWorks.Email.ToolKit <command> <source-path> <destination-path>
+DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 
 | Commands:            |                                 |
 | -------------------- | ------------------------------  |
@@ -37,7 +37,7 @@ Testing (1)
 Testing (1) (1)  
 Testing (1) (2()  
 
-If you ever try to move or copy a folder to a place where a folder with that name exists, Outlook will add, but will give it a name an appendix like ' (1)'.  In import or export processes, often these are the exact same folders, so you can end up with multiple duplicate folders like this.  This will merge these folders into a single folder.  If there are duplicate mail items, these will copied.  So, this wil not remove the duplicate mail items (That will come in the feature release).  But, it doesn't create any duplicates and the merging of folders, is an essential precurser to the eventual duplicates removal.  
+If you ever try to move or copy a folder to a place where a folder with that name exists, Outlook will add, but will give it a name an appendix like ' (1)'.  In import or export processes, often these are the exact same folders, so you can end up with multiple duplicate folders like this.  This will merge these folders into a single folder.  If there are duplicate mail items, these will copied.  So, this wil not remove the duplicate mail items (That will come in the feature release).  But, it doesn't create any duplicates and the merging of folders, is an essential precursor to the eventual duplicates removal.  
 
 ## Contributing
 
@@ -54,7 +54,7 @@ Any contributions you make are **greatly appreciated**.  If you have a suggestio
 ### Coding style
 Please match the current coding style.  Most notably:  
 1. One operation per line
-2. Use complete english words in variable and method names
+2. Use complete English words in variable and method names
 3. Attempt to declare variable and method names in a self-documenting manner
 
 
