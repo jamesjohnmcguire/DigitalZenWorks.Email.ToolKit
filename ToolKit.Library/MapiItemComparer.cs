@@ -10,9 +10,7 @@ using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ToolKit.Library
 {
@@ -35,11 +33,21 @@ namespace ToolKit.Library
 			return null;
 		}
 
+		private static byte[] GetBody(MailItem mailItem)
+		{
+			Encoding encoding = Encoding.UTF8;
+			byte[] body = encoding.GetBytes(mailItem.Body);
+			byte[] htmlBody = encoding.GetBytes(mailItem.HTMLBody);
+			byte[] rtfBody = encoding.GetBytes(mailItem.RTFBody);
+
+			return null;
+		}
+
 		[System.Diagnostics.CodeAnalysis.SuppressMessage(
 			"StyleCop.CSharp.NamingRules",
 			"SA1305:Field names should not use Hungarian notation",
 			Justification = "It isn't hungarian notation.")]
-		private static string GetRecipients (MailItem mailItem)
+		private static string GetRecipients(MailItem mailItem)
 		{
 			string recipients = string.Empty;
 			List<string> toList = new List<string> ();
