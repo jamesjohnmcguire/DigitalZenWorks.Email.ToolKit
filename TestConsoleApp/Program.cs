@@ -202,6 +202,9 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem.Move(mainFolder);
 
+			string header = mailItem.PropertyAccessor.GetProperty(
+				"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
+
 			string msgPath = basePath + "test.msg";
 			mailItem.SaveAs(msgPath);
 			byte[] msg1 = File.ReadAllBytes(msgPath);
