@@ -9,6 +9,7 @@ using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text;
 
 namespace ToolKit.Library
@@ -31,6 +32,55 @@ namespace ToolKit.Library
 			return null;
 		}
 
+		private static byte[] GetAttachments(MailItem mailItem)
+		{
+			byte[] result = null;
+			byte[] attachments = null;
+
+			try
+			{
+				string basePath = Path.GetTempPath();
+
+				foreach (Attachment attachment in mailItem.Attachments)
+				{
+					Encoding encoding = Encoding.UTF8;
+					byte[] nameBytes =
+						encoding.GetBytes(attachment.DisplayName);
+
+					if (attachments == null)
+					{
+						attachments = nameBytes;
+					}
+					else
+					{
+						attachments = MergeByteArrays(attachments, nameBytes);
+					}
+
+					nameBytes = encoding.GetBytes(attachment.FileName);
+					attachments = MergeByteArrays(attachments, nameBytes);
+
+					string filePath = basePath + attachment.FileName;
+					attachment.SaveAsFile(filePath);
+
+					byte[] fileBytes = File.ReadAllBytes(filePath);
+
+					attachments = MergeByteArrays(attachments, fileBytes);
+				}
+			}
+			catch (System.Exception exception) when
+			(exception is ArgumentException ||
+			exception is ArgumentNullException ||
+			exception is ArgumentOutOfRangeException ||
+			exception is ArrayTypeMismatchException ||
+			exception is InvalidCastException ||
+			exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
+
+			return result;
+		}
+
 		private static byte[] GetBody(MailItem mailItem)
 		{
 			byte[] allBody = null;
@@ -42,19 +92,8 @@ namespace ToolKit.Library
 				byte[] htmlBody = encoding.GetBytes(mailItem.HTMLBody);
 				byte[] rtfBody = mailItem.RTFBody as byte[];
 
-				long bufferSize =
-					body.LongLength + htmlBody.LongLength + rtfBody.LongLength;
-				allBody = new byte[bufferSize];
-
-				// combine the parts
-				Array.Copy(body, allBody, body.Length);
-
-				Array.Copy(
-					htmlBody, 0, allBody, body.LongLength, htmlBody.LongLength);
-
-				long destinationIndex = body.LongLength + htmlBody.LongLength;
-				Array.Copy(
-					rtfBody, 0, allBody, destinationIndex, rtfBody.LongLength);
+				allBody = MergeByteArrays(body, htmlBody);
+				allBody = MergeByteArrays(allBody, rtfBody);
 			}
 			catch (System.Exception exception) when
 			(exception is ArgumentException ||
@@ -131,6 +170,42 @@ namespace ToolKit.Library
 			}
 
 			return recipients;
+		}
+
+		private static byte[] MergeByteArrays(byte[] buffer1, byte[] buffer2)
+		{
+			byte[] newBuffer = null;
+
+			try
+			{
+				Encoding encoding = Encoding.UTF8;
+
+				long bufferSize =
+					buffer1.LongLength + buffer2.LongLength;
+				newBuffer = new byte[bufferSize];
+
+				// combine the parts
+				Array.Copy(buffer1, newBuffer, buffer1.LongLength);
+
+				Array.Copy(
+					buffer2,
+					0,
+					newBuffer,
+					buffer1.LongLength,
+					buffer2.LongLength);
+			}
+			catch (System.Exception exception) when
+			(exception is ArgumentException ||
+			exception is ArgumentNullException ||
+			exception is ArgumentOutOfRangeException ||
+			exception is ArrayTypeMismatchException ||
+			exception is InvalidCastException ||
+			exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
+
+			return newBuffer;
 		}
 	}
 }
