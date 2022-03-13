@@ -33,24 +33,39 @@ namespace ToolKit.Library
 
 		private static byte[] GetBody(MailItem mailItem)
 		{
-			Encoding encoding = Encoding.UTF8;
-			byte[] body = encoding.GetBytes(mailItem.Body);
-			byte[] htmlBody = encoding.GetBytes(mailItem.HTMLBody);
-			byte[] rtfBody = mailItem.RTFBody as byte[];
+			byte[] allBody = null;
 
-			long bufferSize =
-				body.LongLength + htmlBody.LongLength + rtfBody.LongLength;
-			byte[] allBody = new byte[bufferSize];
+			try
+			{
+				Encoding encoding = Encoding.UTF8;
+				byte[] body = encoding.GetBytes(mailItem.Body);
+				byte[] htmlBody = encoding.GetBytes(mailItem.HTMLBody);
+				byte[] rtfBody = mailItem.RTFBody as byte[];
 
-			// combine the parts
-			Array.Copy(body, allBody, body.Length);
+				long bufferSize =
+					body.LongLength + htmlBody.LongLength + rtfBody.LongLength;
+				allBody = new byte[bufferSize];
 
-			Array.Copy(
-				htmlBody, 0, allBody, body.LongLength, htmlBody.LongLength);
+				// combine the parts
+				Array.Copy(body, allBody, body.Length);
 
-			long destinationIndex = body.LongLength + htmlBody.LongLength;
-			Array.Copy(
-				rtfBody, 0, allBody, destinationIndex, rtfBody.LongLength);
+				Array.Copy(
+					htmlBody, 0, allBody, body.LongLength, htmlBody.LongLength);
+
+				long destinationIndex = body.LongLength + htmlBody.LongLength;
+				Array.Copy(
+					rtfBody, 0, allBody, destinationIndex, rtfBody.LongLength);
+			}
+			catch (System.Exception exception) when
+			(exception is ArgumentException ||
+			exception is ArgumentNullException ||
+			exception is ArgumentOutOfRangeException ||
+			exception is ArrayTypeMismatchException ||
+			exception is InvalidCastException ||
+			exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
 
 			return allBody;
 		}
