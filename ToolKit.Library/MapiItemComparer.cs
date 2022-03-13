@@ -38,7 +38,21 @@ namespace ToolKit.Library
 			byte[] htmlBody = encoding.GetBytes(mailItem.HTMLBody);
 			byte[] rtfBody = encoding.GetBytes(mailItem.RTFBody);
 
-			return null;
+			long bufferSize =
+				body.LongLength + htmlBody.LongLength + rtfBody.LongLength;
+			byte[] allBody = new byte[bufferSize];
+
+			// combine the parts
+			Array.Copy(body, allBody, body.Length);
+
+			Array.Copy(
+				htmlBody, 0, allBody, body.LongLength, htmlBody.LongLength);
+
+			long destinationIndex = body.LongLength + htmlBody.LongLength;
+			Array.Copy(
+				rtfBody, 0, allBody, destinationIndex, rtfBody.LongLength);
+
+			return allBody;
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage(
