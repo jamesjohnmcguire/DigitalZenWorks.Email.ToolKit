@@ -44,20 +44,36 @@ namespace ToolKit.Library
 				foreach (Attachment attachment in mailItem.Attachments)
 				{
 					Encoding encoding = Encoding.UTF8;
-					byte[] nameBytes =
-						encoding.GetBytes(attachment.DisplayName);
+
+					int intType = (int)attachment.Type;
+
+					string index = attachment.Index.ToString(
+						CultureInfo.InvariantCulture);
+					string position = attachment.Position.ToString(
+						CultureInfo.InvariantCulture);
+					string attachmentType =
+						intType.ToString(CultureInfo.InvariantCulture);
+
+					string metaData = string.Format(
+						CultureInfo.InvariantCulture,
+						"{0}{1}{2}{3}{4}{5}",
+						attachment.DisplayName,
+						attachment.FileName,
+						index,
+						attachment.PathName,
+						position,
+						attachmentType);
+
+					byte[] metaDataBytes = encoding.GetBytes(metaData);
 
 					if (attachments == null)
 					{
-						attachments = nameBytes;
+						attachments = metaDataBytes;
 					}
 					else
 					{
-						attachments = MergeByteArrays(attachments, nameBytes);
+						attachments = MergeByteArrays(attachments, metaDataBytes);
 					}
-
-					nameBytes = encoding.GetBytes(attachment.FileName);
-					attachments = MergeByteArrays(attachments, nameBytes);
 
 					string filePath = basePath + attachment.FileName;
 					attachment.SaveAsFile(filePath);
