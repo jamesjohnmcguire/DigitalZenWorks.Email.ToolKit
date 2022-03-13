@@ -36,7 +36,7 @@ namespace ToolKit.Library
 			Encoding encoding = Encoding.UTF8;
 			byte[] body = encoding.GetBytes(mailItem.Body);
 			byte[] htmlBody = encoding.GetBytes(mailItem.HTMLBody);
-			byte[] rtfBody = encoding.GetBytes(mailItem.RTFBody);
+			byte[] rtfBody = mailItem.RTFBody as byte[];
 
 			long bufferSize =
 				body.LongLength + htmlBody.LongLength + rtfBody.LongLength;
