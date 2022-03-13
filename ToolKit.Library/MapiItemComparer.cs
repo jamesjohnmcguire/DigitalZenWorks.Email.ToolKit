@@ -72,7 +72,8 @@ namespace ToolKit.Library
 					}
 					else
 					{
-						attachments = MergeByteArrays(attachments, metaDataBytes);
+						attachments =
+							MergeByteArrays(attachments, metaDataBytes);
 					}
 
 					string filePath = basePath + attachment.FileName;
