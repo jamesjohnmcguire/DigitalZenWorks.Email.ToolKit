@@ -370,7 +370,7 @@ namespace ToolKit.Library
 			return recipients;
 		}
 
-		private static byte[] GetSimpleProperties(MailItem mailItem)
+		private static byte[] GetStringProperties(MailItem mailItem)
 		{
 			string header = mailItem.PropertyAccessor.GetProperty(
 				"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
@@ -414,17 +414,6 @@ namespace ToolKit.Library
 				mailItem.To,
 				mailItem.VotingOptions,
 				mailItem.VotingResponse);
-
-			string deferredDeliveryTime = mailItem.DeferredDeliveryTime.ToString("O");
-			string expiryTime = mailItem.ExpiryTime.ToString("O");
-			string receivedTime = mailItem.ReceivedTime.ToString("O");
-			string reminderTime = mailItem.ReminderTime.ToString("O");
-			string retentionExpirationDate =
-				mailItem.RetentionExpirationDate.ToString("O");
-			string sentOn = mailItem.SentOn.ToString("O");
-			string taskCompletedDate = mailItem.TaskCompletedDate.ToString("O");
-			string taskDueDate = mailItem.TaskDueDate.ToString("O");
-			string taskStartDate = mailItem.TaskStartDate.ToString("O");
 
 			string data = string.Format(
 				CultureInfo.InvariantCulture, "{0}{1}", data1, data2);
