@@ -227,6 +227,36 @@ namespace ToolKit.Library
 				mailItem.VotingOptions,
 				mailItem.VotingResponse);
 
+			int bodyFormat = (int)mailItem.BodyFormat;
+			int itemClass = (int)mailItem.Class;
+			int downloadState = (int)mailItem.DownloadState;
+			int flagStatus = (int)mailItem.FlagStatus;
+			int importance = (int)mailItem.Importance;
+			int markForDownload = (int)mailItem.MarkForDownload;
+			int permission = (int)mailItem.Permission;
+			int permissionService = (int)mailItem.PermissionService;
+			int remoteStatus = (int)mailItem.RemoteStatus;
+			int sensitivity = (int)mailItem.Sensitivity;
+
+			string internetCodepage = mailItem.InternetCodepage.ToString(CultureInfo.InvariantCulture);
+			string size = mailItem.Size.ToString(CultureInfo.InvariantCulture);
+
+			string data3 = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}",
+				bodyFormat.ToString(CultureInfo.InvariantCulture),
+				itemClass.ToString(CultureInfo.InvariantCulture),
+				downloadState.ToString(CultureInfo.InvariantCulture),
+				flagStatus.ToString(CultureInfo.InvariantCulture),
+				importance.ToString(CultureInfo.InvariantCulture),
+				markForDownload.ToString(CultureInfo.InvariantCulture),
+				permission.ToString(CultureInfo.InvariantCulture),
+				permissionService.ToString(CultureInfo.InvariantCulture),
+				remoteStatus.ToString(CultureInfo.InvariantCulture),
+				sensitivity.ToString(CultureInfo.InvariantCulture),
+				internetCodepage,
+				size);
+
 			string data = string.Format(
 				CultureInfo.InvariantCulture, "{0}{1}", data1, data2);
 
