@@ -238,7 +238,8 @@ namespace ToolKit.Library
 			int remoteStatus = (int)mailItem.RemoteStatus;
 			int sensitivity = (int)mailItem.Sensitivity;
 
-			string internetCodepage = mailItem.InternetCodepage.ToString(CultureInfo.InvariantCulture);
+			string internetCodepage = mailItem.InternetCodepage.ToString(
+				CultureInfo.InvariantCulture);
 			string size = mailItem.Size.ToString(CultureInfo.InvariantCulture);
 
 			string data3 = string.Format(
@@ -297,6 +298,30 @@ namespace ToolKit.Library
 			}
 
 			return newBuffer;
+		}
+
+		private static byte SetBit(byte holder, byte bitIndex, bool value)
+		{
+			int intValue = Convert.ToInt32(value);
+
+			// 0 based
+			int shifter = intValue << bitIndex;
+			int intHolder = holder | shifter;
+			holder = (byte)intHolder;
+
+			return holder;
+		}
+
+		private static ushort SetBit(ushort holder, byte bitIndex, bool value)
+		{
+			int intValue = Convert.ToInt32(value);
+
+			// 0 based
+			int shifter = intValue << bitIndex;
+			int intHolder = holder | shifter;
+			holder = (ushort)intHolder;
+
+			return holder;
 		}
 	}
 }
