@@ -67,6 +67,19 @@ namespace ToolKit.Library
 			return bytes;
 		}
 
+		private static byte[] CopyUshortToByteArray(
+			byte[] bytes, int index, ushort value)
+		{
+			byte byteValue1 = (byte)value;
+			byte byteValue2 = (byte)(value >> 8);
+
+			bytes[index] = byteValue1;
+			index++;
+			bytes[index] = byteValue2;
+
+			return bytes;
+		}
+
 		private static byte[] GetActions(MailItem mailItem)
 		{
 			byte[] actions = null;
