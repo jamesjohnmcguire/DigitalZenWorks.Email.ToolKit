@@ -190,6 +190,34 @@ namespace ToolKit.Library
 			return allBody;
 		}
 
+		private static ushort GetBooleans(MailItem mailItem)
+		{
+			ushort boolHolder = 0;
+
+			boolHolder = SetBit(
+				boolHolder, 0, mailItem.AlternateRecipientAllowed);
+			boolHolder = SetBit(boolHolder, 1, mailItem.AutoForwarded);
+			boolHolder = SetBit(boolHolder, 2, mailItem.AutoResolvedWinner);
+			boolHolder = SetBit(boolHolder, 3, mailItem.DeleteAfterSubmit);
+			boolHolder = SetBit(boolHolder, 4, mailItem.IsMarkedAsTask);
+			boolHolder = SetBit(boolHolder, 5, mailItem.NoAging);
+			boolHolder = SetBit(
+				boolHolder, 6, mailItem.OriginatorDeliveryReportRequested);
+			boolHolder = SetBit(boolHolder, 7, mailItem.ReadReceiptRequested);
+			boolHolder = SetBit(
+				boolHolder, 8, mailItem.RecipientReassignmentProhibited);
+			boolHolder = SetBit(
+				boolHolder, 9, mailItem.ReminderOverrideDefault);
+			boolHolder = SetBit(boolHolder, 10, mailItem.ReminderPlaySound);
+			boolHolder = SetBit(boolHolder, 11, mailItem.ReminderSet);
+			boolHolder = SetBit(boolHolder, 12, mailItem.Saved);
+			boolHolder = SetBit(boolHolder, 13, mailItem.Sent);
+			boolHolder = SetBit(boolHolder, 14, mailItem.Submitted);
+			boolHolder = SetBit(boolHolder, 15, mailItem.UnRead);
+
+			return boolHolder;
+		}
+
 		[System.Diagnostics.CodeAnalysis.SuppressMessage(
 			"StyleCop.CSharp.NamingRules",
 			"SA1305:Field names should not use Hungarian notation",
@@ -325,28 +353,6 @@ namespace ToolKit.Library
 				internetCodepage,
 				size);
 
-			ushort boolHolder = 0;
-			boolHolder = SetBit(
-				boolHolder, 0, mailItem.AlternateRecipientAllowed);
-			boolHolder = SetBit(boolHolder, 1, mailItem.AutoForwarded);
-			boolHolder = SetBit(boolHolder, 2, mailItem.AutoResolvedWinner);
-			boolHolder = SetBit(boolHolder, 3, mailItem.DeleteAfterSubmit);
-			boolHolder = SetBit(boolHolder, 4, mailItem.IsMarkedAsTask);
-			boolHolder = SetBit(boolHolder, 5, mailItem.NoAging);
-			boolHolder = SetBit(
-				boolHolder, 6, mailItem.OriginatorDeliveryReportRequested);
-			boolHolder = SetBit(boolHolder, 7, mailItem.ReadReceiptRequested);
-			boolHolder = SetBit(
-				boolHolder, 8, mailItem.RecipientReassignmentProhibited);
-			boolHolder = SetBit(
-				boolHolder, 9, mailItem.ReminderOverrideDefault);
-			boolHolder = SetBit(boolHolder, 10, mailItem.ReminderPlaySound);
-			boolHolder = SetBit(boolHolder, 11, mailItem.ReminderSet);
-			boolHolder = SetBit(boolHolder, 12, mailItem.Saved);
-			boolHolder = SetBit(boolHolder, 13, mailItem.Sent);
-			boolHolder = SetBit(boolHolder, 14, mailItem.Submitted);
-			boolHolder = SetBit(boolHolder, 15, mailItem.UnRead);
-
 			string deferredDeliveryTime = mailItem.DeferredDeliveryTime.ToString("O");
 			string expiryTime = mailItem.ExpiryTime.ToString("O");
 			string receivedTime = mailItem.ReceivedTime.ToString("O");
@@ -357,19 +363,6 @@ namespace ToolKit.Library
 			string taskCompletedDate = mailItem.TaskCompletedDate.ToString("O");
 			string taskDueDate = mailItem.TaskDueDate.ToString("O");
 			string taskStartDate = mailItem.TaskStartDate.ToString("O");
-
-			/*
-Conflicts
-CreationTime
-FormDescription
-LastModificationTime
-Links
-SaveSentMessageFolder
-ToDoTaskOrdinal
-
-Actions
-UserProperties
-*/
 
 			string data = string.Format(
 				CultureInfo.InvariantCulture, "{0}{1}", data1, data2);
