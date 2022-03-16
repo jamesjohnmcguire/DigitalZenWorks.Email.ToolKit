@@ -532,7 +532,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				string buffer1 = string.Format(
 					CultureInfo.InvariantCulture,
-					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}",
+					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}",
 					mailItem.BCC,
 					mailItem.BillingInformation,
 					mailItem.Body,
@@ -547,13 +547,11 @@ namespace DigitalZenWorks.Email.ToolKit
 					mailItem.HTMLBody,
 					mailItem.MessageClass,
 					mailItem.Mileage,
-					mailItem.OutlookVersion,
-					mailItem.PermissionTemplateGuid);
+					mailItem.ReceivedByEntryID);
 
 				string buffer2 = string.Format(
 					CultureInfo.InvariantCulture,
-					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}",
-					mailItem.ReceivedByEntryID,
+					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}",
 					mailItem.ReceivedByName,
 					mailItem.ReceivedOnBehalfOfEntryID,
 					mailItem.ReceivedOnBehalfOfName,
