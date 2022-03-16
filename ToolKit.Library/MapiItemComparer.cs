@@ -32,6 +32,73 @@ namespace ToolKit.Library
 			return null;
 		}
 
+		private static byte[] GetActions(MailItem mailItem)
+		{
+			byte[] actions = null;
+
+			try
+			{
+				string basePath = Path.GetTempPath();
+
+				foreach (Microsoft.Office.Interop.Outlook.Action action in
+					mailItem.Actions)
+				{
+					Encoding encoding = Encoding.UTF8;
+
+					int copyLikeEnum = (int)action.CopyLike;
+					int enabledBool = Convert.ToInt32(action.Enabled);
+					int replyStyleEnum = (int)action.ReplyStyle;
+					int responseStyleEnum = (int)action.ResponseStyle;
+					int showOnEnum = (int)action.ShowOn;
+
+					string copyLike =
+						copyLikeEnum.ToString(CultureInfo.InvariantCulture);
+					string enabled =
+						enabledBool.ToString(CultureInfo.InvariantCulture);
+					string replyStyle =
+						replyStyleEnum.ToString(CultureInfo.InvariantCulture);
+					string responseStyle = responseStyleEnum.ToString(
+						CultureInfo.InvariantCulture);
+					string showOn =
+						showOnEnum.ToString(CultureInfo.InvariantCulture);
+
+					string metaData = string.Format(
+						CultureInfo.InvariantCulture,
+						"{0}{1}{2}{3}{4}{5}{6}",
+						copyLike,
+						enabled,
+						action.Name,
+						action.Prefix,
+						replyStyle,
+						responseStyle,
+						showOn);
+
+					byte[] metaDataBytes = encoding.GetBytes(metaData);
+
+					if (actions == null)
+					{
+						actions = metaDataBytes;
+					}
+					else
+					{
+						actions = MergeByteArrays(actions, metaDataBytes);
+					}
+				}
+			}
+			catch (System.Exception exception) when
+			(exception is ArgumentException ||
+			exception is ArgumentNullException ||
+			exception is ArgumentOutOfRangeException ||
+			exception is ArrayTypeMismatchException ||
+			exception is InvalidCastException ||
+			exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
+
+			return actions;
+		}
+
 		private static byte[] GetAttachments(MailItem mailItem)
 		{
 			byte[] attachments = null;
@@ -294,13 +361,13 @@ namespace ToolKit.Library
 			/*
 Conflicts
 CreationTime
+FormDescription
 LastModificationTime
+Links
 SaveSentMessageFolder
+ToDoTaskOrdinal
 
 Actions
-FormDescription
-Links
-ToDoTaskOrdinal
 UserProperties
 */
 
