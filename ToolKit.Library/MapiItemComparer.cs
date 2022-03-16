@@ -27,10 +27,10 @@ namespace ToolKit.Library
 		/// Gets the item's hash.
 		/// </summary>
 		/// <param name="mailItem">The items to compute.</param>
-		/// <returns>The item's hash.</returns>
-		public static byte[] GetItemHash(MailItem mailItem)
+		/// <returns>The item's hash encoded in base 64.</returns>
+		public static string GetItemHash(MailItem mailItem)
 		{
-			byte[] hashValue = null;
+			string hashBase64 = null;
 			try
 			{
 				if (mailItem != null)
@@ -39,7 +39,8 @@ namespace ToolKit.Library
 
 					using SHA256 hasher = SHA256.Create();
 
-					hashValue = hasher.ComputeHash(finalBuffer);
+					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+					hashBase64 = Convert.ToBase64String(hashValue);
 				}
 			}
 			catch (System.Exception exception) when
@@ -53,7 +54,7 @@ namespace ToolKit.Library
 				Log.Error(exception.ToString());
 			}
 
-			return hashValue;
+			return hashBase64;
 		}
 
 		private static byte[] CopyIntToByteArray(
