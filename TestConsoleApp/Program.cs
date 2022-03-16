@@ -55,6 +55,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			TestTargetFrameworks();
 
+			TestGetHash();
+
 			TestMsgCompare();
 
 			TestMergeFolders();
@@ -120,6 +122,34 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 		private static void TestFolder(string path, Encoding encoding)
 		{
 			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
+		}
+
+		private static void TestGetHash()
+		{
+			// Create test store.
+			string basePath = Path.GetTempPath();
+			string storePath = basePath + "Test.pst";
+
+			OutlookStorage pstOutlook = new();
+			Store store = pstOutlook.CreateStore(storePath);
+
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			string hash = MapiItemComparer.GetItemHash(mailItem);
+
+			// Clean up
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
 		}
 
 		private static void TestListMessagesFile(
