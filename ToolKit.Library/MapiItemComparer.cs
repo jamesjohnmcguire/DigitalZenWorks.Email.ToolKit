@@ -188,6 +188,51 @@ namespace ToolKit.Library
 			return recipients;
 		}
 
+		private static byte[] GetSimpleProperties(MailItem mailItem)
+		{
+			string data1 = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}",
+				mailItem.BCC,
+				mailItem.BillingInformation,
+				mailItem.Categories,
+				mailItem.CC,
+				mailItem.Companies,
+				mailItem.ConversationID,
+				mailItem.ConversationIndex,
+				mailItem.ConversationTopic,
+				mailItem.FlagRequest,
+				mailItem.MessageClass,
+				mailItem.Mileage,
+				mailItem.OutlookVersion,
+				mailItem.PermissionTemplateGuid,
+				mailItem.ReceivedByEntryID,
+				mailItem.ReceivedByName,
+				mailItem.ReceivedOnBehalfOfEntryID);
+
+			string data2 = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}",
+				mailItem.ReceivedOnBehalfOfName,
+				mailItem.ReminderSoundFile,
+				mailItem.ReplyRecipientNames,
+				mailItem.RetentionPolicyName,
+				mailItem.SenderEmailAddress,
+				mailItem.SenderEmailType,
+				mailItem.SenderName,
+				mailItem.SentOnBehalfOfName,
+				mailItem.Subject,
+				mailItem.TaskSubject,
+				mailItem.To,
+				mailItem.VotingOptions,
+				mailItem.VotingResponse);
+
+			string data = string.Format(
+				CultureInfo.InvariantCulture, "{0}{1}", data1, data2);
+
+			return null;
+		}
+
 		private static byte[] MergeByteArrays(byte[] buffer1, byte[] buffer2)
 		{
 			byte[] newBuffer = null;
