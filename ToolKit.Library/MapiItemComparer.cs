@@ -266,31 +266,51 @@ namespace ToolKit.Library
 			return boolHolder;
 		}
 
-		private static string GetDateTimes(MailItem mailItem)
+		private static byte[] GetDateTimes(MailItem mailItem)
 		{
-			string deferredDeliveryTime = mailItem.DeferredDeliveryTime.ToString("O");
-			string expiryTime = mailItem.ExpiryTime.ToString("O");
-			string receivedTime = mailItem.ReceivedTime.ToString("O");
-			string reminderTime = mailItem.ReminderTime.ToString("O");
-			string retentionExpirationDate =
-				mailItem.RetentionExpirationDate.ToString("O");
-			string sentOn = mailItem.SentOn.ToString("O");
-			string taskCompletedDate = mailItem.TaskCompletedDate.ToString("O");
-			string taskDueDate = mailItem.TaskDueDate.ToString("O");
-			string taskStartDate = mailItem.TaskStartDate.ToString("O");
+			byte[] data = null;
 
-			string data = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}{6}{7}{8}",
-				deferredDeliveryTime,
-				expiryTime,
-				receivedTime,
-				reminderTime,
-				retentionExpirationDate,
-				sentOn,
-				taskCompletedDate,
-				taskDueDate,
-				taskStartDate);
+			try
+			{
+				string deferredDeliveryTime =
+					mailItem.DeferredDeliveryTime.ToString("O");
+				string expiryTime = mailItem.ExpiryTime.ToString("O");
+				string receivedTime = mailItem.ReceivedTime.ToString("O");
+				string reminderTime = mailItem.ReminderTime.ToString("O");
+				string retentionExpirationDate =
+					mailItem.RetentionExpirationDate.ToString("O");
+				string sentOn = mailItem.SentOn.ToString("O");
+				string taskCompletedDate =
+					mailItem.TaskCompletedDate.ToString("O");
+				string taskDueDate = mailItem.TaskDueDate.ToString("O");
+				string taskStartDate = mailItem.TaskStartDate.ToString("O");
+
+				string buffer = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}{1}{2}{3}{4}{5}{6}{7}{8}",
+					deferredDeliveryTime,
+					expiryTime,
+					receivedTime,
+					reminderTime,
+					retentionExpirationDate,
+					sentOn,
+					taskCompletedDate,
+					taskDueDate,
+					taskStartDate);
+
+				Encoding encoding = Encoding.UTF8;
+				data = encoding.GetBytes(buffer);
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
 
 			return data;
 		}
@@ -401,53 +421,71 @@ namespace ToolKit.Library
 
 		private static byte[] GetStringProperties(MailItem mailItem)
 		{
-			string header = mailItem.PropertyAccessor.GetProperty(
-				"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
+			byte[] data = null;
 
-			string data1 = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}",
-				mailItem.BCC,
-				mailItem.BillingInformation,
-				mailItem.Body,
-				mailItem.Categories,
-				mailItem.CC,
-				mailItem.Companies,
-				mailItem.ConversationID,
-				mailItem.ConversationIndex,
-				mailItem.ConversationTopic,
-				mailItem.FlagRequest,
-				header,
-				mailItem.HTMLBody,
-				mailItem.MessageClass,
-				mailItem.Mileage,
-				mailItem.OutlookVersion,
-				mailItem.PermissionTemplateGuid);
+			try
+			{
+				string header = mailItem.PropertyAccessor.GetProperty(
+					"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
 
-			string data2 = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}",
-				mailItem.ReceivedByEntryID,
-				mailItem.ReceivedByName,
-				mailItem.ReceivedOnBehalfOfEntryID,
-				mailItem.ReceivedOnBehalfOfName,
-				mailItem.ReminderSoundFile,
-				mailItem.ReplyRecipientNames,
-				mailItem.RetentionPolicyName,
-				mailItem.SenderEmailAddress,
-				mailItem.SenderEmailType,
-				mailItem.SenderName,
-				mailItem.SentOnBehalfOfName,
-				mailItem.Subject,
-				mailItem.TaskSubject,
-				mailItem.To,
-				mailItem.VotingOptions,
-				mailItem.VotingResponse);
+				string buffer1 = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}",
+					mailItem.BCC,
+					mailItem.BillingInformation,
+					mailItem.Body,
+					mailItem.Categories,
+					mailItem.CC,
+					mailItem.Companies,
+					mailItem.ConversationID,
+					mailItem.ConversationIndex,
+					mailItem.ConversationTopic,
+					mailItem.FlagRequest,
+					header,
+					mailItem.HTMLBody,
+					mailItem.MessageClass,
+					mailItem.Mileage,
+					mailItem.OutlookVersion,
+					mailItem.PermissionTemplateGuid);
 
-			string data = string.Format(
-				CultureInfo.InvariantCulture, "{0}{1}", data1, data2);
+				string buffer2 = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}",
+					mailItem.ReceivedByEntryID,
+					mailItem.ReceivedByName,
+					mailItem.ReceivedOnBehalfOfEntryID,
+					mailItem.ReceivedOnBehalfOfName,
+					mailItem.ReminderSoundFile,
+					mailItem.ReplyRecipientNames,
+					mailItem.RetentionPolicyName,
+					mailItem.SenderEmailAddress,
+					mailItem.SenderEmailType,
+					mailItem.SenderName,
+					mailItem.SentOnBehalfOfName,
+					mailItem.Subject,
+					mailItem.TaskSubject,
+					mailItem.To,
+					mailItem.VotingOptions,
+					mailItem.VotingResponse);
 
-			return null;
+				string buffer = string.Format(
+					CultureInfo.InvariantCulture, "{0}{1}", buffer1, buffer2);
+
+				Encoding encoding = Encoding.UTF8;
+				data = encoding.GetBytes(buffer);
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
+
+			return data;
 		}
 
 		private static byte[] GetUserProperties(MailItem mailItem)
