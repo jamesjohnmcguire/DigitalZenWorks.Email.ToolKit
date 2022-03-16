@@ -27,8 +27,24 @@ namespace ToolKit.Library
 		/// </summary>
 		/// <param name="item">The items to compute.</param>
 		/// <returns>The item's hash.</returns>
-		public static byte[] GetItemHash(MailItem item)
+		public static byte[] GetItemHash(MailItem mailItem)
 		{
+
+			try
+			{
+				byte[] rtfBody = mailItem.RTFBody as byte[];
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
+
 			return null;
 		}
 
