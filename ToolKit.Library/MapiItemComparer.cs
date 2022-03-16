@@ -84,12 +84,12 @@ namespace ToolKit.Library
 				}
 			}
 			catch (System.Exception exception) when
-			(exception is ArgumentException ||
-			exception is ArgumentNullException ||
-			exception is ArgumentOutOfRangeException ||
-			exception is ArrayTypeMismatchException ||
-			exception is InvalidCastException ||
-			exception is RankException)
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is InvalidCastException ||
+				exception is RankException)
 			{
 				Log.Error(exception.ToString());
 			}
@@ -149,12 +149,12 @@ namespace ToolKit.Library
 				}
 			}
 			catch (System.Exception exception) when
-			(exception is ArgumentException ||
-			exception is ArgumentNullException ||
-			exception is ArgumentOutOfRangeException ||
-			exception is ArrayTypeMismatchException ||
-			exception is InvalidCastException ||
-			exception is RankException)
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is InvalidCastException ||
+				exception is RankException)
 			{
 				Log.Error(exception.ToString());
 			}
@@ -177,12 +177,12 @@ namespace ToolKit.Library
 				allBody = MergeByteArrays(allBody, rtfBody);
 			}
 			catch (System.Exception exception) when
-			(exception is ArgumentException ||
-			exception is ArgumentNullException ||
-			exception is ArgumentOutOfRangeException ||
-			exception is ArrayTypeMismatchException ||
-			exception is InvalidCastException ||
-			exception is RankException)
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is InvalidCastException ||
+				exception is RankException)
 			{
 				Log.Error(exception.ToString());
 			}
@@ -260,6 +260,7 @@ namespace ToolKit.Library
 				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}",
 				mailItem.BCC,
 				mailItem.BillingInformation,
+				mailItem.Body,
 				mailItem.Categories,
 				mailItem.CC,
 				mailItem.Companies,
@@ -267,17 +268,18 @@ namespace ToolKit.Library
 				mailItem.ConversationIndex,
 				mailItem.ConversationTopic,
 				mailItem.FlagRequest,
+				mailItem.HTMLBody,
 				mailItem.MessageClass,
 				mailItem.Mileage,
 				mailItem.OutlookVersion,
 				mailItem.PermissionTemplateGuid,
-				mailItem.ReceivedByEntryID,
-				mailItem.ReceivedByName,
-				mailItem.ReceivedOnBehalfOfEntryID);
+				mailItem.ReceivedByEntryID);
 
 			string data2 = string.Format(
 				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}",
+				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}",
+				mailItem.ReceivedByName,
+				mailItem.ReceivedOnBehalfOfEntryID,
 				mailItem.ReceivedOnBehalfOfName,
 				mailItem.ReminderSoundFile,
 				mailItem.ReplyRecipientNames,
