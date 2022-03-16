@@ -372,6 +372,9 @@ namespace ToolKit.Library
 
 		private static byte[] GetSimpleProperties(MailItem mailItem)
 		{
+			string header = mailItem.PropertyAccessor.GetProperty(
+				"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
+
 			string data1 = string.Format(
 				CultureInfo.InvariantCulture,
 				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}",
@@ -385,16 +388,17 @@ namespace ToolKit.Library
 				mailItem.ConversationIndex,
 				mailItem.ConversationTopic,
 				mailItem.FlagRequest,
+				header,
 				mailItem.HTMLBody,
 				mailItem.MessageClass,
 				mailItem.Mileage,
 				mailItem.OutlookVersion,
-				mailItem.PermissionTemplateGuid,
-				mailItem.ReceivedByEntryID);
+				mailItem.PermissionTemplateGuid);
 
 			string data2 = string.Format(
 				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}",
+				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}",
+				mailItem.ReceivedByEntryID,
 				mailItem.ReceivedByName,
 				mailItem.ReceivedOnBehalfOfEntryID,
 				mailItem.ReceivedOnBehalfOfName,
