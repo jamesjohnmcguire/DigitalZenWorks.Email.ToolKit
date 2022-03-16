@@ -34,7 +34,6 @@ namespace ToolKit.Library
 
 		private static byte[] GetAttachments(MailItem mailItem)
 		{
-			byte[] result = null;
 			byte[] attachments = null;
 
 			try
@@ -95,7 +94,7 @@ namespace ToolKit.Library
 				Log.Error(exception.ToString());
 			}
 
-			return result;
+			return attachments;
 		}
 
 		private static byte[] GetBody(MailItem mailItem)
