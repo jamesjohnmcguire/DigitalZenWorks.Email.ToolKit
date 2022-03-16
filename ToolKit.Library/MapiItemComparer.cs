@@ -278,6 +278,57 @@ namespace DigitalZenWorks.Email.ToolKit
 			return boolHolder;
 		}
 
+		private static long GetBufferSize(
+			byte[] actions,
+			byte[] attachments,
+			byte[] dateTimes,
+			byte[] enums,
+			byte[] rtfBody,
+			byte[] strings,
+			byte[] userProperties)
+		{
+			long bufferSize = 0;
+
+			if (actions != null)
+			{
+				bufferSize += actions.LongLength;
+			}
+
+			if (attachments != null)
+			{
+				bufferSize += attachments.LongLength;
+			}
+
+			if (dateTimes != null)
+			{
+				bufferSize += dateTimes.LongLength;
+			}
+
+			if (enums != null)
+			{
+				bufferSize += enums.LongLength;
+			}
+
+			if (rtfBody != null)
+			{
+				bufferSize += rtfBody.LongLength;
+			}
+
+			if (strings != null)
+			{
+				bufferSize += strings.LongLength;
+			}
+
+			if (userProperties != null)
+			{
+				bufferSize += userProperties.LongLength;
+			}
+
+			bufferSize += 2;
+
+			return bufferSize;
+		}
+
 		private static byte[] GetDateTimes(MailItem mailItem)
 		{
 			byte[] data = null;
@@ -381,10 +432,14 @@ namespace DigitalZenWorks.Email.ToolKit
 					byte[] strings = GetStringProperties(mailItem);
 					byte[] userProperties = GetUserProperties(mailItem);
 
-					long bufferSize = actions.LongLength +
-						attachments.LongLength + dateTimes.LongLength +
-						enums.LongLength + rtfBody.LongLength +
-						strings.LongLength + userProperties.LongLength + 2;
+					long bufferSize = GetBufferSize(
+						actions,
+						attachments,
+						dateTimes,
+						enums,
+						rtfBody,
+						strings,
+						userProperties);
 
 					byte[] finalBuffer = new byte[bufferSize];
 
