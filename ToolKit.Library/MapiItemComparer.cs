@@ -38,8 +38,6 @@ namespace ToolKit.Library
 
 			try
 			{
-				string basePath = Path.GetTempPath();
-
 				foreach (Microsoft.Office.Interop.Outlook.Action action in
 					mailItem.Actions)
 				{
@@ -375,6 +373,60 @@ UserProperties
 				CultureInfo.InvariantCulture, "{0}{1}", data1, data2);
 
 			return null;
+		}
+
+		private static byte[] GetUserProperties(MailItem mailItem)
+		{
+			byte[] properties = null;
+
+			try
+			{
+				foreach (UserProperty property in mailItem.UserProperties)
+				{
+					Encoding encoding = Encoding.UTF8;
+
+					int typeEnum = (int)property.Type;
+
+					string typeValue =
+						typeEnum.ToString(CultureInfo.InvariantCulture);
+					string value =
+						property.Value.ToString(CultureInfo.InvariantCulture);
+
+					string metaData = string.Format(
+						CultureInfo.InvariantCulture,
+						"{0}{1}{2}{3}{4}{5}",
+						property.Formula,
+						property.Name,
+						typeValue,
+						property.ValidationFormula,
+						property.ValidationText,
+						value);
+
+					byte[] metaDataBytes = encoding.GetBytes(metaData);
+
+					if (properties == null)
+					{
+						properties = metaDataBytes;
+					}
+					else
+					{
+						properties =
+							MergeByteArrays(properties, metaDataBytes);
+					}
+				}
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
+
+			return properties;
 		}
 
 		private static byte[] MergeByteArrays(byte[] buffer1, byte[] buffer2)
