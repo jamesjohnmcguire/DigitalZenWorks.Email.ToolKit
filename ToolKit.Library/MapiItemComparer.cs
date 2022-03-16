@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace ToolKit.Library
@@ -29,11 +30,16 @@ namespace ToolKit.Library
 		/// <returns>The item's hash.</returns>
 		public static byte[] GetItemHash(MailItem mailItem)
 		{
+			byte[] hashValue = null;
 			try
 			{
 				if (mailItem != null)
 				{
 					byte[] finalBuffer = GetItemBytes(mailItem);
+
+					using SHA256 hasher = SHA256.Create();
+
+					hashValue = hasher.ComputeHash(finalBuffer);
 				}
 			}
 			catch (System.Exception exception) when
@@ -47,7 +53,7 @@ namespace ToolKit.Library
 				Log.Error(exception.ToString());
 			}
 
-			return null;
+			return hashValue;
 		}
 
 		private static byte[] CopyIntToByteArray(
