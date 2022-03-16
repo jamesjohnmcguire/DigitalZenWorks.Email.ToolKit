@@ -237,6 +237,35 @@ namespace ToolKit.Library
 			return boolHolder;
 		}
 
+		private static string GetDateTimes(MailItem mailItem)
+		{
+			string deferredDeliveryTime = mailItem.DeferredDeliveryTime.ToString("O");
+			string expiryTime = mailItem.ExpiryTime.ToString("O");
+			string receivedTime = mailItem.ReceivedTime.ToString("O");
+			string reminderTime = mailItem.ReminderTime.ToString("O");
+			string retentionExpirationDate =
+				mailItem.RetentionExpirationDate.ToString("O");
+			string sentOn = mailItem.SentOn.ToString("O");
+			string taskCompletedDate = mailItem.TaskCompletedDate.ToString("O");
+			string taskDueDate = mailItem.TaskDueDate.ToString("O");
+			string taskStartDate = mailItem.TaskStartDate.ToString("O");
+
+			string data = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}{5}{6}{7}{8}",
+				deferredDeliveryTime,
+				expiryTime,
+				receivedTime,
+				reminderTime,
+				retentionExpirationDate,
+				sentOn,
+				taskCompletedDate,
+				taskDueDate,
+				taskStartDate);
+
+			return data;
+		}
+
 		private static byte[] GetEnums(MailItem mailItem)
 		{
 			int bodyFormat = (int)mailItem.BodyFormat;
