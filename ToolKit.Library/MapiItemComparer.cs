@@ -237,40 +237,45 @@ namespace ToolKit.Library
 			return boolHolder;
 		}
 
-		private static string GetEnums(MailItem mailItem)
+		private static byte[] GetEnums(MailItem mailItem)
 		{
 			int bodyFormat = (int)mailItem.BodyFormat;
 			int itemClass = (int)mailItem.Class;
-			int downloadState = (int)mailItem.DownloadState;
-			int flagStatus = (int)mailItem.FlagStatus;
 			int importance = (int)mailItem.Importance;
 			int markForDownload = (int)mailItem.MarkForDownload;
 			int permission = (int)mailItem.Permission;
 			int permissionService = (int)mailItem.PermissionService;
-			int remoteStatus = (int)mailItem.RemoteStatus;
 			int sensitivity = (int)mailItem.Sensitivity;
 
 			string internetCodepage = mailItem.InternetCodepage.ToString(
 				CultureInfo.InvariantCulture);
 			string size = mailItem.Size.ToString(CultureInfo.InvariantCulture);
 
-			string data3 = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}",
-				bodyFormat.ToString(CultureInfo.InvariantCulture),
-				itemClass.ToString(CultureInfo.InvariantCulture),
-				downloadState.ToString(CultureInfo.InvariantCulture),
-				flagStatus.ToString(CultureInfo.InvariantCulture),
-				importance.ToString(CultureInfo.InvariantCulture),
-				markForDownload.ToString(CultureInfo.InvariantCulture),
-				permission.ToString(CultureInfo.InvariantCulture),
-				permissionService.ToString(CultureInfo.InvariantCulture),
-				remoteStatus.ToString(CultureInfo.InvariantCulture),
-				sensitivity.ToString(CultureInfo.InvariantCulture),
-				internetCodepage,
-				size);
+			// 9 ints * size of int
+			int bufferSize = 9 * 4;
+			byte[] buffer = new byte[bufferSize];
 
-			return data3;
+			int index = 0;
+			buffer = CopyIntToByteArray(buffer, index, bodyFormat);
+			index += 4;
+			buffer = CopyIntToByteArray(buffer, index, itemClass);
+			index += 4;
+			buffer = CopyIntToByteArray(buffer, index, importance);
+			index += 4;
+			buffer = CopyIntToByteArray(buffer, index, markForDownload);
+			index += 4;
+			buffer = CopyIntToByteArray(buffer, index, permission);
+			index += 4;
+			buffer = CopyIntToByteArray(buffer, index, permissionService);
+			index += 4;
+			buffer = CopyIntToByteArray(buffer, index, sensitivity);
+			index += 4;
+			buffer =
+				CopyIntToByteArray(buffer, index, mailItem.InternetCodepage);
+			index += 4;
+			buffer = CopyIntToByteArray(buffer, index, mailItem.Size);
+
+			return buffer;
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -376,37 +381,6 @@ namespace ToolKit.Library
 				mailItem.To,
 				mailItem.VotingOptions,
 				mailItem.VotingResponse);
-
-			int bodyFormat = (int)mailItem.BodyFormat;
-			int itemClass = (int)mailItem.Class;
-			int downloadState = (int)mailItem.DownloadState;
-			int flagStatus = (int)mailItem.FlagStatus;
-			int importance = (int)mailItem.Importance;
-			int markForDownload = (int)mailItem.MarkForDownload;
-			int permission = (int)mailItem.Permission;
-			int permissionService = (int)mailItem.PermissionService;
-			int remoteStatus = (int)mailItem.RemoteStatus;
-			int sensitivity = (int)mailItem.Sensitivity;
-
-			string internetCodepage = mailItem.InternetCodepage.ToString(
-				CultureInfo.InvariantCulture);
-			string size = mailItem.Size.ToString(CultureInfo.InvariantCulture);
-
-			string data3 = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}",
-				bodyFormat.ToString(CultureInfo.InvariantCulture),
-				itemClass.ToString(CultureInfo.InvariantCulture),
-				downloadState.ToString(CultureInfo.InvariantCulture),
-				flagStatus.ToString(CultureInfo.InvariantCulture),
-				importance.ToString(CultureInfo.InvariantCulture),
-				markForDownload.ToString(CultureInfo.InvariantCulture),
-				permission.ToString(CultureInfo.InvariantCulture),
-				permissionService.ToString(CultureInfo.InvariantCulture),
-				remoteStatus.ToString(CultureInfo.InvariantCulture),
-				sensitivity.ToString(CultureInfo.InvariantCulture),
-				internetCodepage,
-				size);
 
 			string deferredDeliveryTime = mailItem.DeferredDeliveryTime.ToString("O");
 			string expiryTime = mailItem.ExpiryTime.ToString("O");
