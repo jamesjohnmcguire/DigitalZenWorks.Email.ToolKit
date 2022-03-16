@@ -33,77 +33,7 @@ namespace ToolKit.Library
 			{
 				if (mailItem != null)
 				{
-					ushort booleans = GetBooleans(mailItem);
-
-					byte[] actions = GetActions(mailItem);
-					byte[] attachments = GetAttachments(mailItem);
-					byte[] dateTimes = GetDateTimes(mailItem);
-					byte[] enums = GetEnums(mailItem);
-					byte[] rtfBody = mailItem.RTFBody as byte[];
-					byte[] strings = GetStringProperties(mailItem);
-					byte[] userProperties = GetUserProperties(mailItem);
-
-					long bufferSize = actions.LongLength +
-						attachments.LongLength + dateTimes.LongLength +
-						enums.LongLength + rtfBody.LongLength +
-						strings.LongLength + userProperties.LongLength + 2;
-
-					byte[] finalBuffer = new byte[bufferSize];
-
-					// combine the parts
-					Array.Copy(actions, finalBuffer, actions.LongLength);
-					long currentIndex = actions.LongLength;
-
-					Array.Copy(
-						attachments,
-						0,
-						finalBuffer,
-						currentIndex,
-						attachments.LongLength);
-					currentIndex += attachments.LongLength;
-
-					Array.Copy(
-						dateTimes,
-						0,
-						finalBuffer,
-						currentIndex,
-						dateTimes.LongLength);
-					currentIndex += dateTimes.LongLength;
-
-					Array.Copy(
-						enums,
-						0,
-						finalBuffer,
-						currentIndex,
-						enums.LongLength);
-					currentIndex += enums.LongLength;
-
-					Array.Copy(
-						rtfBody,
-						0,
-						finalBuffer,
-						currentIndex,
-						rtfBody.LongLength);
-					currentIndex += rtfBody.LongLength;
-
-					Array.Copy(
-						strings,
-						0,
-						finalBuffer,
-						currentIndex,
-						strings.LongLength);
-					currentIndex += strings.LongLength;
-
-					Array.Copy(
-						userProperties,
-						0,
-						finalBuffer,
-						currentIndex,
-						userProperties.LongLength);
-					currentIndex += userProperties.LongLength;
-
-					finalBuffer = CopyUshortToByteArray(
-						finalBuffer, currentIndex, booleans);
+					byte[] finalBuffer = GetItemBytes(mailItem);
 				}
 			}
 			catch (System.Exception exception) when
@@ -426,6 +356,99 @@ namespace ToolKit.Library
 			buffer = CopyIntToByteArray(buffer, index, mailItem.Size);
 
 			return buffer;
+		}
+
+		private static byte[] GetItemBytes(MailItem mailItem)
+		{
+			try
+			{
+				if (mailItem != null)
+				{
+					ushort booleans = GetBooleans(mailItem);
+
+					byte[] actions = GetActions(mailItem);
+					byte[] attachments = GetAttachments(mailItem);
+					byte[] dateTimes = GetDateTimes(mailItem);
+					byte[] enums = GetEnums(mailItem);
+					byte[] rtfBody = mailItem.RTFBody as byte[];
+					byte[] strings = GetStringProperties(mailItem);
+					byte[] userProperties = GetUserProperties(mailItem);
+
+					long bufferSize = actions.LongLength +
+						attachments.LongLength + dateTimes.LongLength +
+						enums.LongLength + rtfBody.LongLength +
+						strings.LongLength + userProperties.LongLength + 2;
+
+					byte[] finalBuffer = new byte[bufferSize];
+
+					// combine the parts
+					Array.Copy(actions, finalBuffer, actions.LongLength);
+					long currentIndex = actions.LongLength;
+
+					Array.Copy(
+						attachments,
+						0,
+						finalBuffer,
+						currentIndex,
+						attachments.LongLength);
+					currentIndex += attachments.LongLength;
+
+					Array.Copy(
+						dateTimes,
+						0,
+						finalBuffer,
+						currentIndex,
+						dateTimes.LongLength);
+					currentIndex += dateTimes.LongLength;
+
+					Array.Copy(
+						enums,
+						0,
+						finalBuffer,
+						currentIndex,
+						enums.LongLength);
+					currentIndex += enums.LongLength;
+
+					Array.Copy(
+						rtfBody,
+						0,
+						finalBuffer,
+						currentIndex,
+						rtfBody.LongLength);
+					currentIndex += rtfBody.LongLength;
+
+					Array.Copy(
+						strings,
+						0,
+						finalBuffer,
+						currentIndex,
+						strings.LongLength);
+					currentIndex += strings.LongLength;
+
+					Array.Copy(
+						userProperties,
+						0,
+						finalBuffer,
+						currentIndex,
+						userProperties.LongLength);
+					currentIndex += userProperties.LongLength;
+
+					finalBuffer = CopyUshortToByteArray(
+						finalBuffer, currentIndex, booleans);
+				}
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
+
+			return null;
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage(
