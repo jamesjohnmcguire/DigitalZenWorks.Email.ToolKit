@@ -25,14 +25,86 @@ namespace ToolKit.Library
 		/// <summary>
 		/// Gets the item's hash.
 		/// </summary>
-		/// <param name="item">The items to compute.</param>
+		/// <param name="mailItem">The items to compute.</param>
 		/// <returns>The item's hash.</returns>
 		public static byte[] GetItemHash(MailItem mailItem)
 		{
-
 			try
 			{
-				byte[] rtfBody = mailItem.RTFBody as byte[];
+				if (mailItem != null)
+				{
+					ushort booleans = GetBooleans(mailItem);
+
+					byte[] actions = GetActions(mailItem);
+					byte[] attachments = GetAttachments(mailItem);
+					byte[] dateTimes = GetDateTimes(mailItem);
+					byte[] enums = GetEnums(mailItem);
+					byte[] rtfBody = mailItem.RTFBody as byte[];
+					byte[] strings = GetStringProperties(mailItem);
+					byte[] userProperties = GetUserProperties(mailItem);
+
+					long bufferSize = actions.LongLength +
+						attachments.LongLength + dateTimes.LongLength +
+						enums.LongLength + rtfBody.LongLength +
+						strings.LongLength + userProperties.LongLength + 2;
+
+					byte[] finalBuffer = new byte[bufferSize];
+
+					// combine the parts
+					Array.Copy(actions, finalBuffer, actions.LongLength);
+					long currentIndex = actions.LongLength;
+
+					Array.Copy(
+						attachments,
+						0,
+						finalBuffer,
+						currentIndex,
+						attachments.LongLength);
+					currentIndex += attachments.LongLength;
+
+					Array.Copy(
+						dateTimes,
+						0,
+						finalBuffer,
+						currentIndex,
+						dateTimes.LongLength);
+					currentIndex += dateTimes.LongLength;
+
+					Array.Copy(
+						enums,
+						0,
+						finalBuffer,
+						currentIndex,
+						enums.LongLength);
+					currentIndex += enums.LongLength;
+
+					Array.Copy(
+						rtfBody,
+						0,
+						finalBuffer,
+						currentIndex,
+						rtfBody.LongLength);
+					currentIndex += rtfBody.LongLength;
+
+					Array.Copy(
+						strings,
+						0,
+						finalBuffer,
+						currentIndex,
+						strings.LongLength);
+					currentIndex += strings.LongLength;
+
+					Array.Copy(
+						userProperties,
+						0,
+						finalBuffer,
+						currentIndex,
+						userProperties.LongLength);
+					currentIndex += userProperties.LongLength;
+
+					finalBuffer = CopyUshortToByteArray(
+						finalBuffer, currentIndex, booleans);
+				}
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -49,7 +121,7 @@ namespace ToolKit.Library
 		}
 
 		private static byte[] CopyIntToByteArray(
-			byte[] bytes, int index, int value)
+			byte[] bytes, long index, int value)
 		{
 			byte byteValue1 = (byte)value;
 			byte byteValue2 = (byte)(value >> 8);
@@ -68,7 +140,7 @@ namespace ToolKit.Library
 		}
 
 		private static byte[] CopyUshortToByteArray(
-			byte[] bytes, int index, ushort value)
+			byte[] bytes, long index, ushort value)
 		{
 			byte byteValue1 = (byte)value;
 			byte byteValue2 = (byte)(value >> 8);
