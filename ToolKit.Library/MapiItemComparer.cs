@@ -280,23 +280,26 @@ namespace ToolKit.Library
 			boolHolder = SetBit(boolHolder, 14, mailItem.Submitted);
 			boolHolder = SetBit(boolHolder, 15, mailItem.UnRead);
 
+			string deferredDeliveryTime = mailItem.DeferredDeliveryTime.ToString("O");
+			string expiryTime = mailItem.ExpiryTime.ToString("O");
+			string receivedTime = mailItem.ReceivedTime.ToString("O");
+			string reminderTime = mailItem.ReminderTime.ToString("O");
+			string retentionExpirationDate =
+				mailItem.RetentionExpirationDate.ToString("O");
+			string sentOn = mailItem.SentOn.ToString("O");
+			string taskCompletedDate = mailItem.TaskCompletedDate.ToString("O");
+			string taskDueDate = mailItem.TaskDueDate.ToString("O");
+			string taskStartDate = mailItem.TaskStartDate.ToString("O");
+
 			/*
-Actions
 Conflicts
 CreationTime
-DeferredDeliveryTime
-ExpiryTime
-FormDescription
 LastModificationTime
-Links
-ReceivedTime
-ReminderTime
-RetentionExpirationDate
 SaveSentMessageFolder
-SentOn
-TaskCompletedDate
-TaskDueDate
-	TaskStartDate
+
+Actions
+FormDescription
+Links
 ToDoTaskOrdinal
 UserProperties
 */
