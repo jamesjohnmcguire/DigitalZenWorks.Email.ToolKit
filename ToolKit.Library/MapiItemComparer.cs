@@ -13,7 +13,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ToolKit.Library
+namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
 	/// Provides comparision support for Outlook MAPI items.
@@ -145,6 +145,7 @@ namespace ToolKit.Library
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
+				exception is System.Runtime.InteropServices.COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -210,6 +211,7 @@ namespace ToolKit.Library
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
+				exception is System.Runtime.InteropServices.COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -238,6 +240,7 @@ namespace ToolKit.Library
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
+				exception is System.Runtime.InteropServices.COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -315,6 +318,7 @@ namespace ToolKit.Library
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
+				exception is System.Runtime.InteropServices.COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -577,6 +581,7 @@ namespace ToolKit.Library
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
+				exception is System.Runtime.InteropServices.COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -631,6 +636,7 @@ namespace ToolKit.Library
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
+				exception is System.Runtime.InteropServices.COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
