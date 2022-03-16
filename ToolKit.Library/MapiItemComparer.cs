@@ -334,10 +334,6 @@ namespace ToolKit.Library
 			int permissionService = (int)mailItem.PermissionService;
 			int sensitivity = (int)mailItem.Sensitivity;
 
-			string internetCodepage = mailItem.InternetCodepage.ToString(
-				CultureInfo.InvariantCulture);
-			string size = mailItem.Size.ToString(CultureInfo.InvariantCulture);
-
 			// 9 ints * size of int
 			int bufferSize = 9 * 4;
 			byte[] buffer = new byte[bufferSize];
