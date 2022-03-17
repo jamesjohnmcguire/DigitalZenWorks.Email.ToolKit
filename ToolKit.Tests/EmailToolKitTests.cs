@@ -122,6 +122,74 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
+		public void TestMailItemsAreNotSameByContent()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			MailItem mailItem2 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is aka subject",
+				"This is the message.");
+			mailItem2.Move(mainFolder);
+
+			string hash = MapiItemComparer.GetItemHash(mailItem);
+			string hash2 = MapiItemComparer.GetItemHash(mailItem2);
+
+			Assert.AreNotEqual(hash, hash2);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for comparing two MailItems by content.
+		/// </summary>
+		[Test]
+		public void TestMailItemsSameByContent()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			MailItem mailItem2 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem2.Move(mainFolder);
+
+			string hash = MapiItemComparer.GetItemHash(mailItem);
+			string hash2 = MapiItemComparer.GetItemHash(mailItem2);
+
+			Assert.AreEqual(hash, hash2);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
 		/// Test for comparing two MailItems by refence.
 		/// </summary>
 		/// <remarks>This is more of a sanity check.</remarks>
