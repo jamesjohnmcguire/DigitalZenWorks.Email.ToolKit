@@ -88,8 +88,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[Test]
 		public void TestDuplicateItems()
 		{
-			bool result = false;
-
 			MAPIFolder rootFolder = store.GetRootFolder();
 			MAPIFolder mainFolder = OutlookStorage.AddFolder(
 				rootFolder, "Main Test Folder");
@@ -113,8 +111,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			var tester2 = mailItem2.EntryID;
 
 			Assert.AreNotEqual(tester, tester2);
-
-			Assert.IsTrue(result);
 
 			// Clean up
 			mailItem.Delete();
