@@ -571,7 +571,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				string buffer1 = string.Format(
 					CultureInfo.InvariantCulture,
-					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}",
+					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}",
 					mailItem.BCC,
 					mailItem.BillingInformation,
 					mailItem.Body,
@@ -579,7 +579,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					mailItem.CC,
 					mailItem.Companies,
 					mailItem.ConversationID,
-					mailItem.ConversationIndex,
 					mailItem.ConversationTopic,
 					mailItem.FlagRequest,
 					header,
