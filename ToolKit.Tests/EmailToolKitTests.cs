@@ -30,8 +30,11 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[OneTimeSetUp]
 		public void OneTimeSetUp()
 		{
-			string basePath = Path.GetTempPath();
-			storePath = basePath + "Test.pst";
+			string fileName = Path.GetTempFileName();
+
+			// A 0 byte sized file is created.  Need to remove it.
+			File.Delete(fileName);
+			storePath = Path.ChangeExtension(fileName, ".pst");
 
 			pstOutlook = new ();
 
