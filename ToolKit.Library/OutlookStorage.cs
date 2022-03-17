@@ -408,6 +408,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			IDictionary<string, IList<string>> hashTable =
 				GetFolderHashTable(folder);
 
+			var duplicates = hashTable.Where(p => p.Value.Count > 1);
+
+			foreach (KeyValuePair<string, IList<string>> duplicateSet in duplicates)
+			{
+				ListDuplicates(duplicateSet.Value);
+			}
 		}
 
 		/// <summary>
@@ -637,6 +643,23 @@ namespace DigitalZenWorks.Email.ToolKit
 			return folderExists;
 		}
 
+		private static void ListItem(MailItem mailItem, string prefixMessage)
+		{
+			string sentOn = mailItem.SentOn.ToString(
+				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+			string message = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0} {1}: From: {2}: {3} Subject: {4}",
+				prefixMessage,
+				sentOn,
+				mailItem.SenderName,
+				mailItem.SenderEmailAddress,
+				mailItem.Subject);
+
+			Log.Info(message);
+		}
+
 		private static void MoveFolderItems(
 			MAPIFolder source, MAPIFolder destination)
 		{
@@ -771,6 +794,17 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return hashTable;
+		}
+
+		private void ListDuplicates(IList<string> duplicateSet)
+		{
+			string keeper = duplicateSet[0];
+			duplicateSet.RemoveAt(0);
+
+			MailItem mailItem = outlookNamespace.GetItemFromID(keeper);
+
+			ListItem(mailItem, "Duplicates: Keeping ");
+
 		}
 
 		private void MoveFolderContents(
