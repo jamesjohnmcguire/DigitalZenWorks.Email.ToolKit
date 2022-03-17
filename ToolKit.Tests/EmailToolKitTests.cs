@@ -86,7 +86,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		/// Test for checking of duplicate items.
 		/// </summary>
 		[Test]
-		public void TestDuplicateItems()
+		public void TestDifferentItemsEntryIds()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
 			MAPIFolder mainFolder = OutlookStorage.AddFolder(
