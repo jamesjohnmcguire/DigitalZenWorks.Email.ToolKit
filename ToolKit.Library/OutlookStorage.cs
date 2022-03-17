@@ -238,6 +238,81 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Empty deleted items folder.
+		/// </summary>
+		public void EmptyDeletedItemsFolder()
+		{
+			MAPIFolder deletedItemsFolder = outlookNamespace.GetDefaultFolder(
+					OlDefaultFolders.olFolderDeletedItems);
+			Items items = deletedItemsFolder.Items;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group will change.
+			for (int index = items.Count; index > 0; index--)
+			{
+				object item = items[index];
+
+				switch (item)
+				{
+					case AppointmentItem appointmentItem:
+						appointmentItem.Delete();
+						break;
+					case ContactItem contactItem:
+						contactItem.Delete();
+						break;
+					case DistListItem distListItem:
+						distListItem.Delete();
+						break;
+					case DocumentItem documentItem:
+						documentItem.Delete();
+						break;
+					case JournalItem journalItem:
+						journalItem.Delete();
+						break;
+					case MailItem mailItem:
+						mailItem.Delete();
+						break;
+					case MeetingItem meetingItem:
+						meetingItem.Delete();
+						break;
+					case NoteItem noteItem:
+						noteItem.Delete();
+						break;
+					case PostItem postItem:
+						postItem.Delete();
+						break;
+					case RemoteItem remoteItem:
+						remoteItem.Delete();
+						break;
+					case ReportItem reportItem:
+						reportItem.Delete();
+						break;
+					case TaskItem taskItem:
+						taskItem.Delete();
+						break;
+					case TaskRequestAcceptItem taskRequestAcceptItem:
+						taskRequestAcceptItem.Delete();
+						break;
+					case TaskRequestDeclineItem taskRequestDeclineItem:
+						taskRequestDeclineItem.Delete();
+						break;
+					case TaskRequestItem taskRequestItem:
+						taskRequestItem.Delete();
+						break;
+					case TaskRequestUpdateItem taskRequestUpdateItem:
+						taskRequestUpdateItem.Delete();
+						break;
+					default:
+						Log.Warn(
+							"folder item of unknown type: " + item.ToString());
+						break;
+				}
+
+				Marshal.ReleaseComObject(item);
+			}
+		}
+
+		/// <summary>
 		/// Gets folder from entry id.
 		/// </summary>
 		/// <param name="entryId">The entry id.</param>
