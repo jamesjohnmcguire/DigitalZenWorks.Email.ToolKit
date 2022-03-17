@@ -146,8 +146,37 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			mailItem.Move(mainFolder);
 
 			string hash = MapiItemComparer.GetItemHash(mailItem);
+			string hash2 = MapiItemComparer.GetItemHash(mailItem);
+
+			if (hash.Equals(hash2))
+			{
+				Log.Info("Hashes are the same");
+			}
+			else
+			{
+				Log.Info("Hashes are NOT the same");
+			}
+
+			MailItem mailItem2 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem2.Move(mainFolder);
+
+			hash2 = MapiItemComparer.GetItemHash(mailItem2);
+
+			if (hash.Equals(hash2))
+			{
+				Log.Info("Hashes are the same");
+			}
+			else
+			{
+				Log.Info("Hashes are NOT the same");
+			}
 
 			// Clean up
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
 			Marshal.ReleaseComObject(mainFolder);
 			Marshal.ReleaseComObject(rootFolder);
 		}
