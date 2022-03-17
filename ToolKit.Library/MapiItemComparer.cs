@@ -435,6 +435,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static byte[] GetItemBytes(MailItem mailItem)
 		{
+			byte[] finalBuffer = null;
+
 			try
 			{
 				if (mailItem != null)
@@ -458,7 +460,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						strings,
 						userProperties);
 
-					byte[] finalBuffer = new byte[bufferSize];
+					finalBuffer = new byte[bufferSize];
 
 					// combine the parts
 					long currentIndex = ArrayCopyConditional(
@@ -492,7 +494,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				Log.Error(exception.ToString());
 			}
 
-			return null;
+			return finalBuffer;
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage(
