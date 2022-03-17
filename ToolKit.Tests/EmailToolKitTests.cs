@@ -60,6 +60,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
+			pstOutlook.EmptyDeletedItemsFolder();
 			pstOutlook.RemoveStore(store);
 		}
 
