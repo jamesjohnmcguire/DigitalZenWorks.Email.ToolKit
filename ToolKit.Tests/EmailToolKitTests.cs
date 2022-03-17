@@ -116,6 +116,35 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test for comparing two MailItems by refence.
+		/// </summary>
+		/// <remarks>This is more of a sanity check.</remarks>
+		[Test]
+		public void TestMailItemsSameByReference()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			string hash = MapiItemComparer.GetItemHash(mailItem);
+			string hash2 = MapiItemComparer.GetItemHash(mailItem);
+
+			Assert.AreEqual(hash, hash2);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
 		/// Test for removing empty folders.
 		/// </summary>
 		[Test]
