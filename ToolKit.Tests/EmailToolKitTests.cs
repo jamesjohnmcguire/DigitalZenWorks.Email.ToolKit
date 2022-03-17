@@ -4,6 +4,7 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
 using System;
@@ -113,6 +114,14 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Assert.AreNotEqual(tester, tester2);
 
 			Assert.IsTrue(result);
+
+			// Clean up
+			mailItem.Delete();
+			mailItem2.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
 		}
 
 		/// <summary>
