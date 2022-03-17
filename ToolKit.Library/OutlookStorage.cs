@@ -412,7 +412,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			foreach (KeyValuePair<string, IList<string>> duplicateSet in duplicates)
 			{
-				ListDuplicates(duplicateSet.Value);
+				ListDuplicates(duplicateSet.Value, true);
 			}
 		}
 
@@ -796,7 +796,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return hashTable;
 		}
 
-		private void ListDuplicates(IList<string> duplicateSet)
+		private void ListDuplicates(IList<string> duplicateSet, bool dryRun)
 		{
 			string keeper = duplicateSet[0];
 			duplicateSet.RemoveAt(0);
@@ -805,6 +805,17 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			ListItem(mailItem, "Duplicates: Keeping ");
 
+			string prefixMessage = "Duplicates: Removing ";
+			if (dryRun == true)
+			{
+				prefixMessage = "Duplicates: WOULD RemovE ";
+			}
+
+			foreach (string duplicateId in duplicateSet)
+			{
+				mailItem = outlookNamespace.GetItemFromID(duplicateId);
+				ListItem(mailItem, prefixMessage);
+			}
 		}
 
 		private void MoveFolderContents(
