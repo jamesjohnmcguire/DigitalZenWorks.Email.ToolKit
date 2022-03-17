@@ -130,7 +130,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			string basePath = Path.GetTempPath();
 			string storePath = basePath + "Test.pst";
 
-			OutlookStorage pstOutlook = new();
+			OutlookStorage pstOutlook = new ();
 			Store store = pstOutlook.CreateStore(storePath);
 
 			// Create top level folders

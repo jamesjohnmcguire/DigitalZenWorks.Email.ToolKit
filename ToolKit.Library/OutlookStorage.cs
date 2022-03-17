@@ -396,7 +396,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void RemoveDuplicates()
 		{
-
 		}
 
 		/// <summary>
@@ -410,7 +409,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			var duplicates = hashTable.Where(p => p.Value.Count > 1);
 
-			foreach (KeyValuePair<string, IList<string>> duplicateSet in duplicates)
+			foreach (KeyValuePair<string, IList<string>> duplicateSet in
+				duplicates)
 			{
 				ListDuplicates(duplicateSet.Value, true);
 			}
@@ -419,9 +419,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Remove duplicates items from the given store.
 		/// </summary>
+		/// <param name="store">The PST store to process.</param>
 		public void RemoveDuplicates(Store store)
 		{
-
 		}
 
 		/// <summary>
@@ -643,6 +643,56 @@ namespace DigitalZenWorks.Email.ToolKit
 			return folderExists;
 		}
 
+		private static IDictionary<string, IList<string>> GetFolderHashTable(
+			MAPIFolder folder)
+		{
+			IDictionary<string, IList<string>> hashTable = null;
+
+			if (folder != null)
+			{
+				hashTable = new Dictionary<string, IList<string>>();
+				Items items = folder.Items;
+
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group will change.
+				for (int index = items.Count; index > 0; index--)
+				{
+					object item = items[index];
+
+					switch (item)
+					{
+						// Initially, just focus on MailItems
+						case MailItem mailItem:
+							string hash =
+								MapiItemComparer.GetItemHash(mailItem);
+							bool keyExists = hashTable.ContainsKey(hash);
+
+							if (keyExists == true)
+							{
+								IList<string> bucket = hashTable[hash];
+								bucket.Add(mailItem.EntryID);
+							}
+							else
+							{
+								IList<string> bucket = new List<string>();
+								bucket.Add(mailItem.EntryID);
+
+								hashTable.Add(hash, bucket);
+							}
+
+							break;
+						default:
+							Log.Info("Ignoring item of non-MailItem type: ");
+							break;
+					}
+
+					Marshal.ReleaseComObject(item);
+				}
+			}
+
+			return hashTable;
+		}
+
 		private static void ListItem(MailItem mailItem, string prefixMessage)
 		{
 			string sentOn = mailItem.SentOn.ToString(
@@ -744,56 +794,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				MergeDuplicateFolder(path, index, folder, duplicatePattern);
 			}
-		}
-
-		private IDictionary<string, IList<string>> GetFolderHashTable(
-			MAPIFolder folder)
-		{
-			IDictionary<string, IList<string>> hashTable = null;
-
-			if (folder != null)
-			{
-				hashTable = new Dictionary<string, IList<string>>();
-				Items items = folder.Items;
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group will change.
-				for (int index = items.Count; index > 0; index--)
-				{
-					object item = items[index];
-
-					switch (item)
-					{
-						// Initially, just focus on MailItems
-						case MailItem mailItem:
-							string hash =
-								MapiItemComparer.GetItemHash(mailItem);
-							bool keyExists = hashTable.ContainsKey(hash);
-
-							if (keyExists == true)
-							{
-								IList<string> bucket = hashTable[hash];
-								bucket.Add(mailItem.EntryID);
-							}
-							else
-							{
-								IList<string> bucket = new List<string>();
-								bucket.Add(mailItem.EntryID);
-
-								hashTable.Add(hash, bucket);
-							}
-
-							break;
-						default:
-							Log.Info("Ignoring item of non-MailItem type: ");
-							break;
-					}
-
-					Marshal.ReleaseComObject(item);
-				}
-			}
-
-			return hashTable;
 		}
 
 		private void ListDuplicates(IList<string> duplicateSet, bool dryRun)
