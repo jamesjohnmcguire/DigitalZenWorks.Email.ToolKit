@@ -402,18 +402,25 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Remove duplicates items from the given folder.
 		/// </summary>
 		/// <param name="folder">The MAPI folder to process.</param>
-		public void RemoveDuplicates(MAPIFolder folder)
+		/// <returns>An array of duplicate sets and total duplicate items
+		/// count.</returns>
+		public int[] RemoveDuplicates(MAPIFolder folder)
 		{
+			int[] duplicateCounts = new int[2];
+
 			IDictionary<string, IList<string>> hashTable =
 				GetFolderHashTable(folder);
 
 			var duplicates = hashTable.Where(p => p.Value.Count > 1);
+			duplicateCounts[0] = duplicates.Count();
 
 			foreach (KeyValuePair<string, IList<string>> duplicateSet in
 				duplicates)
 			{
-				ListDuplicates(duplicateSet.Value, true);
+				duplicateCounts[1] += ListDuplicates(duplicateSet.Value, true);
 			}
+
+			return duplicateCounts;
 		}
 
 		/// <summary>
@@ -796,8 +803,10 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private void ListDuplicates(IList<string> duplicateSet, bool dryRun)
+		private int ListDuplicates(IList<string> duplicateSet, bool dryRun)
 		{
+			int totalDuplicates = duplicateSet.Count;
+
 			string keeper = duplicateSet[0];
 			duplicateSet.RemoveAt(0);
 
@@ -816,6 +825,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				mailItem = outlookNamespace.GetItemFromID(duplicateId);
 				ListItem(mailItem, prefixMessage);
 			}
+
+			return totalDuplicates;
 		}
 
 		private void MoveFolderContents(
