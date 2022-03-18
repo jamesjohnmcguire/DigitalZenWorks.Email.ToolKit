@@ -274,6 +274,48 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		/// Test for removing empty folder.
 		/// </summary>
 		[Test]
+		public void TestRemoveDuplicates()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Duplicates Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			MailItem mailItem2 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is aka subject",
+				"This is the message.");
+			mailItem2.Move(mainFolder);
+
+			MailItem mailItem3 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem3.Move(mainFolder);
+
+			int[] counts = pstOutlook.RemoveDuplicates(mainFolder);
+
+			Assert.AreEqual(counts[0], 1);
+			Assert.AreEqual(counts[1], 2);
+
+			// Clean up
+			mailItem.Delete();
+			mailItem2.Delete();
+			mailItem3.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folder.
+		/// </summary>
+		[Test]
 		public void TestRemoveEmptyFolder()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
