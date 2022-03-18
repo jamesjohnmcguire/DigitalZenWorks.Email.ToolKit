@@ -397,6 +397,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void RemoveDuplicates()
 		{
+			foreach (Store store in outlookNamespace.Session.Stores)
+			{
+				RemoveDuplicates(store);
+			}
 		}
 
 		/// <summary>
@@ -430,6 +434,17 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="store">The PST store to process.</param>
 		public void RemoveDuplicates(Store store)
 		{
+			if (store != null)
+			{
+				string storePath = GetStoreName(store) + "::";
+
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				RemoveDuplicatesFromSubFolders(storePath, rootFolder);
+
+				totalFolders++;
+				Marshal.ReleaseComObject(rootFolder);
+			}
 		}
 
 		/// <summary>
@@ -929,6 +944,86 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 				}
 			}
+		}
+
+		/// <summary>
+		/// Remove duplicates items from the given folder.
+		/// </summary>
+		/// <param name="path">The path of the curent folder.</param>
+		/// <param name="folder">The MAPI folder to process.</param>
+		/// <param name="recurse">Indicates whether to recurse into
+		/// sub folders.</param>
+		/// <returns>An array of duplicate sets and total duplicate items
+		/// count.</returns>
+		private int[] RemoveDuplicates(
+			string path, MAPIFolder folder, bool recurse)
+		{
+			int[] duplicateCounts = new int[2];
+
+			if (recurse == true)
+			{
+				duplicateCounts = RemoveDuplicatesFromSubFolders(path, folder);
+			}
+
+			IDictionary<string, IList<string>> hashTable =
+				GetFolderHashTable(folder);
+
+			IEnumerable<KeyValuePair<string, IList<string>>> duplicates =
+				hashTable.Where(p => p.Value.Count > 1);
+
+			int duplicateSetsCount = duplicates.Count();
+			duplicateCounts[0] += duplicateSetsCount;
+
+			if (duplicateSetsCount > 0)
+			{
+				path += "/" + folder.Name;
+
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"Duplicates Found at: {0}",
+					path);
+				Log.Info(message);
+
+				foreach (KeyValuePair<string, IList<string>> duplicateSet in
+					duplicates)
+				{
+					duplicateCounts[1] +=
+						ListDuplicates(duplicateSet.Value, true);
+				}
+			}
+
+			return duplicateCounts;
+		}
+
+		/// <summary>
+		/// Remove duplicates items from the given folder.
+		/// </summary>
+		/// <param name="path">The path of the curent folder.</param>
+		/// <param name="folder">The MAPI folder to process.</param>
+		/// <returns>An array of duplicate sets and total duplicate items
+		/// count.</returns>
+		private int[] RemoveDuplicatesFromSubFolders(
+			string path, MAPIFolder folder)
+		{
+			int[] duplicateCounts = new int[2];
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int index = folder.Folders.Count; index > 0; index--)
+			{
+				MAPIFolder subFolder = folder.Folders[index];
+
+				int[] subFolderduplicateCounts =
+					RemoveDuplicates(path, subFolder, true);
+
+				duplicateCounts[0] += subFolderduplicateCounts[0];
+				duplicateCounts[1] += subFolderduplicateCounts[1];
+
+				totalFolders++;
+				Marshal.ReleaseComObject(subFolder);
+			}
+
+			return duplicateCounts;
 		}
 	}
 }
