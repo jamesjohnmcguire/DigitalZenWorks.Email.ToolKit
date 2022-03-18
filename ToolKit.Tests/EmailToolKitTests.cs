@@ -110,8 +110,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			mailItem.Save();
 			mailItem2.Save();
 
-			var tester = mailItem.EntryID;
-			var tester2 = mailItem2.EntryID;
+			string tester = mailItem.EntryID;
+			string tester2 = mailItem2.EntryID;
 
 			Assert.AreNotEqual(tester, tester2);
 
@@ -153,7 +153,9 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			// Clean up
 			mailItem.Delete();
+			mailItem2.Delete();
 			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
 			Marshal.ReleaseComObject(mainFolder);
 			Marshal.ReleaseComObject(rootFolder);
 		}
@@ -187,7 +189,9 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			// Clean up
 			mailItem.Delete();
+			mailItem2.Delete();
 			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
 			Marshal.ReleaseComObject(mainFolder);
 			Marshal.ReleaseComObject(rootFolder);
 		}
@@ -245,7 +249,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem.Move(subFolder);
 
-			Marshal.ReleaseComObject(mailItem);
 			Marshal.ReleaseComObject(subFolder);
 
 			// Review
@@ -261,6 +264,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Assert.IsNull(subFolder);
 
 			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
 			Marshal.ReleaseComObject(mainFolder);
 			Marshal.ReleaseComObject(rootFolder);
 		}
