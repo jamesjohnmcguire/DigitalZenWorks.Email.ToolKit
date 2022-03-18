@@ -199,10 +199,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			MailItem mailItem =
 				(MailItem)outlookApplication.CreateItem(OlItemType.olMailItem);
 
+			mailItem.Display(false);
+
 			mailItem.To = recipient;
 			mailItem.Subject = subject;
 			mailItem.Body = body;
-			mailItem.Display(false);
 
 			return mailItem;
 		}
