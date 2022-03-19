@@ -89,8 +89,16 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = 0;
 							break;
 						case "remove-duplicates":
+							bool dryRun = false;
+
+							if (arguments.Contains("-n") ||
+								arguments.Contains("--dryrun"))
+							{
+								dryRun = true;
+							}
+
 							pstOutlook = new ();
-							pstOutlook.RemoveDuplicates();
+							pstOutlook.RemoveDuplicates(dryRun);
 
 							result = 0;
 							break;
