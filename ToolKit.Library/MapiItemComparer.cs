@@ -398,37 +398,53 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static byte[] GetEnums(MailItem mailItem)
 		{
-			int bodyFormat = (int)mailItem.BodyFormat;
-			int itemClass = (int)mailItem.Class;
-			int importance = (int)mailItem.Importance;
-			int markForDownload = (int)mailItem.MarkForDownload;
-			int permission = (int)mailItem.Permission;
-			int permissionService = (int)mailItem.PermissionService;
-			int sensitivity = (int)mailItem.Sensitivity;
+			byte[] buffer = null;
 
-			// 9 ints * size of int
-			int bufferSize = 9 * 4;
-			byte[] buffer = new byte[bufferSize];
+			try
+			{
+				int bodyFormat = (int)mailItem.BodyFormat;
+				int itemClass = (int)mailItem.Class;
+				int importance = (int)mailItem.Importance;
+				int markForDownload = (int)mailItem.MarkForDownload;
+				int permission = (int)mailItem.Permission;
+				int permissionService = (int)mailItem.PermissionService;
+				int sensitivity = (int)mailItem.Sensitivity;
 
-			int index = 0;
-			buffer = CopyIntToByteArray(buffer, index, bodyFormat);
-			index += 4;
-			buffer = CopyIntToByteArray(buffer, index, itemClass);
-			index += 4;
-			buffer = CopyIntToByteArray(buffer, index, importance);
-			index += 4;
-			buffer = CopyIntToByteArray(buffer, index, markForDownload);
-			index += 4;
-			buffer = CopyIntToByteArray(buffer, index, permission);
-			index += 4;
-			buffer = CopyIntToByteArray(buffer, index, permissionService);
-			index += 4;
-			buffer = CopyIntToByteArray(buffer, index, sensitivity);
-			index += 4;
-			buffer =
-				CopyIntToByteArray(buffer, index, mailItem.InternetCodepage);
-			index += 4;
-			buffer = CopyIntToByteArray(buffer, index, mailItem.Size);
+				// 9 ints * size of int
+				int bufferSize = 9 * 4;
+				buffer = new byte[bufferSize];
+
+				int index = 0;
+				buffer = CopyIntToByteArray(buffer, index, bodyFormat);
+				index += 4;
+				buffer = CopyIntToByteArray(buffer, index, itemClass);
+				index += 4;
+				buffer = CopyIntToByteArray(buffer, index, importance);
+				index += 4;
+				buffer = CopyIntToByteArray(buffer, index, markForDownload);
+				index += 4;
+				buffer = CopyIntToByteArray(buffer, index, permission);
+				index += 4;
+				buffer = CopyIntToByteArray(buffer, index, permissionService);
+				index += 4;
+				buffer = CopyIntToByteArray(buffer, index, sensitivity);
+				index += 4;
+				buffer = CopyIntToByteArray(
+					buffer, index, mailItem.InternetCodepage);
+				index += 4;
+				buffer = CopyIntToByteArray(buffer, index, mailItem.Size);
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is System.Runtime.InteropServices.COMException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
 
 			return buffer;
 		}
