@@ -1014,32 +1014,11 @@ namespace DigitalZenWorks.Email.ToolKit
 					RemoveDuplicatesFromSubFolders(path, folder, dryRun);
 			}
 
-			IDictionary<string, IList<string>> hashTable =
-				GetFolderHashTable(folder);
+			int[] duplicateCountsThisFolder = 
+				RemoveDuplicatesFromThisFolder(folder, dryRun);
 
-			IEnumerable<KeyValuePair<string, IList<string>>> duplicates =
-				hashTable.Where(p => p.Value.Count > 1);
-
-			int duplicateSetsCount = duplicates.Count();
-			duplicateCounts[0] += duplicateSetsCount;
-
-			if (duplicateSetsCount > 0)
-			{
-				path += "/" + folder.Name;
-
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
-					"Duplicates Found at: {0}",
-					path);
-				Log.Info(message);
-
-				foreach (KeyValuePair<string, IList<string>> duplicateSet in
-					duplicates)
-				{
-					duplicateCounts[1] +=
-						ListDuplicates(duplicateSet.Value, true);
-				}
-			}
+			duplicateCounts[0] += duplicateCountsThisFolder[0];
+			duplicateCounts[1] += duplicateCountsThisFolder[1];
 
 			return duplicateCounts;
 		}
