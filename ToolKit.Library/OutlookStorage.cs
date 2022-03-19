@@ -435,22 +435,28 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Remove duplicates items from the given folder.
 		/// </summary>
 		/// <param name="folder">The MAPI folder to process.</param>
+		/// <param name="recurse">Indicates whether to recurse into
+		/// sub folders.</param>
 		/// <returns>An array of duplicate sets and total duplicate items
 		/// count.</returns>
-		public int[] RemoveDuplicates(MAPIFolder folder)
+		public int[] RemoveDuplicates(MAPIFolder folder, bool recurse)
 		{
 			int[] duplicateCounts = new int[2];
 
-			IDictionary<string, IList<string>> hashTable =
-				GetFolderHashTable(folder);
-
-			var duplicates = hashTable.Where(p => p.Value.Count > 1);
-			duplicateCounts[0] = duplicates.Count();
-
-			foreach (KeyValuePair<string, IList<string>> duplicateSet in
-				duplicates)
+			if (folder != null)
 			{
-				duplicateCounts[1] += ListDuplicates(duplicateSet.Value, true);
+				if (recurse == true)
+				{
+					string path = GetFolderPath(folder);
+					duplicateCounts =
+						RemoveDuplicatesFromSubFolders(path, folder);
+				}
+
+				int[] duplicateCountsThisFolder =
+					RemoveDuplicatesFromThisFolder(folder);
+
+				duplicateCounts[0] += duplicateCountsThisFolder[0];
+				duplicateCounts[1] += duplicateCountsThisFolder[1];
 			}
 
 			return duplicateCounts;
@@ -1053,5 +1059,24 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			return duplicateCounts;
 		}
+		private int[] RemoveDuplicatesFromThisFolder(MAPIFolder folder)
+		{
+			int[] duplicateCounts = new int[2];
+
+			IDictionary<string, IList<string>> hashTable =
+				GetFolderHashTable(folder);
+
+			var duplicates = hashTable.Where(p => p.Value.Count > 1);
+			duplicateCounts[0] = duplicates.Count();
+
+			foreach (KeyValuePair<string, IList<string>> duplicateSet in
+				duplicates)
+			{
+				duplicateCounts[1] += ListDuplicates(duplicateSet.Value, true);
+			}
+
+			return duplicateCounts;
+		}
+
 	}
 }
