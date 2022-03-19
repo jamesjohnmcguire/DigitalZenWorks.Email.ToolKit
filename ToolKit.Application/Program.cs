@@ -88,6 +88,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							pstOutlook.MergeFolders();
 							result = 0;
 							break;
+						case "remove-duplicates":
+							pstOutlook = new ();
+							pstOutlook.RemoveDuplicates();
+
+							result = 0;
+							break;
 						case "remove-empty-folders":
 							pstOutlook = new ();
 							pstOutlook.RemoveEmptyFolders();
@@ -314,6 +320,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Log.Info("dbx-to-pst            Migrate dbx files to pst file");
 			Log.Info("eml-to-pst            Migrate eml files to pst file");
 			Log.Info("merge-folders         Merge duplicate folders");
+			Log.Info("remove-duplicates     Prune empty folders");
 			Log.Info("remove-empty-folders  Prune empty folders");
 			Log.Info("help                  Show this information");
 		}
