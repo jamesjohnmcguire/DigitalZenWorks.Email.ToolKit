@@ -423,11 +423,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Remove duplicates items from default account.
 		/// </summary>
-		public void RemoveDuplicates()
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		public void RemoveDuplicates(bool dryRun)
 		{
 			foreach (Store store in outlookNamespace.Session.Stores)
 			{
-				RemoveDuplicates(store);
+				RemoveDuplicates(store, dryRun);
 			}
 		}
 
@@ -435,11 +437,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Remove duplicates items from the given folder.
 		/// </summary>
 		/// <param name="folder">The MAPI folder to process.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
 		/// <param name="recurse">Indicates whether to recurse into
 		/// sub folders.</param>
 		/// <returns>An array of duplicate sets and total duplicate items
 		/// count.</returns>
-		public int[] RemoveDuplicates(MAPIFolder folder, bool recurse)
+		public int[] RemoveDuplicates(
+			MAPIFolder folder, bool dryRun, bool recurse)
 		{
 			int[] duplicateCounts = new int[2];
 
@@ -449,11 +454,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					string path = GetFolderPath(folder);
 					duplicateCounts =
-						RemoveDuplicatesFromSubFolders(path, folder);
+						RemoveDuplicatesFromSubFolders(path, folder, dryRun);
 				}
 
 				int[] duplicateCountsThisFolder =
-					RemoveDuplicatesFromThisFolder(folder);
+					RemoveDuplicatesFromThisFolder(folder, dryRun);
 
 				duplicateCounts[0] += duplicateCountsThisFolder[0];
 				duplicateCounts[1] += duplicateCountsThisFolder[1];
@@ -466,7 +471,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Remove duplicates items from the given store.
 		/// </summary>
 		/// <param name="store">The PST store to process.</param>
-		public void RemoveDuplicates(Store store)
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		public void RemoveDuplicates(Store store, bool dryRun)
 		{
 			if (store != null)
 			{
@@ -474,7 +481,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				RemoveDuplicatesFromSubFolders(storePath, rootFolder);
+				RemoveDuplicatesFromSubFolders(storePath, rootFolder, dryRun);
 
 				totalFolders++;
 				Marshal.ReleaseComObject(rootFolder);
@@ -874,6 +881,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				mailItem = outlookNamespace.GetItemFromID(duplicateId);
 				ListItem(mailItem, prefixMessage);
+
+				if (dryRun == false)
+				{
+					mailItem.Delete();
+				}
 			}
 
 			return totalDuplicates;
@@ -985,18 +997,21 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The MAPI folder to process.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
 		/// <param name="recurse">Indicates whether to recurse into
 		/// sub folders.</param>
 		/// <returns>An array of duplicate sets and total duplicate items
 		/// count.</returns>
 		private int[] RemoveDuplicates(
-			string path, MAPIFolder folder, bool recurse)
+			string path, MAPIFolder folder, bool dryRun, bool recurse)
 		{
 			int[] duplicateCounts = new int[2];
 
 			if (recurse == true)
 			{
-				duplicateCounts = RemoveDuplicatesFromSubFolders(path, folder);
+				duplicateCounts =
+					RemoveDuplicatesFromSubFolders(path, folder, dryRun);
 			}
 
 			IDictionary<string, IList<string>> hashTable =
@@ -1034,10 +1049,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The MAPI folder to process.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
 		/// <returns>An array of duplicate sets and total duplicate items
 		/// count.</returns>
 		private int[] RemoveDuplicatesFromSubFolders(
-			string path, MAPIFolder folder)
+			string path, MAPIFolder folder, bool dryRun)
 		{
 			int[] duplicateCounts = new int[2];
 
@@ -1048,7 +1065,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder subFolder = folder.Folders[index];
 
 				int[] subFolderduplicateCounts =
-					RemoveDuplicates(path, subFolder, true);
+					RemoveDuplicates(path, subFolder, dryRun, true);
 
 				duplicateCounts[0] += subFolderduplicateCounts[0];
 				duplicateCounts[1] += subFolderduplicateCounts[1];
@@ -1059,7 +1076,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			return duplicateCounts;
 		}
-		private int[] RemoveDuplicatesFromThisFolder(MAPIFolder folder)
+
+		private int[] RemoveDuplicatesFromThisFolder(
+			MAPIFolder folder, bool dryRun)
 		{
 			int[] duplicateCounts = new int[2];
 
@@ -1072,11 +1091,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			foreach (KeyValuePair<string, IList<string>> duplicateSet in
 				duplicates)
 			{
-				duplicateCounts[1] += ListDuplicates(duplicateSet.Value, true);
+				duplicateCounts[1] +=
+					ListDuplicates(duplicateSet.Value, dryRun);
 			}
 
 			return duplicateCounts;
 		}
-
 	}
 }
