@@ -76,6 +76,34 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the folder's full path.
+		/// </summary>
+		/// <param name="folder">The folder to check.</param>
+		/// <returns>The folder's full path.</returns>
+		public static string GetFolderPath(MAPIFolder folder)
+		{
+			string path = null;
+
+			if (folder != null)
+			{
+				path = folder.Name;
+
+				MAPIFolder parent;
+				do
+				{
+					parent = folder.Parent;
+					path = parent.Name + "/" + path;
+				}
+				while (parent != null);
+
+				string storeName = GetStoreName(folder.Store);
+				path = storeName + "::" + path;
+			}
+
+			return path;
+		}
+
+		/// <summary>
 		/// Gets the message as a stream.
 		/// </summary>
 		/// <param name="filePath">The file path to create.</param>
