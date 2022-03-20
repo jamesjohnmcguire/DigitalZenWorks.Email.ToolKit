@@ -196,13 +196,34 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					string metaData = string.Format(
 						CultureInfo.InvariantCulture,
-						"{0}{1}{2}{3}{4}{5}",
+						"{0}{1}{2}{3}{4}",
 						attachment.DisplayName,
 						attachment.FileName,
 						index,
-						attachment.PathName,
 						position,
 						attachmentType);
+
+					try
+					{
+						metaData += attachment.PathName;
+					}
+					catch (System.Runtime.InteropServices.COMException)
+					{
+						string sentOn = mailItem.SentOn.ToString(
+							"yyyy-MM-dd HH:mm:ss",
+							CultureInfo.InvariantCulture);
+
+						string message = string.Format(
+							CultureInfo.InvariantCulture,
+							"Item: {0}: From: {1}: {2} Subject: {3}",
+							sentOn,
+							mailItem.SenderName,
+							mailItem.SenderEmailAddress,
+							mailItem.Subject);
+
+						Log.Error("Exception on attachment PathName at: " + path);
+						Log.Error(message);
+					}
 
 					byte[] metaDataBytes = encoding.GetBytes(metaData);
 
