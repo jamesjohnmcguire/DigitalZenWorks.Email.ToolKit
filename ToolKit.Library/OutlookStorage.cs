@@ -485,7 +485,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (store != null)
 			{
-				string storePath = GetStoreName(store) + "::";
+				string storePath = GetStoreName(store);
+				Log.Info("Checking for duplicates in: " + storePath);
+
+				storePath += "::";
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
