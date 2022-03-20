@@ -28,9 +28,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		private readonly string[] ignoreFolders =
 		{
 				"Calendar", "Contacts", "Conversation Action Settings",
-				"Deleted Items", "Drafts", "Junk E-mail", "Journal", "Notes",
-				"Outbox", "Quick Step Settings", "RSS Feeds", "Search Folders",
-				"Sent Items", "Tasks"
+				"Deleted Items", "Deleted Messages", "Drafts", "Junk E-mail",
+				"Journal", "Notes", "Outbox", "Quick Step Settings",
+				"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
 		};
 
 		private readonly NameSpace outlookNamespace;
