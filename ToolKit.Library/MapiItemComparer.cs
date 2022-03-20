@@ -433,9 +433,31 @@ namespace DigitalZenWorks.Email.ToolKit
 				int itemClass = (int)mailItem.Class;
 				int importance = (int)mailItem.Importance;
 				int markForDownload = (int)mailItem.MarkForDownload;
-				int permission = (int)mailItem.Permission;
+				int permission = 0;
 				int permissionService = (int)mailItem.PermissionService;
 				int sensitivity = (int)mailItem.Sensitivity;
+
+				try
+				{
+					permission = (int)mailItem.Permission;
+				}
+				catch (System.Runtime.InteropServices.COMException)
+				{
+					string sentOn = mailItem.SentOn.ToString(
+						"yyyy-MM-dd HH:mm:ss",
+						CultureInfo.InvariantCulture);
+
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Item: {0}: From: {1}: {2} Subject: {3}",
+						sentOn,
+						mailItem.SenderName,
+						mailItem.SenderEmailAddress,
+						mailItem.Subject);
+
+					Log.Error("Exception on permission property at: " + path);
+					Log.Error(message);
+				}
 
 				// 9 ints * size of int
 				int bufferSize = 9 * 4;
