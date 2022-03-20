@@ -444,6 +444,19 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
+				string sentOn = mailItem.SentOn.ToString(
+					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"Item: {0}: From: {1}: {2} Subject: {3}",
+					sentOn,
+					mailItem.SenderName,
+					mailItem.SenderEmailAddress,
+					mailItem.Subject);
+
+				Log.Error("Exception at: " + path);
+				Log.Error(message);
 				Log.Error(exception.ToString());
 			}
 
