@@ -98,15 +98,14 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (folder != null)
 			{
 				path = folder.Name;
+				MAPIFolder parent = null;
 
 				while (folder.Parent != null && folder.Parent is MAPIFolder)
 				{
-					MAPIFolder parent = folder.Parent;
+					parent = folder.Parent;
 
 					path = parent.Name + "/" + path;
 					folder = parent;
-
-					Marshal.ReleaseComObject(parent);
 				}
 
 				string storeName = GetStoreName(folder.Store);
