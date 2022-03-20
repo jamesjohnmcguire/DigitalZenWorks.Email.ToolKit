@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -156,6 +157,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						actions = MergeByteArrays(actions, metaDataBytes);
 					}
+
+					Marshal.ReleaseComObject(action);
 				}
 			}
 			catch (System.Exception exception) when
@@ -243,6 +246,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					byte[] fileBytes = File.ReadAllBytes(filePath);
 
 					attachments = MergeByteArrays(attachments, fileBytes);
+
+					Marshal.ReleaseComObject(attachment);
 				}
 			}
 			catch (System.Exception exception) when
@@ -610,6 +615,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						Log.Warn("Ignoring uknown recipient type");
 						break;
 				}
+
+				Marshal.ReleaseComObject(recipient);
 			}
 
 			toList.Sort();
@@ -740,6 +747,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						properties =
 							MergeByteArrays(properties, metaDataBytes);
 					}
+
+					Marshal.ReleaseComObject(property);
 				}
 			}
 			catch (System.Exception exception) when
