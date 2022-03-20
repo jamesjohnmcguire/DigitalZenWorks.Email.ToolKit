@@ -477,7 +477,30 @@ namespace DigitalZenWorks.Email.ToolKit
 					byte[] attachments = GetAttachments(path, mailItem);
 					byte[] dateTimes = GetDateTimes(path, mailItem);
 					byte[] enums = GetEnums(path, mailItem);
-					byte[] rtfBody = mailItem.RTFBody as byte[];
+					byte[] rtfBody = null;
+
+					try
+					{
+						rtfBody = mailItem.RTFBody as byte[];
+					}
+					catch (System.Runtime.InteropServices.COMException)
+					{
+						string sentOn = mailItem.SentOn.ToString(
+							"yyyy-MM-dd HH:mm:ss",
+							CultureInfo.InvariantCulture);
+
+						string message = string.Format(
+							CultureInfo.InvariantCulture,
+							"Item: {0}: From: {1}: {2} Subject: {3}",
+							sentOn,
+							mailItem.SenderName,
+							mailItem.SenderEmailAddress,
+							mailItem.Subject);
+
+						Log.Error("Exception on RTFBody at: " + path);
+						Log.Error(message);
+					}
+
 					byte[] strings = GetStringProperties(path, mailItem);
 					byte[] userProperties = GetUserProperties(path, mailItem);
 
