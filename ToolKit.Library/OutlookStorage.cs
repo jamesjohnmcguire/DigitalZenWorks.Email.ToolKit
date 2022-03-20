@@ -39,7 +39,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		private uint removedFolders;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="OutlookStorage"/> class.
+		/// Initializes a new instance of the
+		/// <see cref="OutlookStorage"/> class.
 		/// </summary>
 		public OutlookStorage()
 		{
@@ -78,6 +79,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						Log.Warn(exception.ToString());
 					}
 				}
+
+				Marshal.ReleaseComObject(pstFolder);
 			}
 
 			return pstFolder;
@@ -102,6 +105,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					path = parent.Name + "/" + path;
 					folder = parent;
+
+					Marshal.ReleaseComObject(parent);
 				}
 
 				string storeName = GetStoreName(folder.Store);
@@ -166,6 +171,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						pstFolder = subFolder;
 						break;
 					}
+
+					Marshal.ReleaseComObject(subFolder);
 				}
 			}
 
@@ -1078,13 +1085,15 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				Log.Info("Duplicates found at: " + path);
 			}
-	
+
 			foreach (KeyValuePair<string, IList<string>> duplicateSet in
 				duplicates)
 			{
 				duplicateCounts[1] +=
 					ListDuplicates(duplicateSet.Value, dryRun);
 			}
+
+			Marshal.ReleaseComObject(folder);
 
 			return duplicateCounts;
 		}
