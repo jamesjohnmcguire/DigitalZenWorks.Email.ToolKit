@@ -708,7 +708,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static IDictionary<string, IList<string>> GetFolderHashTable(
-			MAPIFolder folder)
+			string path, MAPIFolder folder)
 		{
 			IDictionary<string, IList<string>> hashTable = null;
 
@@ -728,7 +728,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						// Initially, just focus on MailItems
 						case MailItem mailItem:
 							string hash =
-								MapiItemComparer.GetItemHash(mailItem);
+								MapiItemComparer.GetItemHash(path, mailItem);
 							bool keyExists = hashTable.ContainsKey(hash);
 
 							if (keyExists == true)
@@ -1061,8 +1061,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int[] duplicateCounts = new int[2];
 
+			string path = GetFolderPath(folder);
 			IDictionary<string, IList<string>> hashTable =
-				GetFolderHashTable(folder);
+				GetFolderHashTable(path, folder);
 
 			var duplicates = hashTable.Where(p => p.Value.Count > 1);
 			duplicateCounts[0] = duplicates.Count();
