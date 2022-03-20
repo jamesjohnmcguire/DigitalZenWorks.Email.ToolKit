@@ -25,6 +25,14 @@ namespace DigitalZenWorks.Email.ToolKit
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		private readonly Application outlookApplication;
+		private readonly string[] ignoreFolders =
+		{
+				"Calendar", "Contacts", "Conversation Action Settings",
+				"Deleted Items", "Drafts", "Junk E-mail", "Journal", "Notes",
+				"Outbox", "Quick Step Settings", "RSS Feeds", "Search Folders",
+				"Sent Items", "Tasks"
+		};
+
 		private readonly NameSpace outlookNamespace;
 
 		private uint totalFolders;
@@ -448,7 +456,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int[] duplicateCounts = new int[2];
 
-			if (folder != null)
+			if (folder != null && !ignoreFolders.Contains(folder.Name))
 			{
 				if (recurse == true)
 				{
@@ -493,14 +501,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void RemoveEmptyFolders()
 		{
-			string[] ignoreFolders =
-			{
-				"Calendar", "Contacts", "Conversation Action Settings",
-				"Deleted Items", "Drafts", "Junk E-mail", "Journal", "Notes",
-				"Outbox", "Quick Step Settings", "RSS Feeds", "Search Folders",
-				"Sent Items", "Tasks"
-			};
-
 			foreach (Store store in outlookNamespace.Session.Stores)
 			{
 				string extension = Path.GetExtension(store.FilePath);
@@ -1008,17 +1008,20 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int[] duplicateCounts = new int[2];
 
-			if (recurse == true)
+			if (!ignoreFolders.Contains(folder.Name))
 			{
-				duplicateCounts =
-					RemoveDuplicatesFromSubFolders(path, folder, dryRun);
+				if (recurse == true)
+				{
+					duplicateCounts =
+						RemoveDuplicatesFromSubFolders(path, folder, dryRun);
+				}
+
+				int[] duplicateCountsThisFolder =
+					RemoveDuplicatesFromThisFolder(folder, dryRun);
+
+				duplicateCounts[0] += duplicateCountsThisFolder[0];
+				duplicateCounts[1] += duplicateCountsThisFolder[1];
 			}
-
-			int[] duplicateCountsThisFolder =
-				RemoveDuplicatesFromThisFolder(folder, dryRun);
-
-			duplicateCounts[0] += duplicateCountsThisFolder[0];
-			duplicateCounts[1] += duplicateCountsThisFolder[1];
 
 			return duplicateCounts;
 		}
