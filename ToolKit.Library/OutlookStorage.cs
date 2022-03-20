@@ -874,10 +874,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			ListItem(mailItem, "Duplicates: Keeping ");
 
-			string prefixMessage = "Duplicates: Removing ";
+			string prefixMessage = "Duplicates: Removing";
 			if (dryRun == true)
 			{
-				prefixMessage = "Duplicates: WOULD RemovE ";
+				prefixMessage = "Duplicates: WOULD Remove";
 			}
 
 			foreach (string duplicateId in duplicateSet)
