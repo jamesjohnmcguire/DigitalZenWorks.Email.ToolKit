@@ -88,13 +88,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				path = folder.Name;
 
-				MAPIFolder parent;
-				do
+				while (folder.Parent != null && folder.Parent is MAPIFolder)
 				{
-					parent = folder.Parent;
+					MAPIFolder parent = folder.Parent;
+
 					path = parent.Name + "/" + path;
+					folder = parent;
 				}
-				while (parent != null);
 
 				string storeName = GetStoreName(folder.Store);
 				path = storeName + "::" + path;
@@ -1014,7 +1014,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					RemoveDuplicatesFromSubFolders(path, folder, dryRun);
 			}
 
-			int[] duplicateCountsThisFolder = 
+			int[] duplicateCountsThisFolder =
 				RemoveDuplicatesFromThisFolder(folder, dryRun);
 
 			duplicateCounts[0] += duplicateCountsThisFolder[0];
