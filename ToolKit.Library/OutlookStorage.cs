@@ -1074,6 +1074,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			var duplicates = hashTable.Where(p => p.Value.Count > 1);
 			duplicateCounts[0] = duplicates.Count();
 
+			if (duplicateCounts[0] > 0)
+			{
+				Log.Info("Duplicates found at: " + path);
+			}
+	
 			foreach (KeyValuePair<string, IList<string>> duplicateSet in
 				duplicates)
 			{
