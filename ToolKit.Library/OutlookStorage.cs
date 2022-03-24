@@ -79,8 +79,6 @@ namespace DigitalZenWorks.Email.ToolKit
 						Log.Warn(exception.ToString());
 					}
 				}
-
-				Marshal.ReleaseComObject(pstFolder);
 			}
 
 			return pstFolder;
@@ -98,14 +96,21 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (folder != null)
 			{
 				path = folder.Name;
-				MAPIFolder parent = null;
+				MAPIFolder parent = folder.Parent;
 
-				while (folder.Parent != null && folder.Parent is MAPIFolder)
+				while (parent != null && parent is MAPIFolder)
 				{
-					parent = folder.Parent;
-
 					path = parent.Name + "/" + path;
 					folder = parent;
+
+					if (folder.Parent != null && folder.Parent is MAPIFolder)
+					{
+						parent = folder.Parent;
+					}
+					else
+					{
+						parent = null;
+					}
 				}
 
 				string storeName = GetStoreName(folder.Store);
@@ -142,7 +147,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (string.IsNullOrWhiteSpace(name))
 				{
-					name = Path.GetFileNameWithoutExtension(store.FilePath);
+					string path = store.FilePath;
+					name = Path.GetFileNameWithoutExtension(path);
 				}
 			}
 
@@ -162,8 +168,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
 			{
-				foreach (MAPIFolder subFolder in parentFolder.Folders)
+				int total = parentFolder.Folders.Count;
+
+				for (int index = 1; index <= total; index++)
 				{
+					MAPIFolder subFolder = parentFolder.Folders[index];
+
 					if (folderName.Equals(
 						subFolder.Name, StringComparison.OrdinalIgnoreCase))
 					{
@@ -194,6 +204,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				pstFolder = AddFolder(rootFolder, folderName);
+
+				Marshal.ReleaseComObject(rootFolder);
 			}
 
 			return pstFolder;
@@ -269,8 +281,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			// If the .pst file does not exist, Microsoft Outlook creates it.
 			outlookNamespace.Session.AddStore(path);
 
-			foreach (Store store in outlookNamespace.Session.Stores)
+			int total = outlookNamespace.Session.Stores.Count;
+
+			for (int index = 1; index <= total; index++)
 			{
+				Store store = outlookNamespace.Session.Stores[index];
+
 				if (store.FilePath == path)
 				{
 					newPst = store;
@@ -300,51 +316,67 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					case AppointmentItem appointmentItem:
 						appointmentItem.Delete();
+						Marshal.ReleaseComObject(appointmentItem);
 						break;
 					case ContactItem contactItem:
 						contactItem.Delete();
+						Marshal.ReleaseComObject(contactItem);
 						break;
 					case DistListItem distListItem:
 						distListItem.Delete();
+						Marshal.ReleaseComObject(distListItem);
 						break;
 					case DocumentItem documentItem:
 						documentItem.Delete();
+						Marshal.ReleaseComObject(documentItem);
 						break;
 					case JournalItem journalItem:
 						journalItem.Delete();
+						Marshal.ReleaseComObject(journalItem);
 						break;
 					case MailItem mailItem:
 						mailItem.Delete();
+						Marshal.ReleaseComObject(mailItem);
 						break;
 					case MeetingItem meetingItem:
 						meetingItem.Delete();
+						Marshal.ReleaseComObject(meetingItem);
 						break;
 					case NoteItem noteItem:
 						noteItem.Delete();
+						Marshal.ReleaseComObject(noteItem);
 						break;
 					case PostItem postItem:
 						postItem.Delete();
+						Marshal.ReleaseComObject(postItem);
 						break;
 					case RemoteItem remoteItem:
 						remoteItem.Delete();
+						Marshal.ReleaseComObject(remoteItem);
 						break;
 					case ReportItem reportItem:
 						reportItem.Delete();
+						Marshal.ReleaseComObject(reportItem);
 						break;
 					case TaskItem taskItem:
 						taskItem.Delete();
+						Marshal.ReleaseComObject(taskItem);
 						break;
 					case TaskRequestAcceptItem taskRequestAcceptItem:
 						taskRequestAcceptItem.Delete();
+						Marshal.ReleaseComObject(taskRequestAcceptItem);
 						break;
 					case TaskRequestDeclineItem taskRequestDeclineItem:
 						taskRequestDeclineItem.Delete();
+						Marshal.ReleaseComObject(taskRequestDeclineItem);
 						break;
 					case TaskRequestItem taskRequestItem:
 						taskRequestItem.Delete();
+						Marshal.ReleaseComObject(taskRequestItem);
 						break;
 					case TaskRequestUpdateItem taskRequestUpdateItem:
 						taskRequestUpdateItem.Delete();
+						Marshal.ReleaseComObject(taskRequestUpdateItem);
 						break;
 					default:
 						Log.Warn(
@@ -380,19 +412,24 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void MergeFolders()
 		{
-			foreach (Store store in outlookNamespace.Session.Stores)
+			int total = outlookNamespace.Session.Stores.Count;
+
+			for (int index = 1; index <= total; index++)
 			{
+				Store store = outlookNamespace.Session.Stores[index];
+
 				string storePath = GetStoreName(store) + "::";
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				// Office uses 1 based indexes from VBA.
 				// Iterate in reverse order as the group may change.
-				for (int index = rootFolder.Folders.Count; index > 0; index--)
+				for (int subIndex = rootFolder.Folders.Count; subIndex > 0;
+					subIndex--)
 				{
 					string path = storePath + rootFolder.Name;
 
-					MAPIFolder subFolder = rootFolder.Folders[index];
+					MAPIFolder subFolder = rootFolder.Folders[subIndex];
 					MergeFolders(path, subFolder);
 
 					totalFolders++;
@@ -400,7 +437,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 
 				totalFolders++;
+
 				Marshal.ReleaseComObject(rootFolder);
+				Marshal.ReleaseComObject(store);
 			}
 
 			Log.Info("Remove empty folder complete - total folder checked:" +
@@ -441,8 +480,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// or not.</param>
 		public void RemoveDuplicates(bool dryRun)
 		{
-			foreach (Store store in outlookNamespace.Session.Stores)
+			int total = outlookNamespace.Session.Stores.Count;
+
+			for (int index = 1; index <= total; index++)
 			{
+				Store store = outlookNamespace.Session.Stores[index];
+
 				RemoveDuplicates(store, dryRun);
 			}
 		}
@@ -462,20 +505,25 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int[] duplicateCounts = new int[2];
 
-			if (folder != null && !ignoreFolders.Contains(folder.Name))
+			if (folder != null)
 			{
-				if (recurse == true)
+				string folderName = folder.Name;
+
+				if (!ignoreFolders.Contains(folderName))
 				{
-					string path = GetFolderPath(folder);
-					duplicateCounts =
-						RemoveDuplicatesFromSubFolders(path, folder, dryRun);
+					if (recurse == true)
+					{
+						string path = GetFolderPath(folder);
+						duplicateCounts = RemoveDuplicatesFromSubFolders(
+							path, folder, dryRun);
+					}
+
+					int[] duplicateCountsThisFolder =
+						RemoveDuplicatesFromThisFolder(folder, dryRun);
+
+					duplicateCounts[0] += duplicateCountsThisFolder[0];
+					duplicateCounts[1] += duplicateCountsThisFolder[1];
 				}
-
-				int[] duplicateCountsThisFolder =
-					RemoveDuplicatesFromThisFolder(folder, dryRun);
-
-				duplicateCounts[0] += duplicateCountsThisFolder[0];
-				duplicateCounts[1] += duplicateCountsThisFolder[1];
 			}
 
 			return duplicateCounts;
@@ -510,9 +558,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void RemoveEmptyFolders()
 		{
-			foreach (Store store in outlookNamespace.Session.Stores)
+			int total = outlookNamespace.Session.Stores.Count;
+
+			for (int index = 1; index <= total; index++)
 			{
-				string extension = Path.GetExtension(store.FilePath);
+				Store store = outlookNamespace.Session.Stores[index];
+
+				string path = store.FilePath;
+				string extension = Path.GetExtension(path);
 
 				if (extension.Equals(
 					".ost", StringComparison.OrdinalIgnoreCase))
@@ -527,23 +580,26 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				// Office uses 1 based indexes from VBA.
 				// Iterate in reverse order as the group may change.
-				for (int index = rootFolder.Folders.Count; index > 0; index--)
+				for (int subIndex = rootFolder.Folders.Count; subIndex > 0;
+					subIndex--)
 				{
-					string path = storePath + rootFolder.Name;
+					path = storePath + rootFolder.Name;
 
-					MAPIFolder subFolder = rootFolder.Folders[index];
+					MAPIFolder subFolder = rootFolder.Folders[subIndex];
 					bool subFolderEmtpy = RemoveEmptyFolders(path, subFolder);
 
 					if (subFolderEmtpy == true)
 					{
-						if (ignoreFolders.Contains(subFolder.Name))
+						string name = subFolder.Name;
+
+						if (ignoreFolders.Contains(name))
 						{
 							Log.Warn("Not deleting reserved folder: " +
-								subFolder.Name);
+								name);
 						}
 						else
 						{
-							RemoveFolder(path, index, subFolder, false);
+							RemoveFolder(path, subIndex, subFolder, false);
 						}
 					}
 
@@ -614,6 +670,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (subFolder != null)
 			{
+				string subFolderName = subFolder.Name;
 				MAPIFolder parentFolder = subFolder.Parent;
 
 				int count = parentFolder.Folders.Count;
@@ -622,8 +679,10 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					MAPIFolder folder = parentFolder.Folders[index];
 
+					string name = folder.Name;
+
 					if (folder.Name.Equals(
-						subFolder.Name, StringComparison.OrdinalIgnoreCase))
+						subFolderName, StringComparison.OrdinalIgnoreCase))
 					{
 						break;
 					}
@@ -691,24 +750,35 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				outlookNamespace.Session.RemoveStore(rootFolder);
+
+				Marshal.ReleaseComObject(rootFolder);
+				Marshal.ReleaseComObject(store);
 			}
 		}
 
 		private static bool DoesSiblingFolderExist(
-					MAPIFolder folder, string folderName)
+			MAPIFolder folder, string folderName)
 		{
 			bool folderExists = false;
 
 			MAPIFolder parentFolder = folder.Parent;
 
-			foreach (MAPIFolder subFolder in parentFolder.Folders)
+			int total = parentFolder.Folders.Count;
+
+			for (int index = 1; index <= total; index++)
 			{
+				MAPIFolder subFolder = parentFolder.Folders[index];
+
+				string name = subFolder.Name;
+
 				if (folderName.Equals(
-					subFolder.Name, StringComparison.OrdinalIgnoreCase))
+					name, StringComparison.OrdinalIgnoreCase))
 				{
 					folderExists = true;
 					break;
 				}
+
+				Marshal.ReleaseComObject(subFolder);
 			}
 
 			Marshal.ReleaseComObject(parentFolder);
@@ -725,10 +795,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				hashTable = new Dictionary<string, IList<string>>();
 				Items items = folder.Items;
+				int total = items.Count;
+
+				Log.Info("Checking " + total + " items");
 
 				// Office uses 1 based indexes from VBA.
 				// Iterate in reverse order as the group will change.
-				for (int index = items.Count; index > 0; index--)
+				for (int index = total; index > 0; index--)
 				{
 					object item = items[index];
 
@@ -738,21 +811,26 @@ namespace DigitalZenWorks.Email.ToolKit
 						case MailItem mailItem:
 							string hash =
 								MapiItemComparer.GetItemHash(path, mailItem);
-							bool keyExists = hashTable.ContainsKey(hash);
 
-							if (keyExists == true)
+							if (!string.IsNullOrEmpty(hash))
 							{
-								IList<string> bucket = hashTable[hash];
-								bucket.Add(mailItem.EntryID);
-							}
-							else
-							{
-								IList<string> bucket = new List<string>();
-								bucket.Add(mailItem.EntryID);
+								bool keyExists = hashTable.ContainsKey(hash);
 
-								hashTable.Add(hash, bucket);
+								if (keyExists == true)
+								{
+									IList<string> bucket = hashTable[hash];
+									bucket.Add(mailItem.EntryID);
+								}
+								else
+								{
+									IList<string> bucket = new List<string>();
+									bucket.Add(mailItem.EntryID);
+
+									hashTable.Add(hash, bucket);
+								}
 							}
 
+							Marshal.ReleaseComObject(mailItem);
 							break;
 						default:
 							Log.Info("Ignoring item of non-MailItem type: ");
@@ -798,18 +876,23 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					case AppointmentItem appointmentItem:
 						appointmentItem.Move(destination);
+						Marshal.ReleaseComObject(appointmentItem);
 						break;
 					case ContactItem contactItem:
 						contactItem.Move(destination);
+						Marshal.ReleaseComObject(contactItem);
 						break;
 					case DistListItem distListItem:
 						distListItem.Move(destination);
+						Marshal.ReleaseComObject(distListItem);
 						break;
 					case DocumentItem documentItem:
 						documentItem.Move(destination);
+						Marshal.ReleaseComObject(documentItem);
 						break;
 					case JournalItem journalItem:
 						journalItem.Move(destination);
+						Marshal.ReleaseComObject(journalItem);
 						break;
 					case MailItem mailItem:
 						mailItem.Move(destination);
@@ -817,33 +900,43 @@ namespace DigitalZenWorks.Email.ToolKit
 						break;
 					case MeetingItem meetingItem:
 						meetingItem.Move(destination);
+						Marshal.ReleaseComObject(meetingItem);
 						break;
 					case NoteItem noteItem:
 						noteItem.Move(destination);
+						Marshal.ReleaseComObject(noteItem);
 						break;
 					case PostItem postItem:
 						postItem.Move(destination);
+						Marshal.ReleaseComObject(postItem);
 						break;
 					case RemoteItem remoteItem:
 						remoteItem.Move(destination);
+						Marshal.ReleaseComObject(remoteItem);
 						break;
 					case ReportItem reportItem:
 						reportItem.Move(destination);
+						Marshal.ReleaseComObject(reportItem);
 						break;
 					case TaskItem taskItem:
 						taskItem.Move(destination);
+						Marshal.ReleaseComObject(taskItem);
 						break;
 					case TaskRequestAcceptItem taskRequestAcceptItem:
 						taskRequestAcceptItem.Move(destination);
+						Marshal.ReleaseComObject(taskRequestAcceptItem);
 						break;
 					case TaskRequestDeclineItem taskRequestDeclineItem:
 						taskRequestDeclineItem.Move(destination);
+						Marshal.ReleaseComObject(taskRequestDeclineItem);
 						break;
 					case TaskRequestItem taskRequestItem:
 						taskRequestItem.Move(destination);
+						Marshal.ReleaseComObject(taskRequestItem);
 						break;
 					case TaskRequestUpdateItem taskRequestUpdateItem:
 						taskRequestUpdateItem.Move(destination);
+						Marshal.ReleaseComObject(taskRequestUpdateItem);
 						break;
 					default:
 						Log.Warn(
@@ -895,6 +988,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					mailItem.Delete();
 				}
+
+				Marshal.ReleaseComObject(mailItem);
 			}
 
 			return totalDuplicates;
@@ -910,14 +1005,17 @@ namespace DigitalZenWorks.Email.ToolKit
 		private void MoveFolderFolders(
 			string path, MAPIFolder source, MAPIFolder destination)
 		{
+			string destinationName = destination.Name;
+
 			// Office uses 1 based indexes from VBA.
 			// Iterate in reverse order as the group may change.
 			for (int index = source.Folders.Count; index > 0; index--)
 			{
 				MAPIFolder subFolder = source.Folders[index];
 
+				string name = subFolder.Name;
 				MAPIFolder destinationSubFolder =
-					GetSubFolder(destination, subFolder.Name);
+					GetSubFolder(destination, name);
 
 				if (destinationSubFolder == null)
 				{
@@ -926,8 +1024,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						CultureInfo.InvariantCulture,
 						"at: {0} Moving {1} to {2}",
 						path,
-						subFolder.Name,
-						destination.Name);
+						name,
+						destinationName);
 					Log.Info(message);
 					subFolder.MoveTo(destination);
 				}
@@ -941,10 +1039,11 @@ namespace DigitalZenWorks.Email.ToolKit
 						CultureInfo.InvariantCulture,
 						"at: {0} Merging {1} to {2}",
 						subPath,
-						subFolder.Name,
-						destination.Name);
+						name,
+						destinationName);
 					Log.Info(message);
-					MoveFolderContents(subPath, subFolder, destinationSubFolder);
+					MoveFolderContents(
+						subPath, subFolder, destinationSubFolder);
 
 					// Once all the items have been moved,
 					// now remove the folder.

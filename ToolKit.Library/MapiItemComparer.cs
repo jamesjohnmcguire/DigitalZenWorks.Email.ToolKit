@@ -114,13 +114,18 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				foreach (Microsoft.Office.Interop.Outlook.Action action in
-					mailItem.Actions)
+				int total = mailItem.Actions.Count;
+
+				for (int index = 1; index <= total; index++)
 				{
+					Microsoft.Office.Interop.Outlook.Action action =
+						mailItem.Actions[index];
+
 					Encoding encoding = Encoding.UTF8;
 
 					int copyLikeEnum = (int)action.CopyLike;
-					int enabledBool = Convert.ToInt32(action.Enabled);
+					bool enabledBool = action.Enabled;
+					int enabledInt = Convert.ToInt32(enabledBool);
 					int replyStyleEnum = (int)action.ReplyStyle;
 					int responseStyleEnum = (int)action.ResponseStyle;
 					int showOnEnum = (int)action.ShowOn;
@@ -128,7 +133,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					string copyLike =
 						copyLikeEnum.ToString(CultureInfo.InvariantCulture);
 					string enabled =
-						enabledBool.ToString(CultureInfo.InvariantCulture);
+						enabledInt.ToString(CultureInfo.InvariantCulture);
 					string replyStyle =
 						replyStyleEnum.ToString(CultureInfo.InvariantCulture);
 					string responseStyle = responseStyleEnum.ToString(
@@ -184,16 +189,24 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				string basePath = Path.GetTempPath();
 
-				foreach (Attachment attachment in mailItem.Attachments)
+				int total = mailItem.Attachments.Count;
+
+				for (int index = 1; index <= total; index++)
 				{
+					Attachment attachment =
+						mailItem.Attachments[index];
+
 					Encoding encoding = Encoding.UTF8;
 
-					int intType = (int)attachment.Type;
+					int attachmentIndex = attachment.Index;
+					string indexValue = attachmentIndex.ToString(
+						CultureInfo.InvariantCulture);
 
-					string index = attachment.Index.ToString(
+					int positionValue = attachment.Position;
+					string position = positionValue.ToString(
 						CultureInfo.InvariantCulture);
-					string position = attachment.Position.ToString(
-						CultureInfo.InvariantCulture);
+
+					int intType = (int)attachment.Type;
 					string attachmentType =
 						intType.ToString(CultureInfo.InvariantCulture);
 
@@ -202,7 +215,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						"{0}{1}{2}{3}{4}",
 						attachment.DisplayName,
 						attachment.FileName,
-						index,
+						indexValue,
 						position,
 						attachmentType);
 
@@ -272,11 +285,15 @@ namespace DigitalZenWorks.Email.ToolKit
 			try
 			{
 				Encoding encoding = Encoding.UTF8;
-				byte[] body = encoding.GetBytes(mailItem.Body);
-				byte[] htmlBody = encoding.GetBytes(mailItem.HTMLBody);
+
+				string body = mailItem.Body;
+				string htmlBody = mailItem.HTMLBody;
+
+				byte[] bodyBytes = encoding.GetBytes(body);
+				byte[] htmlBodyBytes = encoding.GetBytes(htmlBody);
 				byte[] rtfBody = mailItem.RTFBody as byte[];
 
-				allBody = MergeByteArrays(body, htmlBody);
+				allBody = MergeByteArrays(bodyBytes, htmlBodyBytes);
 				allBody = MergeByteArrays(allBody, rtfBody);
 			}
 			catch (System.Exception exception) when
@@ -298,26 +315,60 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			ushort boolHolder = 0;
 
-			boolHolder = SetBit(
-				boolHolder, 0, mailItem.AlternateRecipientAllowed);
-			boolHolder = SetBit(boolHolder, 1, mailItem.AutoForwarded);
-			boolHolder = SetBit(boolHolder, 2, mailItem.AutoResolvedWinner);
-			boolHolder = SetBit(boolHolder, 3, mailItem.DeleteAfterSubmit);
-			boolHolder = SetBit(boolHolder, 4, mailItem.IsMarkedAsTask);
-			boolHolder = SetBit(boolHolder, 5, mailItem.NoAging);
-			boolHolder = SetBit(
-				boolHolder, 6, mailItem.OriginatorDeliveryReportRequested);
-			boolHolder = SetBit(boolHolder, 7, mailItem.ReadReceiptRequested);
-			boolHolder = SetBit(
-				boolHolder, 8, mailItem.RecipientReassignmentProhibited);
-			boolHolder = SetBit(
-				boolHolder, 9, mailItem.ReminderOverrideDefault);
-			boolHolder = SetBit(boolHolder, 10, mailItem.ReminderPlaySound);
-			boolHolder = SetBit(boolHolder, 11, mailItem.ReminderSet);
-			boolHolder = SetBit(boolHolder, 12, mailItem.Saved);
-			boolHolder = SetBit(boolHolder, 13, mailItem.Sent);
-			boolHolder = SetBit(boolHolder, 14, mailItem.Submitted);
-			boolHolder = SetBit(boolHolder, 15, mailItem.UnRead);
+			try
+			{
+				bool rawValue = mailItem.AlternateRecipientAllowed;
+				boolHolder = SetBit(boolHolder, 0, rawValue);
+
+				rawValue = mailItem.AutoForwarded;
+				boolHolder = SetBit(boolHolder, 1, rawValue);
+
+				rawValue = mailItem.AutoResolvedWinner;
+				boolHolder = SetBit(boolHolder, 2, rawValue);
+
+				rawValue = mailItem.DeleteAfterSubmit;
+				boolHolder = SetBit(boolHolder, 3, rawValue);
+
+				rawValue = mailItem.IsMarkedAsTask;
+				boolHolder = SetBit(boolHolder, 4, rawValue);
+
+				rawValue = mailItem.NoAging;
+				boolHolder = SetBit(boolHolder, 5, rawValue);
+
+				rawValue = mailItem.OriginatorDeliveryReportRequested;
+				boolHolder = SetBit(boolHolder, 6, rawValue);
+
+				rawValue = mailItem.ReadReceiptRequested;
+				boolHolder = SetBit(boolHolder, 7, rawValue);
+
+				rawValue = mailItem.RecipientReassignmentProhibited;
+				boolHolder = SetBit(boolHolder, 8, rawValue);
+
+				rawValue = mailItem.ReminderOverrideDefault;
+				boolHolder = SetBit(boolHolder, 9, rawValue);
+
+				rawValue = mailItem.ReminderPlaySound;
+				boolHolder = SetBit(boolHolder, 10, rawValue);
+
+				rawValue = mailItem.ReminderSet;
+				boolHolder = SetBit(boolHolder, 11, rawValue);
+
+				rawValue = mailItem.Saved;
+				boolHolder = SetBit(boolHolder, 12, rawValue);
+
+				rawValue = mailItem.Sent;
+				boolHolder = SetBit(boolHolder, 13, rawValue);
+
+				rawValue = mailItem.Submitted;
+				boolHolder = SetBit(boolHolder, 14, rawValue);
+
+				rawValue = mailItem.UnRead;
+				boolHolder = SetBit(boolHolder, 15, rawValue);
+			}
+			catch (System.Runtime.InteropServices.COMException exception)
+			{
+				Log.Error(exception.ToString());
+			}
 
 			return boolHolder;
 		}
@@ -379,18 +430,31 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
+				DateTime deferredDeliveryTimeDateTime =
+					mailItem.DeferredDeliveryTime;
+				DateTime expiryTimeDateTime = mailItem.ExpiryTime;
+				DateTime receivedTimeDateTime = mailItem.ReceivedTime;
+				DateTime reminderTimeDateTime = mailItem.ReminderTime;
+				DateTime retentionExpirationDateDateTime =
+					mailItem.RetentionExpirationDate;
+				DateTime sentOnDateTime = mailItem.SentOn;
+				DateTime taskCompletedDateDateTime =
+					mailItem.TaskCompletedDate;
+				DateTime taskDueDateDateTime = mailItem.TaskDueDate;
+				DateTime taskStartDateDateTime = mailItem.TaskStartDate;
+
 				string deferredDeliveryTime =
-					mailItem.DeferredDeliveryTime.ToString("O");
-				string expiryTime = mailItem.ExpiryTime.ToString("O");
-				string receivedTime = mailItem.ReceivedTime.ToString("O");
-				string reminderTime = mailItem.ReminderTime.ToString("O");
+					deferredDeliveryTimeDateTime.ToString("O");
+				string expiryTime = expiryTimeDateTime.ToString("O");
+				string receivedTime = receivedTimeDateTime.ToString("O");
+				string reminderTime = reminderTimeDateTime.ToString("O");
 				string retentionExpirationDate =
-					mailItem.RetentionExpirationDate.ToString("O");
-				string sentOn = mailItem.SentOn.ToString("O");
+					retentionExpirationDateDateTime.ToString("O");
+				string sentOn = sentOnDateTime.ToString("O");
 				string taskCompletedDate =
-					mailItem.TaskCompletedDate.ToString("O");
-				string taskDueDate = mailItem.TaskDueDate.ToString("O");
-				string taskStartDate = mailItem.TaskStartDate.ToString("O");
+					taskCompletedDateDateTime.ToString("O");
+				string taskDueDate = taskDueDateDateTime.ToString("O");
+				string taskStartDate = taskStartDateDateTime.ToString("O");
 
 				string buffer = string.Format(
 					CultureInfo.InvariantCulture,
@@ -609,13 +673,19 @@ namespace DigitalZenWorks.Email.ToolKit
 			List<string> ccList = new ();
 			List<string> bccList = new ();
 
-			foreach (Recipient recipient in mailItem.Recipients)
+			int total = mailItem.Recipients.Count;
+
+			for (int index = 1; index <= total; index++)
 			{
+				Recipient recipient = mailItem.Recipients[index];
+				string name = recipient.Name;
+				string address = recipient.Address;
+
 				string formattedRecipient = string.Format(
 					CultureInfo.InvariantCulture,
 					"{0} <{1}>; ",
-					recipient.Name,
-					recipient.Address);
+					name,
+					address);
 
 				OlMailRecipientType recipientType =
 					(OlMailRecipientType)recipient.Type;
@@ -670,45 +740,76 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
+				string bcc = mailItem.BCC;
+				string billingInformation = mailItem.BillingInformation;
+				string body = mailItem.Body;
+				string categories = mailItem.Categories;
+				string cc = mailItem.CC;
+				string companies = mailItem.Companies;
+				string conversationID = mailItem.ConversationID;
+				string conversationTopic = mailItem.ConversationTopic;
+				string flagRequest = mailItem.FlagRequest;
 				string header = mailItem.PropertyAccessor.GetProperty(
 					"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
+				string htmlBody = mailItem.HTMLBody;
+				string messageClass = mailItem.MessageClass;
+				string mileage = mailItem.Mileage;
+				string receivedByEntryID = mailItem.ReceivedByEntryID;
+				string receivedByName = mailItem.ReceivedByName;
+				string receivedOnBehalfOfEntryID =
+					mailItem.ReceivedOnBehalfOfEntryID;
+				string receivedOnBehalfOfName =
+					mailItem.ReceivedOnBehalfOfName;
+				string reminderSoundFile = mailItem.ReminderSoundFile;
+				string replyRecipientNames = mailItem.ReplyRecipientNames;
+				string retentionPolicyName = mailItem.RetentionPolicyName;
+				string senderEmailAddress = mailItem.SenderEmailAddress;
+				string senderEmailType = mailItem.SenderEmailType;
+				string senderName = mailItem.SenderName;
+				string sentOnBehalfOfName = mailItem.SentOnBehalfOfName;
+				string subject = mailItem.Subject;
+				string taskSubject = mailItem.TaskSubject;
+				string to = mailItem.To;
+				string votingOptions = mailItem.VotingOptions;
+				string votingResponse = mailItem.VotingResponse;
 
 				string buffer1 = string.Format(
 					CultureInfo.InvariantCulture,
 					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}",
-					mailItem.BCC,
-					mailItem.BillingInformation,
-					mailItem.Body,
-					mailItem.Categories,
-					mailItem.CC,
-					mailItem.Companies,
-					mailItem.ConversationID,
-					mailItem.ConversationTopic,
-					mailItem.FlagRequest,
+					bcc,
+					billingInformation,
+					body,
+					categories,
+					cc,
+					companies,
+					conversationID,
+					conversationTopic,
+					flagRequest,
 					header,
-					mailItem.HTMLBody,
-					mailItem.MessageClass,
-					mailItem.Mileage,
-					mailItem.ReceivedByEntryID);
+					htmlBody,
+					messageClass,
+					mileage,
+					receivedByEntryID);
 
 				string buffer2 = string.Format(
 					CultureInfo.InvariantCulture,
 					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}",
-					mailItem.ReceivedByName,
-					mailItem.ReceivedOnBehalfOfEntryID,
-					mailItem.ReceivedOnBehalfOfName,
-					mailItem.ReminderSoundFile,
-					mailItem.ReplyRecipientNames,
-					mailItem.RetentionPolicyName,
-					mailItem.SenderEmailAddress,
-					mailItem.SenderEmailType,
-					mailItem.SenderName,
-					mailItem.SentOnBehalfOfName,
-					mailItem.Subject,
-					mailItem.TaskSubject,
-					mailItem.To,
-					mailItem.VotingOptions,
-					mailItem.VotingResponse);
+					receivedByName,
+					receivedOnBehalfOfEntryID,
+					receivedOnBehalfOfName,
+					reminderSoundFile,
+					replyRecipientNames,
+					retentionPolicyName,
+					senderEmailAddress,
+					senderEmailType,
+					senderName,
+					sentOnBehalfOfName,
+					subject,
+					taskSubject,
+					to,
+					votingOptions,
+					votingResponse);
+
 
 				string buffer = string.Format(
 					CultureInfo.InvariantCulture, "{0}{1}", buffer1, buffer2);
@@ -737,16 +838,21 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				foreach (UserProperty property in mailItem.UserProperties)
+				int total = mailItem.UserProperties.Count;
+
+				for (int index = 1; index <= total; index++)
 				{
+					UserProperty property = mailItem.UserProperties[index];
+
 					Encoding encoding = Encoding.UTF8;
 
 					int typeEnum = (int)property.Type;
+					var propertyValue = property.Value;
 
 					string typeValue =
 						typeEnum.ToString(CultureInfo.InvariantCulture);
 					string value =
-						property.Value.ToString(CultureInfo.InvariantCulture);
+						propertyValue.ToString(CultureInfo.InvariantCulture);
 
 					string metaData = string.Format(
 						CultureInfo.InvariantCulture,
