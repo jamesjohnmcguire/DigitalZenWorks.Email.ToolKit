@@ -145,8 +145,9 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem.Move(mainFolder);
 
-			string hash = MapiItemComparer.GetItemHash(mailItem);
-			string hash2 = MapiItemComparer.GetItemHash(mailItem);
+			string path = "Main Test Folder";
+			string hash = MapiItemComparer.GetItemHash(path, mailItem);
+			string hash2 = MapiItemComparer.GetItemHash(path, mailItem);
 
 			if (hash.Equals(hash2))
 			{
@@ -163,7 +164,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem2.Move(mainFolder);
 
-			hash2 = MapiItemComparer.GetItemHash(mailItem2);
+			hash2 = MapiItemComparer.GetItemHash(path, mailItem2);
 
 			if (hash.Equals(hash2))
 			{
@@ -180,7 +181,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem3.Move(mainFolder);
 
-			hash2 = MapiItemComparer.GetItemHash(mailItem3);
+			hash2 = MapiItemComparer.GetItemHash(path, mailItem3);
 
 			if (hash.Equals(hash2))
 			{
