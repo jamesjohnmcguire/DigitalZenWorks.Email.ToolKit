@@ -149,7 +149,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			string hash = MapiItemComparer.GetItemHash(path, mailItem);
 			string hash2 = MapiItemComparer.GetItemHash(path, mailItem);
 
-			if (hash.Equals(hash2))
+			if (hash.Equals(hash2, StringComparison.Ordinal))
 			{
 				Log.Info("Hashes are the same");
 			}
@@ -166,7 +166,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			hash2 = MapiItemComparer.GetItemHash(path, mailItem2);
 
-			if (hash.Equals(hash2))
+			if (hash.Equals(hash2, StringComparison.Ordinal))
 			{
 				Log.Info("Hashes are the same");
 			}
@@ -183,7 +183,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			hash2 = MapiItemComparer.GetItemHash(path, mailItem3);
 
-			if (hash.Equals(hash2))
+			if (hash.Equals(hash2, StringComparison.Ordinal))
 			{
 				Log.Info("Hashes are the same");
 			}

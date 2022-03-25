@@ -98,12 +98,12 @@ namespace DigitalZenWorks.Email.ToolKit
 				path = folder.Name;
 				MAPIFolder parent = folder.Parent;
 
-				while (parent != null && parent is MAPIFolder)
+				while (parent is not null && parent is MAPIFolder)
 				{
 					path = parent.Name + "/" + path;
 					folder = parent;
 
-					if (folder.Parent != null && folder.Parent is MAPIFolder)
+					if (folder.Parent is not null && folder.Parent is MAPIFolder)
 					{
 						parent = folder.Parent;
 					}
@@ -681,7 +681,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					string name = folder.Name;
 
-					if (folder.Name.Equals(
+					if (name.Equals(
 						subFolderName, StringComparison.OrdinalIgnoreCase))
 					{
 						break;
