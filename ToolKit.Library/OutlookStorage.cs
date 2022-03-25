@@ -845,6 +845,22 @@ namespace DigitalZenWorks.Email.ToolKit
 			return hashTable;
 		}
 
+		private static string GetMailItemSynopses(MailItem mailItem)
+		{
+			string sentOn = mailItem.SentOn.ToString(
+				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+			string synopses = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}: From: {1}: {2} Subject: {3}",
+				sentOn,
+				mailItem.SenderName,
+				mailItem.SenderEmailAddress,
+				mailItem.Subject);
+
+			return synopses;
+		}
+
 		private static void ListItem(MailItem mailItem, string prefixMessage)
 		{
 			string sentOn = mailItem.SentOn.ToString(
@@ -971,19 +987,26 @@ namespace DigitalZenWorks.Email.ToolKit
 			duplicateSet.RemoveAt(0);
 
 			MailItem mailItem = outlookNamespace.GetItemFromID(keeper);
+			string keeperSynopses = GetMailItemSynopses(mailItem);
 
-			ListItem(mailItem, "Duplicates: Keeping ");
+			string message = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0} Duplicates Found for: ",
+				totalDuplicates.ToString(CultureInfo.InvariantCulture));
 
-			string prefixMessage = "Duplicates: Removing";
-			if (dryRun == true)
-			{
-				prefixMessage = "Duplicates: WOULD Remove";
-			}
+			ListItem(mailItem, message);
 
 			foreach (string duplicateId in duplicateSet)
 			{
 				mailItem = outlookNamespace.GetItemFromID(duplicateId);
-				ListItem(mailItem, prefixMessage);
+				string duplicateSynopses = GetMailItemSynopses(mailItem);
+
+				if (!duplicateSynopses.Equals(
+					keeperSynopses, StringComparison.Ordinal))
+				{
+					Log.Error("Warning! Duplicate Items Don't Seem to Match");
+					Log.Error("Not Matching Item: " + duplicateSynopses);
+				}
 
 				if (dryRun == false)
 				{
