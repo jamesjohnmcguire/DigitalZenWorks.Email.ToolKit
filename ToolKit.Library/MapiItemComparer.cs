@@ -51,6 +51,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
 				exception is InvalidCastException ||
+				exception is OutOfMemoryException ||
 				exception is RankException)
 			{
 				Log.Error(exception.ToString());
