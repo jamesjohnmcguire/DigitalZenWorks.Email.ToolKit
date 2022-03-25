@@ -54,6 +54,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is OutOfMemoryException ||
 				exception is RankException)
 			{
+				LogException(path, string.Empty, mailItem);
 				Log.Error(exception.ToString());
 			}
 
@@ -226,20 +227,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					catch (System.Runtime.InteropServices.COMException)
 					{
-						string sentOn = mailItem.SentOn.ToString(
-							"yyyy-MM-dd HH:mm:ss",
-							CultureInfo.InvariantCulture);
-
-						string message = string.Format(
-							CultureInfo.InvariantCulture,
-							"Item: {0}: From: {1}: {2} Subject: {3}",
-							sentOn,
-							mailItem.SenderName,
-							mailItem.SenderEmailAddress,
-							mailItem.Subject);
-
-						Log.Error("Exception on attachment PathName at: " + path);
-						Log.Error(message);
+						LogException(
+							path, "on attachment PathName ", mailItem);
 					}
 
 					byte[] metaDataBytes = encoding.GetBytes(metaData);
@@ -508,20 +497,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				catch (System.Runtime.InteropServices.COMException)
 				{
-					string sentOn = mailItem.SentOn.ToString(
-						"yyyy-MM-dd HH:mm:ss",
-						CultureInfo.InvariantCulture);
-
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"Item: {0}: From: {1}: {2} Subject: {3}",
-						sentOn,
-						mailItem.SenderName,
-						mailItem.SenderEmailAddress,
-						mailItem.Subject);
-
-					Log.Error("Exception on permission property at: " + path);
-					Log.Error(message);
+					LogException(
+						path, "on permission property ", mailItem);
 				}
 
 				// 9 ints * size of int
@@ -885,6 +862,25 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return properties;
+		}
+
+		private static void LogException(
+			string path, string extraInformation, MailItem mailItem)
+		{
+			string sentOn = mailItem.SentOn.ToString(
+				"yyyy-MM-dd HH:mm:ss",
+				CultureInfo.InvariantCulture);
+
+			string message = string.Format(
+				CultureInfo.InvariantCulture,
+				"Item: {0}: From: {1}: {2} Subject: {3}",
+				sentOn,
+				mailItem.SenderName,
+				mailItem.SenderEmailAddress,
+				mailItem.Subject);
+
+			Log.Error("Exception " + extraInformation + "at: " + path);
+			Log.Error(message);
 		}
 
 		private static byte[] MergeByteArrays(byte[] buffer1, byte[] buffer2)
