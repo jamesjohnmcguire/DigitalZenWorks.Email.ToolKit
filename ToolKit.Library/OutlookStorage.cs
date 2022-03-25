@@ -797,7 +797,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				Items items = folder.Items;
 				int total = items.Count;
 
-				Log.Info("Checking " + total + " items");
+				Log.Info("Checking for duplicates at: " + path +
+					" Total items: " + total);
 
 				// Office uses 1 based indexes from VBA.
 				// Iterate in reverse order as the group will change.
@@ -1173,6 +1174,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			int[] duplicateCounts = new int[2];
 
 			string path = GetFolderPath(folder);
+
 			IDictionary<string, IList<string>> hashTable =
 				GetFolderHashTable(path, folder);
 
