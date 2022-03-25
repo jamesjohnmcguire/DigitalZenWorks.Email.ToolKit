@@ -227,8 +227,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					catch (System.Runtime.InteropServices.COMException)
 					{
-						LogException(
-							path, "on attachment PathName ", mailItem);
 					}
 
 					byte[] metaDataBytes = encoding.GetBytes(metaData);
@@ -497,8 +495,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				catch (System.Runtime.InteropServices.COMException)
 				{
-					LogException(
-						path, "on permission property ", mailItem);
 				}
 
 				// 9 ints * size of int
