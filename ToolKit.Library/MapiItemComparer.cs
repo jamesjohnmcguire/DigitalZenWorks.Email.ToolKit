@@ -773,46 +773,38 @@ namespace DigitalZenWorks.Email.ToolKit
 				string votingOptions = mailItem.VotingOptions;
 				string votingResponse = mailItem.VotingResponse;
 
-				string buffer1 = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}",
-					bcc,
-					billingInformation,
-					body,
-					categories,
-					cc,
-					companies,
-					conversationID,
-					conversationTopic,
-					flagRequest,
-					header,
-					htmlBody,
-					messageClass,
-					mileage,
-					receivedByEntryID);
+				StringBuilder builder = new ();
+				builder.Append(bcc);
+				builder.Append(billingInformation);
+				builder.Append(body);
+				builder.Append(categories);
+				builder.Append(cc);
+				builder.Append(companies);
+				builder.Append(conversationID);
+				builder.Append(conversationTopic);
+				builder.Append(flagRequest);
+				builder.Append(header);
+				builder.Append(htmlBody);
+				builder.Append(messageClass);
+				builder.Append(mileage);
+				builder.Append(receivedByEntryID);
+				builder.Append(receivedByName);
+				builder.Append(receivedOnBehalfOfEntryID);
+				builder.Append(receivedOnBehalfOfName);
+				builder.Append(reminderSoundFile);
+				builder.Append(replyRecipientNames);
+				builder.Append(retentionPolicyName);
+				builder.Append(senderEmailAddress);
+				builder.Append(senderEmailAddress);
+				builder.Append(senderName);
+				builder.Append(sentOnBehalfOfName);
+				builder.Append(subject);
+				builder.Append(taskSubject);
+				builder.Append(to);
+				builder.Append(votingOptions);
+				builder.Append(votingResponse);
 
-				string buffer2 = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}",
-					receivedByName,
-					receivedOnBehalfOfEntryID,
-					receivedOnBehalfOfName,
-					reminderSoundFile,
-					replyRecipientNames,
-					retentionPolicyName,
-					senderEmailAddress,
-					senderEmailType,
-					senderName,
-					sentOnBehalfOfName,
-					subject,
-					taskSubject,
-					to,
-					votingOptions,
-					votingResponse);
-
-
-				string buffer = string.Format(
-					CultureInfo.InvariantCulture, "{0}{1}", buffer1, buffer2);
+				string buffer = builder.ToString();
 
 				Encoding encoding = Encoding.UTF8;
 				data = encoding.GetBytes(buffer);
