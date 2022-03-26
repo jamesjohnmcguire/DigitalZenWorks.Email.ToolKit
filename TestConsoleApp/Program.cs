@@ -61,9 +61,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				CodePagesEncodingProvider.Instance);
 			Encoding encoding = Encoding.GetEncoding("shift_jis");
 
-			string path = BaseDataDirectory + @"\TestFolder\Inbox.dbx";
-
-			path = BaseDataDirectory + @"\TestFolder";
+			string path = BaseDataDirectory + @"\TestFolder";
 
 			TestConvertToMsgFile(path, encoding);
 
@@ -113,28 +111,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			File.Delete(msgPath);
 
 			using Stream msgStream =
-				PstOutlook.GetMsgFileStream(msgPath);
+				OutlookStorage.GetMsgFileStream(msgPath);
 			Converter.ConvertEmlToMsg(dbxStream, msgStream);
-		}
-
-		private static void TestCreateFolder(
-			string pstPath, DbxFolder dbxFolder)
-		{
-			IDictionary<uint, string> mappings =
-				new Dictionary<uint, string>();
-
-			PstOutlook pstOutlook = new ();
-			Store pstStore = pstOutlook.CreateStore(pstPath);
-			MAPIFolder rootFolder = pstStore.GetRootFolder();
-
-			Migrate.CopyFolderToPst(
-				mappings,
-				pstOutlook,
-				pstStore,
-				rootFolder,
-				dbxFolder);
-
-			Marshal.ReleaseComObject(rootFolder);
 		}
 
 		private static void TestFolder(string path, Encoding encoding)
@@ -163,20 +141,20 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			string basePath = Path.GetTempPath();
 			string storePath = basePath + "Test.pst";
 
-			PstOutlook pstOutlook = new ();
+			OutlookStorage pstOutlook = new ();
 			Store store = pstOutlook.CreateStore(storePath);
 
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder mainFolder = PstOutlook.AddFolderSafe(
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			// Create sub folders
 			MAPIFolder subFolder =
-				PstOutlook.AddFolderSafe(mainFolder, "Testing");
-			PstOutlook.AddFolderSafe(subFolder, "Testing2");
-			PstOutlook.AddFolderSafe(subFolder, "Testing2 (1)");
+				OutlookStorage.AddFolder(mainFolder, "Testing");
+			OutlookStorage.AddFolder(subFolder, "Testing2");
+			OutlookStorage.AddFolder(subFolder, "Testing2 (1)");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
 				"someone@example.com",
@@ -184,13 +162,13 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem.Move(subFolder);
 
-			subFolder = PstOutlook.AddFolderSafe(
+			subFolder = OutlookStorage.AddFolder(
 				mainFolder, "Testing (1)");
-			PstOutlook.AddFolderSafe(subFolder, "Testing2");
-			PstOutlook.AddFolderSafe(subFolder, "Testing2 (1)");
+			OutlookStorage.AddFolder(subFolder, "Testing2");
+			OutlookStorage.AddFolder(subFolder, "Testing2 (1)");
 
 			// Review
-			storePath = PstOutlook.GetStoreName(store) + "::";
+			storePath = OutlookStorage.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
 			pstOutlook.MergeFolders(path, rootFolder);
@@ -243,7 +221,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				RegexOptions.ExplicitCapture);
 
 			string sample = "hello-world-";
-			Regex regex = new Regex("-(?<test>[^-]*)-");
+			Regex regex = new ("-(?<test>[^-]*)-");
 
 			Match match = regex.Match(sample);
 
@@ -251,15 +229,6 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			{
 				Console.WriteLine(match.Groups["test"].Value);
 			}
-
-			input = "abc_123_def";
-			result = Regex.Replace(input, @"(?<=abc_)\d+(?=_def)", "999");
-
-			input = "abc_123_def";
-			result = Regex.Replace(input, @"(?<=[a-z](.*)_)\d+(?=_def)", "999");
-
-			input = "abc_123";
-			result = Regex.Replace(input, @"(?<=[a-z](.*)_)\d+", "999");
 
 			input = "abc123";
 			result = Regex.Replace(input, @"(?<=[a-z](.*))\d+", string.Empty);

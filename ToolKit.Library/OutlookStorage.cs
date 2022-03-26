@@ -1,5 +1,5 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
-// <copyright file="PstOutlook.cs" company="James John McGuire">
+// <copyright file="OutlookStorage.cs" company="James John McGuire">
 // Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <summary>
 	/// Provides support for interacting with an Outlook PST file.
 	/// </summary>
-	public class PstOutlook
+	public class OutlookStorage
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -30,9 +30,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		private uint removedFolders;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="PstOutlook"/> class.
+		/// Initializes a new instance of the <see cref="OutlookStorage"/> class.
 		/// </summary>
-		public PstOutlook()
+		public OutlookStorage()
 		{
 			outlookApplication = new ();
 
@@ -42,10 +42,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Add folder in safe context.
 		/// </summary>
+		/// <remarks>If there is a folder already existing with the given
+		/// folder name, this method will return that folder.</remarks>
 		/// <param name="parentFolder">The parent folder.</param>
 		/// <param name="folderName">The new folder name.</param>
-		/// <returns>The added folder.</returns>
-		public static MAPIFolder AddFolderSafe(
+		/// <returns>The added or existing folder.</returns>
+		public static MAPIFolder AddFolder(
 			MAPIFolder parentFolder, string folderName)
 		{
 			MAPIFolder pstFolder = null;
@@ -136,19 +138,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Get top level folder by name.
 		/// </summary>
-		/// <param name="pstStore">The pst store to check.</param>
+		/// <param name="store">The store to check.</param>
 		/// <param name="folderName">The folder name.</param>
 		/// <returns>The MAPIFolder object.</returns>
 		public static MAPIFolder GetTopLevelFolder(
-			Store pstStore, string folderName)
+			Store store, string folderName)
 		{
 			MAPIFolder pstFolder = null;
 
-			if (pstStore != null)
+			if (store != null)
 			{
-				MAPIFolder rootFolder = pstStore.GetRootFolder();
+				MAPIFolder rootFolder = store.GetRootFolder();
 
-				pstFolder = AddFolderSafe(rootFolder, folderName);
+				pstFolder = AddFolder(rootFolder, folderName);
 			}
 
 			return pstFolder;
@@ -233,6 +235,81 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return newPst;
+		}
+
+		/// <summary>
+		/// Empty deleted items folder.
+		/// </summary>
+		public void EmptyDeletedItemsFolder()
+		{
+			MAPIFolder deletedItemsFolder = outlookNamespace.GetDefaultFolder(
+					OlDefaultFolders.olFolderDeletedItems);
+			Items items = deletedItemsFolder.Items;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group will change.
+			for (int index = items.Count; index > 0; index--)
+			{
+				object item = items[index];
+
+				switch (item)
+				{
+					case AppointmentItem appointmentItem:
+						appointmentItem.Delete();
+						break;
+					case ContactItem contactItem:
+						contactItem.Delete();
+						break;
+					case DistListItem distListItem:
+						distListItem.Delete();
+						break;
+					case DocumentItem documentItem:
+						documentItem.Delete();
+						break;
+					case JournalItem journalItem:
+						journalItem.Delete();
+						break;
+					case MailItem mailItem:
+						mailItem.Delete();
+						break;
+					case MeetingItem meetingItem:
+						meetingItem.Delete();
+						break;
+					case NoteItem noteItem:
+						noteItem.Delete();
+						break;
+					case PostItem postItem:
+						postItem.Delete();
+						break;
+					case RemoteItem remoteItem:
+						remoteItem.Delete();
+						break;
+					case ReportItem reportItem:
+						reportItem.Delete();
+						break;
+					case TaskItem taskItem:
+						taskItem.Delete();
+						break;
+					case TaskRequestAcceptItem taskRequestAcceptItem:
+						taskRequestAcceptItem.Delete();
+						break;
+					case TaskRequestDeclineItem taskRequestDeclineItem:
+						taskRequestDeclineItem.Delete();
+						break;
+					case TaskRequestItem taskRequestItem:
+						taskRequestItem.Delete();
+						break;
+					case TaskRequestUpdateItem taskRequestUpdateItem:
+						taskRequestUpdateItem.Delete();
+						break;
+					default:
+						Log.Warn(
+							"folder item of unknown type: " + item.ToString());
+						break;
+				}
+
+				Marshal.ReleaseComObject(item);
+			}
 		}
 
 		/// <summary>
