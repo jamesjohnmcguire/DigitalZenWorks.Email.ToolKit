@@ -224,14 +224,22 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (exists == true)
 				{
-					MailItem item = outlookNamespace.OpenSharedItem(filePath);
+					try
+					{
+						MailItem item =
+							outlookNamespace.OpenSharedItem(filePath);
 
-					item.UnRead = false;
-					item.Save();
+						item.UnRead = false;
+						item.Save();
 
-					item.Move(pstFolder);
+						item.Move(pstFolder);
 
-					Marshal.ReleaseComObject(item);
+						Marshal.ReleaseComObject(item);
+					}
+					catch (COMException exception)
+					{
+						Log.Error(exception.ToString());
+					}
 				}
 				else
 				{
