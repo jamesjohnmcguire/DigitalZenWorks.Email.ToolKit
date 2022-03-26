@@ -98,7 +98,20 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							}
 
 							pstOutlook = new ();
-							pstOutlook.RemoveDuplicates(dryRun);
+
+							int pstFileIndex =
+								ArgumentsContainPstFile(arguments);
+
+							if (pstFileIndex > 0)
+							{
+								string pstFile = arguments[pstFileIndex];
+
+								pstOutlook.RemoveDuplicates(pstFile, dryRun);
+							}
+							else
+							{
+								pstOutlook.RemoveDuplicates(dryRun);
+							}
 
 							result = 0;
 							break;
@@ -192,6 +205,27 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			string assemblyVersion = version.ToString();
 
 			return assemblyVersion;
+		}
+
+		private static int ArgumentsContainPstFile(string[] arguments)
+		{
+			int pstFileIndex = 0;
+
+			if (arguments.Length > 1)
+			{
+				for (int index = 1; index < arguments.Length; index++)
+				{
+					string extension = Path.GetExtension(arguments[index]);
+
+					if (extension.Equals(".pst", StringComparison.Ordinal))
+					{
+						pstFileIndex = index;
+						break;
+					}
+				}
+			}
+
+			return pstFileIndex;
 		}
 
 		private static void LogInitialization()
