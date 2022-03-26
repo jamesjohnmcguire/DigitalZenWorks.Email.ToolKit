@@ -532,24 +532,18 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Remove duplicates items from the given store.
 		/// </summary>
-		/// <param name="store">The PST store to process.</param>
+		/// <param name="storePath">The path of the PST file to
+		/// process.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		public void RemoveDuplicates(Store store, bool dryRun)
+		public void RemoveDuplicates(string storePath, bool dryRun)
 		{
+			Store store = CreateStore(storePath);
+
 			if (store != null)
 			{
-				string storePath = GetStoreName(store);
-				Log.Info("Checking for duplicates in: " + storePath);
-
-				storePath += "::";
-
-				MAPIFolder rootFolder = store.GetRootFolder();
-
-				RemoveDuplicatesFromSubFolders(storePath, rootFolder, dryRun);
-
-				totalFolders++;
-				Marshal.ReleaseComObject(rootFolder);
+				RemoveDuplicates(store, dryRun);
+				Marshal.ReleaseComObject(store);
 			}
 		}
 
@@ -1121,6 +1115,30 @@ namespace DigitalZenWorks.Email.ToolKit
 						Log.Error(message);
 					}
 				}
+			}
+		}
+
+		/// <summary>
+		/// Remove duplicates items from the given store.
+		/// </summary>
+		/// <param name="store">The PST store to process.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		private void RemoveDuplicates(Store store, bool dryRun)
+		{
+			if (store != null)
+			{
+				string storePath = GetStoreName(store);
+				Log.Info("Checking for duplicates in: " + storePath);
+
+				storePath += "::";
+
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				RemoveDuplicatesFromSubFolders(storePath, rootFolder, dryRun);
+
+				totalFolders++;
+				Marshal.ReleaseComObject(rootFolder);
 			}
 		}
 
