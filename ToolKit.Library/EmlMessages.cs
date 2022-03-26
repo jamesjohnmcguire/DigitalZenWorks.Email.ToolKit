@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace ToolKit.Library
+namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
 	/// Eml messages class.
