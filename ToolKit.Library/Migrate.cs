@@ -15,7 +15,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using ToolKit.Library;
 
 [assembly: CLSCompliant(false)]
 
@@ -364,8 +363,10 @@ namespace DigitalZenWorks.Email.ToolKit
 					Converter.ConvertEmlToMsg(emailStream, msgStream);
 				}
 				catch (System.Exception exception) when
-					(exception is FormatException ||
+					(exception is ArgumentException ||
+					exception is FormatException ||
 					exception is InvalidCastException ||
+					exception is NotSupportedException ||
 					exception is NullReferenceException)
 				{
 					Log.Error(exception.ToString());
