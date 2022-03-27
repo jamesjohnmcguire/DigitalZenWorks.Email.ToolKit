@@ -365,6 +365,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				catch (System.Exception exception) when
 					(exception is FormatException ||
 					exception is InvalidCastException ||
+					exception is NotSupportedException ||
 					exception is NullReferenceException)
 				{
 					Log.Error(exception.ToString());
