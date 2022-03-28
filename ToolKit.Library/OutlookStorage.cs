@@ -1143,7 +1143,15 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				RemoveDuplicatesFromSubFolders(storePath, rootFolder, dryRun);
+				int[] duplicateCounts = RemoveDuplicatesFromSubFolders(
+					storePath, rootFolder, dryRun);
+
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"Duplicates Removed in: {0}: {1}",
+					storePath,
+					duplicateCounts[1].ToString(CultureInfo.InvariantCulture));
+				Log.Info(message);
 
 				totalFolders++;
 				Marshal.ReleaseComObject(rootFolder);
