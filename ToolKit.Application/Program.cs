@@ -170,7 +170,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return result;
 		}
 
-		private static string GetPstLocation(string[] arguments, string source, int index)
+		private static string GetPstLocation(
+			string[] arguments, string source, int index)
 		{
 			string pstLocation = null;
 
@@ -259,13 +260,20 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string location = arguments[0];
 
+				string pstLocation = GetPstLocation(arguments, location, 1);
 				if (Directory.Exists(location))
 				{
-					result = ProcessDirectDirectory(arguments, location);
+					result = ProcessDirectDirectory(location, pstLocation);
 				}
 				else if (File.Exists(location))
 				{
-					result = ProcessDirectFile(arguments, location);
+					result = ProcessDirectFile(location, pstLocation);
+				}
+				else
+				{
+					string message =
+						"Argument supplied is neither a directory nor a file.";
+					Log.Error(message);
 				}
 			}
 
@@ -273,7 +281,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		}
 
 		private static int ProcessDirectDirectory(
-			string[] arguments, string location)
+			string location, string pstLocation)
 		{
 			int result = -1;
 
@@ -281,9 +289,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			if (files.Length > 0)
 			{
-				string pstLocation = GetPstLocation(arguments, location, 1);
-
-				result = DbxToPst(arguments[0], pstLocation);
+				result = DbxToPst(location, pstLocation);
 			}
 			else
 			{
@@ -291,9 +297,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				if (emlFiles.Any())
 				{
-					string pstLocation =
-						GetPstLocation(arguments, location, 2);
-
 					result = EmlToPst(location, pstLocation);
 				}
 			}
@@ -302,17 +305,15 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		}
 
 		private static int ProcessDirectFile(
-			string[] arguments, string location)
+			string location, string pstLocation)
 		{
 			int result = -1;
-
-			string pstLocation = GetPstLocation(arguments, location, 1);
 
 			string extension = Path.GetExtension(location);
 
 			if (extension.Equals(".dbx", StringComparison.Ordinal))
 			{
-				result = DbxToPst(arguments[1], pstLocation);
+				result = DbxToPst(location, pstLocation);
 			}
 			else if (extension.Equals(".eml", StringComparison.Ordinal) ||
 				extension.Equals(".txt", StringComparison.Ordinal))

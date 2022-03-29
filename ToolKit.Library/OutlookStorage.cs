@@ -295,10 +295,20 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				Store store = outlookNamespace.Session.Stores[index];
 
-				if (store.FilePath == path)
+				if (store == null)
 				{
-					newPst = store;
-					break;
+					Log.Warn("Enumerating stores - store is null");
+				}
+				else
+				{
+					string filePath = store.FilePath;
+
+					if (!string.IsNullOrWhiteSpace(filePath) &&
+						store.FilePath == path)
+					{
+						newPst = store;
+						break;
+					}
 				}
 			}
 
