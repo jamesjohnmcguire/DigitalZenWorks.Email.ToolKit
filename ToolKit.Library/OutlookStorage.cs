@@ -1149,8 +1149,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				string storePath = GetStoreName(store);
 				Log.Info("Checking for duplicates in: " + storePath);
 
-				storePath += "::";
-
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				int[] duplicateCounts = RemoveDuplicatesFromSubFolders(
