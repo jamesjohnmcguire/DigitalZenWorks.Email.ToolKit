@@ -55,6 +55,10 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			TestTargetFrameworks();
 
+			TestGetHash();
+
+			TestMsgCompare();
+
 			TestMergeFolders();
 
 			Encoding.RegisterProvider(
@@ -120,6 +124,81 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
 		}
 
+		private static void TestGetHash()
+		{
+			// Create test store.
+			string basePath = Path.GetTempPath();
+			string storePath = basePath + "Test.pst";
+
+			OutlookStorage pstOutlook = new ();
+			Store store = pstOutlook.CreateStore(storePath);
+
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			string path = "Main Test Folder";
+			string hash = MapiItemComparer.GetItemHash(path, mailItem);
+			string hash2 = MapiItemComparer.GetItemHash(path, mailItem);
+
+			if (hash.Equals(hash2, StringComparison.Ordinal))
+			{
+				Log.Info("Hashes are the same");
+			}
+			else
+			{
+				Log.Info("Hashes are NOT the same");
+			}
+
+			MailItem mailItem2 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem2.Move(mainFolder);
+
+			hash2 = MapiItemComparer.GetItemHash(path, mailItem2);
+
+			if (hash.Equals(hash2, StringComparison.Ordinal))
+			{
+				Log.Info("Hashes are the same");
+			}
+			else
+			{
+				Log.Info("Hashes are NOT the same");
+			}
+
+			MailItem mailItem3 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is aka subject",
+				"This is the message.");
+			mailItem3.Move(mainFolder);
+
+			hash2 = MapiItemComparer.GetItemHash(path, mailItem3);
+
+			if (hash.Equals(hash2, StringComparison.Ordinal))
+			{
+				Log.Info("Hashes are the same");
+			}
+			else
+			{
+				Log.Info("Hashes are NOT the same");
+			}
+
+			// Clean up
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
 		private static void TestListMessagesFile(
 			string path, Encoding encoding)
 		{
@@ -175,6 +254,50 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			// Clean up
 			Marshal.ReleaseComObject(subFolder);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		private static void TestMsgCompare()
+		{
+			// Create test store.
+			string basePath = Path.GetTempPath();
+			string storePath = basePath + "Test.pst";
+
+			OutlookStorage pstOutlook = new ();
+			Store store = pstOutlook.CreateStore(storePath);
+
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			string msgPath = basePath + "test.msg";
+			mailItem.SaveAs(msgPath);
+			byte[] msg1 = File.ReadAllBytes(msgPath);
+
+			msgPath = basePath + "test2.msg";
+			mailItem.SaveAs(msgPath);
+			byte[] msg2 = File.ReadAllBytes(msgPath);
+
+			if (msg1.Equals(msg2))
+			{
+				Log.Info("Messages are the same");
+			}
+			else
+			{
+				Log.Info("Messages are NOT the same");
+			}
+
+			// Clean up
+			Marshal.ReleaseComObject(mainFolder);
 			Marshal.ReleaseComObject(rootFolder);
 		}
 
