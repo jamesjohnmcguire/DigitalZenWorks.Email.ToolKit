@@ -36,6 +36,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<AdditionalFiles Include="../README.md" />
 		<AdditionalFiles Include="../stylecop.json" />
 		<CodeAnalysisDictionary Include="../CodeAnalysis.ruleset" />
 		<None Include="../.editorconfig" Link="../.editorconfig" />
