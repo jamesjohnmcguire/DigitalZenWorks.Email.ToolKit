@@ -20,24 +20,32 @@ NOTE: Always back up any data you might be modifying.  So, please back up your d
 
 DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 
-| Commands:            |                                 |
-| -------------------- | ------------------------------  |
-| dbx-to-pst           | Migrate dbx files to pst file   |
-| eml-to-pst           | Migrate eml files to pst file   |
-| merge-folders        | Merge duplicate Outlook folders |
-| remove-empty-folders | Prune empty folders             |
-| help                 | Display this information        |
+| Commands:            |                                 | options      |
+| -------------------- | ------------------------------  | ------------ |
+| dbx-to-pst           | Migrate dbx files to pst file   |              |
+| eml-to-pst           | Migrate eml files to pst file   |              |
+| merge-folders        | Merge duplicate Outlook folders |              |
+| remove-duplicates    | Remove duplicate messages       | -n, --dryrun |
+| remove-empty-folders | Prune empty folders             |              |
+| help                 | Display this information        |              |
 
 ##### Command line usage notes:
 The command is optional if the command can be inferred from the source-path.  For example, if the source path is a directory containing *.eml files, they will processed accordingly.  
 If the source-path is a directory, the command will attempt to process the files in directory.  If the source-path is a file, it will process that file directly.  
-In regards to merge-folders, have you ever seen a folders like this:  
+
+###### merge-folders
+Sometimes, folders get duplicated, like in the following manner:  
 Testing  
 Testing (1)  
 Testing (1) (1)  
 Testing (1) (2()  
 
 If you ever try to move or copy a folder to a place where a folder with that name exists, Outlook will add, but will give it a name an appendix like ' (1)'.  In import or export processes, often these are the exact same folders, so you can end up with multiple duplicate folders like this.  This will merge these folders into a single folder.  If there are duplicate mail items, these will copied.  So, this wil not remove the duplicate mail items (That will come in the feature release).  But, it doesn't create any duplicates and the merging of folders, is an essential precursor to the eventual duplicates removal.  
+
+###### remove-duplicates
+If no PST path is provided, it will attempt to remove all duplicates in all folders in all stores of the default or current Outlook account.  
+Use the --dryrun option to see which message WOULD be deleted.  
+For large stores, this can take some time.
 
 ## Contributing
 
