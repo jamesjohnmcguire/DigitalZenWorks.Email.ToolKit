@@ -991,7 +991,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private int ListDuplicates(IList<string> duplicateSet, bool dryRun)
+		private int DeleteDuplicates(IList<string> duplicateSet, bool dryRun)
 		{
 			int totalDuplicates = duplicateSet.Count;
 
@@ -1255,7 +1255,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				duplicates)
 			{
 				duplicateCounts[1] +=
-					ListDuplicates(duplicateSet.Value, dryRun);
+					DeleteDuplicates(duplicateSet.Value, dryRun);
 			}
 
 			Marshal.ReleaseComObject(folder);
