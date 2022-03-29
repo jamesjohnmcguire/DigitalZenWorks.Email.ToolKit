@@ -293,7 +293,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				// The search folder doesn't seem to contain any actual
 				// message content, so it would be justa a waste of time.
-				if (!dbxFolder.FolderName.Equals(
+				if (!string.IsNullOrWhiteSpace(dbxFolder.FolderName) &&
+					!dbxFolder.FolderName.Equals(
 					"Search Folder", StringComparison.OrdinalIgnoreCase))
 				{
 					// add folder to pst
