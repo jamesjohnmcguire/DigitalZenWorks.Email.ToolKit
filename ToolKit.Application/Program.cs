@@ -87,6 +87,33 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							pstOutlook.MergeFolders();
 							result = 0;
 							break;
+						case "remove-duplicates":
+							bool dryRun = false;
+
+							if (arguments.Contains("-n") ||
+								arguments.Contains("--dryrun"))
+							{
+								dryRun = true;
+							}
+
+							pstOutlook = new ();
+
+							int pstFileIndex =
+								ArgumentsContainPstFile(arguments);
+
+							if (pstFileIndex > 0)
+							{
+								string pstFile = arguments[pstFileIndex];
+
+								pstOutlook.RemoveDuplicates(pstFile, dryRun);
+							}
+							else
+							{
+								pstOutlook.RemoveDuplicates(dryRun);
+							}
+
+							result = 0;
+							break;
 						case "remove-empty-folders":
 							pstOutlook = new ();
 							pstOutlook.RemoveEmptyFolders();
@@ -178,6 +205,27 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			string assemblyVersion = version.ToString();
 
 			return assemblyVersion;
+		}
+
+		private static int ArgumentsContainPstFile(string[] arguments)
+		{
+			int pstFileIndex = 0;
+
+			if (arguments.Length > 1)
+			{
+				for (int index = 1; index < arguments.Length; index++)
+				{
+					string extension = Path.GetExtension(arguments[index]);
+
+					if (extension.Equals(".pst", StringComparison.Ordinal))
+					{
+						pstFileIndex = index;
+						break;
+					}
+				}
+			}
+
+			return pstFileIndex;
 		}
 
 		private static void LogInitialization()
@@ -314,6 +362,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Log.Info("dbx-to-pst            Migrate dbx files to pst file");
 			Log.Info("eml-to-pst            Migrate eml files to pst file");
 			Log.Info("merge-folders         Merge duplicate folders");
+			Log.Info("remove-duplicates     Prune empty folders");
 			Log.Info("remove-empty-folders  Prune empty folders");
 			Log.Info("help                  Show this information");
 		}
