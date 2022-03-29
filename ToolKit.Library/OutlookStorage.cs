@@ -1154,11 +1154,13 @@ namespace DigitalZenWorks.Email.ToolKit
 				int[] duplicateCounts = RemoveDuplicatesFromSubFolders(
 					storePath, rootFolder, dryRun);
 
+				int removedDuplicates =
+					duplicateCounts[1] - duplicateCounts[0];
 				string message = string.Format(
 					CultureInfo.InvariantCulture,
 					"Duplicates Removed in: {0}: {1}",
 					storePath,
-					duplicateCounts[1].ToString(CultureInfo.InvariantCulture));
+					removedDuplicates.ToString(CultureInfo.InvariantCulture));
 				Log.Info(message);
 
 				totalFolders++;
