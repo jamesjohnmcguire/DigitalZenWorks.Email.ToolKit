@@ -8,6 +8,7 @@ using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -85,6 +86,149 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test for checking of duplicate items.
+		/// </summary>
+		[Test]
+		public void TestDifferentItemsEntryIds()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			MailItem mailItem2 = pstOutlook.CreateMailItem(
+				"someoneelse@example.com",
+				"This is another subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			mailItem.Save();
+			mailItem2.Save();
+
+			string tester = mailItem.EntryID;
+			string tester2 = mailItem2.EntryID;
+
+			Assert.AreNotEqual(tester, tester2);
+
+			// Clean up
+			mailItem.Delete();
+			mailItem2.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
+		public void TestMailItemsAreNotSameByContent()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			MailItem mailItem2 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is aka subject",
+				"This is the message.");
+			mailItem2.Move(mainFolder);
+
+			string path = OutlookStorage.GetFolderPath(mainFolder);
+			string hash = MapiItemComparer.GetItemHash(path, mailItem);
+			string hash2 = MapiItemComparer.GetItemHash(path, mailItem2);
+
+			Assert.AreNotEqual(hash, hash2);
+
+			// Clean up
+			mailItem.Delete();
+			mailItem2.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for comparing two MailItems by content.
+		/// </summary>
+		[Test]
+		public void TestMailItemsSameByContent()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			MailItem mailItem2 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem2.Move(mainFolder);
+
+			string path = OutlookStorage.GetFolderPath(mainFolder);
+			string hash = MapiItemComparer.GetItemHash(path, mailItem);
+			string hash2 = MapiItemComparer.GetItemHash(path, mailItem2);
+
+			Assert.AreEqual(hash, hash2);
+
+			// Clean up
+			mailItem.Delete();
+			mailItem2.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for comparing two MailItems by refence.
+		/// </summary>
+		/// <remarks>This is more of a sanity check.</remarks>
+		[Test]
+		public void TestMailItemsSameByReference()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			string path = OutlookStorage.GetFolderPath(mainFolder);
+			string hash = MapiItemComparer.GetItemHash(path, mailItem);
+			string hash2 = MapiItemComparer.GetItemHash(path, mailItem);
+
+			Assert.AreEqual(hash, hash2);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
 		/// Test for removing empty folders.
 		/// </summary>
 		[Test]
@@ -108,7 +252,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem.Move(subFolder);
 
-			Marshal.ReleaseComObject(mailItem);
 			Marshal.ReleaseComObject(subFolder);
 
 			// Review
@@ -124,6 +267,51 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Assert.IsNull(subFolder);
 
 			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folder.
+		/// </summary>
+		[Test]
+		public void TestRemoveDuplicates()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+				rootFolder, "Duplicates Test Folder");
+
+			MailItem mailItem = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem.Move(mainFolder);
+
+			MailItem mailItem2 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is aka subject",
+				"This is the message.");
+			mailItem2.Move(mainFolder);
+
+			MailItem mailItem3 = pstOutlook.CreateMailItem(
+				"someone@example.com",
+				"This is the subject",
+				"This is the message.");
+			mailItem3.Move(mainFolder);
+
+			int[] counts =
+				pstOutlook.RemoveDuplicates(mainFolder, false, true);
+
+			Assert.AreEqual(counts[0], 1);
+			Assert.AreEqual(counts[1], 2);
+
+			// Clean up
+			mailItem.Delete();
+			mailItem2.Delete();
+			mailItem3.Delete();
+			Marshal.ReleaseComObject(mailItem);
 			Marshal.ReleaseComObject(mainFolder);
 			Marshal.ReleaseComObject(rootFolder);
 		}
