@@ -823,7 +823,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						// Initially, just focus on MailItems
 						case MailItem mailItem:
 							string hash =
-								MapiItemComparer.GetItemHash(path, mailItem);
+								MapiItem.GetItemHash(path, mailItem);
 
 							if (!string.IsNullOrEmpty(hash))
 							{

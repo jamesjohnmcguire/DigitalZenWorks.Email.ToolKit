@@ -1,5 +1,5 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
-// <copyright file="MapiItemComparer.cs" company="James John McGuire">
+// <copyright file="MapiItem.cs" company="James John McGuire">
 // Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <summary>
 	/// Provides comparision support for Outlook MAPI items.
 	/// </summary>
-	public static class MapiItemComparer
+	public static class MapiItem
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
