@@ -439,7 +439,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MergeFolders(store);
 			}
 
-			Log.Info("Remove empty folder complete - total folder checked:" +
+			Log.Info("Remove empty folder complete - total folders checked: " +
 				totalFolders);
 		}
 
@@ -453,7 +453,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			MergeFolders(store);
 
-			Log.Info("Remove empty folder complete - total folder checked:" +
+			Log.Info("Remove empty folder complete - total folders checked: " +
 				totalFolders);
 		}
 
