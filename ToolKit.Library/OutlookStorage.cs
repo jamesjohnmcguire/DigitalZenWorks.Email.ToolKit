@@ -436,29 +436,22 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				Store store = outlookNamespace.Session.Stores[index];
 
-				string storePath = GetStoreName(store) + "::";
-
-				MAPIFolder rootFolder = store.GetRootFolder();
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int subIndex = rootFolder.Folders.Count; subIndex > 0;
-					subIndex--)
-				{
-					string path = storePath + rootFolder.Name;
-
-					MAPIFolder subFolder = rootFolder.Folders[subIndex];
-					MergeFolders(path, subFolder);
-
-					totalFolders++;
-					Marshal.ReleaseComObject(subFolder);
-				}
-
-				totalFolders++;
-
-				Marshal.ReleaseComObject(rootFolder);
-				Marshal.ReleaseComObject(store);
+				MergeFolders(store);
 			}
+
+			Log.Info("Remove empty folder complete - total folder checked:" +
+				totalFolders);
+		}
+
+		/// <summary>
+		/// Merge duplicate folders.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		public void MergeFolders(string pstFilePath)
+		{
+			Store store = CreateStore(pstFilePath);
+
+			MergeFolders(store);
 
 			Log.Info("Remove empty folder complete - total folder checked:" +
 				totalFolders);
@@ -1133,6 +1126,22 @@ namespace DigitalZenWorks.Email.ToolKit
 						Log.Error(message);
 					}
 				}
+			}
+		}
+
+		private void MergeFolders(Store store)
+		{
+			if (store != null)
+			{
+				string storePath = GetStoreName(store) + "::";
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				MergeFolders(storePath, rootFolder);
+
+				totalFolders++;
+
+				Marshal.ReleaseComObject(rootFolder);
+				Marshal.ReleaseComObject(store);
 			}
 		}
 
