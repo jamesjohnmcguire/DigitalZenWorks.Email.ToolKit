@@ -51,6 +51,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					bool valid;
 					OutlookStorage pstOutlook;
 
+					int pstFileIndex = ArgumentsContainPstFile(arguments);
+
 					switch (arguments[0])
 					{
 						case "dbx-to-pst":
@@ -84,7 +86,18 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							break;
 						case "merge-folders":
 							pstOutlook = new ();
-							pstOutlook.MergeFolders();
+
+							if (pstFileIndex > 0)
+							{
+								string pstFile = arguments[pstFileIndex];
+
+								pstOutlook.MergeFolders(pstFile);
+							}
+							else
+							{
+								pstOutlook.MergeFolders();
+							}
+
 							result = 0;
 							break;
 						case "remove-duplicates":
@@ -97,9 +110,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							}
 
 							pstOutlook = new ();
-
-							int pstFileIndex =
-								ArgumentsContainPstFile(arguments);
 
 							if (pstFileIndex > 0)
 							{
