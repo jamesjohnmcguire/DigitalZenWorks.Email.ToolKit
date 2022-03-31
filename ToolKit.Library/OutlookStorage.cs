@@ -277,13 +277,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>A store object.</returns>
 		public Store CreateStore(string path)
 		{
-			bool exists = File.Exists(path);
-
-			if (exists == true)
-			{
-				Log.Warn("File already exists!: " + path);
-			}
-
 			Store newPst = null;
 
 			// If the .pst file does not exist, Microsoft Outlook creates it.
