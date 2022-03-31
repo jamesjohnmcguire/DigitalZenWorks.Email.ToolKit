@@ -275,7 +275,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="path">The path to the pst file.</param>
 		/// <returns>A store object.</returns>
-		public Store CreateStore(string path)
+		public Store GetStore(string path)
 		{
 			Store newPst = null;
 
@@ -442,7 +442,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstFilePath">The PST file to check.</param>
 		public void MergeFolders(string pstFilePath)
 		{
-			Store store = CreateStore(pstFilePath);
+			Store store = GetStore(pstFilePath);
 
 			MergeFolders(store);
 
@@ -542,7 +542,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// or not.</param>
 		public void RemoveDuplicates(string storePath, bool dryRun)
 		{
-			Store store = CreateStore(storePath);
+			Store store = GetStore(storePath);
 
 			if (store != null)
 			{

@@ -131,7 +131,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			string storePath = basePath + "Test.pst";
 
 			OutlookStorage pstOutlook = new ();
-			Store store = pstOutlook.CreateStore(storePath);
+			Store store = pstOutlook.GetStore(storePath);
 
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
@@ -221,7 +221,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			string storePath = basePath + "Test.pst";
 
 			OutlookStorage pstOutlook = new ();
-			Store store = pstOutlook.CreateStore(storePath);
+			Store store = pstOutlook.GetStore(storePath);
 
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
@@ -265,7 +265,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			string storePath = basePath + "Test.pst";
 
 			OutlookStorage pstOutlook = new ();
-			Store store = pstOutlook.CreateStore(storePath);
+			Store store = pstOutlook.GetStore(storePath);
 
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
