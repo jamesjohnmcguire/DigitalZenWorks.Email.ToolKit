@@ -55,7 +55,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				}
 			}
 
-			store = pstOutlook.CreateStore(storePath);
+			store = pstOutlook.GetStore(storePath);
 		}
 
 		/// <summary>

@@ -56,7 +56,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			dbxSet.SetTreeOrdered();
 
 			OutlookStorage pstOutlook = new ();
-			Store pstStore = pstOutlook.CreateStore(pstPath);
+			Store pstStore = pstOutlook.GetStore(pstPath);
 
 			if (pstStore == null)
 			{
@@ -110,7 +110,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			else
 			{
 				OutlookStorage pstOutlook = new ();
-				Store pstStore = pstOutlook.CreateStore(pstPath);
+				Store pstStore = pstOutlook.GetStore(pstPath);
 
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
 
@@ -391,7 +391,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string emlFilesPath, string pstPath)
 		{
 			OutlookStorage pstOutlook = new ();
-			Store pstStore = pstOutlook.CreateStore(pstPath);
+			Store pstStore = pstOutlook.GetStore(pstPath);
 
 			if (pstStore == null)
 			{
@@ -427,7 +427,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static void EmlFileToPst(string filePath, string pstPath)
 		{
 			OutlookStorage pstOutlook = new ();
-			Store pstStore = pstOutlook.CreateStore(pstPath);
+			Store pstStore = pstOutlook.GetStore(pstPath);
 
 			string baseName = Path.GetFileNameWithoutExtension(pstPath);
 
