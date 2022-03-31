@@ -1126,7 +1126,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (store != null)
 			{
-				string storePath = GetStoreName(store) + "::";
+				string storePath = GetStoreName(store);
+				Log.Info("Merging folders in: " + storePath);
+
+				storePath += "::";
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				MergeFolders(storePath, rootFolder);
