@@ -137,7 +137,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
@@ -227,14 +227,14 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			// Create sub folders
 			MAPIFolder subFolder =
-				OutlookStorage.AddFolder(mainFolder, "Testing");
-			OutlookStorage.AddFolder(subFolder, "Testing2");
-			OutlookStorage.AddFolder(subFolder, "Testing2 (1)");
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			OutlookFolder.AddFolder(subFolder, "Testing2");
+			OutlookFolder.AddFolder(subFolder, "Testing2 (1)");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
 				"someone@example.com",
@@ -242,10 +242,10 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem.Move(subFolder);
 
-			subFolder = OutlookStorage.AddFolder(
+			subFolder = OutlookFolder.AddFolder(
 				mainFolder, "Testing (1)");
-			OutlookStorage.AddFolder(subFolder, "Testing2");
-			OutlookStorage.AddFolder(subFolder, "Testing2 (1)");
+			OutlookFolder.AddFolder(subFolder, "Testing2");
+			OutlookFolder.AddFolder(subFolder, "Testing2 (1)");
 
 			// Review
 			storePath = OutlookStorage.GetStoreName(store) + "::";
@@ -271,7 +271,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
