@@ -115,7 +115,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			File.Delete(msgPath);
 
 			using Stream msgStream =
-				OutlookStorage.GetMsgFileStream(msgPath);
+				new FileStream(msgPath, FileMode.Create);
+
 			Converter.ConvertEmlToMsg(dbxStream, msgStream);
 		}
 
