@@ -50,6 +50,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Gets the default Outlook namepace.
+		/// </summary>
+		/// <value>The default Outlook namepace.</value>
+		public NameSpace OutlookNamespace { get { return outlookNamespace; } }
+
+		/// <summary>
 		/// Get store name.
 		/// </summary>
 		/// <param name="store">The store to access.</param>
