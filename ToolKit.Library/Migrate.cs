@@ -357,7 +357,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				string msgFile = GetTemporaryMsgFile();
 
 				using Stream msgStream =
-					OutlookStorage.GetMsgFileStream(msgFile);
+					new FileStream(msgFile, FileMode.Create);
 
 				try
 				{

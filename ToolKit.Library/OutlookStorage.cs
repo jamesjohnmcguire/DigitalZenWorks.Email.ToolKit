@@ -50,18 +50,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Gets the message as a stream.
-		/// </summary>
-		/// <param name="filePath">The file path to create.</param>
-		/// <returns>The message as a stream.</returns>
-		public static Stream GetMsgFileStream(string filePath)
-		{
-			FileStream stream = new (filePath, FileMode.Create);
-
-			return stream;
-		}
-
-		/// <summary>
 		/// Get store name.
 		/// </summary>
 		/// <param name="store">The store to access.</param>
