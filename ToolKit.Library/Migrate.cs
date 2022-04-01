@@ -119,7 +119,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				DbxFolder dbxFolder = new (filePath, baseName, encoding);
 
-				MAPIFolder pstFolder = OutlookStorage.AddFolder(
+				MAPIFolder pstFolder = OutlookFolder.AddFolder(
 					rootFolder, rootFolder.Name);
 
 				CopyMessages(pstOutlook, pstFolder, dbxFolder);
@@ -239,7 +239,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				parentFolder = pstOutlook.GetFolderFromID(entryId, pstStore);
 			}
 
-			pstFolder = OutlookStorage.AddFolder(
+			pstFolder = OutlookFolder.AddFolder(
 				parentFolder, dbxFolder.FolderName);
 
 			Marshal.ReleaseComObject(parentFolder);
@@ -301,7 +301,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					if (dbxFolder.FolderParentId == 0)
 					{
 						// top level folder
-						pstFolder = OutlookStorage.AddFolder(
+						pstFolder = OutlookFolder.AddFolder(
 							rootFolder, dbxFolder.FolderName);
 					}
 					else
