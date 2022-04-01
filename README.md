@@ -47,8 +47,11 @@ If you ever try to move or copy a folder to a place where a folder with that nam
 
 ###### remove-duplicates
 If no PST path is provided, it will attempt to remove all duplicates in all folders in all stores of the default or current Outlook account.  
-Use the --dryrun option to see which message WOULD be deleted.  
+Use the --dryrun option to see which messages WOULD be deleted.  
 For large stores, this can take some time.
+
+#### Library and API usage:
+Except for command line argument processing, all of the functionality is located in the main library project.  The main APIs match the command line commands.
 
 ## Contributing
 
