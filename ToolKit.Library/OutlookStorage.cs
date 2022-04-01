@@ -102,43 +102,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Add MSG file as MailItem in folder.
-		/// </summary>
-		/// <param name="pstFolder">The MSG file path.</param>
-		/// <param name="filePath">The folder to add to.</param>
-		public void AddMsgFile(MAPIFolder pstFolder, string filePath)
-		{
-			if (pstFolder != null && !string.IsNullOrWhiteSpace(filePath))
-			{
-				bool exists = File.Exists(filePath);
-
-				if (exists == true)
-				{
-					try
-					{
-						MailItem item =
-							outlookNamespace.OpenSharedItem(filePath);
-
-						item.UnRead = false;
-						item.Save();
-
-						item.Move(pstFolder);
-
-						Marshal.ReleaseComObject(item);
-					}
-					catch (COMException exception)
-					{
-						Log.Error(exception.ToString());
-					}
-				}
-				else
-				{
-					Log.Warn("File doesn't exist: " + filePath);
-				}
-			}
-		}
-
-		/// <summary>
 		/// Create mail item.
 		/// </summary>
 		/// <param name="recipient">The recipient of the mail.</param>

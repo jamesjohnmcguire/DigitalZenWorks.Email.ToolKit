@@ -92,7 +92,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		public void TestDifferentItemsEntryIds()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
@@ -131,7 +131,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		public void TestMailItemsAreNotSameByContent()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
@@ -146,7 +146,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem2.Move(mainFolder);
 
-			string path = OutlookStorage.GetFolderPath(mainFolder);
+			string path = OutlookFolder.GetFolderPath(mainFolder);
 			string hash = MapiItem.GetItemHash(path, mailItem);
 			string hash2 = MapiItem.GetItemHash(path, mailItem2);
 
@@ -168,7 +168,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		public void TestMailItemsSameByContent()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
@@ -183,7 +183,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem2.Move(mainFolder);
 
-			string path = OutlookStorage.GetFolderPath(mainFolder);
+			string path = OutlookFolder.GetFolderPath(mainFolder);
 			string hash = MapiItem.GetItemHash(path, mailItem);
 			string hash2 = MapiItem.GetItemHash(path, mailItem2);
 
@@ -206,7 +206,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		public void TestMailItemsSameByReference()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
@@ -215,7 +215,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem.Move(mainFolder);
 
-			string path = OutlookStorage.GetFolderPath(mainFolder);
+			string path = OutlookFolder.GetFolderPath(mainFolder);
 			string hash = MapiItem.GetItemHash(path, mailItem);
 			string hash2 = MapiItem.GetItemHash(path, mailItem);
 
@@ -236,15 +236,15 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			// Create sub folders
 			MAPIFolder subFolder =
-				OutlookStorage.AddFolder(mainFolder, "Testing");
+				OutlookFolder.AddFolder(mainFolder, "Testing");
 			Marshal.ReleaseComObject(subFolder);
 
-			subFolder = OutlookStorage.AddFolder(mainFolder, "Testing (1)");
+			subFolder = OutlookFolder.AddFolder(mainFolder, "Testing (1)");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
 				"someone@example.com",
@@ -262,7 +262,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
-				OutlookStorage.GetSubFolder(mainFolder, "Testing (1)");
+				OutlookFolder.GetSubFolder(mainFolder, "Testing (1)");
 
 			Assert.IsNull(subFolder);
 
@@ -280,7 +280,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		public void TestRemoveDuplicates()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Duplicates Test Folder");
 
 			MailItem mailItem = pstOutlook.CreateMailItem(
@@ -324,7 +324,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder subFolder = OutlookStorage.AddFolder(
+			MAPIFolder subFolder = OutlookFolder.AddFolder(
 				rootFolder, "Temporary Test Folder");
 
 			pstOutlook.RemoveFolder(rootFolder.Name, subFolder, false);
@@ -332,8 +332,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Marshal.ReleaseComObject(subFolder);
 
 			System.Threading.Thread.Sleep(200);
-			subFolder =
-				OutlookStorage.GetSubFolder(rootFolder, "Temporary Test Folder");
+			subFolder = OutlookFolder.GetSubFolder(
+				rootFolder, "Temporary Test Folder");
 
 			Assert.IsNull(subFolder);
 
@@ -353,7 +353,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder subFolder = OutlookStorage.AddFolder(
+			MAPIFolder subFolder = OutlookFolder.AddFolder(
 				rootFolder, "Temporary Test Folder");
 			Marshal.ReleaseComObject(subFolder);
 
@@ -362,8 +362,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			pstOutlook.RemoveEmptyFolders(path, rootFolder);
 
-			subFolder =
-				OutlookStorage.GetSubFolder(rootFolder, "Temporary Test Folder");
+			subFolder = OutlookFolder.GetSubFolder(
+				rootFolder, "Temporary Test Folder");
 
 			Assert.IsNull(subFolder);
 
