@@ -4,7 +4,10 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+using Common.Logging;
+using Microsoft.Office.Interop.Outlook;
 using System;
+using System.Runtime.InteropServices;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -13,5 +16,8 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// </summary>
 	internal class OutlookFolder
 	{
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 	}
 }
