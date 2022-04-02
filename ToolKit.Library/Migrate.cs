@@ -43,6 +43,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static void DbxDirectoryToPst(
 			string dbxFoldersPath, string pstPath)
 		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStorage store = new (outlookAccount);
+
 			// Personal preference... For me, most of these types will
 			// likely be Japansese.
 			Encoding.RegisterProvider(
@@ -54,8 +57,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			// Order the list, so that parents always come before their
 			// children.
 			dbxSet.SetTreeOrdered();
-
-			OutlookStorage store = new ();
 			Store pstStore = store.GetStore(pstPath);
 
 			if (pstStore == null)
@@ -113,7 +114,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				OutlookStorage store = new OutlookStorage();
+				OutlookAccount outlookAccount = OutlookAccount.Instance;
+				OutlookStorage store = new (outlookAccount);
 				OutlookFolder outlookFolder = new ();
 				Store pstStore = store.GetStore(pstPath);
 
@@ -311,7 +313,9 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						OutlookStorage store = new OutlookStorage();
+						OutlookAccount outlookAccount =
+							OutlookAccount.Instance;
+						OutlookStorage store = new (outlookAccount);
 
 						pstFolder = CopyChildFolderToPst(
 							mappings,
@@ -401,7 +405,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static void EmlDirectoryToPst(
 			string emlFilesPath, string pstPath)
 		{
-			OutlookStorage store = new ();
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStorage store = new (outlookAccount);
 			Store pstStore = store.GetStore(pstPath);
 
 			if (pstStore == null)
@@ -438,7 +443,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		private static void EmlFileToPst(string filePath, string pstPath)
 		{
-			OutlookStorage store = new ();
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStorage store = new (outlookAccount);
 			Store pstStore = store.GetStore(pstPath);
 
 			string baseName = Path.GetFileNameWithoutExtension(pstPath);

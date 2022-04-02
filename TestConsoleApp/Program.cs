@@ -53,13 +53,14 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			Log.Info("Test console app");
 
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			TestTargetFrameworks();
 
-			TestGetHash();
+			TestGetHash(outlookAccount);
 
-			TestMsgCompare();
+			TestMsgCompare(outlookAccount);
 
-			TestMergeFolders();
+			TestMergeFolders(outlookAccount);
 
 			Encoding.RegisterProvider(
 				CodePagesEncodingProvider.Instance);
@@ -125,13 +126,13 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
 		}
 
-		private static void TestGetHash()
+		private static void TestGetHash(OutlookAccount outlookAccount)
 		{
 			// Create test store.
 			string basePath = Path.GetTempPath();
 			string storePath = basePath + "Test.pst";
 
-			OutlookStorage pstOutlook = new ();
+			OutlookStorage pstOutlook = new (outlookAccount);
 			Store store = pstOutlook.GetStore(storePath);
 
 			// Create top level folders
@@ -215,13 +216,13 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			set.List();
 		}
 
-		private static void TestMergeFolders()
+		private static void TestMergeFolders(OutlookAccount outlookAccount)
 		{
 			// Create test store.
 			string basePath = Path.GetTempPath();
 			string storePath = basePath + "Test.pst";
 
-			OutlookStorage pstOutlook = new ();
+			OutlookStorage pstOutlook = new (outlookAccount);
 			Store store = pstOutlook.GetStore(storePath);
 
 			// Create top level folders
@@ -260,13 +261,13 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			Marshal.ReleaseComObject(rootFolder);
 		}
 
-		private static void TestMsgCompare()
+		private static void TestMsgCompare(OutlookAccount outlookAccount)
 		{
 			// Create test store.
 			string basePath = Path.GetTempPath();
 			string storePath = basePath + "Test.pst";
 
-			OutlookStorage pstOutlook = new ();
+			OutlookStorage pstOutlook = new (outlookAccount);
 			Store store = pstOutlook.GetStore(storePath);
 
 			// Create top level folders
