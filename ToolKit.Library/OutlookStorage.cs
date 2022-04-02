@@ -39,14 +39,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Initializes a new instance of the
 		/// <see cref="OutlookStorage"/> class.
 		/// </summary>
-		public OutlookStorage()
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the
-		/// <see cref="OutlookStorage"/> class.
-		/// </summary>
 		/// <param name="outlookAccount">The outlook account object.</param>
 		public OutlookStorage(OutlookAccount outlookAccount)
 		{
