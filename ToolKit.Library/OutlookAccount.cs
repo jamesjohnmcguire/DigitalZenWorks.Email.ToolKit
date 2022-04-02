@@ -36,6 +36,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Gets the Outlook application object.
+		/// </summary>
+		/// <value>The Outlook application object.</value>
+		public Application Application { get { return application; } }
+
+		/// <summary>
 		/// Gets the singleton instance of this class.
 		/// </summary>
 		/// <value>The singleton instance of this class.</value>
