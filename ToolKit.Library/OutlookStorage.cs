@@ -25,7 +25,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		private readonly OutlookAccount outlookAccount;
-		private readonly Application outlookApplication;
 		private readonly string[] ignoreFolders =
 		{
 				"Calendar", "Contacts", "Conversation Action Settings",
@@ -33,8 +32,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				"Journal", "Notes", "Outbox", "Quick Step Settings",
 				"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
 		};
-
-		private readonly NameSpace outlookNamespace;
 
 		private uint totalFolders;
 
@@ -44,9 +41,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public OutlookStorage()
 		{
-			outlookApplication = new ();
-
-			outlookNamespace = outlookApplication.GetNamespace("mapi");
 		}
 
 		/// <summary>
@@ -64,12 +58,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <value>The ignore folders list.</value>
 		public string[] IgnoreFolders { get { return ignoreFolders; } }
-
-		/// <summary>
-		/// Gets the default Outlook namepace.
-		/// </summary>
-		/// <value>The default Outlook namepace.</value>
-		public NameSpace OutlookNamespace { get { return outlookNamespace; } }
 
 		/// <summary>
 		/// Gets or sets the total folders.
@@ -137,8 +125,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		public MailItem CreateMailItem(
 			string recipient, string subject, string body)
 		{
+			Application application = outlookAccount.Application;
 			MailItem mailItem =
-				(MailItem)outlookApplication.CreateItem(OlItemType.olMailItem);
+				(MailItem)application.CreateItem(OlItemType.olMailItem);
 
 			mailItem.Display(false);
 
@@ -159,13 +148,14 @@ namespace DigitalZenWorks.Email.ToolKit
 			Store newPst = null;
 
 			// If the .pst file does not exist, Microsoft Outlook creates it.
-			outlookNamespace.Session.AddStore(path);
+			NameSpace session = outlookAccount.Session;
+			session.AddStore(path);
 
-			int total = outlookNamespace.Session.Stores.Count;
+			int total = session.Stores.Count;
 
 			for (int index = 1; index <= total; index++)
 			{
-				Store store = outlookNamespace.Session.Stores[index];
+				Store store = session.Stores[index];
 
 				if (store == null)
 				{
@@ -192,7 +182,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void EmptyDeletedItemsFolder()
 		{
-			MAPIFolder deletedItemsFolder = outlookNamespace.GetDefaultFolder(
+			NameSpace session = outlookAccount.Session;
+			MAPIFolder deletedItemsFolder = session.GetDefaultFolder(
 					OlDefaultFolders.olFolderDeletedItems);
 			Items items = deletedItemsFolder.Items;
 
@@ -290,8 +281,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (store != null)
 			{
-				folder =
-					outlookNamespace.GetFolderFromID(entryId, store.StoreID);
+				NameSpace session = outlookAccount.Session;
+				folder = session.GetFolderFromID(entryId, store.StoreID);
 			}
 
 			return folder;
@@ -302,11 +293,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void MergeFolders()
 		{
-			int total = outlookNamespace.Session.Stores.Count;
+			NameSpace session = outlookAccount.Session;
+			int total = session.Stores.Count;
 
 			for (int index = 1; index <= total; index++)
 			{
-				Store store = outlookNamespace.Session.Stores[index];
+				Store store = session.Stores[index];
 
 				MergeFolders(store);
 			}
@@ -336,11 +328,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// or not.</param>
 		public void RemoveDuplicates(bool dryRun)
 		{
-			int total = outlookNamespace.Session.Stores.Count;
+			NameSpace session = outlookAccount.Session;
+			int total = session.Stores.Count;
 
 			for (int index = 1; index <= total; index++)
 			{
-				Store store = outlookNamespace.Session.Stores[index];
+				Store store = session.Stores[index];
 
 				RemoveDuplicates(store, dryRun);
 			}
@@ -369,11 +362,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void RemoveEmptyFolders()
 		{
-			int total = outlookNamespace.Session.Stores.Count;
+			NameSpace session = outlookAccount.Session;
+			int total = session.Stores.Count;
 
 			for (int index = 1; index <= total; index++)
 			{
-				Store store = outlookNamespace.Session.Stores[index];
+				Store store = session.Stores[index];
 
 				string path = store.FilePath;
 				string extension = Path.GetExtension(path);
@@ -516,9 +510,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (store != null)
 			{
+				NameSpace session = outlookAccount.Session;
+
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				outlookNamespace.Session.RemoveStore(rootFolder);
+				session.RemoveStore(rootFolder);
 
 				Marshal.ReleaseComObject(rootFolder);
 				Marshal.ReleaseComObject(store);
