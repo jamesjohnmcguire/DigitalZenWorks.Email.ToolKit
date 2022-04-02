@@ -302,8 +302,9 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem3.Move(mainFolder);
 
+			OutlookFolder outlookFolder = new ();
 			int[] counts =
-				pstOutlook.RemoveDuplicates(mainFolder, false, true);
+				outlookFolder.RemoveDuplicates(mainFolder, false, true);
 
 			Assert.AreEqual(counts[0], 1);
 			Assert.AreEqual(counts[1], 2);
