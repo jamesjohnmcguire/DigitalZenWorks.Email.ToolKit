@@ -258,7 +258,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			storePath = OutlookStorage.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
-			pstOutlook.MergeFolders(path, rootFolder);
+			OutlookFolder outlookFolder = new ();
+			outlookFolder.MergeFolders(path, rootFolder);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
