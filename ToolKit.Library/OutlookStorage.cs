@@ -24,6 +24,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		private readonly OutlookAccount outlookAccount;
 		private readonly Application outlookApplication;
 		private readonly string[] ignoreFolders =
 		{
@@ -47,6 +48,16 @@ namespace DigitalZenWorks.Email.ToolKit
 			outlookApplication = new ();
 
 			outlookNamespace = outlookApplication.GetNamespace("mapi");
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the
+		/// <see cref="OutlookStorage"/> class.
+		/// </summary>
+		/// <param name="outlookAccount">The outlook account object.</param>
+		public OutlookStorage(OutlookAccount outlookAccount)
+		{
+			this.outlookAccount = outlookAccount;
 		}
 
 		/// <summary>

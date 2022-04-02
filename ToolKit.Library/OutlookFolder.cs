@@ -24,6 +24,26 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		private readonly OutlookAccount outlookAccount;
+
+		/// <summary>
+		/// Initializes a new instance of the
+		/// <see cref="OutlookFolder"/> class.
+		/// </summary>
+		public OutlookFolder()
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the
+		/// <see cref="OutlookFolder"/> class.
+		/// </summary>
+		/// <param name="outlookAccount">The outlook account object.</param>
+		public OutlookFolder(OutlookAccount outlookAccount)
+		{
+			this.outlookAccount = outlookAccount;
+		}
+
 		/// <summary>
 		/// Add folder in safe context.
 		/// </summary>
