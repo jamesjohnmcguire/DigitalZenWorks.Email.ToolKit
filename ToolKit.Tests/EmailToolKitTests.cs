@@ -21,6 +21,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 	/// </summary>
 	public class EmailToolKitTests
 	{
+		private OutlookAccount outlookAccount;
 		private OutlookStorage pstOutlook;
 		private Store store;
 		private string storePath;
@@ -31,13 +32,15 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[OneTimeSetUp]
 		public void OneTimeSetUp()
 		{
+			outlookAccount = OutlookAccount.Instance;
+
+			pstOutlook = new (outlookAccount);
+
 			string fileName = Path.GetTempFileName();
 
 			// A 0 byte sized file is created.  Need to remove it.
 			File.Delete(fileName);
 			storePath = Path.ChangeExtension(fileName, ".pst");
-
-			pstOutlook = new ();
 
 			// PST provider in Outlook keeps the PST file open for 30 minutes
 			// after closing it for the performance reasons. So, try to delete
@@ -302,7 +305,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem3.Move(mainFolder);
 
-			OutlookFolder outlookFolder = new ();
+			OutlookFolder outlookFolder = new (outlookAccount);
 			int[] counts =
 				outlookFolder.RemoveDuplicates(mainFolder, false, true);
 
