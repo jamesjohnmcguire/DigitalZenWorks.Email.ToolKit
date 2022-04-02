@@ -19,12 +19,23 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <summary>
 	/// Represents an Outlook Folder.
 	/// </summary>
-	public class OutlookFolder : OutlookStorage
+	public class OutlookFolder
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		private readonly string[] ignoreFolders =
+		{
+				"Calendar", "Contacts", "Conversation Action Settings",
+				"Deleted Items", "Deleted Messages", "Drafts", "Junk E-mail",
+				"Journal", "Notes", "Outbox", "Quick Step Settings",
+				"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
+		};
+
 		private readonly OutlookAccount outlookAccount;
+
+		private uint removedFolders;
+		private uint totalFolders;
 
 		/// <summary>
 		/// Initializes a new instance of the
@@ -164,8 +175,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					try
 					{
-						MailItem item =
-							OutlookNamespace.OpenSharedItem(filePath);
+						NameSpace session = outlookAccount.Session;
+
+						MailItem item = session.OpenSharedItem(filePath);
 
 						item.UnRead = false;
 						item.Save();
@@ -207,7 +219,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					CheckForDuplicateFolders(path, index, subFolder);
 
-					TotalFolders++;
+					totalFolders++;
 					Marshal.ReleaseComObject(subFolder);
 				}
 			}
@@ -232,7 +244,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				string folderName = folder.Name;
 
-				if (!IgnoreFolders.Contains(folderName))
+				if (!ignoreFolders.Contains(folderName))
 				{
 					if (recurse == true)
 					{
@@ -282,12 +294,59 @@ namespace DigitalZenWorks.Email.ToolKit
 					duplicateCounts[0] += subFolderduplicateCounts[0];
 					duplicateCounts[1] += subFolderduplicateCounts[1];
 
-					TotalFolders++;
+					totalFolders++;
 					Marshal.ReleaseComObject(subFolder);
 				}
 			}
 
 			return duplicateCounts;
+		}
+
+		/// <summary>
+		/// Remove folder from PST store.
+		/// </summary>
+		/// <param name="path">The path of current folder.</param>
+		/// <param name="subFolderIndex">The index of the sub-folder.</param>
+		/// <param name="subFolder">The sub-folder.</param>
+		/// <param name="force">Whether to force the removal.</param>
+		public void RemoveFolder(
+			string path,
+			int subFolderIndex,
+			MAPIFolder subFolder,
+			bool force)
+		{
+			if (subFolder != null)
+			{
+				// Perhaps because interaction through COM interop, the count
+				// values sometimes seem a bit behind, so pause a little bit
+				// before moving on.
+				System.Threading.Thread.Sleep(100);
+
+				if (subFolder.Folders.Count > 0 || subFolder.Items.Count > 0)
+				{
+					Log.Warn("Attempting to remove non empty folder: " + path);
+				}
+
+				if (force == true || (subFolder.Folders.Count == 0 &&
+					subFolder.Items.Count == 0))
+				{
+					path += "/" + subFolder.Name;
+					Log.Info("Removing empty folder: " + path);
+
+					try
+					{
+						MAPIFolder parentFolder = subFolder.Parent;
+
+						parentFolder.Folders.Remove(subFolderIndex);
+					}
+					catch (COMException exception)
+					{
+						Log.Error(exception.ToString());
+					}
+
+					removedFolders++;
+				}
+			}
 		}
 
 		private static bool DoesSiblingFolderExist(
@@ -520,7 +579,9 @@ namespace DigitalZenWorks.Email.ToolKit
 			string keeper = duplicateSet[0];
 			duplicateSet.RemoveAt(0);
 
-			MailItem mailItem = OutlookNamespace.GetItemFromID(keeper);
+			NameSpace session = outlookAccount.Session;
+
+			MailItem mailItem = session.GetItemFromID(keeper);
 			string keeperSynopses = GetMailItemSynopses(mailItem);
 
 			string message = string.Format(
@@ -532,7 +593,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			foreach (string duplicateId in duplicateSet)
 			{
-				mailItem = OutlookNamespace.GetItemFromID(duplicateId);
+				mailItem = session.GetItemFromID(duplicateId);
 				string duplicateSynopses = GetMailItemSynopses(mailItem);
 
 				if (!duplicateSynopses.Equals(
@@ -682,7 +743,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int[] duplicateCounts = new int[2];
 
-			if (!IgnoreFolders.Contains(folder.Name))
+			if (!ignoreFolders.Contains(folder.Name))
 			{
 				if (recurse == true)
 				{
