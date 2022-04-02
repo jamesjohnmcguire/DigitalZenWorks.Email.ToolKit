@@ -11,20 +11,37 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <summary>
 	/// Represents an Outlook account.
 	/// </summary>
-	public class OutlookAccount
+	public sealed class OutlookAccount
 	{
+		private static readonly OutlookAccount InternalInstance = new ();
+
 		private readonly Application application;
 		private readonly NameSpace session;
+
+		// Explicit static constructor to tell C# compiler
+		// not to mark type as beforefieldinit
+		static OutlookAccount()
+		{
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the
 		/// <see cref="OutlookAccount"/> class.
 		/// </summary>
-		public OutlookAccount()
+		private OutlookAccount()
 		{
 			application = new ();
 
 			session = application.Session;
+		}
+
+		/// <summary>
+		/// Gets the singleton instance of this class.
+		/// </summary>
+		/// <value>The singleton instance of this class.</value>
+		public static OutlookAccount Instance
+		{
+			get { return InternalInstance; }
 		}
 
 		/// <summary>
