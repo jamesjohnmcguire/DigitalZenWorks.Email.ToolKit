@@ -50,6 +50,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Gets the ignore folders list.
+		/// </summary>
+		/// <value>The ignore folders list.</value>
+		public string[] IgnoreFolders { get { return ignoreFolders; } }
+
+		/// <summary>
 		/// Gets the default Outlook namepace.
 		/// </summary>
 		/// <value>The default Outlook namepace.</value>
@@ -331,45 +337,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Remove duplicates items from the given folder.
-		/// </summary>
-		/// <param name="folder">The MAPI folder to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <param name="recurse">Indicates whether to recurse into
-		/// sub folders.</param>
-		/// <returns>An array of duplicate sets and total duplicate items
-		/// count.</returns>
-		public int[] RemoveDuplicates(
-			MAPIFolder folder, bool dryRun, bool recurse)
-		{
-			int[] duplicateCounts = new int[2];
-
-			if (folder != null)
-			{
-				string folderName = folder.Name;
-
-				if (!ignoreFolders.Contains(folderName))
-				{
-					if (recurse == true)
-					{
-						string path = OutlookFolder.GetFolderPath(folder);
-						duplicateCounts = RemoveDuplicatesFromSubFolders(
-							path, folder, dryRun);
-					}
-
-					int[] duplicateCountsThisFolder =
-						RemoveDuplicatesFromThisFolder(folder, dryRun);
-
-					duplicateCounts[0] += duplicateCountsThisFolder[0];
-					duplicateCounts[1] += duplicateCountsThisFolder[1];
-				}
-			}
-
-			return duplicateCounts;
-		}
-
-		/// <summary>
 		/// Remove duplicates items from the given store.
 		/// </summary>
 		/// <param name="storePath">The path of the PST file to
@@ -590,138 +557,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private static IDictionary<string, IList<string>> GetFolderHashTable(
-			string path, MAPIFolder folder)
-		{
-			IDictionary<string, IList<string>> hashTable = null;
-
-			if (folder != null)
-			{
-				hashTable = new Dictionary<string, IList<string>>();
-				Items items = folder.Items;
-				int total = items.Count;
-
-				Log.Info("Checking for duplicates at: " + path +
-					" Total items: " + total);
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group will change.
-				for (int index = total; index > 0; index--)
-				{
-					object item = items[index];
-
-					switch (item)
-					{
-						// Initially, just focus on MailItems
-						case MailItem mailItem:
-							string hash =
-								MapiItem.GetItemHash(path, mailItem);
-
-							if (!string.IsNullOrEmpty(hash))
-							{
-								bool keyExists = hashTable.ContainsKey(hash);
-
-								if (keyExists == true)
-								{
-									IList<string> bucket = hashTable[hash];
-									bucket.Add(mailItem.EntryID);
-								}
-								else
-								{
-									IList<string> bucket = new List<string>();
-									bucket.Add(mailItem.EntryID);
-
-									hashTable.Add(hash, bucket);
-								}
-							}
-
-							Marshal.ReleaseComObject(mailItem);
-							break;
-						default:
-							Log.Info("Ignoring item of non-MailItem type: ");
-							break;
-					}
-
-					Marshal.ReleaseComObject(item);
-				}
-			}
-
-			return hashTable;
-		}
-
-		private static string GetMailItemSynopses(MailItem mailItem)
-		{
-			string sentOn = mailItem.SentOn.ToString(
-				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-			string synopses = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}: From: {1}: {2} Subject: {3}",
-				sentOn,
-				mailItem.SenderName,
-				mailItem.SenderEmailAddress,
-				mailItem.Subject);
-
-			return synopses;
-		}
-
-		private static void ListItem(MailItem mailItem, string prefixMessage)
-		{
-			string sentOn = mailItem.SentOn.ToString(
-				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-			string message = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0} {1}: From: {2}: {3} Subject: {4}",
-				prefixMessage,
-				sentOn,
-				mailItem.SenderName,
-				mailItem.SenderEmailAddress,
-				mailItem.Subject);
-
-			Log.Info(message);
-		}
-
-		private int DeleteDuplicates(IList<string> duplicateSet, bool dryRun)
-		{
-			int totalDuplicates = duplicateSet.Count;
-
-			string keeper = duplicateSet[0];
-			duplicateSet.RemoveAt(0);
-
-			MailItem mailItem = outlookNamespace.GetItemFromID(keeper);
-			string keeperSynopses = GetMailItemSynopses(mailItem);
-
-			string message = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0} Duplicates Found for: ",
-				totalDuplicates.ToString(CultureInfo.InvariantCulture));
-
-			ListItem(mailItem, message);
-
-			foreach (string duplicateId in duplicateSet)
-			{
-				mailItem = outlookNamespace.GetItemFromID(duplicateId);
-				string duplicateSynopses = GetMailItemSynopses(mailItem);
-
-				if (!duplicateSynopses.Equals(
-					keeperSynopses, StringComparison.Ordinal))
-				{
-					Log.Error("Warning! Duplicate Items Don't Seem to Match");
-					Log.Error("Not Matching Item: " + duplicateSynopses);
-				}
-
-				if (dryRun == false)
-				{
-					mailItem.Delete();
-				}
-
-				Marshal.ReleaseComObject(mailItem);
-			}
-
-			return totalDuplicates;
-		}
-
 		private void MergeFolders(Store store)
 		{
 			if (store != null)
@@ -757,8 +592,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				int[] duplicateCounts = RemoveDuplicatesFromSubFolders(
-					storePath, rootFolder, dryRun);
+				OutlookFolder outlookFolder = new ();
+				int[] duplicateCounts =
+					outlookFolder.RemoveDuplicatesFromSubFolders(
+						storePath, rootFolder, dryRun);
 
 				int removedDuplicates =
 					duplicateCounts[1] - duplicateCounts[0];
@@ -772,103 +609,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				totalFolders++;
 				Marshal.ReleaseComObject(rootFolder);
 			}
-		}
-
-		/// <summary>
-		/// Remove duplicates items from the given folder.
-		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
-		/// <param name="folder">The MAPI folder to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <param name="recurse">Indicates whether to recurse into
-		/// sub folders.</param>
-		/// <returns>An array of duplicate sets and total duplicate items
-		/// count.</returns>
-		private int[] RemoveDuplicates(
-			string path, MAPIFolder folder, bool dryRun, bool recurse)
-		{
-			int[] duplicateCounts = new int[2];
-
-			if (!ignoreFolders.Contains(folder.Name))
-			{
-				if (recurse == true)
-				{
-					duplicateCounts =
-						RemoveDuplicatesFromSubFolders(path, folder, dryRun);
-				}
-
-				int[] duplicateCountsThisFolder =
-					RemoveDuplicatesFromThisFolder(folder, dryRun);
-
-				duplicateCounts[0] += duplicateCountsThisFolder[0];
-				duplicateCounts[1] += duplicateCountsThisFolder[1];
-			}
-
-			return duplicateCounts;
-		}
-
-		/// <summary>
-		/// Remove duplicates items from the given folder.
-		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
-		/// <param name="folder">The MAPI folder to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <returns>An array of duplicate sets and total duplicate items
-		/// count.</returns>
-		private int[] RemoveDuplicatesFromSubFolders(
-			string path, MAPIFolder folder, bool dryRun)
-		{
-			int[] duplicateCounts = new int[2];
-
-			// Office uses 1 based indexes from VBA.
-			// Iterate in reverse order as the group may change.
-			for (int index = folder.Folders.Count; index > 0; index--)
-			{
-				MAPIFolder subFolder = folder.Folders[index];
-
-				int[] subFolderduplicateCounts =
-					RemoveDuplicates(path, subFolder, dryRun, true);
-
-				duplicateCounts[0] += subFolderduplicateCounts[0];
-				duplicateCounts[1] += subFolderduplicateCounts[1];
-
-				totalFolders++;
-				Marshal.ReleaseComObject(subFolder);
-			}
-
-			return duplicateCounts;
-		}
-
-		private int[] RemoveDuplicatesFromThisFolder(
-			MAPIFolder folder, bool dryRun)
-		{
-			int[] duplicateCounts = new int[2];
-
-			string path = OutlookFolder.GetFolderPath(folder);
-
-			IDictionary<string, IList<string>> hashTable =
-				GetFolderHashTable(path, folder);
-
-			var duplicates = hashTable.Where(p => p.Value.Count > 1);
-			duplicateCounts[0] = duplicates.Count();
-
-			if (duplicateCounts[0] > 0)
-			{
-				Log.Info("Duplicates found at: " + path);
-			}
-
-			foreach (KeyValuePair<string, IList<string>> duplicateSet in
-				duplicates)
-			{
-				duplicateCounts[1] +=
-					DeleteDuplicates(duplicateSet.Value, dryRun);
-			}
-
-			Marshal.ReleaseComObject(folder);
-
-			return duplicateCounts;
 		}
 	}
 }
