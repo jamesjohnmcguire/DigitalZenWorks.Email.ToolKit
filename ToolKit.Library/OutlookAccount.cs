@@ -149,5 +149,23 @@ namespace DigitalZenWorks.Email.ToolKit
 			Log.Info("Remove empty folder complete - total folders checked: " +
 				totalFolders);
 		}
+
+		/// <summary>
+		/// Remove duplicates items from default account.
+		/// </summary>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		public void RemoveDuplicates(bool dryRun)
+		{
+			OutlookStorage outlookStorage = new (this);
+			int total = session.Stores.Count;
+
+			for (int index = 1; index <= total; index++)
+			{
+				Store store = session.Stores[index];
+
+				outlookStorage.RemoveDuplicates(store, dryRun);
+			}
+		}
 	}
 }
