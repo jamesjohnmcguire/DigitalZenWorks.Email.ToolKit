@@ -62,6 +62,21 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Empty deleted items folder.
+		/// </summary>
+		/// <param name="store">The store to access.</param>
+		public static void EmptyDeletedItemsFolder(Store store)
+		{
+			if (store != null)
+			{
+				MAPIFolder deletedItemsFolder = store.GetDefaultFolder(
+						OlDefaultFolders.olFolderDeletedItems);
+
+				EmptyDeletedItemsFolder(deletedItemsFolder);
+			}
+		}
+
+		/// <summary>
 		/// Get store name.
 		/// </summary>
 		/// <param name="store">The store to access.</param>
@@ -141,18 +156,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				OutlookFolder outlookFolder = new ();
 				outlookFolder.RemoveFolder(path, index, subFolder, force);
 			}
-		}
-
-		/// <summary>
-		/// Empty deleted items folder.
-		/// </summary>
-		public void EmptyDeletedItemsFolder()
-		{
-			NameSpace session = outlookAccount.Session;
-			MAPIFolder deletedItemsFolder = session.GetDefaultFolder(
-					OlDefaultFolders.olFolderDeletedItems);
-
-			EmptyDeletedItemsFolder(deletedItemsFolder);
 		}
 
 		/// <summary>
