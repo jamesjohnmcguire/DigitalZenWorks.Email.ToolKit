@@ -332,7 +332,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder subFolder = OutlookFolder.AddFolder(
 				rootFolder, "Temporary Test Folder");
 
-			pstOutlook.RemoveFolder(rootFolder.Name, subFolder, false);
+			OutlookStorage.RemoveFolder(rootFolder.Name, subFolder, false);
 
 			Marshal.ReleaseComObject(subFolder);
 

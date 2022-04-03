@@ -108,6 +108,42 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Remove folder from PST store.
+		/// </summary>
+		/// <param name="path">The path of current folder.</param>
+		/// <param name="subFolder">The sub-folder.</param>
+		/// <param name="force">Whether to force the removal.</param>
+		public static void RemoveFolder(
+			string path,
+			MAPIFolder subFolder,
+			bool force)
+		{
+			if (subFolder != null)
+			{
+				string subFolderName = subFolder.Name;
+				MAPIFolder parentFolder = subFolder.Parent;
+
+				int count = parentFolder.Folders.Count;
+				int index;
+				for (index = 1; index <= count; index++)
+				{
+					MAPIFolder folder = parentFolder.Folders[index];
+
+					string name = folder.Name;
+
+					if (name.Equals(
+						subFolderName, StringComparison.OrdinalIgnoreCase))
+					{
+						break;
+					}
+				}
+
+				OutlookFolder outlookFolder = new ();
+				outlookFolder.RemoveFolder(path, index, subFolder, force);
+			}
+		}
+
+		/// <summary>
 		/// Create mail item.
 		/// </summary>
 		/// <param name="recipient">The recipient of the mail.</param>
@@ -456,42 +492,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return isEmpty;
-		}
-
-		/// <summary>
-		/// Remove folder from PST store.
-		/// </summary>
-		/// <param name="path">The path of current folder.</param>
-		/// <param name="subFolder">The sub-folder.</param>
-		/// <param name="force">Whether to force the removal.</param>
-		public void RemoveFolder(
-			string path,
-			MAPIFolder subFolder,
-			bool force)
-		{
-			if (subFolder != null)
-			{
-				string subFolderName = subFolder.Name;
-				MAPIFolder parentFolder = subFolder.Parent;
-
-				int count = parentFolder.Folders.Count;
-				int index;
-				for (index = 1; index <= count; index++)
-				{
-					MAPIFolder folder = parentFolder.Folders[index];
-
-					string name = folder.Name;
-
-					if (name.Equals(
-						subFolderName, StringComparison.OrdinalIgnoreCase))
-					{
-						break;
-					}
-				}
-
-				OutlookFolder outlookFolder = new ();
-				outlookFolder.RemoveFolder(path, index, subFolder, force);
-			}
 		}
 
 		/// <summary>
