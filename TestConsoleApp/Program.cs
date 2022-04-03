@@ -141,7 +141,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
@@ -160,7 +160,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				Log.Info("Hashes are NOT the same");
 			}
 
-			MailItem mailItem2 = pstOutlook.CreateMailItem(
+			MailItem mailItem2 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
@@ -177,7 +177,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				Log.Info("Hashes are NOT the same");
 			}
 
-			MailItem mailItem3 = pstOutlook.CreateMailItem(
+			MailItem mailItem3 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is aka subject",
 				"This is the message.");
@@ -237,7 +237,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			OutlookFolder.AddFolder(subFolder, "Testing2");
 			OutlookFolder.AddFolder(subFolder, "Testing2 (1)");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
@@ -276,7 +276,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");

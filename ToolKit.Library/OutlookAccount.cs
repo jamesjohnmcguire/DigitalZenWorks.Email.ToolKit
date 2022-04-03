@@ -55,5 +55,27 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <value>The default session (Outlook namespace).</value>
 		public NameSpace Session { get { return session; } }
+
+		/// <summary>
+		/// Create mail item.
+		/// </summary>
+		/// <param name="recipient">The recipient of the mail.</param>
+		/// <param name="subject">The subject of the mail.</param>
+		/// <param name="body">The body of the mail.</param>
+		/// <returns>The created mail item.</returns>
+		public MailItem CreateMailItem(
+			string recipient, string subject, string body)
+		{
+			MailItem mailItem =
+				(MailItem)application.CreateItem(OlItemType.olMailItem);
+
+			mailItem.Display(false);
+
+			mailItem.To = recipient;
+			mailItem.Subject = subject;
+			mailItem.Body = body;
+
+			return mailItem;
+		}
 	}
 }
