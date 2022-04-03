@@ -129,5 +129,25 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			return newPst;
 		}
+
+		/// <summary>
+		/// Merge duplicate folders.
+		/// </summary>
+		public void MergeFolders()
+		{
+			OutlookStorage outlookStorage = new (this);
+			uint totalFolders = 0;
+			int totalStores = session.Stores.Count;
+
+			for (int index = 1; index <= totalStores; index++)
+			{
+				Store store = session.Stores[index];
+
+				totalFolders += outlookStorage.MergeFolders(store);
+			}
+
+			Log.Info("Remove empty folder complete - total folders checked: " +
+				totalFolders);
+		}
 	}
 }

@@ -97,7 +97,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							}
 							else
 							{
-								pstOutlook.MergeFolders();
+								outlookAccount.MergeFolders();
 							}
 
 							result = 0;
