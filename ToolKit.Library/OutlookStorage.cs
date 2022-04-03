@@ -144,45 +144,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Create a new pst storage file.
-		/// </summary>
-		/// <param name="path">The path to the pst file.</param>
-		/// <returns>A store object.</returns>
-		public Store GetStore(string path)
-		{
-			Store newPst = null;
-
-			// If the .pst file does not exist, Microsoft Outlook creates it.
-			NameSpace session = outlookAccount.Session;
-			session.AddStore(path);
-
-			int total = session.Stores.Count;
-
-			for (int index = 1; index <= total; index++)
-			{
-				Store store = session.Stores[index];
-
-				if (store == null)
-				{
-					Log.Warn("Enumerating stores - store is null");
-				}
-				else
-				{
-					string filePath = store.FilePath;
-
-					if (!string.IsNullOrWhiteSpace(filePath) &&
-						store.FilePath == path)
-					{
-						newPst = store;
-						break;
-					}
-				}
-			}
-
-			return newPst;
-		}
-
-		/// <summary>
 		/// Empty deleted items folder.
 		/// </summary>
 		public void EmptyDeletedItemsFolder()
@@ -318,7 +279,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstFilePath">The PST file to check.</param>
 		public void MergeFolders(string pstFilePath)
 		{
-			Store store = GetStore(pstFilePath);
+			Store store = outlookAccount.GetStore(pstFilePath);
 
 			MergeFolders(store);
 
@@ -353,7 +314,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// or not.</param>
 		public void RemoveDuplicates(string storePath, bool dryRun)
 		{
-			Store store = GetStore(storePath);
+			Store store = outlookAccount.GetStore(storePath);
 
 			if (store != null)
 			{
