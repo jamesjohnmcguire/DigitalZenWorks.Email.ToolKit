@@ -219,24 +219,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Remove duplicates items from default account.
-		/// </summary>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		public void RemoveDuplicates(bool dryRun)
-		{
-			NameSpace session = outlookAccount.Session;
-			int total = session.Stores.Count;
-
-			for (int index = 1; index <= total; index++)
-			{
-				Store store = session.Stores[index];
-
-				RemoveDuplicates(store, dryRun);
-			}
-		}
-
-		/// <summary>
 		/// Remove duplicates items from the given store.
 		/// </summary>
 		/// <param name="storePath">The path of the PST file to
@@ -251,6 +233,40 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				RemoveDuplicates(store, dryRun);
 				Marshal.ReleaseComObject(store);
+			}
+		}
+
+		/// <summary>
+		/// Remove duplicates items from the given store.
+		/// </summary>
+		/// <param name="store">The PST store to process.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		public void RemoveDuplicates(Store store, bool dryRun)
+		{
+			if (store != null)
+			{
+				string storePath = GetStoreName(store);
+				Log.Info("Checking for duplicates in: " + storePath);
+
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				OutlookFolder outlookFolder = new ();
+				int[] duplicateCounts =
+					outlookFolder.RemoveDuplicatesFromSubFolders(
+						storePath, rootFolder, dryRun);
+
+				int removedDuplicates =
+					duplicateCounts[1] - duplicateCounts[0];
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"Duplicates Removed in: {0}: {1}",
+					storePath,
+					removedDuplicates.ToString(CultureInfo.InvariantCulture));
+				Log.Info(message);
+
+				totalFolders++;
+				Marshal.ReleaseComObject(rootFolder);
 			}
 		}
 
@@ -467,40 +483,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 
 				Marshal.ReleaseComObject(item);
-			}
-		}
-
-		/// <summary>
-		/// Remove duplicates items from the given store.
-		/// </summary>
-		/// <param name="store">The PST store to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		private void RemoveDuplicates(Store store, bool dryRun)
-		{
-			if (store != null)
-			{
-				string storePath = GetStoreName(store);
-				Log.Info("Checking for duplicates in: " + storePath);
-
-				MAPIFolder rootFolder = store.GetRootFolder();
-
-				OutlookFolder outlookFolder = new ();
-				int[] duplicateCounts =
-					outlookFolder.RemoveDuplicatesFromSubFolders(
-						storePath, rootFolder, dryRun);
-
-				int removedDuplicates =
-					duplicateCounts[1] - duplicateCounts[0];
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
-					"Duplicates Removed in: {0}: {1}",
-					storePath,
-					removedDuplicates.ToString(CultureInfo.InvariantCulture));
-				Log.Info(message);
-
-				totalFolders++;
-				Marshal.ReleaseComObject(rootFolder);
 			}
 		}
 	}
