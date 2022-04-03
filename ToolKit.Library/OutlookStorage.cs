@@ -144,29 +144,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Create mail item.
-		/// </summary>
-		/// <param name="recipient">The recipient of the mail.</param>
-		/// <param name="subject">The subject of the mail.</param>
-		/// <param name="body">The body of the mail.</param>
-		/// <returns>The created mail item.</returns>
-		public MailItem CreateMailItem(
-			string recipient, string subject, string body)
-		{
-			Application application = outlookAccount.Application;
-			MailItem mailItem =
-				(MailItem)application.CreateItem(OlItemType.olMailItem);
-
-			mailItem.Display(false);
-
-			mailItem.To = recipient;
-			mailItem.Subject = subject;
-			mailItem.Body = body;
-
-			return mailItem;
-		}
-
-		/// <summary>
 		/// Create a new pst storage file.
 		/// </summary>
 		/// <param name="path">The path to the pst file.</param>

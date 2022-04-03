@@ -98,13 +98,13 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
 			mailItem.Move(mainFolder);
 
-			MailItem mailItem2 = pstOutlook.CreateMailItem(
+			MailItem mailItem2 = outlookAccount.CreateMailItem(
 				"someoneelse@example.com",
 				"This is another subject",
 				"This is the message.");
@@ -137,13 +137,13 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
 			mailItem.Move(mainFolder);
 
-			MailItem mailItem2 = pstOutlook.CreateMailItem(
+			MailItem mailItem2 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is aka subject",
 				"This is the message.");
@@ -174,13 +174,13 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
 			mailItem.Move(mainFolder);
 
-			MailItem mailItem2 = pstOutlook.CreateMailItem(
+			MailItem mailItem2 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
@@ -212,7 +212,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
@@ -249,7 +249,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			subFolder = OutlookFolder.AddFolder(mainFolder, "Testing (1)");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
@@ -287,19 +287,19 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Duplicates Test Folder");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
 			mailItem.Move(mainFolder);
 
-			MailItem mailItem2 = pstOutlook.CreateMailItem(
+			MailItem mailItem2 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is aka subject",
 				"This is the message.");
 			mailItem2.Move(mainFolder);
 
-			MailItem mailItem3 = pstOutlook.CreateMailItem(
+			MailItem mailItem3 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
