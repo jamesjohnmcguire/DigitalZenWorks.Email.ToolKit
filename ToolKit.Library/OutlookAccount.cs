@@ -4,6 +4,7 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 
 namespace DigitalZenWorks.Email.ToolKit
@@ -13,6 +14,9 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// </summary>
 	public sealed class OutlookAccount
 	{
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		private static readonly OutlookAccount InternalInstance = new ();
 
 		private readonly Application application;
