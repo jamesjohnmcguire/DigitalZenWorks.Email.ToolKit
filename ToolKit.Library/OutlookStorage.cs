@@ -180,25 +180,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Merge duplicate folders.
 		/// </summary>
-		public void MergeFolders()
-		{
-			NameSpace session = outlookAccount.Session;
-			int total = session.Stores.Count;
-
-			for (int index = 1; index <= total; index++)
-			{
-				Store store = session.Stores[index];
-
-				MergeFolders(store);
-			}
-
-			Log.Info("Remove empty folder complete - total folders checked: " +
-				totalFolders);
-		}
-
-		/// <summary>
-		/// Merge duplicate folders.
-		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>
 		public void MergeFolders(string pstFilePath)
 		{
@@ -208,6 +189,33 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			Log.Info("Remove empty folder complete - total folders checked: " +
 				totalFolders);
+		}
+
+		/// <summary>
+		/// Merge duplicate folders.
+		/// </summary>
+		/// <param name="store">The store to check.</param>
+		/// <returns>The total folders checked.</returns>
+		public uint MergeFolders(Store store)
+		{
+			if (store != null)
+			{
+				string storePath = GetStoreName(store);
+				Log.Info("Merging folders in: " + storePath);
+
+				storePath += "::";
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				OutlookFolder outlookFolder = new ();
+				outlookFolder.MergeFolders(storePath, rootFolder);
+
+				totalFolders++;
+
+				Marshal.ReleaseComObject(rootFolder);
+				Marshal.ReleaseComObject(store);
+			}
+
+			return totalFolders;
 		}
 
 		/// <summary>
@@ -459,26 +467,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 
 				Marshal.ReleaseComObject(item);
-			}
-		}
-
-		private void MergeFolders(Store store)
-		{
-			if (store != null)
-			{
-				string storePath = GetStoreName(store);
-				Log.Info("Merging folders in: " + storePath);
-
-				storePath += "::";
-				MAPIFolder rootFolder = store.GetRootFolder();
-
-				OutlookFolder outlookFolder = new ();
-				outlookFolder.MergeFolders(storePath, rootFolder);
-
-				totalFolders++;
-
-				Marshal.ReleaseComObject(rootFolder);
-				Marshal.ReleaseComObject(store);
 			}
 		}
 
