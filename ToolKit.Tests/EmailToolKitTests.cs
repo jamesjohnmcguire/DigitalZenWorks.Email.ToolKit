@@ -55,7 +55,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				}
 			}
 
-			store = pstOutlook.CreateStore(storePath);
+			store = pstOutlook.GetStore(storePath);
 		}
 
 		/// <summary>
@@ -147,8 +147,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			mailItem2.Move(mainFolder);
 
 			string path = OutlookStorage.GetFolderPath(mainFolder);
-			string hash = MapiItemComparer.GetItemHash(path, mailItem);
-			string hash2 = MapiItemComparer.GetItemHash(path, mailItem2);
+			string hash = MapiItem.GetItemHash(path, mailItem);
+			string hash2 = MapiItem.GetItemHash(path, mailItem2);
 
 			Assert.AreNotEqual(hash, hash2);
 
@@ -184,8 +184,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			mailItem2.Move(mainFolder);
 
 			string path = OutlookStorage.GetFolderPath(mainFolder);
-			string hash = MapiItemComparer.GetItemHash(path, mailItem);
-			string hash2 = MapiItemComparer.GetItemHash(path, mailItem2);
+			string hash = MapiItem.GetItemHash(path, mailItem);
+			string hash2 = MapiItem.GetItemHash(path, mailItem2);
 
 			Assert.AreEqual(hash, hash2);
 
@@ -216,8 +216,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			mailItem.Move(mainFolder);
 
 			string path = OutlookStorage.GetFolderPath(mainFolder);
-			string hash = MapiItemComparer.GetItemHash(path, mailItem);
-			string hash2 = MapiItemComparer.GetItemHash(path, mailItem);
+			string hash = MapiItem.GetItemHash(path, mailItem);
+			string hash2 = MapiItem.GetItemHash(path, mailItem);
 
 			Assert.AreEqual(hash, hash2);
 

@@ -18,6 +18,7 @@ CD Bin\Release\AnyCpu
 
 7z u DigitalZenWorks.Email.ToolKit.zip
 
-gh release create v%1 --notes "%2" Bin\Release\AnyCPU\DigitalZenWorks.Email.ToolKit.zip
+gh release create v%2 --notes "%2" DigitalZenWorks.Email.ToolKit.zip
 
+CD ..\..\..
 :end
