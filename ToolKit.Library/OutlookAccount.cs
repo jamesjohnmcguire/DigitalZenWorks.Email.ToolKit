@@ -83,6 +83,16 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Empty deleted items folder.
+		/// </summary>
+		public void EmptyDeletedItemsFolder()
+		{
+			Store store = session.DefaultStore;
+
+			OutlookStorage.EmptyDeletedItemsFolder(store);
+		}
+
+		/// <summary>
 		/// Create a new pst storage file.
 		/// </summary>
 		/// <param name="path">The path to the pst file.</param>
