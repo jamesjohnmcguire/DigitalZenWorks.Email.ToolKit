@@ -44,7 +44,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			string dbxFoldersPath, string pstPath)
 		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
-			OutlookStorage store = new (outlookAccount);
 
 			// Personal preference... For me, most of these types will
 			// likely be Japansese.
@@ -57,7 +56,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			// Order the list, so that parents always come before their
 			// children.
 			dbxSet.SetTreeOrdered();
-			Store pstStore = store.GetStore(pstPath);
+			Store pstStore = outlookAccount.GetStore(pstPath);
 
 			if (pstStore == null)
 			{
@@ -115,9 +114,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			else
 			{
 				OutlookAccount outlookAccount = OutlookAccount.Instance;
-				OutlookStorage store = new (outlookAccount);
 				OutlookFolder outlookFolder = new ();
-				Store pstStore = store.GetStore(pstPath);
+				Store pstStore = outlookAccount.GetStore(pstPath);
 
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
 
@@ -407,7 +405,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStorage store = new (outlookAccount);
-			Store pstStore = store.GetStore(pstPath);
+			Store pstStore = outlookAccount.GetStore(pstPath);
 
 			if (pstStore == null)
 			{
@@ -444,8 +442,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static void EmlFileToPst(string filePath, string pstPath)
 		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
-			OutlookStorage store = new (outlookAccount);
-			Store pstStore = store.GetStore(pstPath);
+			Store pstStore = outlookAccount.GetStore(pstPath);
 
 			string baseName = Path.GetFileNameWithoutExtension(pstPath);
 
