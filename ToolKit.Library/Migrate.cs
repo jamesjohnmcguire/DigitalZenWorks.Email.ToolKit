@@ -404,7 +404,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			string emlFilesPath, string pstPath)
 		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
-			OutlookStorage store = new (outlookAccount);
 			Store pstStore = outlookAccount.GetStore(pstPath);
 
 			if (pstStore == null)
