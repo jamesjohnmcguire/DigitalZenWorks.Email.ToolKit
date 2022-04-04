@@ -24,7 +24,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		private readonly string[] ignoreFolders =
+		private static readonly string[] ignoreFolders =
 		{
 				"Calendar", "Contacts", "Conversation Action Settings",
 				"Deleted Items", "Deleted Messages", "Drafts", "Junk E-mail",
@@ -158,6 +158,23 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return pstFolder;
+		}
+
+		public static bool IsReservedFolder(MAPIFolder folder)
+		{
+			bool reserved = false;
+
+			if (folder != null)
+			{
+				string name = folder.Name;
+
+				if (ignoreFolders.Contains(name))
+				{
+					reserved = true;
+				}
+			}
+
+			return reserved;
 		}
 
 		/// <summary>
