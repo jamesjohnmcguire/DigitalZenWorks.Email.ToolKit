@@ -25,6 +25,87 @@ namespace DigitalZenWorks.Email.ToolKit
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		/// <summary>
+		/// Deletes the given item.
+		/// </summary>
+		/// <param name="item">The item to delete.</param>
+		public static void DeleteItem(object item)
+		{
+			switch (item)
+			{
+				case AppointmentItem appointmentItem:
+					appointmentItem.Delete();
+					Marshal.ReleaseComObject(appointmentItem);
+					break;
+				case ContactItem contactItem:
+					contactItem.Delete();
+					Marshal.ReleaseComObject(contactItem);
+					break;
+				case DistListItem distListItem:
+					distListItem.Delete();
+					Marshal.ReleaseComObject(distListItem);
+					break;
+				case DocumentItem documentItem:
+					documentItem.Delete();
+					Marshal.ReleaseComObject(documentItem);
+					break;
+				case JournalItem journalItem:
+					journalItem.Delete();
+					Marshal.ReleaseComObject(journalItem);
+					break;
+				case MailItem mailItem:
+					mailItem.Delete();
+					Marshal.ReleaseComObject(mailItem);
+					break;
+				case MeetingItem meetingItem:
+					meetingItem.Delete();
+					Marshal.ReleaseComObject(meetingItem);
+					break;
+				case NoteItem noteItem:
+					noteItem.Delete();
+					Marshal.ReleaseComObject(noteItem);
+					break;
+				case PostItem postItem:
+					postItem.Delete();
+					Marshal.ReleaseComObject(postItem);
+					break;
+				case RemoteItem remoteItem:
+					remoteItem.Delete();
+					Marshal.ReleaseComObject(remoteItem);
+					break;
+				case ReportItem reportItem:
+					reportItem.Delete();
+					Marshal.ReleaseComObject(reportItem);
+					break;
+				case TaskItem taskItem:
+					taskItem.Delete();
+					Marshal.ReleaseComObject(taskItem);
+					break;
+				case TaskRequestAcceptItem taskRequestAcceptItem:
+					taskRequestAcceptItem.Delete();
+					Marshal.ReleaseComObject(taskRequestAcceptItem);
+					break;
+				case TaskRequestDeclineItem taskRequestDeclineItem:
+					taskRequestDeclineItem.Delete();
+					Marshal.ReleaseComObject(taskRequestDeclineItem);
+					break;
+				case TaskRequestItem taskRequestItem:
+					taskRequestItem.Delete();
+					Marshal.ReleaseComObject(taskRequestItem);
+					break;
+				case TaskRequestUpdateItem taskRequestUpdateItem:
+					taskRequestUpdateItem.Delete();
+					Marshal.ReleaseComObject(taskRequestUpdateItem);
+					break;
+				default:
+					Log.Warn(
+						"folder item of unknown type: " + item.ToString());
+					break;
+			}
+
+			Marshal.ReleaseComObject(item);
+		}
+
+		/// <summary>
 		/// Gets the item's hash.
 		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
