@@ -120,7 +120,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 				}
 
-				string storeName = OutlookStorage.GetStoreName(folder.Store);
+				string storeName = OutlookStore.GetStoreName(folder.Store);
 				path = storeName + "::" + path;
 			}
 

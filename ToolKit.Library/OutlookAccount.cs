@@ -92,7 +92,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			Store store = session.DefaultStore;
 
-			OutlookStorage.EmptyDeletedItemsFolder(store);
+			OutlookStore.EmptyDeletedItemsFolder(store);
 		}
 
 		/// <summary>
@@ -138,7 +138,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void MergeFolders()
 		{
-			OutlookStorage outlookStorage = new (this);
+			OutlookStore outlookStorage = new (this);
 			uint totalFolders = 0;
 			int totalStores = session.Stores.Count;
 
@@ -160,7 +160,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// or not.</param>
 		public void RemoveDuplicates(bool dryRun)
 		{
-			OutlookStorage outlookStorage = new (this);
+			OutlookStore outlookStorage = new (this);
 			int total = session.Stores.Count;
 
 			for (int index = 1; index <= total; index++)
@@ -176,7 +176,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		public void RemoveEmptyFolders()
 		{
-			OutlookStorage outlookStorage = new (this);
+			OutlookStore outlookStorage = new (this);
 
 			int total = session.Stores.Count;
 			uint totalFolders = 0;

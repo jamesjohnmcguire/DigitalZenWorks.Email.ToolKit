@@ -220,7 +220,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static MAPIFolder CopyChildFolderToPst(
 			IDictionary<uint, string> mappings,
-			OutlookStorage pstOutlook,
+			OutlookStore pstOutlook,
 			Store pstStore,
 			DbxFolder dbxFolder)
 		{
@@ -313,7 +313,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						OutlookAccount outlookAccount =
 							OutlookAccount.Instance;
-						OutlookStorage store = new (outlookAccount);
+						OutlookStore store = new (outlookAccount);
 
 						pstFolder = CopyChildFolderToPst(
 							mappings,
@@ -421,7 +421,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					OutlookFolder outlookFolder = new ();
 					MAPIFolder pstFolder =
-						OutlookStorage.GetTopLevelFolder(pstStore, baseName);
+						OutlookStore.GetTopLevelFolder(pstStore, baseName);
 
 					foreach (string file in emlFiles)
 					{
@@ -446,7 +446,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string baseName = Path.GetFileNameWithoutExtension(pstPath);
 
 			MAPIFolder pstFolder =
-				OutlookStorage.GetTopLevelFolder(pstStore, baseName);
+				OutlookStore.GetTopLevelFolder(pstStore, baseName);
 
 			OutlookFolder outlookFolder = new ();
 			CopyEmlToPst(outlookFolder, pstFolder, filePath);
