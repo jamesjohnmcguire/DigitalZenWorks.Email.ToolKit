@@ -122,7 +122,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							}
 							else
 							{
-								pstOutlook.RemoveDuplicates(dryRun);
+								outlookAccount.RemoveDuplicates(dryRun);
 							}
 
 							result = 0;
