@@ -24,7 +24,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		private static readonly string[] ignoreFolders =
+		private static readonly string[] ReservedFolders =
 		{
 				"Calendar", "Contacts", "Conversation Action Settings",
 				"Deleted Items", "Deleted Messages", "Drafts", "Junk E-mail",
@@ -174,7 +174,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				string name = folder.Name;
 
-				if (ignoreFolders.Contains(name))
+				if (ReservedFolders.Contains(name))
 				{
 					reserved = true;
 				}
@@ -267,7 +267,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				string folderName = folder.Name;
 
-				if (!ignoreFolders.Contains(folderName))
+				if (!ReservedFolders.Contains(folderName))
 				{
 					if (recurse == true)
 					{
@@ -766,7 +766,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int[] duplicateCounts = new int[2];
 
-			if (!ignoreFolders.Contains(folder.Name))
+			if (!ReservedFolders.Contains(folder.Name))
 			{
 				if (recurse == true)
 				{
