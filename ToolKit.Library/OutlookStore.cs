@@ -23,13 +23,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		private readonly OutlookAccount outlookAccount;
-		private readonly string[] ignoreFolders =
-		{
-				"Calendar", "Contacts", "Conversation Action Settings",
-				"Deleted Items", "Deleted Messages", "Drafts", "Junk E-mail",
-				"Journal", "Notes", "Outbox", "Quick Step Settings",
-				"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
-		};
 
 		private uint totalFolders;
 
@@ -293,10 +286,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (subFolderEmtpy == true)
 						{
-							string name = subFolder.Name;
+							bool isReservedFolder =
+								OutlookFolder.IsReservedFolder(subFolder);
 
-							if (ignoreFolders.Contains(name))
+							if (isReservedFolder == true)
 							{
+								string name = subFolder.Name;
 								Log.Warn("Not deleting reserved folder: " +
 									name);
 							}
