@@ -268,6 +268,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Remove all empty folders.
 		/// </summary>
 		/// <param name="store">The PST store to process.</param>
+		/// <returns>The total folder checked.</returns>
 		public uint RemoveEmptyFolders(Store store)
 		{
 			if (store != null)
