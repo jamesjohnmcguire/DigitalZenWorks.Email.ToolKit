@@ -46,12 +46,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Gets the ignore folders list.
-		/// </summary>
-		/// <value>The ignore folders list.</value>
-		public string[] IgnoreFolders { get { return ignoreFolders; } }
-
-		/// <summary>
 		/// Gets or sets the total folders.
 		/// </summary>
 		/// <value>The total folders.</value>
