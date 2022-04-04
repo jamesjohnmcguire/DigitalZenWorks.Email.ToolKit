@@ -160,6 +160,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			return pstFolder;
 		}
 
+		/// <summary>
+		/// Indicates whether the given folder is a reserved folder.
+		/// </summary>
+		/// <param name="folder">The folder to check.</param>
+		/// <returns>A value that indicates whether the given folder is a
+		/// reserved folder.</returns>
 		public static bool IsReservedFolder(MAPIFolder folder)
 		{
 			bool reserved = false;
