@@ -129,8 +129,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							break;
 						case "remove-empty-folders":
 							outlookAccount = OutlookAccount.Instance;
-							pstOutlook = new (outlookAccount);
-							pstOutlook.RemoveEmptyFolders();
+							outlookAccount.RemoveEmptyFolders();
 
 							result = 0;
 							break;

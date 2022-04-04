@@ -273,66 +273,61 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Remove all empty folders.
 		/// </summary>
-		public void RemoveEmptyFolders()
+		/// <param name="store">The PST store to process.</param>
+		public uint RemoveEmptyFolders(Store store)
 		{
-			NameSpace session = outlookAccount.Session;
-			int total = session.Stores.Count;
-
-			for (int index = 1; index <= total; index++)
+			if (store != null)
 			{
-				Store store = session.Stores[index];
-
 				string path = store.FilePath;
 				string extension = Path.GetExtension(path);
 
-				if (extension.Equals(
+				if (!extension.Equals(
 					".ost", StringComparison.OrdinalIgnoreCase))
 				{
-					// for the time being, ignore ost files.
-					continue;
-				}
+					string storePath = GetStoreName(store) + "::";
 
-				string storePath = GetStoreName(store) + "::";
+					MAPIFolder rootFolder = store.GetRootFolder();
 
-				MAPIFolder rootFolder = store.GetRootFolder();
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int subIndex = rootFolder.Folders.Count; subIndex > 0;
-					subIndex--)
-				{
-					path = storePath + rootFolder.Name;
-
-					MAPIFolder subFolder = rootFolder.Folders[subIndex];
-					bool subFolderEmtpy = RemoveEmptyFolders(path, subFolder);
-
-					if (subFolderEmtpy == true)
+					// Office uses 1 based indexes from VBA.
+					// Iterate in reverse order as the group may change.
+					for (int subIndex = rootFolder.Folders.Count; subIndex > 0;
+						subIndex--)
 					{
-						string name = subFolder.Name;
+						path = storePath + rootFolder.Name;
 
-						if (ignoreFolders.Contains(name))
+						MAPIFolder subFolder = rootFolder.Folders[subIndex];
+						bool subFolderEmtpy = RemoveEmptyFolders(path, subFolder);
+
+						if (subFolderEmtpy == true)
 						{
-							Log.Warn("Not deleting reserved folder: " +
-								name);
+							string name = subFolder.Name;
+
+							if (ignoreFolders.Contains(name))
+							{
+								Log.Warn("Not deleting reserved folder: " +
+									name);
+							}
+							else
+							{
+								OutlookFolder outlookFolder = new ();
+								outlookFolder.RemoveFolder(
+									path, subIndex, subFolder, false);
+							}
 						}
-						else
-						{
-							OutlookFolder outlookFolder = new ();
-							outlookFolder.RemoveFolder(
-								path, subIndex, subFolder, false);
-						}
+
+						totalFolders++;
+						Marshal.ReleaseComObject(subFolder);
 					}
 
 					totalFolders++;
-					Marshal.ReleaseComObject(subFolder);
+					Marshal.ReleaseComObject(rootFolder);
 				}
-
-				totalFolders++;
-				Marshal.ReleaseComObject(rootFolder);
 			}
 
 			Log.Info("Remove empty folder complete - total folder checked:" +
 				totalFolders);
+
+			return totalFolders;
 		}
 
 		/// <summary>
