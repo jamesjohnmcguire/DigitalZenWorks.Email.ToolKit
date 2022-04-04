@@ -247,7 +247,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			OutlookFolder.AddFolder(subFolder, "Testing2 (1)");
 
 			// Review
-			storePath = OutlookStorage.GetStoreName(store) + "::";
+			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new ();

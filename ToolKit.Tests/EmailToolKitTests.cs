@@ -22,7 +22,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 	public class EmailToolKitTests
 	{
 		private OutlookAccount outlookAccount;
-		private OutlookStorage pstOutlook;
+		private OutlookStore pstOutlook;
 		private Store store;
 		private string storePath;
 
@@ -67,7 +67,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[OneTimeTearDown]
 		public void OneTimeTearDown()
 		{
-			OutlookStorage.EmptyDeletedItemsFolder(store);
+			OutlookStore.EmptyDeletedItemsFolder(store);
 			pstOutlook.RemoveStore(store);
 		}
 
@@ -258,7 +258,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Marshal.ReleaseComObject(subFolder);
 
 			// Review
-			storePath = OutlookStorage.GetStoreName(store) + "::";
+			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new ();
@@ -332,7 +332,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder subFolder = OutlookFolder.AddFolder(
 				rootFolder, "Temporary Test Folder");
 
-			OutlookStorage.RemoveFolder(rootFolder.Name, subFolder, false);
+			OutlookStore.RemoveFolder(rootFolder.Name, subFolder, false);
 
 			Marshal.ReleaseComObject(subFolder);
 
@@ -362,7 +362,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				rootFolder, "Temporary Test Folder");
 			Marshal.ReleaseComObject(subFolder);
 
-			storePath = OutlookStorage.GetStoreName(store) + "::";
+			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
 			pstOutlook.RemoveEmptyFolders(path, rootFolder);

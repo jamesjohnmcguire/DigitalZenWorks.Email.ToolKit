@@ -50,7 +50,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				{
 					bool valid;
 					OutlookAccount outlookAccount;
-					OutlookStorage pstOutlook;
+					OutlookStore pstOutlook;
 
 					int pstFileIndex = ArgumentsContainPstFile(arguments);
 

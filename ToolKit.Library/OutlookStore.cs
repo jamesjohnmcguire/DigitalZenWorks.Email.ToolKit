@@ -1,5 +1,5 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
-// <copyright file="OutlookStorage.cs" company="James John McGuire">
+// <copyright file="OutlookStore.cs" company="James John McGuire">
 // Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <summary>
 	/// Provides support for interacting with an Outlook PST file.
 	/// </summary>
-	public class OutlookStorage
+	public class OutlookStore
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -37,10 +37,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		/// <summary>
 		/// Initializes a new instance of the
-		/// <see cref="OutlookStorage"/> class.
+		/// <see cref="OutlookStore"/> class.
 		/// </summary>
 		/// <param name="outlookAccount">The outlook account object.</param>
-		public OutlookStorage(OutlookAccount outlookAccount)
+		public OutlookStore(OutlookAccount outlookAccount)
 		{
 			this.outlookAccount = outlookAccount;
 		}
