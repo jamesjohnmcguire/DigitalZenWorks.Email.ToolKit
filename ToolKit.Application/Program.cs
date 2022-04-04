@@ -49,7 +49,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				if (arguments != null && arguments.Length > 0)
 				{
 					bool valid;
-					OutlookStorage pstOutlook;
+					OutlookAccount outlookAccount;
+					OutlookStore pstOutlook;
 
 					int pstFileIndex = ArgumentsContainPstFile(arguments);
 
@@ -85,7 +86,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = 0;
 							break;
 						case "merge-folders":
-							pstOutlook = new ();
+							outlookAccount = OutlookAccount.Instance;
+							pstOutlook = new (outlookAccount);
 
 							if (pstFileIndex > 0)
 							{
@@ -95,7 +97,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							}
 							else
 							{
-								pstOutlook.MergeFolders();
+								outlookAccount.MergeFolders();
 							}
 
 							result = 0;
@@ -109,7 +111,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 								dryRun = true;
 							}
 
-							pstOutlook = new ();
+							outlookAccount = OutlookAccount.Instance;
+							pstOutlook = new (outlookAccount);
 
 							if (pstFileIndex > 0)
 							{
@@ -119,14 +122,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							}
 							else
 							{
-								pstOutlook.RemoveDuplicates(dryRun);
+								outlookAccount.RemoveDuplicates(dryRun);
 							}
 
 							result = 0;
 							break;
 						case "remove-empty-folders":
-							pstOutlook = new ();
-							pstOutlook.RemoveEmptyFolders();
+							outlookAccount = OutlookAccount.Instance;
+							outlookAccount.RemoveEmptyFolders();
 
 							result = 0;
 							break;
