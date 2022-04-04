@@ -6,6 +6,9 @@
 
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -166,6 +169,27 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				outlookStorage.RemoveDuplicates(store, dryRun);
 			}
+		}
+
+		/// <summary>
+		/// Remove all empty folders.
+		/// </summary>
+		public void RemoveEmptyFolders()
+		{
+			OutlookStorage outlookStorage = new (this);
+
+			int total = session.Stores.Count;
+			uint totalFolders = 0;
+
+			for (int index = 1; index <= total; index++)
+			{
+				Store store = session.Stores[index];
+
+				totalFolders += outlookStorage.RemoveEmptyFolders(store);
+			}
+
+			Log.Info("Remove empty folder complete - total folder checked:" +
+				totalFolders);
 		}
 	}
 }
