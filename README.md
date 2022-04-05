@@ -34,7 +34,7 @@ The command is optional if the command can be inferred from the source-path.  Fo
 If the source-path is a directory, the command will attempt to process the files in directory.  If the source-path is a file, it will process that file directly.  
 
 ###### Example
-DigitalZenWorks.Email.ToolKit.exe remove-duplicates --dryrun %USERPROFILE%\Email\Test.pst
+Det.exe remove-duplicates --dryrun \path\to\some.pst  
 
 ###### merge-folders
 Sometimes, folders get duplicated, like in the following manner:  
