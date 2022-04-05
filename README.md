@@ -33,8 +33,9 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 The command is optional if the command can be inferred from the source-path.  For example, if the source path is a directory containing *.eml files, they will processed accordingly.  
 If the source-path is a directory, the command will attempt to process the files in directory.  If the source-path is a file, it will process that file directly.  
 
-###### Example
+###### Examples
 Det.exe remove-duplicates --dryrun \path\to\some.pst  
+Det.exe dbx-to-pst \path\to\some-dbx-files  
 
 ###### merge-folders
 Sometimes, folders get duplicated, like in the following manner:  
