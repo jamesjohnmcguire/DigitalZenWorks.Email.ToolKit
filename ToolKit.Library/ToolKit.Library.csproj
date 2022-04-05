@@ -5,14 +5,22 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AssemblyName>DigitalZenWorks.Email.ToolKit.Library</AssemblyName>
 		<AssemblyVersion>1.3.0.21</AssemblyVersion>
+		<Authors>James John McGuire</Authors>
 		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
-		<Company>James John McGuire</Company>
+		<Company>Digital Zen Works</Company>
 		<Copyright>Copyright © 2021 - 2022</Copyright>
+		<Description>
+			This client library provides functionality to help migrate email messages from dbx (Outlook Express) or eml format to Outlook.  It also contains functionality to help clean up Outlook stores.
+			Additional notes - https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
+		</Description>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<FileVersion>1.3.0.21</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
+		<PackageId>DigitalZenWorks.Email.ToolKit</PackageId>
+		<PackageTags>Digital Zen Works;Email;Dbx;Eml;Outlook;Duplicates</PackageTags>
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<Version>1.3.0.21</Version>
 	</PropertyGroup>
