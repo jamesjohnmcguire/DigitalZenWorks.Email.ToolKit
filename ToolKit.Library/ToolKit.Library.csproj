@@ -14,7 +14,7 @@
 			Additional notes - https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
 		</Description>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<FileVersion>1.3.21.0</FileVersion>
+		<FileVersion>1.4.22.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>Latest</LangVersion>
@@ -23,7 +23,7 @@
 		<PackageId>DigitalZenWorks.Email.ToolKit</PackageId>
 		<PackageTags>Digital Zen Works;Email;Dbx;Eml;Outlook;Duplicates</PackageTags>
 		<TargetFrameworks>net461;net5.0-windows;net6.0-windows</TargetFrameworks>
-		<Version>1.3.21</Version>
+		<Version>1.4.22</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
