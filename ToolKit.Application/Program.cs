@@ -104,11 +104,18 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							break;
 						case "remove-duplicates":
 							bool dryRun = false;
+							bool flush = false;
 
 							if (arguments.Contains("-n") ||
 								arguments.Contains("--dryrun"))
 							{
 								dryRun = true;
+							}
+
+							if (arguments.Contains("-h") ||
+								arguments.Contains("--flush"))
+							{
+								flush = true;
 							}
 
 							outlookAccount = OutlookAccount.Instance;
@@ -118,11 +125,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							{
 								string pstFile = arguments[pstFileIndex];
 
-								pstOutlook.RemoveDuplicates(pstFile, dryRun);
+								pstOutlook.RemoveDuplicates(
+									pstFile, dryRun, flush);
 							}
 							else
 							{
-								outlookAccount.RemoveDuplicates(dryRun);
+								outlookAccount.RemoveDuplicates(dryRun, flush);
 							}
 
 							result = 0;

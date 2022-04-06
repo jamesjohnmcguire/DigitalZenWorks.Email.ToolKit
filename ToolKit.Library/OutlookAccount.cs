@@ -158,7 +158,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		public void RemoveDuplicates(bool dryRun)
+		/// <param name="flush">Indicates whether to empty the deleted items
+		/// folder.</param>
+		public void RemoveDuplicates(bool dryRun, bool flush)
 		{
 			OutlookStore outlookStorage = new (this);
 			int total = session.Stores.Count;
@@ -167,7 +169,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				Store store = session.Stores[index];
 
-				outlookStorage.RemoveDuplicates(store, dryRun);
+				outlookStorage.RemoveDuplicates(store, dryRun, flush);
 			}
 		}
 

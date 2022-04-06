@@ -210,13 +210,15 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// process.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		public void RemoveDuplicates(string storePath, bool dryRun)
+		/// <param name="flush">Indicates whether to empty the deleted items
+		/// folder.</param>
+		public void RemoveDuplicates(string storePath, bool dryRun, bool flush)
 		{
 			Store store = outlookAccount.GetStore(storePath);
 
 			if (store != null)
 			{
-				RemoveDuplicates(store, dryRun);
+				RemoveDuplicates(store, dryRun, flush);
 				Marshal.ReleaseComObject(store);
 			}
 		}
@@ -227,7 +229,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="store">The PST store to process.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		public void RemoveDuplicates(Store store, bool dryRun)
+		/// <param name="flush">Indicates whether to empty the deleted items
+		/// folder.</param>
+		public void RemoveDuplicates(Store store, bool dryRun, bool flush)
 		{
 			if (store != null)
 			{
@@ -240,6 +244,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				int[] duplicateCounts =
 					outlookFolder.RemoveDuplicatesFromSubFolders(
 						storePath, rootFolder, dryRun);
+
+				if (flush == true)
+				{
+					EmptyDeletedItemsFolder(store);
+				}
 
 				int removedDuplicates =
 					duplicateCounts[1] - duplicateCounts[0];
