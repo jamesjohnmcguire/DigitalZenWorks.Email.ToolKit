@@ -3,18 +3,15 @@ CD ..
 
 IF "%1"=="release" GOTO release
 
-SET NUGET_RESTORE_MSBUILD_ARGS=/p:Configuration=Release
-
-CALL nuget restore DigitalZenWorks.Email.ToolKit.sln
-CALL msbuild -property:Configuration=Release
+msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true;TargetFramework=net6.0-windows -restore -target:publish;rebuild ToolKit.Application
 
 GOTO end
 
 :release
 IF EXIST Bin\Release\AnyCPU\NUL DEL /Q Bin\Release\AnyCPU\*.*
 
-CALL msbuild -property:Configuration=Release;TargetFramework=net6.0-windows -restore -target:publish
-CD Bin\Release\AnyCpu
+CALL msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true;TargetFramework=net6.0-windows -restore -target:publish;rebuild ToolKit.Application
+CD Bin\Release\AnyCpu\win-x64\publish
 
 7z u DigitalZenWorks.Email.ToolKit.zip
 
