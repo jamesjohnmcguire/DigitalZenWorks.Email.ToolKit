@@ -22,8 +22,14 @@
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<PackageId>DigitalZenWorks.Email.ToolKit</PackageId>
 		<PackageTags>Digital Zen Works;Email;Dbx;Eml;Outlook;Duplicates</PackageTags>
-		<TargetFrameworks>net461;net5.0-windows;net6.0-windows</TargetFrameworks>
 		<Version>1.4.22</Version>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<TargetFramework>net6.0-windows</TargetFramework>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<TargetFrameworks>net461;net5.0-windows;net6.0-windows</TargetFrameworks>
 	</PropertyGroup>
 
 	<ItemGroup>
