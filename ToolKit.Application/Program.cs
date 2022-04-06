@@ -112,7 +112,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 								dryRun = true;
 							}
 
-							if (arguments.Contains("-h") ||
+							if (arguments.Contains("-s") ||
 								arguments.Contains("--flush"))
 							{
 								flush = true;
