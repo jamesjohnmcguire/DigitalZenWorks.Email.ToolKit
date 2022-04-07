@@ -1,6 +1,6 @@
 REM %1 - Type of build
-REM %2 - API key
-REM %3 - Version (such as 1.0.0.5)
+REM %2 - Version (such as 1.0.0.5)
+REM %3 - API key
 
 CD %~dp0
 CD ..
