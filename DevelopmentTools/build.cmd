@@ -15,19 +15,19 @@ GOTO end
 
 :publish
 
-msbuild -property:Configuration=Release;OutputPath=Bin\Publish -restore -target:rebuild ToolKit.Library
-msbuild -property:Configuration=Release;OutputPath=Bin\Publish -target:pack ToolKit.Library
+msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -restore -target:rebuild ToolKit.Library
+msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -target:pack ToolKit.Library
 
-cd ToolKit.Library\Bin\Publish
+cd ToolKit.Library\Bin\Release\Library
 
 nuget push DigitalZenWorks.Email.ToolKit.%2.nupkg %3
 GOTO end
 
 :release
 
-CALL msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true;TargetFramework=net6.0-windows -restore -target:publish;rebuild ToolKit.Application
-CD Bin\Release\AnyCpu\win-x64\publish
-
+msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;OutputPath=Bin\;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true;TargetFramework=net6.0-windows -restore -target:publish;rebuild ToolKit.Application
+CD ToolKit.Application\Bin\publish
+PAUSE
 7z u DigitalZenWorks.Email.ToolKit.zip
 
 gh release create v%2 --notes "%2" DigitalZenWorks.Email.ToolKit.zip
