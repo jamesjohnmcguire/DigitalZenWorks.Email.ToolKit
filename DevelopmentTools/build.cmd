@@ -19,8 +19,7 @@ msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -restore 
 msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -target:pack ToolKit.Library
 
 cd ToolKit.Library\Bin\Release\Library
-PAUSE
-nuget push DigitalZenWorks.Email.ToolKit.%2.nupkg %3
+nuget push DigitalZenWorks.Email.ToolKit.%2.nupkg %3 -Source https://api.nuget.org/v3/index.json
 GOTO end
 
 :release
