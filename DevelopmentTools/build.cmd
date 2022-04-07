@@ -5,7 +5,7 @@ REM %3 - API key
 CD %~dp0
 CD ..
 
-IF "%1"=="publish" GOTO release
+IF "%1"=="publish" GOTO publish
 IF "%1"=="release" GOTO release
 
 :default
@@ -19,7 +19,7 @@ msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -restore 
 msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -target:pack ToolKit.Library
 
 cd ToolKit.Library\Bin\Release\Library
-
+PAUSE
 nuget push DigitalZenWorks.Email.ToolKit.%2.nupkg %3
 GOTO end
 
