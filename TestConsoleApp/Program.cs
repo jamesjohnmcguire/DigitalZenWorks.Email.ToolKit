@@ -53,13 +53,14 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			Log.Info("Test console app");
 
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			TestTargetFrameworks();
 
-			TestGetHash();
+			TestGetHash(outlookAccount);
 
-			TestMsgCompare();
+			TestMsgCompare(outlookAccount);
 
-			TestMergeFolders();
+			TestMergeFolders(outlookAccount);
 
 			Encoding.RegisterProvider(
 				CodePagesEncodingProvider.Instance);
@@ -115,7 +116,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			File.Delete(msgPath);
 
 			using Stream msgStream =
-				OutlookStorage.GetMsgFileStream(msgPath);
+				new FileStream(msgPath, FileMode.Create);
+
 			Converter.ConvertEmlToMsg(dbxStream, msgStream);
 		}
 
@@ -124,22 +126,21 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
 		}
 
-		private static void TestGetHash()
+		private static void TestGetHash(OutlookAccount outlookAccount)
 		{
 			// Create test store.
 			string basePath = Path.GetTempPath();
 			string storePath = basePath + "Test.pst";
 
-			OutlookStorage pstOutlook = new ();
-			Store store = pstOutlook.GetStore(storePath);
+			Store store = outlookAccount.GetStore(storePath);
 
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
@@ -158,7 +159,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				Log.Info("Hashes are NOT the same");
 			}
 
-			MailItem mailItem2 = pstOutlook.CreateMailItem(
+			MailItem mailItem2 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
@@ -175,7 +176,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				Log.Info("Hashes are NOT the same");
 			}
 
-			MailItem mailItem3 = pstOutlook.CreateMailItem(
+			MailItem mailItem3 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is aka subject",
 				"This is the message.");
@@ -214,43 +215,43 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			set.List();
 		}
 
-		private static void TestMergeFolders()
+		private static void TestMergeFolders(OutlookAccount outlookAccount)
 		{
 			// Create test store.
 			string basePath = Path.GetTempPath();
 			string storePath = basePath + "Test.pst";
 
-			OutlookStorage pstOutlook = new ();
-			Store store = pstOutlook.GetStore(storePath);
+			Store store = outlookAccount.GetStore(storePath);
 
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
 			// Create sub folders
 			MAPIFolder subFolder =
-				OutlookStorage.AddFolder(mainFolder, "Testing");
-			OutlookStorage.AddFolder(subFolder, "Testing2");
-			OutlookStorage.AddFolder(subFolder, "Testing2 (1)");
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			OutlookFolder.AddFolder(subFolder, "Testing2");
+			OutlookFolder.AddFolder(subFolder, "Testing2 (1)");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
 			mailItem.Move(subFolder);
 
-			subFolder = OutlookStorage.AddFolder(
+			subFolder = OutlookFolder.AddFolder(
 				mainFolder, "Testing (1)");
-			OutlookStorage.AddFolder(subFolder, "Testing2");
-			OutlookStorage.AddFolder(subFolder, "Testing2 (1)");
+			OutlookFolder.AddFolder(subFolder, "Testing2");
+			OutlookFolder.AddFolder(subFolder, "Testing2 (1)");
 
 			// Review
-			storePath = OutlookStorage.GetStoreName(store) + "::";
+			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
-			pstOutlook.MergeFolders(path, rootFolder);
+			OutlookFolder outlookFolder = new ();
+			outlookFolder.MergeFolders(path, rootFolder);
 
 			// Clean up
 			Marshal.ReleaseComObject(subFolder);
@@ -258,22 +259,21 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			Marshal.ReleaseComObject(rootFolder);
 		}
 
-		private static void TestMsgCompare()
+		private static void TestMsgCompare(OutlookAccount outlookAccount)
 		{
 			// Create test store.
 			string basePath = Path.GetTempPath();
 			string storePath = basePath + "Test.pst";
 
-			OutlookStorage pstOutlook = new ();
-			Store store = pstOutlook.GetStore(storePath);
+			Store store = outlookAccount.GetStore(storePath);
 
 			// Create top level folders
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			MAPIFolder mainFolder = OutlookStorage.AddFolder(
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
-			MailItem mailItem = pstOutlook.CreateMailItem(
+			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");

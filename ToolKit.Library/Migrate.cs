@@ -43,6 +43,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static void DbxDirectoryToPst(
 			string dbxFoldersPath, string pstPath)
 		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+
 			// Personal preference... For me, most of these types will
 			// likely be Japansese.
 			Encoding.RegisterProvider(
@@ -54,9 +56,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			// Order the list, so that parents always come before their
 			// children.
 			dbxSet.SetTreeOrdered();
-
-			OutlookStorage pstOutlook = new ();
-			Store pstStore = pstOutlook.GetStore(pstPath);
+			Store pstStore = outlookAccount.GetStore(pstPath);
 
 			if (pstStore == null)
 			{
@@ -65,7 +65,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			else
 			{
 				DbxFolder dbxFolder;
-
+				OutlookFolder outlookFolder = new ();
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
 
 				string baseName = Path.GetFileNameWithoutExtension(pstPath);
@@ -79,7 +79,11 @@ namespace DigitalZenWorks.Email.ToolKit
 					dbxFolder = dbxSet.GetNextFolder();
 
 					CopyFolderToPst(
-						mappings, pstOutlook, pstStore, rootFolder, dbxFolder);
+						mappings,
+						outlookFolder,
+						pstStore,
+						rootFolder,
+						dbxFolder);
 				}
 				while (dbxFolder != null);
 
@@ -109,8 +113,9 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				OutlookStorage pstOutlook = new ();
-				Store pstStore = pstOutlook.GetStore(pstPath);
+				OutlookAccount outlookAccount = OutlookAccount.Instance;
+				OutlookFolder outlookFolder = new ();
+				Store pstStore = outlookAccount.GetStore(pstPath);
 
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
 
@@ -119,10 +124,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				DbxFolder dbxFolder = new (filePath, baseName, encoding);
 
-				MAPIFolder pstFolder = OutlookStorage.AddFolder(
+				MAPIFolder pstFolder = OutlookFolder.AddFolder(
 					rootFolder, rootFolder.Name);
 
-				CopyMessages(pstOutlook, pstFolder, dbxFolder);
+				CopyMessages(outlookFolder, pstFolder, dbxFolder);
 
 				Marshal.ReleaseComObject(pstFolder);
 				Marshal.ReleaseComObject(rootFolder);
@@ -215,7 +220,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static MAPIFolder CopyChildFolderToPst(
 			IDictionary<uint, string> mappings,
-			OutlookStorage pstOutlook,
+			OutlookStore pstOutlook,
 			Store pstStore,
 			DbxFolder dbxFolder)
 		{
@@ -239,7 +244,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				parentFolder = pstOutlook.GetFolderFromID(entryId, pstStore);
 			}
 
-			pstFolder = OutlookStorage.AddFolder(
+			pstFolder = OutlookFolder.AddFolder(
 				parentFolder, dbxFolder.FolderName);
 
 			Marshal.ReleaseComObject(parentFolder);
@@ -248,7 +253,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static void CopyEmlToPst(
-			OutlookStorage pstOutlook, MAPIFolder pstFolder, string emlFile)
+			OutlookFolder outlookFolder, MAPIFolder mapiFolder, string emlFile)
 		{
 			if (!string.IsNullOrWhiteSpace(emlFile) && File.Exists(emlFile))
 			{
@@ -265,7 +270,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					Log.Error(exception.ToString());
 				}
 
-				pstOutlook.AddMsgFile(pstFolder, msgFile);
+				outlookFolder.AddMsgFile(mapiFolder, msgFile);
 
 				File.Delete(msgFile);
 			}
@@ -275,18 +280,18 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Copy folder to pst store.
 		/// </summary>
 		/// <param name="mappings">The mappings file to add to.</param>
-		/// <param name="pstOutlook">The pst object to use.</param>
+		/// <param name="outlookFolder">The Outlook folder to use.</param>
 		/// <param name="pstStore">The store to use.</param>
 		/// <param name="rootFolder">The root folder of the store.</param>
 		/// <param name="dbxFolder">The dbx folder to add.</param>
 		private static void CopyFolderToPst(
 			IDictionary<uint, string> mappings,
-			OutlookStorage pstOutlook,
+			OutlookFolder outlookFolder,
 			Store pstStore,
 			MAPIFolder rootFolder,
 			DbxFolder dbxFolder)
 		{
-			if (mappings != null && pstOutlook != null &&
+			if (mappings != null && outlookFolder != null &&
 				pstStore != null && dbxFolder != null)
 			{
 				MAPIFolder pstFolder;
@@ -301,14 +306,18 @@ namespace DigitalZenWorks.Email.ToolKit
 					if (dbxFolder.FolderParentId == 0)
 					{
 						// top level folder
-						pstFolder = OutlookStorage.AddFolder(
+						pstFolder = OutlookFolder.AddFolder(
 							rootFolder, dbxFolder.FolderName);
 					}
 					else
 					{
+						OutlookAccount outlookAccount =
+							OutlookAccount.Instance;
+						OutlookStore store = new (outlookAccount);
+
 						pstFolder = CopyChildFolderToPst(
 							mappings,
-							pstOutlook,
+							store,
 							pstStore,
 							dbxFolder);
 					}
@@ -317,7 +326,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						AddMappingSafe(mappings, pstFolder, dbxFolder);
 
-						CopyMessages(pstOutlook, pstFolder, dbxFolder);
+						CopyMessages(outlookFolder, pstFolder, dbxFolder);
 					}
 					else
 					{
@@ -328,7 +337,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static void CopyMessages(
-			OutlookStorage pstOutlook, MAPIFolder pstFolder, DbxFolder dbxFolder)
+			OutlookFolder outlookFolder,
+			MAPIFolder pstFolder,
+			DbxFolder dbxFolder)
 		{
 			// for each message
 			DbxMessage dbxMessage;
@@ -337,7 +348,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				dbxMessage = dbxFolder.GetNextMessage();
 
-				CopyMessageToPst(pstOutlook, pstFolder, dbxMessage);
+				CopyMessageToPst(outlookFolder, pstFolder, dbxMessage);
 			}
 			while (dbxMessage != null);
 
@@ -345,7 +356,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static void CopyMessageToPst(
-			OutlookStorage pstOutlook, MAPIFolder pstFolder, DbxMessage dbxMessage)
+			OutlookFolder outlookFolder,
+			MAPIFolder mapiFolder,
+			DbxMessage dbxMessage)
 		{
 			if (dbxMessage != null && dbxMessage.Message.Length > 0)
 			{
@@ -357,7 +370,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				string msgFile = GetTemporaryMsgFile();
 
 				using Stream msgStream =
-					OutlookStorage.GetMsgFileStream(msgFile);
+					new FileStream(msgFile, FileMode.Create);
 
 				try
 				{
@@ -375,7 +388,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				msgStream.Dispose();
 
-				pstOutlook.AddMsgFile(pstFolder, msgFile);
+				outlookFolder.AddMsgFile(mapiFolder, msgFile);
 
 				File.Delete(msgFile);
 			}
@@ -390,8 +403,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static void EmlDirectoryToPst(
 			string emlFilesPath, string pstPath)
 		{
-			OutlookStorage pstOutlook = new ();
-			Store pstStore = pstOutlook.GetStore(pstPath);
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			Store pstStore = outlookAccount.GetStore(pstPath);
 
 			if (pstStore == null)
 			{
@@ -406,12 +419,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (emlFiles.Any())
 				{
+					OutlookFolder outlookFolder = new ();
 					MAPIFolder pstFolder =
-						OutlookStorage.GetTopLevelFolder(pstStore, baseName);
+						OutlookStore.GetTopLevelFolder(pstStore, baseName);
 
 					foreach (string file in emlFiles)
 					{
-						CopyEmlToPst(pstOutlook, pstFolder, file);
+						CopyEmlToPst(outlookFolder, pstFolder, file);
 					}
 
 					Marshal.ReleaseComObject(pstFolder);
@@ -426,15 +440,16 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		private static void EmlFileToPst(string filePath, string pstPath)
 		{
-			OutlookStorage pstOutlook = new ();
-			Store pstStore = pstOutlook.GetStore(pstPath);
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			Store pstStore = outlookAccount.GetStore(pstPath);
 
 			string baseName = Path.GetFileNameWithoutExtension(pstPath);
 
 			MAPIFolder pstFolder =
-				OutlookStorage.GetTopLevelFolder(pstStore, baseName);
+				OutlookStore.GetTopLevelFolder(pstStore, baseName);
 
-			CopyEmlToPst(pstOutlook, pstFolder, filePath);
+			OutlookFolder outlookFolder = new ();
+			CopyEmlToPst(outlookFolder, pstFolder, filePath);
 
 			Marshal.ReleaseComObject(pstFolder);
 		}

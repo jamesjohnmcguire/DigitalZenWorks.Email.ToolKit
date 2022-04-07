@@ -3,19 +3,19 @@
 	<PropertyGroup>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<AssemblyName>DigitalZenWorks.Email.ToolKit</AssemblyName>
-		<AssemblyVersion>1.3.0.21</AssemblyVersion>
+		<AssemblyName>Det</AssemblyName>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 		<Company>James John McGuire</Company>
 		<Copyright>Copyright © 2021 - 2022</Copyright>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<FileVersion>1.3.0.21</FileVersion>
+		<FileVersion>1.4.22.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net6.0-windows</TargetFramework>
-		<Version>1.3.0.21</Version>
+		<Version>1.4.22</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

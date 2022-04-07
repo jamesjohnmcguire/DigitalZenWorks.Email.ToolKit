@@ -49,7 +49,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				if (arguments != null && arguments.Length > 0)
 				{
 					bool valid;
-					OutlookStorage pstOutlook;
+					OutlookAccount outlookAccount;
+					OutlookStore pstOutlook;
 
 					int pstFileIndex = ArgumentsContainPstFile(arguments);
 
@@ -85,7 +86,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = 0;
 							break;
 						case "merge-folders":
-							pstOutlook = new ();
+							outlookAccount = OutlookAccount.Instance;
+							pstOutlook = new (outlookAccount);
 
 							if (pstFileIndex > 0)
 							{
@@ -95,13 +97,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							}
 							else
 							{
-								pstOutlook.MergeFolders();
+								outlookAccount.MergeFolders();
 							}
 
 							result = 0;
 							break;
 						case "remove-duplicates":
 							bool dryRun = false;
+							bool flush = false;
 
 							if (arguments.Contains("-n") ||
 								arguments.Contains("--dryrun"))
@@ -109,24 +112,32 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 								dryRun = true;
 							}
 
-							pstOutlook = new ();
+							if (arguments.Contains("-s") ||
+								arguments.Contains("--flush"))
+							{
+								flush = true;
+							}
+
+							outlookAccount = OutlookAccount.Instance;
+							pstOutlook = new (outlookAccount);
 
 							if (pstFileIndex > 0)
 							{
 								string pstFile = arguments[pstFileIndex];
 
-								pstOutlook.RemoveDuplicates(pstFile, dryRun);
+								pstOutlook.RemoveDuplicates(
+									pstFile, dryRun, flush);
 							}
 							else
 							{
-								pstOutlook.RemoveDuplicates(dryRun);
+								outlookAccount.RemoveDuplicates(dryRun, flush);
 							}
 
 							result = 0;
 							break;
 						case "remove-empty-folders":
-							pstOutlook = new ();
-							pstOutlook.RemoveEmptyFolders();
+							outlookAccount = OutlookAccount.Instance;
+							outlookAccount.RemoveEmptyFolders();
 
 							result = 0;
 							break;
