@@ -225,6 +225,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Version version = assemblyName.Version;
 			string assemblyVersion = version.ToString();
 
+			string location = assembly.Location;
+
+			if (string.IsNullOrWhiteSpace(location))
+			{
+				// Single file apps have no assemblies.
+				Process process = Process.GetCurrentProcess();
+				location = process.MainModule.FileName;
+			}
+
+			if (!string.IsNullOrWhiteSpace(location))
+			{
+				FileVersionInfo fileVersionInfo =
+					FileVersionInfo.GetVersionInfo(location);
+				assemblyVersion = fileVersionInfo.FileVersion;
+			}
+
 			return assemblyVersion;
 		}
 
