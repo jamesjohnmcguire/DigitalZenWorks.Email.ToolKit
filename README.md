@@ -26,6 +26,7 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 | eml-to-pst           | Migrate eml files to pst file   |              |
 | merge-folders        | Merge duplicate Outlook folders |              |
 | remove-duplicates    | Remove duplicate messages       | -n, --dryrun |
+|                      |                                 | -s, --flush  |
 | remove-empty-folders | Prune empty folders             |              |
 | help                 | Display this information        |              |
 
@@ -33,8 +34,9 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 The command is optional if the command can be inferred from the source-path.  For example, if the source path is a directory containing *.eml files, they will processed accordingly.  
 If the source-path is a directory, the command will attempt to process the files in directory.  If the source-path is a file, it will process that file directly.  
 
-###### Example
-DigitalZenWorks.Email.ToolKit.exe remove-duplicates --dryrun %USERPROFILE%\Email\Test.pst
+###### Examples
+Det.exe remove-duplicates --dryrun \path\to\some.pst  
+Det.exe dbx-to-pst \path\to\some-dbx-files  
 
 ###### merge-folders
 Sometimes, folders get duplicated, like in the following manner:  
@@ -48,6 +50,7 @@ If you ever try to move or copy a folder to a place where a folder with that nam
 ###### remove-duplicates
 If no PST path is provided, it will attempt to remove all duplicates in all folders in all stores of the default or current Outlook account.  
 Use the --dryrun option to see which messages WOULD be deleted.  
+Use --flush to empty the deleted items folder at the end.  
 For large stores, this can take some time.
 
 #### Library and API usage:
