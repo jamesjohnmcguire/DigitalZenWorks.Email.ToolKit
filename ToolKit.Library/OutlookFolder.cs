@@ -176,6 +176,23 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (ReservedFolders.Contains(name))
 				{
+					MAPIFolder parent = folder.Parent;
+
+					// Only top level folders are reserved
+					if (parent is not null && parent is MAPIFolder)
+					{
+						// Check if root folder
+						if (parent.Parent is null ||
+							parent.Parent is not MAPIFolder)
+						{
+							reserved = true;
+						}
+					}
+				}
+				else if (folder.Parent is null ||
+					folder.Parent is not MAPIFolder)
+				{
+					// root folder
 					reserved = true;
 				}
 			}
@@ -353,7 +370,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (force == true || (subFolder.Folders.Count == 0 &&
 					subFolder.Items.Count == 0))
 				{
-					path += "/" + subFolder.Name;
 					Log.Info("Removing empty folder: " + path);
 
 					try
@@ -662,6 +678,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					MoveFolderContents(path, folder, destination);
 
+					path += "/" + folder.Name;
+
 					// Once all the items have been moved,
 					// now remove the folder.
 					RemoveFolder(path, index, folder, false);
@@ -745,7 +763,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					// Once all the items have been moved,
 					// now remove the folder.
-					RemoveFolder(path, index, subFolder, false);
+					RemoveFolder(subPath, index, subFolder, false);
 				}
 			}
 		}

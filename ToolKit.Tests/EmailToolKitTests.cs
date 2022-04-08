@@ -365,7 +365,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
-			pstOutlook.RemoveEmptyFolders(path, rootFolder);
+			pstOutlook.RemoveEmptyFolders(path, rootFolder, 1);
 
 			subFolder = OutlookFolder.GetSubFolder(
 				rootFolder, "Temporary Test Folder");

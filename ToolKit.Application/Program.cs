@@ -137,7 +137,18 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							break;
 						case "remove-empty-folders":
 							outlookAccount = OutlookAccount.Instance;
-							outlookAccount.RemoveEmptyFolders();
+
+							if (pstFileIndex > 0)
+							{
+								pstOutlook = new (outlookAccount);
+								string pstFile = arguments[pstFileIndex];
+
+								pstOutlook.RemoveEmptyFolders(pstFile);
+							}
+							else
+							{
+								outlookAccount.RemoveEmptyFolders();
+							}
 
 							result = 0;
 							break;
@@ -224,6 +235,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			AssemblyName assemblyName = assembly.GetName();
 			Version version = assemblyName.Version;
 			string assemblyVersion = version.ToString();
+
+			string location = assembly.Location;
+
+			if (string.IsNullOrWhiteSpace(location))
+			{
+				// Single file apps have no assemblies.
+				Process process = Process.GetCurrentProcess();
+				location = process.MainModule.FileName;
+			}
+
+			if (!string.IsNullOrWhiteSpace(location))
+			{
+				FileVersionInfo fileVersionInfo =
+					FileVersionInfo.GetVersionInfo(location);
+				assemblyVersion = fileVersionInfo.FileVersion;
+			}
 
 			return assemblyVersion;
 		}
