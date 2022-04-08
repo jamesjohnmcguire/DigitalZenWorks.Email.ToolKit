@@ -283,43 +283,11 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					Log.Info("Checking for empty folders in: " +
 						storePath);
-					storePath += storePath + "::";
-
+					storePath += "::";
 
 					MAPIFolder rootFolder = store.GetRootFolder();
 
-					// Office uses 1 based indexes from VBA.
-					// Iterate in reverse order as the group may change.
-					for (int subIndex = rootFolder.Folders.Count; subIndex > 0;
-						subIndex--)
-					{
-						path = storePath + rootFolder.Name;
-
-						MAPIFolder subFolder = rootFolder.Folders[subIndex];
-						bool subFolderEmtpy = RemoveEmptyFolders(path, subFolder);
-
-						if (subFolderEmtpy == true)
-						{
-							bool isReservedFolder =
-								OutlookFolder.IsReservedFolder(subFolder);
-
-							if (isReservedFolder == true)
-							{
-								string name = subFolder.Name;
-								Log.Warn("Not deleting reserved folder: " +
-									name);
-							}
-							else
-							{
-								OutlookFolder outlookFolder = new ();
-								outlookFolder.RemoveFolder(
-									path, subIndex, subFolder, false);
-							}
-						}
-
-						totalFolders++;
-						Marshal.ReleaseComObject(subFolder);
-					}
+					RemoveEmptyFolders(storePath, rootFolder);
 
 					totalFolders++;
 					Marshal.ReleaseComObject(rootFolder);
@@ -358,9 +326,21 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (subFolderEmtpy == true)
 					{
-						OutlookFolder outlookFolder = new ();
-						outlookFolder.RemoveFolder(
-							subPath, index, subFolder, false);
+						bool isReservedFolder =
+							OutlookFolder.IsReservedFolder(subFolder);
+
+						if (isReservedFolder == true)
+						{
+							string name = subFolder.Name;
+							Log.Warn("Not deleting reserved folder: " +
+								name);
+						}
+						else
+						{
+							OutlookFolder outlookFolder = new ();
+							outlookFolder.RemoveFolder(
+								subPath, index, subFolder, false);
+						}
 					}
 
 					totalFolders++;
