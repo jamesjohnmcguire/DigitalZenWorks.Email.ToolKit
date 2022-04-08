@@ -56,6 +56,18 @@ For large stores, this can take some time.
 #### Library and API usage:
 Except for command line argument processing, all of the functionality is located in the main library project.  The main APIs match the command line commands.
 
+The main classes are MapiItem, Migrate, OutlookOutlook, OutlookFolder and OutlookStore.  
+Migrate is for migrating messages in other formats into Outlook.  Some examples:  
+Migrate.DbxToPst(dbxPath, pstPath);  
+Migrate.EmlToPst(dbxPath, pstPath);  
+
+OutlookAccount acts on the entire default or current Outlook account.  OutlookStore acts on a specific store (PST file).  OutlookFolder acts on a specific folder. 
+For cleaning up Outlook, you could use the following:  
+OutlookAccount outlookAccont = new ();  
+outlookAccont.MergeFolders();  
+outlookAccont.RemoveDuplicates();  
+
+
 ## Contributing
 
 Any contributions you make are **greatly appreciated**.  If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
