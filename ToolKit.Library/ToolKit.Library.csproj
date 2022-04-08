@@ -21,6 +21,7 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<PackageId>DigitalZenWorks.Email.ToolKit</PackageId>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>Digital Zen Works;Email;Dbx;Eml;Outlook;Duplicates</PackageTags>
 		<Version>1.4.22</Version>
 	</PropertyGroup>
@@ -70,6 +71,14 @@
 		<AdditionalFiles Include="../stylecop.json" />
 		<CodeAnalysisDictionary Include="../CodeAnalysis.ruleset" />
 		<None Include="../.editorconfig" Link="../.editorconfig" />
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 </Project>
