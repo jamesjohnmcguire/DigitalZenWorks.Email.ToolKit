@@ -172,7 +172,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			MergeFolders(store);
 
-			Log.Info("Remove empty folder complete - total folders checked: " +
+			Log.Info("Merge folders complete - total folders checked: " +
 				totalFolders);
 		}
 
