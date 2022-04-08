@@ -176,7 +176,17 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (ReservedFolders.Contains(name))
 				{
-					reserved = true;
+					MAPIFolder parent = folder.Parent;
+
+					// Only top level folders are reserved
+					if (parent is not null && parent is MAPIFolder)
+					{
+						// Check if root folder
+						if (parent.Parent is null || parent.Parent is not MAPIFolder)
+						{
+							reserved = true;
+						}
+					}
 				}
 			}
 
