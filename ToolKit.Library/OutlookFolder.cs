@@ -182,11 +182,18 @@ namespace DigitalZenWorks.Email.ToolKit
 					if (parent is not null && parent is MAPIFolder)
 					{
 						// Check if root folder
-						if (parent.Parent is null || parent.Parent is not MAPIFolder)
+						if (parent.Parent is null ||
+							parent.Parent is not MAPIFolder)
 						{
 							reserved = true;
 						}
 					}
+				}
+				else if (folder.Parent is null ||
+					folder.Parent is not MAPIFolder)
+				{
+					// root folder
+					reserved = true;
 				}
 			}
 
