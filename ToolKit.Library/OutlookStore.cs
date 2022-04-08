@@ -279,7 +279,12 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (!extension.Equals(
 					".ost", StringComparison.OrdinalIgnoreCase))
 				{
-					string storePath = GetStoreName(store) + "::";
+					string storePath = GetStoreName(store);
+
+					Log.Info("Checking for empty folders in: " +
+						storePath);
+					storePath += storePath + "::";
+
 
 					MAPIFolder rootFolder = store.GetRootFolder();
 
@@ -321,7 +326,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 			}
 
-			Log.Info("Remove empty folder complete - total folder checked:" +
+			Log.Info("Remove empty folder complete - total folder checked: " +
 				totalFolders);
 
 			return totalFolders;
