@@ -261,7 +261,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
-			OutlookFolder outlookFolder = new ();
+			OutlookFolder outlookFolder = new (outlookAccount);
 			outlookFolder.MergeFolders(path, rootFolder);
 
 			System.Threading.Thread.Sleep(200);
@@ -332,7 +332,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder subFolder = OutlookFolder.AddFolder(
 				rootFolder, "Temporary Test Folder");
 
-			OutlookStore.RemoveFolder(rootFolder.Name, subFolder, false);
+			OutlookStore outlookStore = new (outlookAccount);
+			outlookStore.RemoveFolder(rootFolder.Name, subFolder, false);
 
 			Marshal.ReleaseComObject(subFolder);
 
