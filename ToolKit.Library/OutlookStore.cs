@@ -113,7 +113,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="path">The path of current folder.</param>
 		/// <param name="subFolder">The sub-folder.</param>
 		/// <param name="force">Whether to force the removal.</param>
-		public static void RemoveFolder(
+		public void RemoveFolder(
 			string path,
 			MAPIFolder subFolder,
 			bool force)
@@ -140,7 +140,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				path += "/" + subFolder.Name;
 
-				OutlookFolder outlookFolder = new ();
+				OutlookFolder outlookFolder = new (outlookAccount);
 				outlookFolder.RemoveFolder(path, index, subFolder, force);
 			}
 		}
@@ -193,7 +193,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				storePath += "::";
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new ();
+				OutlookFolder outlookFolder = new (outlookAccount);
 				outlookFolder.MergeFolders(storePath, rootFolder);
 
 				totalFolders++;
@@ -242,7 +242,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new ();
+				OutlookFolder outlookFolder = new (outlookAccount);
 				int[] duplicateCounts =
 					outlookFolder.RemoveDuplicatesFromSubFolders(
 						storePath, rootFolder, dryRun);
@@ -358,7 +358,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						OutlookFolder outlookFolder = new ();
+						OutlookFolder outlookFolder = new (outlookAccount);
 						outlookFolder.RemoveFolder(
 							path, index, folder, false);
 						removedFolders++;

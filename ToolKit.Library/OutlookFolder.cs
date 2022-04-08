@@ -41,14 +41,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Initializes a new instance of the
 		/// <see cref="OutlookFolder"/> class.
 		/// </summary>
-		public OutlookFolder()
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the
-		/// <see cref="OutlookFolder"/> class.
-		/// </summary>
 		/// <param name="outlookAccount">The outlook account object.</param>
 		public OutlookFolder(OutlookAccount outlookAccount)
 		{
