@@ -181,17 +181,17 @@ namespace DigitalZenWorks.Email.ToolKit
 			OutlookStore outlookStorage = new (this);
 
 			int total = session.Stores.Count;
-			uint totalFolders = 0;
+			int removedFolders = 0;
 
 			for (int index = 1; index <= total; index++)
 			{
 				Store store = session.Stores[index];
 
-				totalFolders += outlookStorage.RemoveEmptyFolders(store);
+				removedFolders += outlookStorage.RemoveEmptyFolders(store);
 			}
 
 			Log.Info("Remove empty folder complete - total folder checked:" +
-				totalFolders);
+				removedFolders);
 		}
 	}
 }
