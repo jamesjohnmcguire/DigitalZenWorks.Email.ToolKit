@@ -14,16 +14,17 @@
 			Additional notes - https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
 		</Description>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<FileVersion>1.4.23.0</FileVersion>
+		<FileVersion>1.4.24.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>Latest</LangVersion>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<PackageId>DigitalZenWorks.Email.ToolKit</PackageId>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>Digital Zen Works;Email;Dbx;Eml;Outlook;Duplicates</PackageTags>
-		<Version>1.4.23</Version>
+		<Version>1.4.24</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
