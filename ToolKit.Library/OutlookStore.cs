@@ -359,6 +359,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						OutlookFolder outlookFolder = new ();
 						outlookFolder.RemoveFolder(
 							path, index, folder, false);
+						removedFolders++;
 					}
 				}
 			}
