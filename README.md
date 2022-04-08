@@ -12,6 +12,9 @@ This project includes the [DbxOutlookExpress project](https://github.com/jamesjo
 #### Git
 git clone --recurse-submodules https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
 
+#### Nuget
+PM> Install-Package DigitalZenWorks.Email.ToolKit
+
 ### Usage:
 
 NOTE: Always back up any data you might be modifying.  So, please back up your data before using this tool.  Did I mention that you should back up?  
@@ -55,6 +58,18 @@ For large stores, this can take some time.
 
 #### Library and API usage:
 Except for command line argument processing, all of the functionality is located in the main library project.  The main APIs match the command line commands.
+
+The main classes are MapiItem, Migrate, OutlookOutlook, OutlookFolder and OutlookStore.  
+Migrate is for migrating messages in other formats into Outlook.  Some examples:  
+Migrate.DbxToPst(dbxPath, pstPath);  
+Migrate.EmlToPst(dbxPath, pstPath);  
+
+OutlookAccount acts on the entire default or current Outlook account.  OutlookStore acts on a specific store (PST file).  OutlookFolder acts on a specific folder. 
+For cleaning up Outlook, you could use the following:  
+OutlookAccount outlookAccont = new ();  
+outlookAccont.MergeFolders();  
+outlookAccont.RemoveDuplicates();  
+
 
 ## Contributing
 
