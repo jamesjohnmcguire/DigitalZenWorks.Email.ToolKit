@@ -138,6 +138,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 				}
 
+				path += "/" + subFolder.Name;
+
 				OutlookFolder outlookFolder = new ();
 				outlookFolder.RemoveFolder(path, index, subFolder, force);
 			}

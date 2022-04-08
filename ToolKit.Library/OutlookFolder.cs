@@ -370,7 +370,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (force == true || (subFolder.Folders.Count == 0 &&
 					subFolder.Items.Count == 0))
 				{
-					path += "/" + subFolder.Name;
 					Log.Info("Removing empty folder: " + path);
 
 					try
@@ -679,6 +678,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					MoveFolderContents(path, folder, destination);
 
+					path += "/" + folder.Name;
+
 					// Once all the items have been moved,
 					// now remove the folder.
 					RemoveFolder(path, index, folder, false);
@@ -762,7 +763,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					// Once all the items have been moved,
 					// now remove the folder.
-					RemoveFolder(path, index, subFolder, false);
+					RemoveFolder(subPath, index, subFolder, false);
 				}
 			}
 		}
