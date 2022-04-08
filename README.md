@@ -12,6 +12,9 @@ This project includes the [DbxOutlookExpress project](https://github.com/jamesjo
 #### Git
 git clone --recurse-submodules https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
 
+#### Nuget
+PM> Install-Package DigitalZenWorks.Email.ToolKit
+
 ### Usage:
 
 NOTE: Always back up any data you might be modifying.  So, please back up your data before using this tool.  Did I mention that you should back up?  
