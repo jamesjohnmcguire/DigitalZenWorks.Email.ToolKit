@@ -85,7 +85,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							ShowHelp();
 							result = 0;
 							break;
-						case "merge":
+						case "merge-stores":
 							valid = ValidateLocationArguments(arguments);
 
 							if (valid == true)
