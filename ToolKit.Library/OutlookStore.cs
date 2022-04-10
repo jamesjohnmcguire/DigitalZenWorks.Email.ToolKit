@@ -271,8 +271,14 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						// Once all the items have been moved,
 						// now remove the folder.
-						outlookFolder.RemoveFolder(
-							subPath, subIndex, subFolder, false);
+						bool isReserved =
+							OutlookFolder.IsReservedFolder(subFolder);
+
+						if (isReserved == false)
+						{
+							outlookFolder.RemoveFolder(
+								subPath, subIndex, subFolder, false);
+						}
 					}
 					else
 					{
