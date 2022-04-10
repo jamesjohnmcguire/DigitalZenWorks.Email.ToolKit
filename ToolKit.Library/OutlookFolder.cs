@@ -292,19 +292,31 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		/// <summary>
+		/// Move the folder contents.
+		/// </summary>
+		/// <param name="path">Path of parent folder.</param>
+		/// <param name="source">The source folder.</param>
+		/// <param name="destination">The destination folder.</param>
 		public void MoveFolderContents(
 			string path, MAPIFolder source, MAPIFolder destination)
 		{
-			string message = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}: Merging {1} into {2}",
-				path,
-				source.Name,
-				destination.Name);
-			Log.Info(message);
+			if (source != null && destination != null)
+			{
+				string sourceName = source.Name;
+				string destinationName = destination.Name;
 
-			MoveFolderItems(source, destination);
-			MoveFolderFolders(path, source, destination);
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: Merging {1} into {2}",
+					path,
+					sourceName,
+					destinationName);
+				Log.Info(message);
+
+				MoveFolderItems(source, destination);
+				MoveFolderFolders(path, source, destination);
+			}
 		}
 
 		/// <summary>

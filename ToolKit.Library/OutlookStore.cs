@@ -279,7 +279,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 				}
 			}
-
 		}
 
 		/// <summary>
