@@ -292,6 +292,21 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		public void MoveFolderContents(
+			string path, MAPIFolder source, MAPIFolder destination)
+		{
+			string message = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}: Merging {1} into {2}",
+				path,
+				source.Name,
+				destination.Name);
+			Log.Info(message);
+
+			MoveFolderItems(source, destination);
+			MoveFolderFolders(path, source, destination);
+		}
+
 		/// <summary>
 		/// Remove duplicates items from the given folder.
 		/// </summary>
@@ -710,21 +725,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 				}
 			}
-		}
-
-		private void MoveFolderContents(
-			string path, MAPIFolder source, MAPIFolder destination)
-		{
-			string message = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}: Merging {1} into {2}",
-				path,
-				source.Name,
-				destination.Name);
-			Log.Info(message);
-
-			MoveFolderItems(source, destination);
-			MoveFolderFolders(path, source, destination);
 		}
 
 		private void MoveFolderFolders(
