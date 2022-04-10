@@ -83,6 +83,41 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Does folder exist.
+		/// </summary>
+		/// <param name="parentFolder">The parent folder to check.</param>
+		/// <param name="folderName">The name of the sub-folder.</param>
+		/// <returns>Indicates whether the folder exists.</returns>
+		public static bool DoesFolderExist(
+			MAPIFolder parentFolder, string folderName)
+		{
+			bool folderExists = false;
+
+			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
+			{
+				int total = parentFolder.Folders.Count;
+
+				for (int index = 1; index <= total; index++)
+				{
+					MAPIFolder subFolder = parentFolder.Folders[index];
+
+					string name = subFolder.Name;
+
+					if (folderName.Equals(
+						name, StringComparison.OrdinalIgnoreCase))
+					{
+						folderExists = true;
+						break;
+					}
+
+					Marshal.ReleaseComObject(subFolder);
+				}
+			}
+
+			return folderExists;
+		}
+
+		/// <summary>
 		/// Get the folder's full path.
 		/// </summary>
 		/// <param name="folder">The folder to check.</param>
@@ -383,27 +418,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static bool DoesSiblingFolderExist(
 			MAPIFolder folder, string folderName)
 		{
-			bool folderExists = false;
-
 			MAPIFolder parentFolder = folder.Parent;
 
-			int total = parentFolder.Folders.Count;
-
-			for (int index = 1; index <= total; index++)
-			{
-				MAPIFolder subFolder = parentFolder.Folders[index];
-
-				string name = subFolder.Name;
-
-				if (folderName.Equals(
-					name, StringComparison.OrdinalIgnoreCase))
-				{
-					folderExists = true;
-					break;
-				}
-
-				Marshal.ReleaseComObject(subFolder);
-			}
+			bool folderExists = DoesFolderExist(parentFolder, folderName);
 
 			Marshal.ReleaseComObject(parentFolder);
 
