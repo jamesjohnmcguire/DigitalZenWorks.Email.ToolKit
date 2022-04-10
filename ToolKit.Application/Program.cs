@@ -85,6 +85,25 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							ShowHelp();
 							result = 0;
 							break;
+						case "merge":
+							valid = ValidateLocationArguments(arguments);
+
+							if (valid == true)
+							{
+								outlookAccount = OutlookAccount.Instance;
+								pstOutlook = new (outlookAccount);
+
+								if (arguments.Length > 2)
+								{
+									string sourcePst = arguments[1];
+									string destinationPst = arguments[2];
+
+									pstOutlook.MergeStores(
+										sourcePst, destinationPst);
+								}
+							}
+
+							break;
 						case "merge-folders":
 							outlookAccount = OutlookAccount.Instance;
 							pstOutlook = new (outlookAccount);
