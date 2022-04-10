@@ -206,6 +206,95 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Merge 2 stores together.
+		/// </summary>
+		/// <param name="sourcePstPath">The source PST path.</param>
+		/// <param name="destinationPstPath">The desination PST path.</param>
+		public void MergeStores(
+			string sourcePstPath, string destinationPstPath)
+		{
+			Store source = outlookAccount.GetStore(sourcePstPath);
+			Store destination = outlookAccount.GetStore(destinationPstPath);
+
+			MergeStores(source, destination);
+		}
+
+		/// <summary>
+		/// Merge 2 stores together.
+		/// </summary>
+		/// <param name="source">The source store.</param>
+		/// <param name="destination">The desination store.</param>
+		public void MergeStores(Store source, Store destination)
+		{
+			if (source != null && destination != null)
+			{
+				string sourcePath = GetStoreName(source);
+				string destinationPath = GetStoreName(destination);
+
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"Moving contents of {0} to {1}",
+					sourcePath,
+					destinationPath);
+				Log.Info(message);
+
+				MAPIFolder sourceRootFolder = source.GetRootFolder();
+				MAPIFolder destinationRootFolder = destination.GetRootFolder();
+
+				int subFolderCount = sourceRootFolder.Folders.Count;
+
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int subIndex = subFolderCount; subIndex > 0; subIndex--)
+				{
+					MAPIFolder subFolder = sourceRootFolder.Folders[subIndex];
+					string folderName = subFolder.Name;
+
+					bool folderExists = OutlookFolder.DoesFolderExist(
+						destinationRootFolder, folderName);
+
+					if (folderExists == true)
+					{
+						// Folder exists, so if just moving it, it will get
+						// renamed something FolderName (2), so need to merge.
+						string subPath =
+							destinationPath + "/" + folderName;
+
+						MAPIFolder destinationSubFolder =
+							OutlookFolder.GetSubFolder(
+								destinationRootFolder, folderName);
+
+						OutlookFolder outlookFolder = new (outlookAccount);
+
+						outlookFolder.MoveFolderContents(
+							subPath, subFolder, destinationSubFolder);
+
+						// Once all the items have been moved,
+						// now remove the folder.
+						RemoveFolder(subPath, index, subFolder, false);
+					}
+					else
+					{
+						try
+						{
+							folder.Name = newFolderName;
+						}
+						catch (COMException)
+						{
+							string message = string.Format(
+								CultureInfo.InvariantCulture,
+								"Failed renaming {0} to {1} with COMException",
+								folder.Name,
+								newFolderName);
+							Log.Error(message);
+						}
+					}
+				}
+			}
+
+		}
+
+		/// <summary>
 		/// Remove duplicates items from the given store.
 		/// </summary>
 		/// <param name="storePath">The path of the PST file to
