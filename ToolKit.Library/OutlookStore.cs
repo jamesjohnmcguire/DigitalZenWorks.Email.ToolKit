@@ -271,23 +271,11 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						// Once all the items have been moved,
 						// now remove the folder.
-						RemoveFolder(subPath, index, subFolder, false);
+						outlookFolder.RemoveFolder(
+							subPath, subIndex, subFolder, false);
 					}
 					else
 					{
-						try
-						{
-							folder.Name = newFolderName;
-						}
-						catch (COMException)
-						{
-							string message = string.Format(
-								CultureInfo.InvariantCulture,
-								"Failed renaming {0} to {1} with COMException",
-								folder.Name,
-								newFolderName);
-							Log.Error(message);
-						}
 					}
 				}
 			}
