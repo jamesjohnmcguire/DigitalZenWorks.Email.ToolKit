@@ -250,6 +250,9 @@ namespace DigitalZenWorks.Email.ToolKit
 					MAPIFolder subFolder = sourceRootFolder.Folders[subIndex];
 					string folderName = subFolder.Name;
 
+					string subPath =
+						destinationPath + "/" + folderName;
+
 					bool folderExists = OutlookFolder.DoesFolderExist(
 						destinationRootFolder, folderName);
 
@@ -257,9 +260,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						// Folder exists, so if just moving it, it will get
 						// renamed something FolderName (2), so need to merge.
-						string subPath =
-							destinationPath + "/" + folderName;
-
 						MAPIFolder destinationSubFolder =
 							OutlookFolder.GetSubFolder(
 								destinationRootFolder, folderName);
@@ -276,6 +276,16 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
+						// Folder doesn't already exist, so just move it.
+						message = string.Format(
+							CultureInfo.InvariantCulture,
+							"at: {0} Moving {1} to {2}",
+							subPath,
+							folderName,
+							destinationPath);
+						Log.Info(message);
+
+						subFolder.MoveTo(destinationRootFolder);
 					}
 				}
 			}
