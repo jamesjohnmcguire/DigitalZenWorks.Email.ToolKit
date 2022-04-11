@@ -41,14 +41,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Initializes a new instance of the
 		/// <see cref="OutlookFolder"/> class.
 		/// </summary>
-		public OutlookFolder()
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the
-		/// <see cref="OutlookFolder"/> class.
-		/// </summary>
 		/// <param name="outlookAccount">The outlook account object.</param>
 		public OutlookFolder(OutlookAccount outlookAccount)
 		{
@@ -88,6 +80,41 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return pstFolder;
+		}
+
+		/// <summary>
+		/// Does folder exist.
+		/// </summary>
+		/// <param name="parentFolder">The parent folder to check.</param>
+		/// <param name="folderName">The name of the sub-folder.</param>
+		/// <returns>Indicates whether the folder exists.</returns>
+		public static bool DoesFolderExist(
+			MAPIFolder parentFolder, string folderName)
+		{
+			bool folderExists = false;
+
+			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
+			{
+				int total = parentFolder.Folders.Count;
+
+				for (int index = 1; index <= total; index++)
+				{
+					MAPIFolder subFolder = parentFolder.Folders[index];
+
+					string name = subFolder.Name;
+
+					if (folderName.Equals(
+						name, StringComparison.OrdinalIgnoreCase))
+					{
+						folderExists = true;
+						break;
+					}
+
+					Marshal.ReleaseComObject(subFolder);
+				}
+			}
+
+			return folderExists;
 		}
 
 		/// <summary>
@@ -266,6 +293,33 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Move the folder contents.
+		/// </summary>
+		/// <param name="path">Path of parent folder.</param>
+		/// <param name="source">The source folder.</param>
+		/// <param name="destination">The destination folder.</param>
+		public void MoveFolderContents(
+			string path, MAPIFolder source, MAPIFolder destination)
+		{
+			if (source != null && destination != null)
+			{
+				string sourceName = source.Name;
+				string destinationName = destination.Name;
+
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: Merging {1} into {2}",
+					path,
+					sourceName,
+					destinationName);
+				Log.Info(message);
+
+				MoveFolderItems(source, destination);
+				MoveFolderFolders(path, source, destination);
+			}
+		}
+
+		/// <summary>
 		/// Remove duplicates items from the given folder.
 		/// </summary>
 		/// <param name="folder">The MAPI folder to process.</param>
@@ -391,27 +445,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static bool DoesSiblingFolderExist(
 			MAPIFolder folder, string folderName)
 		{
-			bool folderExists = false;
-
 			MAPIFolder parentFolder = folder.Parent;
 
-			int total = parentFolder.Folders.Count;
-
-			for (int index = 1; index <= total; index++)
-			{
-				MAPIFolder subFolder = parentFolder.Folders[index];
-
-				string name = subFolder.Name;
-
-				if (folderName.Equals(
-					name, StringComparison.OrdinalIgnoreCase))
-				{
-					folderExists = true;
-					break;
-				}
-
-				Marshal.ReleaseComObject(subFolder);
-			}
+			bool folderExists = DoesFolderExist(parentFolder, folderName);
 
 			Marshal.ReleaseComObject(parentFolder);
 
@@ -701,21 +737,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 				}
 			}
-		}
-
-		private void MoveFolderContents(
-			string path, MAPIFolder source, MAPIFolder destination)
-		{
-			string message = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}: Merging {1} into {2}",
-				path,
-				source.Name,
-				destination.Name);
-			Log.Info(message);
-
-			MoveFolderItems(source, destination);
-			MoveFolderFolders(path, source, destination);
 		}
 
 		private void MoveFolderFolders(
