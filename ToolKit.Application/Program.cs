@@ -297,16 +297,15 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static void LogInitialization()
 		{
-			string applicationDataDirectory = @"DigitalZenWorks\DbxToPst";
 			string baseDataDirectory = Environment.GetFolderPath(
 				Environment.SpecialFolder.ApplicationData,
-				Environment.SpecialFolderOption.Create) + @"\" +
-				applicationDataDirectory;
+				Environment.SpecialFolderOption.Create);
 
-			string logFilePath = baseDataDirectory + "\\DbxToPst.log";
-			string outputTemplate =
-				"[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] " +
-				"{Message:lj}{NewLine}{Exception}";
+			baseDataDirectory += @"\DigitalZenWorks\Email.Toolkit";
+			string logFilePath = baseDataDirectory + @"\Email.Toolkit.log";
+
+			string outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} " +
+				"{Level:u3}] {Message:lj}{NewLine}{Exception}";
 
 			LoggerConfiguration configuration = new ();
 			LoggerSinkConfiguration sinkConfiguration = configuration.WriteTo;
