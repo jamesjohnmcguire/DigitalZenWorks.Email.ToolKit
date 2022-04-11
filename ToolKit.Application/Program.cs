@@ -46,63 +46,48 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				Log.Info("Starting DigitalZenWorks.Email.ToolKit Version: " +
 					version);
 
-				if (arguments != null && arguments.Length > 0)
+				bool valid = ValidateLocationArguments(arguments);
+
+				if (valid == true)
 				{
-					bool valid;
 					OutlookAccount outlookAccount;
 					OutlookStore outlookStore;
+					string pstLocation;
 
 					int pstFileIndex = ArgumentsContainPstFile(arguments);
 
 					switch (arguments[0])
 					{
 						case "dbx-to-pst":
-							valid = ValidateLocationArguments(arguments);
+							string dbxLocation = arguments[1];
+							pstLocation =
+								GetPstLocation(arguments, dbxLocation, 2);
 
-							if (valid == true)
-							{
-								string dbxLocation = arguments[1];
-								string pstLocation =
-									GetPstLocation(arguments, dbxLocation, 2);
-
-								result = DbxToPst(dbxLocation, pstLocation);
-							}
-
+							result = DbxToPst(dbxLocation, pstLocation);
 							break;
 						case "eml-to-pst":
-							valid = ValidateLocationArguments(arguments);
-							if (valid == true)
-							{
-								string emlLocation = arguments[1];
-								string pstLocation =
-									GetPstLocation(arguments, emlLocation, 2);
+							string emlLocation = arguments[1];
+							pstLocation =
+								GetPstLocation(arguments, emlLocation, 2);
 
-								result = EmlToPst(emlLocation, pstLocation);
-							}
-
+							result = EmlToPst(emlLocation, pstLocation);
 							break;
 						case "help":
 							ShowHelp();
 							result = 0;
 							break;
 						case "merge-stores":
-							valid = ValidateLocationArguments(arguments);
+							outlookAccount = OutlookAccount.Instance;
+							outlookStore = new (outlookAccount);
 
-							if (valid == true)
+							if (arguments.Length > 2)
 							{
-								outlookAccount = OutlookAccount.Instance;
-								outlookStore = new (outlookAccount);
+								string sourcePst = arguments[1];
+								string destinationPst = arguments[2];
 
-								if (arguments.Length > 2)
-								{
-									string sourcePst = arguments[1];
-									string destinationPst = arguments[2];
-
-									outlookStore.MergeStores(
-										sourcePst, destinationPst);
-								}
+								outlookStore.MergeStores(
+									sourcePst, destinationPst);
 							}
-
 							break;
 						case "merge-folders":
 							outlookAccount = OutlookAccount.Instance;
@@ -437,13 +422,54 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		{
 			bool valid = false;
 
-			if (arguments.Length > 1)
+			if (arguments != null && arguments.Length > 0)
 			{
-				string location = arguments[1];
+				string command = arguments[0];
 
-				if (Directory.Exists(location) || File.Exists(location))
+				if (arguments.Length > 1)
 				{
-					valid = true;
+					if (arguments.Length > 2 || !command.Equals(
+						"merge-stores", StringComparison.OrdinalIgnoreCase))
+					{
+						string location = arguments[1];
+
+						if (Directory.Exists(location) ||
+							File.Exists(location))
+						{
+							valid = true;
+						}
+					}
+				}
+				else
+				{
+					if (command.Equals(
+						"help", StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"merge-folders", StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"remove-duplicates",
+						StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"remove-empty-folders",
+						StringComparison.OrdinalIgnoreCase))
+					{
+						valid = true;
+					}
+					else
+					{
+						string extension = Path.GetExtension(command);
+
+						// Command inferred from file type.
+						if (extension.Equals(
+							".dbx", StringComparison.OrdinalIgnoreCase) ||
+							extension.Equals(
+								".eml", StringComparison.OrdinalIgnoreCase) ||
+							extension.Equals(
+								".txt", StringComparison.OrdinalIgnoreCase))
+						{
+							valid = true;
+						}
+					}
 				}
 			}
 
