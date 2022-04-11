@@ -50,7 +50,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				{
 					bool valid;
 					OutlookAccount outlookAccount;
-					OutlookStore pstOutlook;
+					OutlookStore outlookStore;
 
 					int pstFileIndex = ArgumentsContainPstFile(arguments);
 
@@ -91,14 +91,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							if (valid == true)
 							{
 								outlookAccount = OutlookAccount.Instance;
-								pstOutlook = new (outlookAccount);
+								outlookStore = new (outlookAccount);
 
 								if (arguments.Length > 2)
 								{
 									string sourcePst = arguments[1];
 									string destinationPst = arguments[2];
 
-									pstOutlook.MergeStores(
+									outlookStore.MergeStores(
 										sourcePst, destinationPst);
 								}
 							}
@@ -106,13 +106,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							break;
 						case "merge-folders":
 							outlookAccount = OutlookAccount.Instance;
-							pstOutlook = new (outlookAccount);
+							outlookStore = new (outlookAccount);
 
 							if (pstFileIndex > 0)
 							{
 								string pstFile = arguments[pstFileIndex];
 
-								pstOutlook.MergeFolders(pstFile);
+								outlookStore.MergeFolders(pstFile);
 							}
 							else
 							{
@@ -138,13 +138,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							}
 
 							outlookAccount = OutlookAccount.Instance;
-							pstOutlook = new (outlookAccount);
+							outlookStore = new (outlookAccount);
 
 							if (pstFileIndex > 0)
 							{
 								string pstFile = arguments[pstFileIndex];
 
-								pstOutlook.RemoveDuplicates(
+								outlookStore.RemoveDuplicates(
 									pstFile, dryRun, flush);
 							}
 							else
@@ -159,10 +159,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 							if (pstFileIndex > 0)
 							{
-								pstOutlook = new (outlookAccount);
+								outlookStore = new (outlookAccount);
 								string pstFile = arguments[pstFileIndex];
 
-								pstOutlook.RemoveEmptyFolders(pstFile);
+								outlookStore.RemoveEmptyFolders(pstFile);
 							}
 							else
 							{
