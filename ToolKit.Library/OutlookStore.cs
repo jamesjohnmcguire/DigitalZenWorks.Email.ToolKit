@@ -113,7 +113,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="path">The path of current folder.</param>
 		/// <param name="subFolder">The sub-folder.</param>
 		/// <param name="force">Whether to force the removal.</param>
-		public static void RemoveFolder(
+		public void RemoveFolder(
 			string path,
 			MAPIFolder subFolder,
 			bool force)
@@ -140,7 +140,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				path += "/" + subFolder.Name;
 
-				OutlookFolder outlookFolder = new ();
+				OutlookFolder outlookFolder = new (outlookAccount);
 				outlookFolder.RemoveFolder(path, index, subFolder, force);
 			}
 		}
@@ -193,7 +193,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				storePath += "::";
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new ();
+				OutlookFolder outlookFolder = new (outlookAccount);
 				outlookFolder.MergeFolders(storePath, rootFolder);
 
 				totalFolders++;
@@ -203,6 +203,98 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return totalFolders;
+		}
+
+		/// <summary>
+		/// Merge 2 stores together.
+		/// </summary>
+		/// <param name="sourcePstPath">The source PST path.</param>
+		/// <param name="destinationPstPath">The desination PST path.</param>
+		public void MergeStores(
+			string sourcePstPath, string destinationPstPath)
+		{
+			Store source = outlookAccount.GetStore(sourcePstPath);
+			Store destination = outlookAccount.GetStore(destinationPstPath);
+
+			MergeStores(source, destination);
+		}
+
+		/// <summary>
+		/// Merge 2 stores together.
+		/// </summary>
+		/// <param name="source">The source store.</param>
+		/// <param name="destination">The desination store.</param>
+		public void MergeStores(Store source, Store destination)
+		{
+			if (source != null && destination != null)
+			{
+				string sourcePath = GetStoreName(source);
+				string destinationPath = GetStoreName(destination);
+
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"Moving contents of {0} to {1}",
+					sourcePath,
+					destinationPath);
+				Log.Info(message);
+
+				MAPIFolder sourceRootFolder = source.GetRootFolder();
+				MAPIFolder destinationRootFolder = destination.GetRootFolder();
+
+				int subFolderCount = sourceRootFolder.Folders.Count;
+
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int subIndex = subFolderCount; subIndex > 0; subIndex--)
+				{
+					MAPIFolder subFolder = sourceRootFolder.Folders[subIndex];
+					string folderName = subFolder.Name;
+
+					string subPath =
+						destinationPath + "/" + folderName;
+
+					bool folderExists = OutlookFolder.DoesFolderExist(
+						destinationRootFolder, folderName);
+
+					if (folderExists == true)
+					{
+						// Folder exists, so if just moving it, it will get
+						// renamed something FolderName (2), so need to merge.
+						MAPIFolder destinationSubFolder =
+							OutlookFolder.GetSubFolder(
+								destinationRootFolder, folderName);
+
+						OutlookFolder outlookFolder = new (outlookAccount);
+
+						outlookFolder.MoveFolderContents(
+							subPath, subFolder, destinationSubFolder);
+
+						// Once all the items have been moved,
+						// now remove the folder.
+						bool isReserved =
+							OutlookFolder.IsReservedFolder(subFolder);
+
+						if (isReserved == false)
+						{
+							outlookFolder.RemoveFolder(
+								subPath, subIndex, subFolder, false);
+						}
+					}
+					else
+					{
+						// Folder doesn't already exist, so just move it.
+						message = string.Format(
+							CultureInfo.InvariantCulture,
+							"at: {0} Moving {1} to {2}",
+							subPath,
+							folderName,
+							destinationPath);
+						Log.Info(message);
+
+						subFolder.MoveTo(destinationRootFolder);
+					}
+				}
+			}
 		}
 
 		/// <summary>
@@ -242,7 +334,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new ();
+				OutlookFolder outlookFolder = new (outlookAccount);
 				int[] duplicateCounts =
 					outlookFolder.RemoveDuplicatesFromSubFolders(
 						storePath, rootFolder, dryRun);
@@ -358,7 +450,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						OutlookFolder outlookFolder = new ();
+						OutlookFolder outlookFolder = new (outlookAccount);
 						outlookFolder.RemoveFolder(
 							path, index, folder, false);
 						removedFolders++;

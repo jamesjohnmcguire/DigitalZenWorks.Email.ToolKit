@@ -65,7 +65,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			else
 			{
 				DbxFolder dbxFolder;
-				OutlookFolder outlookFolder = new ();
+				OutlookFolder outlookFolder = new (outlookAccount);
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
 
 				string baseName = Path.GetFileNameWithoutExtension(pstPath);
@@ -114,7 +114,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			else
 			{
 				OutlookAccount outlookAccount = OutlookAccount.Instance;
-				OutlookFolder outlookFolder = new ();
+				OutlookFolder outlookFolder = new (outlookAccount);
 				Store pstStore = outlookAccount.GetStore(pstPath);
 
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
@@ -419,7 +419,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (emlFiles.Any())
 				{
-					OutlookFolder outlookFolder = new ();
+					OutlookFolder outlookFolder = new (outlookAccount);
 					MAPIFolder pstFolder =
 						OutlookStore.GetTopLevelFolder(pstStore, baseName);
 
@@ -448,7 +448,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			MAPIFolder pstFolder =
 				OutlookStore.GetTopLevelFolder(pstStore, baseName);
 
-			OutlookFolder outlookFolder = new ();
+			OutlookFolder outlookFolder = new (outlookAccount);
 			CopyEmlToPst(outlookFolder, pstFolder, filePath);
 
 			Marshal.ReleaseComObject(pstFolder);
