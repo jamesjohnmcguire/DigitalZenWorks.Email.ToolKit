@@ -28,6 +28,7 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 | dbx-to-pst           | Migrate dbx files to pst file   |              |
 | eml-to-pst           | Migrate eml files to pst file   |              |
 | merge-folders        | Merge duplicate Outlook folders |              |
+| merge-stores         | Merge one store into another    |              |
 | remove-duplicates    | Remove duplicate messages       | -n, --dryrun |
 |                      |                                 | -s, --flush  |
 | remove-empty-folders | Prune empty folders             |              |
