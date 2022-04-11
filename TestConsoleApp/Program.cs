@@ -250,7 +250,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
-			OutlookFolder outlookFolder = new ();
+			OutlookFolder outlookFolder = new (outlookAccount);
 			outlookFolder.MergeFolders(path, rootFolder);
 
 			// Clean up

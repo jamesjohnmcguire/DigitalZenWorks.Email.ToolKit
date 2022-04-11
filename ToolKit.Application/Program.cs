@@ -46,111 +46,43 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				Log.Info("Starting DigitalZenWorks.Email.ToolKit Version: " +
 					version);
 
-				if (arguments != null && arguments.Length > 0)
-				{
-					bool valid;
-					OutlookAccount outlookAccount;
-					OutlookStore pstOutlook;
+				bool valid = ValidateLocationArguments(arguments);
 
-					int pstFileIndex = ArgumentsContainPstFile(arguments);
+				if (arguments != null && valid == true)
+				{
+					string pstLocation;
 
 					switch (arguments[0])
 					{
 						case "dbx-to-pst":
-							valid = ValidateLocationArguments(arguments);
+							string dbxLocation = arguments[1];
+							pstLocation =
+								GetPstLocation(arguments, dbxLocation, 2);
 
-							if (valid == true)
-							{
-								string dbxLocation = arguments[1];
-								string pstLocation =
-									GetPstLocation(arguments, dbxLocation, 2);
-
-								result = DbxToPst(dbxLocation, pstLocation);
-							}
-
+							result = DbxToPst(dbxLocation, pstLocation);
 							break;
 						case "eml-to-pst":
-							valid = ValidateLocationArguments(arguments);
-							if (valid == true)
-							{
-								string emlLocation = arguments[1];
-								string pstLocation =
-									GetPstLocation(arguments, emlLocation, 2);
+							string emlLocation = arguments[1];
+							pstLocation =
+								GetPstLocation(arguments, emlLocation, 2);
 
-								result = EmlToPst(emlLocation, pstLocation);
-							}
-
+							result = EmlToPst(emlLocation, pstLocation);
 							break;
 						case "help":
 							ShowHelp();
 							result = 0;
 							break;
 						case "merge-folders":
-							outlookAccount = OutlookAccount.Instance;
-							pstOutlook = new (outlookAccount);
-
-							if (pstFileIndex > 0)
-							{
-								string pstFile = arguments[pstFileIndex];
-
-								pstOutlook.MergeFolders(pstFile);
-							}
-							else
-							{
-								outlookAccount.MergeFolders();
-							}
-
-							result = 0;
+							result = MergeFolders(arguments);
+							break;
+						case "merge-stores":
+							result = MergeStores(arguments);
 							break;
 						case "remove-duplicates":
-							bool dryRun = false;
-							bool flush = false;
-
-							if (arguments.Contains("-n") ||
-								arguments.Contains("--dryrun"))
-							{
-								dryRun = true;
-							}
-
-							if (arguments.Contains("-s") ||
-								arguments.Contains("--flush"))
-							{
-								flush = true;
-							}
-
-							outlookAccount = OutlookAccount.Instance;
-							pstOutlook = new (outlookAccount);
-
-							if (pstFileIndex > 0)
-							{
-								string pstFile = arguments[pstFileIndex];
-
-								pstOutlook.RemoveDuplicates(
-									pstFile, dryRun, flush);
-							}
-							else
-							{
-								outlookAccount.RemoveDuplicates(dryRun, flush);
-							}
-
-							result = 0;
+							result = RemoveDuplicates(arguments);
 							break;
 						case "remove-empty-folders":
-							outlookAccount = OutlookAccount.Instance;
-
-							if (pstFileIndex > 0)
-							{
-								pstOutlook = new (outlookAccount);
-								string pstFile = arguments[pstFileIndex];
-
-								pstOutlook.RemoveEmptyFolders(pstFile);
-							}
-							else
-							{
-								outlookAccount.RemoveEmptyFolders();
-							}
-
-							result = 0;
+							result = RemoveEmptyFolders(arguments);
 							break;
 						default:
 							result = ProcessDirect(arguments);
@@ -172,6 +104,27 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return result;
+		}
+
+		private static int ArgumentsContainPstFile(string[] arguments)
+		{
+			int pstFileIndex = 0;
+
+			if (arguments.Length > 1)
+			{
+				for (int index = 1; index < arguments.Length; index++)
+				{
+					string extension = Path.GetExtension(arguments[index]);
+
+					if (extension.Equals(".pst", StringComparison.Ordinal))
+					{
+						pstFileIndex = index;
+						break;
+					}
+				}
+			}
+
+			return pstFileIndex;
 		}
 
 		private static int DbxToPst(string dbxLocation, string pstLocation)
@@ -255,39 +208,17 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return assemblyVersion;
 		}
 
-		private static int ArgumentsContainPstFile(string[] arguments)
-		{
-			int pstFileIndex = 0;
-
-			if (arguments.Length > 1)
-			{
-				for (int index = 1; index < arguments.Length; index++)
-				{
-					string extension = Path.GetExtension(arguments[index]);
-
-					if (extension.Equals(".pst", StringComparison.Ordinal))
-					{
-						pstFileIndex = index;
-						break;
-					}
-				}
-			}
-
-			return pstFileIndex;
-		}
-
 		private static void LogInitialization()
 		{
-			string applicationDataDirectory = @"DigitalZenWorks\DbxToPst";
 			string baseDataDirectory = Environment.GetFolderPath(
 				Environment.SpecialFolder.ApplicationData,
-				Environment.SpecialFolderOption.Create) + @"\" +
-				applicationDataDirectory;
+				Environment.SpecialFolderOption.Create);
 
-			string logFilePath = baseDataDirectory + "\\DbxToPst.log";
-			string outputTemplate =
-				"[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] " +
-				"{Message:lj}{NewLine}{Exception}";
+			baseDataDirectory += @"\DigitalZenWorks\Email.Toolkit";
+			string logFilePath = baseDataDirectory + @"\Email.Toolkit.log";
+
+			string outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} " +
+				"{Level:u3}] {Message:lj}{NewLine}{Exception}";
 
 			LoggerConfiguration configuration = new ();
 			LoggerSinkConfiguration sinkConfiguration = configuration.WriteTo;
@@ -298,6 +229,44 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			LogManager.Adapter =
 				new Common.Logging.Serilog.SerilogFactoryAdapter();
+		}
+
+		private static int MergeFolders(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				string pstFile = arguments[pstFileIndex];
+
+				outlookStore.MergeFolders(pstFile);
+			}
+			else
+			{
+				outlookAccount.MergeFolders();
+			}
+
+			return 0;
+		}
+
+		private static int MergeStores(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			if (arguments.Length > 2)
+			{
+				string sourcePst = arguments[1];
+				string destinationPst = arguments[2];
+
+				outlookStore.MergeStores(
+					sourcePst, destinationPst);
+			}
+
+			return 0;
 		}
 
 		private static int ProcessDirect(string[] arguments)
@@ -372,6 +341,64 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return result;
 		}
 
+		private static int RemoveDuplicates(string[] arguments)
+		{
+			bool dryRun = false;
+			bool flush = false;
+
+			if (arguments.Contains("-n") ||
+				arguments.Contains("--dryrun"))
+			{
+				dryRun = true;
+			}
+
+			if (arguments.Contains("-s") ||
+				arguments.Contains("--flush"))
+			{
+				flush = true;
+			}
+
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				string pstFile = arguments[pstFileIndex];
+
+				outlookStore.RemoveDuplicates(
+					pstFile, dryRun, flush);
+			}
+			else
+			{
+				outlookAccount.RemoveDuplicates(dryRun, flush);
+			}
+
+			return 0;
+		}
+
+		private static int RemoveEmptyFolders(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				OutlookStore outlookStore = new (outlookAccount);
+				string pstFile = arguments[pstFileIndex];
+
+				outlookStore.RemoveEmptyFolders(pstFile);
+			}
+			else
+			{
+				outlookAccount.RemoveEmptyFolders();
+			}
+
+			return 0;
+		}
+
 		private static void ShowHelp(string additionalMessage = null)
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly();
@@ -410,6 +437,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Log.Info("dbx-to-pst            Migrate dbx files to pst file");
 			Log.Info("eml-to-pst            Migrate eml files to pst file");
 			Log.Info("merge-folders         Merge duplicate folders");
+			Log.Info("merge-stores          Merge one store into another");
 			Log.Info("remove-duplicates     Prune empty folders");
 			Log.Info("remove-empty-folders  Prune empty folders");
 			Log.Info("help                  Show this information");
@@ -419,13 +447,54 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		{
 			bool valid = false;
 
-			if (arguments.Length > 1)
+			if (arguments != null && arguments.Length > 0)
 			{
-				string location = arguments[1];
+				string command = arguments[0];
 
-				if (Directory.Exists(location) || File.Exists(location))
+				if (arguments.Length > 1)
 				{
-					valid = true;
+					if (arguments.Length > 2 || !command.Equals(
+						"merge-stores", StringComparison.OrdinalIgnoreCase))
+					{
+						string location = arguments[1];
+
+						if (Directory.Exists(location) ||
+							File.Exists(location))
+						{
+							valid = true;
+						}
+					}
+				}
+				else
+				{
+					if (command.Equals(
+						"help", StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"merge-folders", StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"remove-duplicates",
+						StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"remove-empty-folders",
+						StringComparison.OrdinalIgnoreCase))
+					{
+						valid = true;
+					}
+					else
+					{
+						string extension = Path.GetExtension(command);
+
+						// Command inferred from file type.
+						if (extension.Equals(
+							".dbx", StringComparison.OrdinalIgnoreCase) ||
+							extension.Equals(
+								".eml", StringComparison.OrdinalIgnoreCase) ||
+							extension.Equals(
+								".txt", StringComparison.OrdinalIgnoreCase))
+						{
+							valid = true;
+						}
+					}
 				}
 			}
 
