@@ -48,7 +48,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				bool valid = ValidateLocationArguments(arguments);
 
-				if (valid == true)
+				if (arguments != null && valid == true)
 				{
 					OutlookAccount outlookAccount;
 					OutlookStore outlookStore;
@@ -76,19 +76,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							ShowHelp();
 							result = 0;
 							break;
-						case "merge-stores":
-							outlookAccount = OutlookAccount.Instance;
-							outlookStore = new (outlookAccount);
-
-							if (arguments.Length > 2)
-							{
-								string sourcePst = arguments[1];
-								string destinationPst = arguments[2];
-
-								outlookStore.MergeStores(
-									sourcePst, destinationPst);
-							}
-							break;
 						case "merge-folders":
 							outlookAccount = OutlookAccount.Instance;
 							outlookStore = new (outlookAccount);
@@ -105,6 +92,20 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							}
 
 							result = 0;
+							break;
+						case "merge-stores":
+							outlookAccount = OutlookAccount.Instance;
+							outlookStore = new (outlookAccount);
+
+							if (arguments.Length > 2)
+							{
+								string sourcePst = arguments[1];
+								string destinationPst = arguments[2];
+
+								outlookStore.MergeStores(
+									sourcePst, destinationPst);
+							}
+
 							break;
 						case "remove-duplicates":
 							bool dryRun = false;
