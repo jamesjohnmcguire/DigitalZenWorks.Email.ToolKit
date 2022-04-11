@@ -50,11 +50,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				if (arguments != null && valid == true)
 				{
-					OutlookAccount outlookAccount;
-					OutlookStore outlookStore;
 					string pstLocation;
-
-					int pstFileIndex = ArgumentsContainPstFile(arguments);
 
 					switch (arguments[0])
 					{
