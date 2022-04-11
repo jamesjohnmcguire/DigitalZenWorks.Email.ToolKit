@@ -77,85 +77,16 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = 0;
 							break;
 						case "merge-folders":
-							outlookAccount = OutlookAccount.Instance;
-							outlookStore = new (outlookAccount);
-
-							if (pstFileIndex > 0)
-							{
-								string pstFile = arguments[pstFileIndex];
-
-								outlookStore.MergeFolders(pstFile);
-							}
-							else
-							{
-								outlookAccount.MergeFolders();
-							}
-
-							result = 0;
+							result = MergeFolders(arguments);
 							break;
 						case "merge-stores":
-							outlookAccount = OutlookAccount.Instance;
-							outlookStore = new (outlookAccount);
-
-							if (arguments.Length > 2)
-							{
-								string sourcePst = arguments[1];
-								string destinationPst = arguments[2];
-
-								outlookStore.MergeStores(
-									sourcePst, destinationPst);
-							}
-
+							result = MergeStores(arguments);
 							break;
 						case "remove-duplicates":
-							bool dryRun = false;
-							bool flush = false;
-
-							if (arguments.Contains("-n") ||
-								arguments.Contains("--dryrun"))
-							{
-								dryRun = true;
-							}
-
-							if (arguments.Contains("-s") ||
-								arguments.Contains("--flush"))
-							{
-								flush = true;
-							}
-
-							outlookAccount = OutlookAccount.Instance;
-							outlookStore = new (outlookAccount);
-
-							if (pstFileIndex > 0)
-							{
-								string pstFile = arguments[pstFileIndex];
-
-								outlookStore.RemoveDuplicates(
-									pstFile, dryRun, flush);
-							}
-							else
-							{
-								outlookAccount.RemoveDuplicates(dryRun, flush);
-							}
-
-							result = 0;
+							result = RemoveDuplicates(arguments);
 							break;
 						case "remove-empty-folders":
-							outlookAccount = OutlookAccount.Instance;
-
-							if (pstFileIndex > 0)
-							{
-								outlookStore = new (outlookAccount);
-								string pstFile = arguments[pstFileIndex];
-
-								outlookStore.RemoveEmptyFolders(pstFile);
-							}
-							else
-							{
-								outlookAccount.RemoveEmptyFolders();
-							}
-
-							result = 0;
+							result = RemoveEmptyFolders(arguments);
 							break;
 						default:
 							result = ProcessDirect(arguments);
@@ -304,6 +235,44 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				new Common.Logging.Serilog.SerilogFactoryAdapter();
 		}
 
+		private static int MergeFolders(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				string pstFile = arguments[pstFileIndex];
+
+				outlookStore.MergeFolders(pstFile);
+			}
+			else
+			{
+				outlookAccount.MergeFolders();
+			}
+
+			return 0;
+		}
+
+		private static int MergeStores(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			if (arguments.Length > 2)
+			{
+				string sourcePst = arguments[1];
+				string destinationPst = arguments[2];
+
+				outlookStore.MergeStores(
+					sourcePst, destinationPst);
+			}
+
+			return 0;
+		}
+
 		private static int ProcessDirect(string[] arguments)
 		{
 			int result = -1;
@@ -374,6 +343,64 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return result;
+		}
+
+		private static int RemoveDuplicates(string[] arguments)
+		{
+			bool dryRun = false;
+			bool flush = false;
+
+			if (arguments.Contains("-n") ||
+				arguments.Contains("--dryrun"))
+			{
+				dryRun = true;
+			}
+
+			if (arguments.Contains("-s") ||
+				arguments.Contains("--flush"))
+			{
+				flush = true;
+			}
+
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				string pstFile = arguments[pstFileIndex];
+
+				outlookStore.RemoveDuplicates(
+					pstFile, dryRun, flush);
+			}
+			else
+			{
+				outlookAccount.RemoveDuplicates(dryRun, flush);
+			}
+
+			return 0;
+		}
+
+		private static int RemoveEmptyFolders(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				OutlookStore outlookStore = new (outlookAccount);
+				string pstFile = arguments[pstFileIndex];
+
+				outlookStore.RemoveEmptyFolders(pstFile);
+			}
+			else
+			{
+				outlookAccount.RemoveEmptyFolders();
+			}
+
+			return 0;
 		}
 
 		private static void ShowHelp(string additionalMessage = null)
