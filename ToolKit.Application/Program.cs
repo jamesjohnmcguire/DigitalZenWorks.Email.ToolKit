@@ -110,6 +110,27 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return result;
 		}
 
+		private static int ArgumentsContainPstFile(string[] arguments)
+		{
+			int pstFileIndex = 0;
+
+			if (arguments.Length > 1)
+			{
+				for (int index = 1; index < arguments.Length; index++)
+				{
+					string extension = Path.GetExtension(arguments[index]);
+
+					if (extension.Equals(".pst", StringComparison.Ordinal))
+					{
+						pstFileIndex = index;
+						break;
+					}
+				}
+			}
+
+			return pstFileIndex;
+		}
+
 		private static int DbxToPst(string dbxLocation, string pstLocation)
 		{
 			int result = -1;
@@ -189,27 +210,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return assemblyVersion;
-		}
-
-		private static int ArgumentsContainPstFile(string[] arguments)
-		{
-			int pstFileIndex = 0;
-
-			if (arguments.Length > 1)
-			{
-				for (int index = 1; index < arguments.Length; index++)
-				{
-					string extension = Path.GetExtension(arguments[index]);
-
-					if (extension.Equals(".pst", StringComparison.Ordinal))
-					{
-						pstFileIndex = index;
-						break;
-					}
-				}
-			}
-
-			return pstFileIndex;
 		}
 
 		private static void LogInitialization()
