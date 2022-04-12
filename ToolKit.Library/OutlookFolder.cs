@@ -17,6 +17,21 @@ using System.Text.RegularExpressions;
 namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
+	/// Delegate for a folder.
+	/// </summary>
+	/// <param name="folder">The folder to act upon.</param>
+	/// <param name="name">The name of the folder.</param>
+	/// <returns>indicates success of the method.</returns>
+	public delegate bool FolderAction(MAPIFolder folder, string name);
+
+	/// <summary>
+	/// Delegate for a folder.
+	/// </summary>
+	/// <param name="path">The path of the folder.</param>
+	/// <param name="folder">The folder to act upon.</param>
+	public delegate void FolderAction2(string path, MAPIFolder folder);
+
+	/// <summary>
 	/// Represents an Outlook Folder.
 	/// </summary>
 	public class OutlookFolder
@@ -83,6 +98,86 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Recurse folders.
+		/// </summary>
+		/// <param name="parentFolder">The parent folder to check.</param>
+		/// <param name="folderName">The name of the folder.</param>
+		/// <param name="folderAction">The delegate to act uoon.</param>
+		/// <returns>Indicates whether the folder exists.</returns>
+		public static bool RecurseFolders(
+			MAPIFolder parentFolder, string folderName, FolderAction folderAction)
+		{
+			bool folderExists = false;
+
+			if (parentFolder != null && folderAction != null)
+			{
+				int total = parentFolder.Folders.Count;
+
+				for (int index = 1; index <= total; index++)
+				{
+					MAPIFolder subFolder = parentFolder.Folders[index];
+
+					folderExists = folderAction(subFolder, folderName);
+
+					if (folderExists == true)
+					{
+						break;
+					}
+
+					Marshal.ReleaseComObject(subFolder);
+				}
+			}
+
+			return folderExists;
+		}
+
+		/// <summary>
+		/// Recurse folders.
+		/// </summary>
+		/// <param name="path">The path of the folder.</param>
+		/// <param name="folder">The folder to check.</param>
+		/// <param name="folderAction">The delegate to act uoon.</param>
+		public static void RecurseFolders(
+			string path, MAPIFolder folder, FolderAction2 folderAction)
+		{
+			if (folder != null && folderAction != null)
+			{
+				int total = folder.Folders.Count;
+
+				for (int index = 1; index <= total; index++)
+				{
+					MAPIFolder subFolder = folder.Folders[index];
+
+					RecurseFolders(path, subFolder, folderAction);
+
+					folderAction(path, subFolder);
+
+					Marshal.ReleaseComObject(subFolder);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Is same folder.
+		/// </summary>
+		/// <param name="folder">The folder.</param>
+		/// <param name="name">The name of the folder.</param>
+		/// <returns>Indicates whether the name of the folder is the same.</returns>
+		public static bool IsSameFolder(MAPIFolder folder, string name)
+		{
+			bool folderExists = false;
+			string folderName = folder.Name;
+
+			if (folderName.Equals(
+				name, StringComparison.OrdinalIgnoreCase))
+			{
+				folderExists = true;
+			}
+
+			return folderExists;
+		}
+
+		/// <summary>
 		/// Does folder exist.
 		/// </summary>
 		/// <param name="parentFolder">The parent folder to check.</param>
@@ -95,23 +190,27 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
 			{
-				int total = parentFolder.Folders.Count;
+				FolderAction folderAction = IsSameFolder;
 
-				for (int index = 1; index <= total; index++)
-				{
-					MAPIFolder subFolder = parentFolder.Folders[index];
+				folderExists = RecurseFolders(parentFolder, folderName, folderAction);
 
-					string name = subFolder.Name;
+				//int total = parentFolder.Folders.Count;
 
-					if (folderName.Equals(
-						name, StringComparison.OrdinalIgnoreCase))
-					{
-						folderExists = true;
-						break;
-					}
+				//for (int index = 1; index <= total; index++)
+				//{
+				//	MAPIFolder subFolder = parentFolder.Folders[index];
 
-					Marshal.ReleaseComObject(subFolder);
-				}
+				//	string name = subFolder.Name;
+
+				//	if (folderName.Equals(
+				//		name, StringComparison.OrdinalIgnoreCase))
+				//	{
+				//		folderExists = true;
+				//		break;
+				//	}
+
+				//	Marshal.ReleaseComObject(subFolder);
+				//}
 			}
 
 			return folderExists;
@@ -680,7 +779,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				string name = subFolder.Name;
 				MAPIFolder destinationSubFolder =
-					OutlookFolder.GetSubFolder(destination, name);
+					GetSubFolder(destination, name);
 
 				if (destinationSubFolder == null)
 				{
