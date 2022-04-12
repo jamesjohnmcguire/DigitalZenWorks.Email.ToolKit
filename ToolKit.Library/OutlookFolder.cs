@@ -93,25 +93,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			bool folderExists = false;
 
-			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
+			MAPIFolder folder = GetSubFolder(parentFolder, folderName);
+
+			if (folder != null)
 			{
-				int total = parentFolder.Folders.Count;
-
-				for (int index = 1; index <= total; index++)
-				{
-					MAPIFolder subFolder = parentFolder.Folders[index];
-
-					string name = subFolder.Name;
-
-					if (folderName.Equals(
-						name, StringComparison.OrdinalIgnoreCase))
-					{
-						folderExists = true;
-						break;
-					}
-
-					Marshal.ReleaseComObject(subFolder);
-				}
+				folderExists = true;
 			}
 
 			return folderExists;
