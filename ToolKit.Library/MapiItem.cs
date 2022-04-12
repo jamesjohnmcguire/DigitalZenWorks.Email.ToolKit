@@ -221,8 +221,13 @@ namespace DigitalZenWorks.Email.ToolKit
 					Marshal.ReleaseComObject(taskRequestUpdateItem);
 					break;
 				default:
-					Log.Warn(
-						"folder item of unknown type: " + item.ToString());
+					string message = "Folder item of unknown type";
+					if (item != null)
+					{
+						message += ": " + item.ToString();
+					}
+
+					Log.Warn(message);
 					break;
 			}
 
