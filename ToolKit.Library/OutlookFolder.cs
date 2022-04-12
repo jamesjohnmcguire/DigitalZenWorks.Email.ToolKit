@@ -342,7 +342,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					if (recurse == true)
 					{
-						string path = OutlookFolder.GetFolderPath(folder);
+						string path = GetFolderPath(folder);
 						duplicateCounts = RemoveDuplicatesFromSubFolders(
 							path, folder, dryRun);
 					}
@@ -680,7 +680,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				string name = subFolder.Name;
 				MAPIFolder destinationSubFolder =
-					OutlookFolder.GetSubFolder(destination, name);
+					GetSubFolder(destination, name);
 
 				if (destinationSubFolder == null)
 				{
@@ -756,7 +756,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int[] duplicateCounts = new int[2];
 
-			string path = OutlookFolder.GetFolderPath(folder);
+			string path = GetFolderPath(folder);
 
 			IDictionary<string, IList<string>> hashTable =
 				GetFolderHashTable(path, folder);
