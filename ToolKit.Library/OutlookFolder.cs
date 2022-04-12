@@ -322,52 +322,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Remove duplicates items from the given folder.
 		/// </summary>
-		/// <param name="folder">The MAPI folder to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <param name="recurse">Indicates whether to recurse into
-		/// sub folders.</param>
-		/// <returns>An array of duplicate sets and total duplicate items
-		/// count.</returns>
-		public int[] RemoveDuplicates(
-			MAPIFolder folder, bool dryRun, bool recurse)
-		{
-			int[] duplicateCounts = new int[2];
-
-			if (folder != null)
-			{
-				string folderName = folder.Name;
-
-				if (!ReservedFolders.Contains(folderName))
-				{
-					if (recurse == true)
-					{
-						string path = GetFolderPath(folder);
-						duplicateCounts = RemoveDuplicatesFromSubFolders(
-							path, folder, dryRun);
-					}
-
-					int[] duplicateCountsThisFolder =
-						RemoveDuplicatesFromThisFolder(folder, dryRun);
-
-					duplicateCounts[0] += duplicateCountsThisFolder[0];
-					duplicateCounts[1] += duplicateCountsThisFolder[1];
-				}
-			}
-
-			return duplicateCounts;
-		}
-
-		/// <summary>
-		/// Remove duplicates items from the given folder.
-		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The MAPI folder to process.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
 		/// <returns>An array of duplicate sets and total duplicate items
 		/// count.</returns>
-		public int[] RemoveDuplicatesFromSubFolders(
+		public int[] RemoveDuplicates(
 			string path, MAPIFolder folder, bool dryRun)
 		{
 			int[] duplicateCounts = new int[2];
@@ -383,7 +344,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					MAPIFolder subFolder = folder.Folders[index];
 
 					int[] subFolderduplicateCounts =
-						RemoveDuplicates(path, subFolder, dryRun, true);
+						RemoveDuplicates(path, subFolder, dryRun);
 
 					duplicateCounts[0] += subFolderduplicateCounts[0];
 					duplicateCounts[1] += subFolderduplicateCounts[1];
@@ -391,6 +352,12 @@ namespace DigitalZenWorks.Email.ToolKit
 					totalFolders++;
 					Marshal.ReleaseComObject(subFolder);
 				}
+
+				int[] duplicateCountsThisFolder =
+					RemoveDuplicatesFromThisFolder(folder, dryRun);
+
+				duplicateCounts[0] += duplicateCountsThisFolder[0];
+				duplicateCounts[1] += duplicateCountsThisFolder[1];
 			}
 
 			return duplicateCounts;
@@ -715,40 +682,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					RemoveFolder(subPath, index, subFolder, false);
 				}
 			}
-		}
-
-		/// <summary>
-		/// Remove duplicates items from the given folder.
-		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
-		/// <param name="folder">The MAPI folder to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <param name="recurse">Indicates whether to recurse into
-		/// sub folders.</param>
-		/// <returns>An array of duplicate sets and total duplicate items
-		/// count.</returns>
-		private int[] RemoveDuplicates(
-			string path, MAPIFolder folder, bool dryRun, bool recurse)
-		{
-			int[] duplicateCounts = new int[2];
-
-			if (!ReservedFolders.Contains(folder.Name))
-			{
-				if (recurse == true)
-				{
-					duplicateCounts =
-						RemoveDuplicatesFromSubFolders(path, folder, dryRun);
-				}
-
-				int[] duplicateCountsThisFolder =
-					RemoveDuplicatesFromThisFolder(folder, dryRun);
-
-				duplicateCounts[0] += duplicateCountsThisFolder[0];
-				duplicateCounts[1] += duplicateCountsThisFolder[1];
-			}
-
-			return duplicateCounts;
 		}
 
 		private int[] RemoveDuplicatesFromThisFolder(

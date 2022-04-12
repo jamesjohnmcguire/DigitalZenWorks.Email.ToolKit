@@ -336,7 +336,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				OutlookFolder outlookFolder = new (outlookAccount);
 				int[] duplicateCounts =
-					outlookFolder.RemoveDuplicatesFromSubFolders(
+					outlookFolder.RemoveDuplicates(
 						storePath, rootFolder, dryRun);
 
 				if (flush == true)
