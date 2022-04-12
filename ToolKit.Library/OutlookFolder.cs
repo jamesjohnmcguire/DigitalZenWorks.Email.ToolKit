@@ -301,7 +301,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				Log.Info(message);
 
 				MoveFolderItems(source, destination);
-				MoveFolderFolders(path, source, destination);
+				MoveSubFolders(path, source, destination);
 			}
 		}
 
@@ -620,53 +620,59 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private void MoveFolderFolders(
+		private void MoveSubFolders(
 			string path, MAPIFolder source, MAPIFolder destination)
 		{
-			string destinationName = destination.Name;
-
 			// Office uses 1 based indexes from VBA.
 			// Iterate in reverse order as the group may change.
 			for (int index = source.Folders.Count; index > 0; index--)
 			{
 				MAPIFolder subFolder = source.Folders[index];
 
-				string name = subFolder.Name;
-				MAPIFolder destinationSubFolder =
-					GetSubFolder(destination, name);
+				MoveFolder(path, subFolder, destination, index);
+			}
+		}
 
-				if (destinationSubFolder == null)
-				{
-					// Folder doesn't already exist, so just move it.
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"at: {0} Moving {1} to {2}",
-						path,
-						name,
-						destinationName);
-					Log.Info(message);
-					subFolder.MoveTo(destination);
-				}
-				else
-				{
-					// Folder exists, so if just moving it, it will get
-					// renamed something FolderName (2), so need to merge.
-					string subPath = path + "/" + subFolder.Name;
+		private void MoveFolder(
+			string path, MAPIFolder source, MAPIFolder destination, int index)
+		{
+			string destinationName = destination.Name;
 
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"at: {0} Merging {1} to {2}",
-						subPath,
-						name,
-						destinationName);
-					Log.Info(message);
-					MoveFolderContents(
-						subPath, subFolder, destinationSubFolder);
+			string name = source.Name;
+			MAPIFolder destinationSubFolder = GetSubFolder(destination, name);
 
-					// Once all the items have been moved,
-					// now remove the folder.
-					RemoveFolder(subPath, index, subFolder, false);
-				}
+			if (destinationSubFolder == null)
+			{
+				// Folder doesn't already exist, so just move it.
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"at: {0} Moving {1} to {2}",
+					path,
+					name,
+					destinationName);
+				Log.Info(message);
+
+				source.MoveTo(destination);
+			}
+			else
+			{
+				// Folder exists, so if just moving it, it will get
+				// renamed something FolderName (2), so need to merge.
+				string subPath = path + "/" + source.Name;
+
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"at: {0} Merging {1} to {2}",
+					subPath,
+					name,
+					destinationName);
+				Log.Info(message);
+				MoveFolderContents(
+					subPath, source, destinationSubFolder);
+
+				// Once all the items have been moved,
+				// now remove the folder.
+				RemoveFolder(subPath, index, source, false);
 			}
 		}
 
