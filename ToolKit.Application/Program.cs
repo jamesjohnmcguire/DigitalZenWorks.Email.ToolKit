@@ -29,6 +29,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		private static readonly string[] Commands =
+		{
+			"dbx-to-pst", "eml-to-pst", "help", "merge-folders",
+			"merge-stores", "remove-duplicates", "remove-empty-folders"
+		};
+
 		/// <summary>
 		/// The program's main entry point.
 		/// </summary>
@@ -451,21 +457,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string command = arguments[0];
 
-				if (arguments.Length > 1)
-				{
-					if (arguments.Length > 2 || !command.Equals(
-						"merge-stores", StringComparison.OrdinalIgnoreCase))
-					{
-						string location = arguments[1];
-
-						if (Directory.Exists(location) ||
-							File.Exists(location))
-						{
-							valid = true;
-						}
-					}
-				}
-				else
+				if (Commands.Contains(command))
 				{
 					if (command.Equals(
 						"help", StringComparison.OrdinalIgnoreCase) ||
@@ -480,20 +472,34 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					{
 						valid = true;
 					}
-					else
+					else if (arguments.Length > 1)
 					{
-						string extension = Path.GetExtension(command);
-
-						// Command inferred from file type.
-						if (extension.Equals(
-							".dbx", StringComparison.OrdinalIgnoreCase) ||
-							extension.Equals(
-								".eml", StringComparison.OrdinalIgnoreCase) ||
-							extension.Equals(
-								".txt", StringComparison.OrdinalIgnoreCase))
+						if (arguments.Length > 2 || !command.Equals(
+							"merge-stores", StringComparison.OrdinalIgnoreCase))
 						{
-							valid = true;
+							string location = arguments[1];
+
+							if (Directory.Exists(location) ||
+								File.Exists(location))
+							{
+								valid = true;
+							}
 						}
+					}
+				}
+				else
+				{
+					string extension = Path.GetExtension(command);
+
+					// Command inferred from file type.
+					if (extension.Equals(
+						".dbx", StringComparison.OrdinalIgnoreCase) ||
+						extension.Equals(
+							".eml", StringComparison.OrdinalIgnoreCase) ||
+						extension.Equals(
+							".txt", StringComparison.OrdinalIgnoreCase))
+					{
+						valid = true;
 					}
 				}
 			}
