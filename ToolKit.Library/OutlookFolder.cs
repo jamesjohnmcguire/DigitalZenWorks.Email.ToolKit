@@ -115,22 +115,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (folder != null)
 			{
 				path = folder.Name;
-				MAPIFolder parent = folder.Parent;
 
-				while (parent is not null && parent is MAPIFolder)
+				while (folder.Parent is not null &&
+					folder.Parent is MAPIFolder)
 				{
-					path = parent.Name + "/" + path;
-					folder = parent;
-
-					if (folder.Parent is not null &&
-						folder.Parent is MAPIFolder)
-					{
-						parent = folder.Parent;
-					}
-					else
-					{
-						parent = null;
-					}
+					folder = folder.Parent;
+					string name = folder.Name;
+					path = name + "/" + path;
 				}
 
 				string storeName = OutlookStore.GetStoreName(folder.Store);
@@ -189,11 +180,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (ReservedFolders.Contains(name))
 				{
-					MAPIFolder parent = folder.Parent;
-
 					// Only top level folders are reserved
-					if (parent is not null && parent is MAPIFolder)
+					if (folder.Parent is not null &&
+						folder.Parent is MAPIFolder)
 					{
+						MAPIFolder parent = folder.Parent;
+
 						// Check if root folder
 						if (parent.Parent is null ||
 							parent.Parent is not MAPIFolder)
@@ -379,15 +371,13 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					Log.Info("Removing empty folder: " + path);
 
-					try
+					bool isReserved = IsReservedFolder(subFolder);
+
+					if (isReserved == false)
 					{
 						MAPIFolder parentFolder = subFolder.Parent;
 
 						parentFolder.Folders.Remove(subFolderIndex);
-					}
-					catch (COMException exception)
-					{
-						Log.Error(exception.ToString());
 					}
 
 					removedFolders++;
