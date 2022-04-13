@@ -26,10 +26,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static readonly string[] ReservedFolders =
 		{
-				"Calendar", "Contacts", "Conversation Action Settings",
-				"Deleted Items", "Deleted Messages", "Drafts", "Junk E-mail",
-				"Journal", "Notes", "Outbox", "Quick Step Settings",
-				"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
+			"Calendar", "Contacts", "Conversation Action Settings",
+			"Deleted Items", "Deleted Messages", "Drafts", "Inbox",
+			"Junk E-mail", "Journal", "Notes", "Outbox", "Quick Step Settings",
+			"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
 		};
 
 		private readonly OutlookAccount outlookAccount;
