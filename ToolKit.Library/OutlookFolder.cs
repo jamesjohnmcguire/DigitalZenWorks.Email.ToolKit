@@ -24,6 +24,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		private static readonly string[] DeletedFolders =
+		{
+			"Deleted Items", "Deleted Messages"
+		};
+
 		private static readonly string[] ReservedFolders =
 		{
 			"Calendar", "Contacts", "Conversation Action Settings",
@@ -162,6 +167,35 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return pstFolder;
+		}
+
+		public static bool IsDeletedFolder(MAPIFolder folder)
+		{
+			bool isDeletedFolder = false;
+
+			if (folder != null)
+			{
+				string name = folder.Name;
+
+				if (DeletedFolders.Contains(name))
+				{
+					// Only top level folders are reserved
+					if (folder.Parent is not null &&
+						folder.Parent is MAPIFolder)
+					{
+						MAPIFolder parent = folder.Parent;
+
+						// Check if root folder
+						if (parent.Parent is null ||
+							parent.Parent is not MAPIFolder)
+						{
+							isDeletedFolder = true;
+						}
+					}
+				}
+			}
+
+			return isDeletedFolder;
 		}
 
 		/// <summary>
@@ -313,29 +347,35 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (folder != null)
 			{
-				int folderCount = folder.Folders.Count;
+				bool isDeletedFolder = IsDeletedFolder(folder);
 
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int index = folderCount; index > 0; index--)
+				// Skip processing of system deleted items folder.
+				if (isDeletedFolder == false)
 				{
-					MAPIFolder subFolder = folder.Folders[index];
+					int folderCount = folder.Folders.Count;
 
-					int[] subFolderduplicateCounts =
-						RemoveDuplicates(path, subFolder, dryRun);
+					// Office uses 1 based indexes from VBA.
+					// Iterate in reverse order as the group may change.
+					for (int index = folderCount; index > 0; index--)
+					{
+						MAPIFolder subFolder = folder.Folders[index];
 
-					duplicateCounts[0] += subFolderduplicateCounts[0];
-					duplicateCounts[1] += subFolderduplicateCounts[1];
+						int[] subFolderduplicateCounts =
+							RemoveDuplicates(path, subFolder, dryRun);
 
-					totalFolders++;
-					Marshal.ReleaseComObject(subFolder);
+						duplicateCounts[0] += subFolderduplicateCounts[0];
+						duplicateCounts[1] += subFolderduplicateCounts[1];
+
+						totalFolders++;
+						Marshal.ReleaseComObject(subFolder);
+					}
+
+					int[] duplicateCountsThisFolder =
+						RemoveDuplicatesFromThisFolder(folder, dryRun);
+
+					duplicateCounts[0] += duplicateCountsThisFolder[0];
+					duplicateCounts[1] += duplicateCountsThisFolder[1];
 				}
-
-				int[] duplicateCountsThisFolder =
-					RemoveDuplicatesFromThisFolder(folder, dryRun);
-
-				duplicateCounts[0] += duplicateCountsThisFolder[0];
-				duplicateCounts[1] += duplicateCountsThisFolder[1];
 			}
 
 			return duplicateCounts;
