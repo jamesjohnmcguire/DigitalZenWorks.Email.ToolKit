@@ -161,6 +161,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			return pstFolder;
 		}
 
+		/// <summary>
+		/// Is deleted folder.
+		/// </summary>
+		/// <param name="folder">The folder to check.</param>
+		/// <returns>Indicates whether this is an system deleted items
+		/// folder.</returns>
 		public static bool IsDeletedFolder(MAPIFolder folder)
 		{
 			bool isDeletedFolder = false;
