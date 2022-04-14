@@ -149,20 +149,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
 			{
-				int total = parentFolder.Folders.Count;
-
-				for (int index = 1; index <= total; index++)
+				try
 				{
-					MAPIFolder subFolder = parentFolder.Folders[index];
-
-					if (folderName.Equals(
-						subFolder.Name, StringComparison.OrdinalIgnoreCase))
-					{
-						pstFolder = subFolder;
-						break;
-					}
-
-					Marshal.ReleaseComObject(subFolder);
+					pstFolder = parentFolder.Folders[folderName];
+				}
+				catch (COMException)
+				{
 				}
 			}
 
