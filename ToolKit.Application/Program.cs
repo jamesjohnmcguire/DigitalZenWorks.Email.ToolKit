@@ -52,7 +52,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				Log.Info("Starting DigitalZenWorks.Email.ToolKit Version: " +
 					version);
 
-				bool valid = ValidateLocationArguments(arguments);
+				bool valid = ValidateArguments(arguments);
 
 				if (arguments != null && valid == true)
 				{
@@ -449,7 +449,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Log.Info("help                  Show this information");
 		}
 
-		private static bool ValidateLocationArguments(string[] arguments)
+		private static bool ValidateArguments(string[] arguments)
 		{
 			bool valid = false;
 
