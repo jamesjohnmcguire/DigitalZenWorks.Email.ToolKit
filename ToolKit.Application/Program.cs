@@ -504,13 +504,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				}
 			}
 
-			if (valid == false)
-			{
-				Log.Error("Invalid arguments");
-
-				ShowHelp();
-			}
-
 			return valid;
 		}
 	}
