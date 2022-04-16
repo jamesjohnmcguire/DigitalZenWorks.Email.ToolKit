@@ -56,9 +56,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				if (arguments != null && valid == true)
 				{
+					string command = arguments[0];
 					string pstLocation;
 
-					switch (arguments[0])
+					Log.Info("Command is: " + command);
+
+					switch (command)
 					{
 						case "dbx-to-pst":
 							string dbxLocation = arguments[1];
