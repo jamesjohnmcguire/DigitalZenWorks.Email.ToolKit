@@ -161,6 +161,29 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return result;
 		}
 
+		private static FileVersionInfo GetAssemblyInformation()
+		{
+			FileVersionInfo fileVersionInfo = null;
+
+			Assembly assembly = Assembly.GetExecutingAssembly();
+
+			string location = assembly.Location;
+
+			if (string.IsNullOrWhiteSpace(location))
+			{
+				// Single file apps have no assemblies.
+				Process process = Process.GetCurrentProcess();
+				location = process.MainModule.FileName;
+			}
+
+			if (!string.IsNullOrWhiteSpace(location))
+			{
+				fileVersionInfo = FileVersionInfo.GetVersionInfo(location);
+			}
+
+			return fileVersionInfo;
+		}
+
 		private static string GetPstLocation(
 			string[] arguments, string source, int index)
 		{
@@ -189,27 +212,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static string GetVersion()
 		{
-			Assembly assembly = Assembly.GetExecutingAssembly();
+			FileVersionInfo fileVersionInfo = GetAssemblyInformation();
 
-			AssemblyName assemblyName = assembly.GetName();
-			Version version = assemblyName.Version;
-			string assemblyVersion = version.ToString();
-
-			string location = assembly.Location;
-
-			if (string.IsNullOrWhiteSpace(location))
-			{
-				// Single file apps have no assemblies.
-				Process process = Process.GetCurrentProcess();
-				location = process.MainModule.FileName;
-			}
-
-			if (!string.IsNullOrWhiteSpace(location))
-			{
-				FileVersionInfo fileVersionInfo =
-					FileVersionInfo.GetVersionInfo(location);
-				assemblyVersion = fileVersionInfo.FileVersion;
-			}
+			string assemblyVersion = fileVersionInfo.FileVersion;
 
 			return assemblyVersion;
 		}
@@ -408,18 +413,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static void ShowHelp(string additionalMessage = null)
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly();
-			string location = assembly.Location;
-
-			FileVersionInfo versionInfo =
-				FileVersionInfo.GetVersionInfo(location);
-
-			string companyName = versionInfo.CompanyName;
-			string copyright = versionInfo.LegalCopyright;
-
 			AssemblyName assemblyName = assembly.GetName();
 			string name = assemblyName.Name;
-			Version version = assemblyName.Version;
-			string assemblyVersion = version.ToString();
+
+			FileVersionInfo versionInfo = GetAssemblyInformation();
+			string companyName = versionInfo.CompanyName;
+			string copyright = versionInfo.LegalCopyright;
+			string assemblyVersion = versionInfo.FileVersion;
 
 			string header = string.Format(
 				CultureInfo.CurrentCulture,
