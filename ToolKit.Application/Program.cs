@@ -492,17 +492,35 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				}
 				else
 				{
-					string extension = Path.GetExtension(command);
-
-					// Command inferred from file type.
-					if (extension.Equals(
-						".dbx", StringComparison.OrdinalIgnoreCase) ||
-						extension.Equals(
-							".eml", StringComparison.OrdinalIgnoreCase) ||
-						extension.Equals(
-							".txt", StringComparison.OrdinalIgnoreCase))
+					if (File.Exists(command))
 					{
-						valid = true;
+						string extension = Path.GetExtension(command);
+
+						// Command inferred from file type.
+						if (extension.Equals(
+							".dbx", StringComparison.OrdinalIgnoreCase) ||
+							extension.Equals(
+								".eml", StringComparison.OrdinalIgnoreCase) ||
+							extension.Equals(
+								".txt", StringComparison.OrdinalIgnoreCase))
+						{
+							valid = true;
+						}
+					}
+					else if (Directory.Exists(command))
+					{
+						string[] dbxFiles =
+							Directory.GetFiles(command, "*.dbx");
+						string[] emlFiles =
+							Directory.GetFiles(command, "*.eml");
+						string[] txtFiles =
+							Directory.GetFiles(command, "*.txt");
+
+						if (dbxFiles.Length > 0 || emlFiles.Length > 0 ||
+							txtFiles.Length > 0)
+						{
+							valid = true;
+						}
 					}
 				}
 			}
