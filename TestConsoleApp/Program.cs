@@ -20,6 +20,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using CommonLogging = Common.Logging;
+
 [assembly: CLSCompliant(true)]
 
 namespace DigitalZenWorks.Email.ToolKit.Test
@@ -99,7 +101,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			Serilog.Log.Logger = configuration.CreateLogger();
 
 			LogManager.Adapter =
-				new Common.Logging.Serilog.SerilogFactoryAdapter();
+				new CommonLogging.Serilog.SerilogFactoryAdapter();
 		}
 
 		private static void TestConvertToMsgFile(
