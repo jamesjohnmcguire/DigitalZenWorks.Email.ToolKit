@@ -17,6 +17,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+using CommonLogging = Common.Logging;
+
 [assembly: CLSCompliant(true)]
 
 namespace DigitalZenWorks.Email.ToolKit.Application
@@ -242,7 +244,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Serilog.Log.Logger = configuration.CreateLogger();
 
 			LogManager.Adapter =
-				new Common.Logging.Serilog.SerilogFactoryAdapter();
+				new CommonLogging.Serilog.SerilogFactoryAdapter();
 		}
 
 		private static int MergeFolders(string[] arguments)
