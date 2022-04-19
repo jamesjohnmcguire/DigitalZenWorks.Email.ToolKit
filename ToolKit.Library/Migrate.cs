@@ -305,9 +305,20 @@ namespace DigitalZenWorks.Email.ToolKit
 					// add folder to pst
 					if (dbxFolder.FolderParentId == 0)
 					{
-						// top level folder
-						pstFolder = OutlookFolder.AddFolder(
-							rootFolder, dbxFolder.FolderName);
+						if (dbxFolder.IsOrphan == true)
+						{
+							MAPIFolder orphanFolders =
+								OutlookFolder.AddFolder(
+									rootFolder, "Orphan Folders");
+							pstFolder = OutlookFolder.AddFolder(
+								orphanFolders, dbxFolder.FolderName);
+						}
+						else
+						{
+							// top level folder
+							pstFolder = OutlookFolder.AddFolder(
+								rootFolder, dbxFolder.FolderName);
+						}
 					}
 					else
 					{
