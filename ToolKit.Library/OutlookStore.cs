@@ -483,8 +483,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static void EmptyDeletedItemsFolder(
 			MAPIFolder deletedItemsFolder)
 		{
+			Folders folders = deletedItemsFolder.Folders;
+			int totalItems = folders.Count;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group will change.
+			for (int index = totalItems; index > 0; index--)
+			{
+				MAPIFolder folder = folders[index];
+				folder.Delete();
+			}
+
 			Items items = deletedItemsFolder.Items;
-			int totalItems = items.Count;
+			totalItems = items.Count;
 
 			// Office uses 1 based indexes from VBA.
 			// Iterate in reverse order as the group will change.
