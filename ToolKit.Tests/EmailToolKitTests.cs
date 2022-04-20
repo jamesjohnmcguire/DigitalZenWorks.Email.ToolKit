@@ -262,7 +262,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, false);
+			outlookFolder.MergeFolders(path, rootFolder, false, true);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =

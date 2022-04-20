@@ -282,21 +282,34 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="folder">The current folder.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		public void MergeFolders(string path, MAPIFolder folder, bool dryRun)
+		/// <param name="aggresive">Indicates whether this is an aggresive
+		/// search or not.</param>
+		public void MergeFolders(
+			string path, MAPIFolder folder, bool dryRun, bool aggresive)
 		{
 			if (folder != null)
 			{
+				string parentName = folder.Name;
+
 				// Office uses 1 based indexes from VBA.
 				// Iterate in reverse order as the group may change.
 				for (int index = folder.Folders.Count; index > 0; index--)
 				{
 					MAPIFolder subFolder = folder.Folders[index];
+					string name = subFolder.Name;
 
-					string subPath = path + "/" + subFolder.Name;
+					string subPath = path + "/" + name;
 
-					MergeFolders(subPath, subFolder, dryRun);
+					MergeFolders(subPath, subFolder, dryRun, aggresive);
 
-					CheckForDuplicateFolders(path, index, subFolder, dryRun);
+					CheckForDuplicateFolders(
+						path, index, subFolder, dryRun, aggresive);
+
+					if (aggresive == true && parentName.Equals(
+						name, StringComparison.OrdinalIgnoreCase))
+					{
+						MergeFolderWithParent(path, folder, subFolder, dryRun);
+					}
 
 					totalFolders++;
 					Marshal.ReleaseComObject(subFolder);
@@ -563,12 +576,24 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private void CheckForDuplicateFolders(
-			string path, int index, MAPIFolder folder, bool dryRun)
+			string path,
+			int index,
+			MAPIFolder folder,
+			bool dryRun,
+			bool aggresive)
 		{
 			string[] duplicatePatterns =
 			{
 				@"\s*\(\d*?\)", @"\s*-\s*Copy"
 			};
+
+			if (aggresive == true)
+			{
+				duplicatePatterns = new string[]
+				{
+					@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^_*", @"_\d+$", @"\d+$"
+				};
+			}
 
 			foreach (string duplicatePattern in duplicatePatterns)
 			{
@@ -683,6 +708,22 @@ namespace DigitalZenWorks.Email.ToolKit
 						Log.Error(message);
 					}
 				}
+			}
+		}
+
+		private void MergeFolderWithParent(
+			string path, MAPIFolder parent, MAPIFolder folder, bool dryRun)
+		{
+			string name = folder.Name;
+
+			if (dryRun == true)
+			{
+				Log.Info("At " + path + "WOULD Move into parent:" + name);
+			}
+			else
+			{
+				Log.Info("At " + path + "Moving into parent:" + name);
+				MoveFolderContents(path, folder, parent);
 			}
 		}
 
