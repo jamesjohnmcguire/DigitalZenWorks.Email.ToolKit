@@ -280,7 +280,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The current folder.</param>
-		public void MergeFolders(string path, MAPIFolder folder)
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		public void MergeFolders(string path, MAPIFolder folder, bool dryRun)
 		{
 			if (folder != null)
 			{
@@ -292,9 +294,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					string subPath = path + "/" + subFolder.Name;
 
-					MergeFolders(subPath, subFolder);
+					MergeFolders(subPath, subFolder, dryRun);
 
-					CheckForDuplicateFolders(path, index, subFolder);
+					CheckForDuplicateFolders(path, index, subFolder, dryRun);
 
 					totalFolders++;
 					Marshal.ReleaseComObject(subFolder);
@@ -561,7 +563,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private void CheckForDuplicateFolders(
-			string path, int index, MAPIFolder folder)
+			string path, int index, MAPIFolder folder, bool dryRun)
 		{
 			string[] duplicatePatterns =
 			{
@@ -570,7 +572,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			foreach (string duplicatePattern in duplicatePatterns)
 			{
-				MergeDuplicateFolder(path, index, folder, duplicatePattern);
+				MergeDuplicateFolder(
+					path, index, folder, duplicatePattern, dryRun);
 			}
 		}
 
@@ -614,7 +617,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private void MergeDuplicateFolder(
-			string path, int index, MAPIFolder folder, string duplicatePattern)
+			string path,
+			int index,
+			MAPIFolder folder,
+			string duplicatePattern,
+			bool dryRun)
 		{
 			if (Regex.IsMatch(
 				folder.Name, duplicatePattern, RegexOptions.IgnoreCase))
@@ -628,36 +635,54 @@ namespace DigitalZenWorks.Email.ToolKit
 				bool folderExists =
 					DoesSiblingFolderExist(folder, newFolderName);
 
+				string source = folder.Name;
+
 				if (folderExists == true)
 				{
-					MAPIFolder parentFolder = folder.Parent;
+					if (dryRun == true)
+					{
+						Log.Info("WOULD merge " + source + " into " +
+							newFolderName);
+					}
+					else
+					{
+						path += "/" + folder.Name;
 
-					// Move items
-					MAPIFolder destination =
-						parentFolder.Folders[newFolderName];
+						MAPIFolder parentFolder = folder.Parent;
 
-					MoveFolderContents(path, folder, destination);
+						// Move items
+						MAPIFolder destination =
+							parentFolder.Folders[newFolderName];
 
-					path += "/" + folder.Name;
+						MoveFolderContents(path, folder, destination);
 
-					// Once all the items have been moved,
-					// now remove the folder.
-					RemoveFolder(path, index, folder, false);
+						// Once all the items have been moved,
+						// now remove the folder.
+						RemoveFolder(path, index, folder, false);
+					}
 				}
 				else
 				{
-					try
+					if (dryRun == true)
 					{
-						folder.Name = newFolderName;
-					}
-					catch (COMException)
-					{
-						string message = string.Format(
-							CultureInfo.InvariantCulture,
-							"Failed renaming {0} to {1} with COMException",
-							folder.Name,
+						Log.Info("WOULD move " + source + " to " +
 							newFolderName);
-						Log.Error(message);
+					}
+					else
+					{
+						try
+						{
+							folder.Name = newFolderName;
+						}
+						catch (COMException)
+						{
+							string message = string.Format(
+								CultureInfo.InvariantCulture,
+								"Failed renaming {0} to {1} with COMException",
+								folder.Name,
+								newFolderName);
+							Log.Error(message);
+						}
 					}
 				}
 			}
