@@ -572,8 +572,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			foreach (string duplicatePattern in duplicatePatterns)
 			{
-				MergeDuplicateFolder(
+				if (Regex.IsMatch(
+					folder.Name, duplicatePattern, RegexOptions.IgnoreCase))
+				{
+					MergeDuplicateFolder(
 					path, index, folder, duplicatePattern, dryRun);
+				}
 			}
 		}
 
@@ -623,66 +627,60 @@ namespace DigitalZenWorks.Email.ToolKit
 			string duplicatePattern,
 			bool dryRun)
 		{
-			if (Regex.IsMatch(
-				folder.Name, duplicatePattern, RegexOptions.IgnoreCase))
+			string newFolderName = Regex.Replace(
+				folder.Name,
+				duplicatePattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			bool folderExists = DoesSiblingFolderExist(folder, newFolderName);
+
+			string source = folder.Name;
+
+			if (folderExists == true)
 			{
-				string newFolderName = Regex.Replace(
-					folder.Name,
-					duplicatePattern,
-					string.Empty,
-					RegexOptions.ExplicitCapture);
-
-				bool folderExists =
-					DoesSiblingFolderExist(folder, newFolderName);
-
-				string source = folder.Name;
-
-				if (folderExists == true)
+				if (dryRun == true)
 				{
-					if (dryRun == true)
-					{
-						Log.Info("WOULD merge " + source + " into " +
-							newFolderName);
-					}
-					else
-					{
-						path += "/" + folder.Name;
-
-						MAPIFolder parentFolder = folder.Parent;
-
-						// Move items
-						MAPIFolder destination =
-							parentFolder.Folders[newFolderName];
-
-						MoveFolderContents(path, folder, destination);
-
-						// Once all the items have been moved,
-						// now remove the folder.
-						RemoveFolder(path, index, folder, false);
-					}
+					Log.Info(
+						"WOULD merge " + source + " into " + newFolderName);
 				}
 				else
 				{
-					if (dryRun == true)
+					path += "/" + folder.Name;
+
+					MAPIFolder parentFolder = folder.Parent;
+
+					// Move items
+					MAPIFolder destination =
+						parentFolder.Folders[newFolderName];
+
+					MoveFolderContents(path, folder, destination);
+
+					// Once all the items have been moved,
+					// now remove the folder.
+					RemoveFolder(path, index, folder, false);
+				}
+			}
+			else
+			{
+				if (dryRun == true)
+				{
+					Log.Info("WOULD move " + source + " to " + newFolderName);
+				}
+				else
+				{
+					try
 					{
-						Log.Info("WOULD move " + source + " to " +
-							newFolderName);
+						folder.Name = newFolderName;
 					}
-					else
+					catch (COMException)
 					{
-						try
-						{
-							folder.Name = newFolderName;
-						}
-						catch (COMException)
-						{
-							string message = string.Format(
-								CultureInfo.InvariantCulture,
-								"Failed renaming {0} to {1} with COMException",
-								folder.Name,
-								newFolderName);
-							Log.Error(message);
-						}
+						string message = string.Format(
+							CultureInfo.InvariantCulture,
+							"Failed renaming {0} to {1} with COMException",
+							folder.Name,
+							newFolderName);
+						Log.Error(message);
 					}
 				}
 			}
