@@ -340,12 +340,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MailItem mailItem2 = AddFolderAndMessage(
 				outlookAccount,
 				mainFolder,
-				"Testing5",
-				"This is the subject 2");
-
-			MailItem mailItem3 = AddFolderAndMessage(
-				outlookAccount,
-				mainFolder,
 				"_Testing",
 				"This is the subject 3");
 
@@ -363,20 +357,14 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Assert.IsNull(subFolder);
 
 			subFolder =
-				OutlookFolder.GetSubFolder(mainFolder, "Testing5");
-			Assert.IsNull(subFolder);
-
-			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "_Testing");
 			Assert.IsNull(subFolder);
 
 			// Clean up
 			mailItem.Delete();
 			mailItem2.Delete();
-			mailItem3.Delete();
 			Marshal.ReleaseComObject(mailItem);
 			Marshal.ReleaseComObject(mailItem2);
-			Marshal.ReleaseComObject(mailItem3);
 			Marshal.ReleaseComObject(mainFolder);
 			Marshal.ReleaseComObject(rootFolder);
 		}
