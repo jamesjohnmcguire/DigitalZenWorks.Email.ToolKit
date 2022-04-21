@@ -55,6 +55,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			Log.Info("Test console app");
 
+			TestRegex();
+
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			TestTargetFrameworks();
 
@@ -315,6 +317,14 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			input = "2000";
 			pattern = @"\d+$";
+			result = Regex.Replace(
+				input,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			input = "123ABC7";
+			pattern = @"(?<=\D+)\d+$";
 			result = Regex.Replace(
 				input,
 				pattern,
