@@ -604,6 +604,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					MergeDuplicateFolder(
 						path, index, folder, duplicatePattern, dryRun);
+
+					// Best to not get multipe matches, at this point.
+					break;
 				}
 			}
 		}
