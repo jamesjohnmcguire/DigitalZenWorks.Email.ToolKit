@@ -720,7 +720,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (dryRun == true)
 			{
-				Log.Info("At " + path + "WOULD Move into parent:" + name);
+				Log.Info("At " + path + " WOULD Move into parent:" + name);
 			}
 			else
 			{
