@@ -591,7 +591,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				duplicatePatterns = new string[]
 				{
-					@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^_*", @"_\d+$", @"\d+$"
+					@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^_+", @"_\d+$", @"\d+$"
 				};
 			}
 
@@ -601,7 +601,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					folder.Name, duplicatePattern, RegexOptions.IgnoreCase))
 				{
 					MergeDuplicateFolder(
-					path, index, folder, duplicatePattern, dryRun);
+						path, index, folder, duplicatePattern, dryRun);
 				}
 			}
 		}
