@@ -726,6 +726,10 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				Log.Info("At " + path + "Moving into parent:" + name);
 				MoveFolderContents(path, folder, parent);
+
+				// Once all the items have been moved,
+				// now remove the folder.
+				folder.Delete();
 			}
 		}
 
