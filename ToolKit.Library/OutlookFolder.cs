@@ -582,6 +582,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			bool dryRun,
 			bool aggresive)
 		{
+			string folderName = folder.Name;
+
 			string[] duplicatePatterns =
 			{
 				@"\s*\(\d*?\)", @"\s*-\s*Copy"
@@ -598,7 +600,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			foreach (string duplicatePattern in duplicatePatterns)
 			{
 				if (Regex.IsMatch(
-					folder.Name, duplicatePattern, RegexOptions.IgnoreCase))
+					folderName, duplicatePattern, RegexOptions.IgnoreCase))
 				{
 					MergeDuplicateFolder(
 						path, index, folder, duplicatePattern, dryRun);
