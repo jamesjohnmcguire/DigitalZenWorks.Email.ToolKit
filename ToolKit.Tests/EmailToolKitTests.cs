@@ -277,6 +277,48 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		/// Test for removing empty folders.
 		/// </summary>
 		[Test]
+		public void TestMergeFoldersAllNumbersFolder()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"2022",
+				"This is the subject");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			outlookFolder.MergeFolders(path, rootFolder, false, true);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "2022");
+
+			Assert.IsNotNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		[Test]
 		public void TestMergeFoldersAggresive()
 		{
 			// Create top level folders
