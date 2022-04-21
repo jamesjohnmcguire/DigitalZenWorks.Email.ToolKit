@@ -593,7 +593,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				duplicatePatterns = new string[]
 				{
-					@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^_+", @"_\d+$", @"\D+\d+$"
+					@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^_+", @"_\d$"
 				};
 			}
 
