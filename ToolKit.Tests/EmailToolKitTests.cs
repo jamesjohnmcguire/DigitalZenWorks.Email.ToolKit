@@ -298,7 +298,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MailItem mailItem2 = AddFolderAndMessage(
 				outlookAccount,
 				mainFolder,
-				"Testing15",
+				"Testing5",
 				"This is the subject 2");
 
 			MailItem mailItem3 = AddFolderAndMessage(
@@ -321,7 +321,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Assert.IsNull(subFolder);
 
 			subFolder =
-				OutlookFolder.GetSubFolder(mainFolder, "Testing15");
+				OutlookFolder.GetSubFolder(mainFolder, "Testing5");
 			Assert.IsNull(subFolder);
 
 			subFolder =
