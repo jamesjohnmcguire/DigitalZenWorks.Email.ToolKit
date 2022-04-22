@@ -375,10 +375,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				dryRun = true;
 			}
-
-			if (arguments.Contains("-s") ||
+			else if (arguments.Contains("-s") ||
 				arguments.Contains("--flush"))
 			{
+				// Obviously, ignore flush if dryRun is set.
 				flush = true;
 			}
 
