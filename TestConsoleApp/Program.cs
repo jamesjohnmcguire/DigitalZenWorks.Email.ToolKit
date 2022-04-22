@@ -330,46 +330,6 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				pattern,
 				string.Empty,
 				RegexOptions.ExplicitCapture);
-
-			input = "Testing9";
-			pattern = @"[A-Za-z](.*)\d+$";
-			result = Regex.Replace(
-				input,
-				pattern,
-				string.Empty,
-				RegexOptions.ExplicitCapture);
-
-			input = "Testing9";
-			pattern = @"[A-Za-z]+(?<test>\d+)$";
-			result = Regex.Replace(
-				input,
-				pattern,
-				string.Empty,
-				RegexOptions.ExplicitCapture);
-
-			input = "Testing9";
-			pattern = @"[A-Za-z](.*)\d{1,}$";
-			result = Regex.Replace(
-				input,
-				pattern,
-				string.Empty,
-				RegexOptions.ExplicitCapture);
-
-			string sample = "hello-world-";
-			Regex regex = new ("-(?<test>[^-]*)-");
-
-			Match match = regex.Match(sample);
-
-			if (match.Success)
-			{
-				Console.WriteLine(match.Groups["test"].Value);
-			}
-
-			input = "abc123";
-			result = Regex.Replace(input, @"(?<=[a-z](.*))\d+", string.Empty);
-
-			input = "2000";
-			result = Regex.Replace(input, @"(?<=[a-z](.*))\d+", string.Empty);
 		}
 
 		private static void TestSetTree(string path, Encoding encoding)
