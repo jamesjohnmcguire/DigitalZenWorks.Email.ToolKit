@@ -249,14 +249,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static int MergeFolders(string[] arguments)
 		{
-			bool aggresive = false;
 			bool dryRun = false;
-
-			if (arguments.Contains("-g") ||
-				arguments.Contains("--aggresive"))
-			{
-				aggresive = true;
-			}
 
 			if (arguments.Contains("-n") ||
 				arguments.Contains("--dryrun"))
@@ -273,11 +266,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string pstFile = arguments[pstFileIndex];
 
-				outlookStore.MergeFolders(pstFile, dryRun, aggresive);
+				outlookStore.MergeFolders(pstFile, dryRun);
 			}
 			else
 			{
-				outlookAccount.MergeFolders(dryRun, aggresive);
+				outlookAccount.MergeFolders(dryRun);
 			}
 
 			return 0;

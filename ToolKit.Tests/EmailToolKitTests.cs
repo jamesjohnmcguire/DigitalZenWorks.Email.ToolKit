@@ -258,7 +258,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, false, true);
+			outlookFolder.MergeFolders(path, rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
@@ -306,7 +306,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, false, true);
+			outlookFolder.MergeFolders(path, rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
 
@@ -353,8 +353,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
-			OutlookFolder outlookFolder = new(outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, false, true);
+			OutlookFolder outlookFolder = new (outlookAccount);
+			outlookFolder.MergeFolders(path, rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
@@ -396,7 +396,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, false, true);
+			outlookFolder.MergeFolders(path, rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =

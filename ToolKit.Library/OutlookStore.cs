@@ -170,14 +170,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstFilePath">The PST file to check.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		/// <param name="aggresive">Indicates whether this is an aggresive
-		/// search or not.</param>
-		public void MergeFolders(
-			string pstFilePath, bool dryRun, bool aggresive)
+		public void MergeFolders(string pstFilePath, bool dryRun)
 		{
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			MergeFolders(store, dryRun, aggresive);
+			MergeFolders(store, dryRun);
 
 			Log.Info("Merge folders complete - total folders checked: " +
 				totalFolders);
@@ -189,10 +186,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="store">The store to check.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		/// <param name="aggresive">Indicates whether this is an aggresive
-		/// search or not.</param>
 		/// <returns>The total folders checked.</returns>
-		public uint MergeFolders(Store store, bool dryRun, bool aggresive)
+		public uint MergeFolders(Store store, bool dryRun)
 		{
 			if (store != null)
 			{
@@ -203,8 +198,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				outlookFolder.MergeFolders(
-					storePath, rootFolder, dryRun, aggresive);
+				outlookFolder.MergeFolders(storePath, rootFolder, dryRun);
 
 				totalFolders++;
 

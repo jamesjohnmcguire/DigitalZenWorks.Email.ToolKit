@@ -282,10 +282,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="folder">The current folder.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		/// <param name="aggresive">Indicates whether this is an aggresive
-		/// search or not.</param>
-		public void MergeFolders(
-			string path, MAPIFolder folder, bool dryRun, bool aggresive)
+		public void MergeFolders(string path, MAPIFolder folder, bool dryRun)
 		{
 			if (folder != null)
 			{
@@ -300,12 +297,11 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					string subPath = path + "/" + name;
 
-					MergeFolders(subPath, subFolder, dryRun, aggresive);
+					MergeFolders(subPath, subFolder, dryRun);
 
-					CheckForDuplicateFolders(
-						path, index, subFolder, dryRun, aggresive);
+					CheckForDuplicateFolders(path, index, subFolder, dryRun);
 
-					if (aggresive == true && parentName.Equals(
+					if (parentName.Equals(
 						name, StringComparison.OrdinalIgnoreCase))
 					{
 						MergeFolderWithParent(path, folder, subFolder, dryRun);
@@ -576,26 +572,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private void CheckForDuplicateFolders(
-			string path,
-			int index,
-			MAPIFolder folder,
-			bool dryRun,
-			bool aggresive)
+			string path, int index, MAPIFolder folder, bool dryRun)
 		{
 			string folderName = folder.Name;
 
 			string[] duplicatePatterns =
 			{
-				@"\s*\(\d*?\)", @"\s*-\s*Copy"
-			};
-
-			if (aggresive == true)
-			{
-				duplicatePatterns = new string[]
-				{
 					@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^_+", @"_\d$"
-				};
-			}
+			};
 
 			foreach (string duplicatePattern in duplicatePatterns)
 			{
