@@ -620,9 +620,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (mailItem != null)
 				{
-					DoubleCheckDuplicate(keeperSynopses, mailItem);
+					bool isValidDuplicate =
+						DoubleCheckDuplicate(keeperSynopses, mailItem);
 
-					if (dryRun == false)
+					if (isValidDuplicate == true && dryRun == false)
 					{
 						mailItem.Delete();
 					}
