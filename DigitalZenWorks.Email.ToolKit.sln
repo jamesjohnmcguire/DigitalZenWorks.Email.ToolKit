@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Library", "ToolKit.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Tests", "ToolKit.Tests\ToolKit.Tests.csproj", "{66CA0D35-F2AF-430E-81D0-78506201ADCD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UTF-unknown", "DbxOutlookExpress\UTF-unknown\src\UTF-unknown.csproj", "{5B3B81DE-CC32-485B-A523-6126551932ED}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpressLibrary", "DbxOutlookExpress\DbxOutlookExpressLibrary\DbxOutlookExpressLibrary.csproj", "{68961552-71D5-4CDC-943D-34A762E74699}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpressTests", "DbxOutlookExpress\DbxOutlookExpressTests\DbxOutlookExpressTests.csproj", "{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}"
@@ -41,9 +39,6 @@ Global
 		{66CA0D35-F2AF-430E-81D0-78506201ADCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{66CA0D35-F2AF-430E-81D0-78506201ADCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66CA0D35-F2AF-430E-81D0-78506201ADCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B3B81DE-CC32-485B-A523-6126551932ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B3B81DE-CC32-485B-A523-6126551932ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B3B81DE-CC32-485B-A523-6126551932ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68961552-71D5-4CDC-943D-34A762E74699}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{68961552-71D5-4CDC-943D-34A762E74699}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68961552-71D5-4CDC-943D-34A762E74699}.Release|Any CPU.ActiveCfg = Release|Any CPU
