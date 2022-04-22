@@ -706,16 +706,15 @@ namespace DigitalZenWorks.Email.ToolKit
 				string sentOn = mailItem.SentOn.ToString(
 					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				Log.Error("Exception at: " + path);
+
+				LogFormatMessage.Error(
 					"Item: {0}: From: {1}: {2} Subject: {3}",
 					sentOn,
 					mailItem.SenderName,
 					mailItem.SenderEmailAddress,
 					mailItem.Subject);
 
-				Log.Error("Exception at: " + path);
-				Log.Error(message);
 				Log.Error(exception.ToString());
 			}
 
@@ -748,16 +747,14 @@ namespace DigitalZenWorks.Email.ToolKit
 							"yyyy-MM-dd HH:mm:ss",
 							CultureInfo.InvariantCulture);
 
-						string message = string.Format(
-							CultureInfo.InvariantCulture,
+						Log.Error("Exception on RTFBody at: " + path);
+
+						LogFormatMessage.Error(
 							"Item: {0}: From: {1}: {2} Subject: {3}",
 							sentOn,
 							mailItem.SenderName,
 							mailItem.SenderEmailAddress,
 							mailItem.Subject);
-
-						Log.Error("Exception on RTFBody at: " + path);
-						Log.Error(message);
 					}
 
 					byte[] strings = GetStringProperties(mailItem);
@@ -1039,16 +1036,14 @@ namespace DigitalZenWorks.Email.ToolKit
 				"yyyy-MM-dd HH:mm:ss",
 				CultureInfo.InvariantCulture);
 
-			string message = string.Format(
-				CultureInfo.InvariantCulture,
+			Log.Error("Exception " + extraInformation + "at: " + path);
+
+			LogFormatMessage.Error(
 				"Item: {0}: From: {1}: {2} Subject: {3}",
 				sentOn,
 				mailItem.SenderName,
 				mailItem.SenderEmailAddress,
 				mailItem.Subject);
-
-			Log.Error("Exception " + extraInformation + "at: " + path);
-			Log.Error(message);
 		}
 
 		private static byte[] MergeByteArrays(byte[] buffer1, byte[] buffer2)

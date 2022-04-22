@@ -327,13 +327,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				string sourceName = source.Name;
 				string destinationName = destination.Name;
 
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"{0}: Merging {1} into {2}",
 					path,
 					sourceName,
 					destinationName);
-				Log.Info(message);
 
 				MoveFolderItems(source, destination);
 				MoveSubFolders(path, source, destination);
@@ -544,16 +542,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			string sentOn = mailItem.SentOn.ToString(
 				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 
-			string message = string.Format(
-				CultureInfo.InvariantCulture,
+			LogFormatMessage.Info(
 				"{0} {1}: From: {2}: {3} Subject: {4}",
 				prefixMessage,
 				sentOn,
 				mailItem.SenderName,
 				mailItem.SenderEmailAddress,
 				mailItem.Subject);
-
-			Log.Info(message);
 		}
 
 		private static void MoveFolderItems(
@@ -745,13 +740,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (destinationSubFolder == null)
 			{
 				// Folder doesn't already exist, so just move it.
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"at: {0} Moving {1} to {2}",
 					path,
 					name,
 					destinationName);
-				Log.Info(message);
 
 				source.MoveTo(destination);
 			}
@@ -761,13 +754,12 @@ namespace DigitalZenWorks.Email.ToolKit
 				// renamed something FolderName (2), so need to merge.
 				string subPath = path + "/" + source.Name;
 
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"at: {0} Merging {1} to {2}",
 					subPath,
 					name,
 					destinationName);
-				Log.Info(message);
+
 				MoveFolderContents(
 					subPath, source, destinationSubFolder);
 

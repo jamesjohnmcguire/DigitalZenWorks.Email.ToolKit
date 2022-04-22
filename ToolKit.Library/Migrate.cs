@@ -204,13 +204,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (keyExists == true)
 			{
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"Duplicate key mapping! Folder Id: {1} Name: {0} ",
 					dbxFolder.FolderName,
-					dbxFolder.FolderId);
-
-				Log.Info(message);
+					dbxFolder.FolderId.ToString(CultureInfo.InvariantCulture));
 			}
 			else
 			{

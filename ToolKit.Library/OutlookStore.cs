@@ -235,12 +235,10 @@ namespace DigitalZenWorks.Email.ToolKit
 				string sourcePath = GetStoreName(source);
 				string destinationPath = GetStoreName(destination);
 
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"Moving contents of {0} to {1}",
 					sourcePath,
 					destinationPath);
-				Log.Info(message);
 
 				MAPIFolder sourceRootFolder = source.GetRootFolder();
 				MAPIFolder destinationRootFolder = destination.GetRootFolder();
@@ -287,13 +285,11 @@ namespace DigitalZenWorks.Email.ToolKit
 					else
 					{
 						// Folder doesn't already exist, so just move it.
-						message = string.Format(
-							CultureInfo.InvariantCulture,
+						LogFormatMessage.Info(
 							"at: {0} Moving {1} to {2}",
 							subPath,
 							folderName,
 							destinationPath);
-						Log.Info(message);
 
 						subFolder.MoveTo(destinationRootFolder);
 					}
@@ -350,12 +346,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				int removedDuplicates =
 					duplicateCounts[1] - duplicateCounts[0];
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"Duplicates Removed in: {0}: {1}",
 					storePath,
 					removedDuplicates.ToString(CultureInfo.InvariantCulture));
-				Log.Info(message);
 
 				totalFolders++;
 				Marshal.ReleaseComObject(rootFolder);
