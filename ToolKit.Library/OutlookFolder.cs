@@ -88,6 +88,43 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Create folder path.
+		/// </summary>
+		/// <param name="store">The PST file store to use.</param>
+		/// <param name="path">The full path to create.</param>
+		/// <returns>The folder with the full path.</returns>
+		public static MAPIFolder CreaterFolderPath(Store store, string path)
+		{
+			MAPIFolder currentFolder = null;
+
+			if (store != null && !string.IsNullOrWhiteSpace(path))
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				if (path.Contains("::", StringComparison.OrdinalIgnoreCase))
+				{
+					int position = path.IndexOf(
+						"::", StringComparison.OrdinalIgnoreCase);
+					position += 2;
+
+					path = path.Substring(position);
+				}
+
+				string[] parts = path.Split(
+					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
+
+				currentFolder = rootFolder;
+
+				foreach (string part in parts)
+				{
+					currentFolder = AddFolder(currentFolder, part);
+				}
+			}
+
+			return currentFolder;
+		}
+
+		/// <summary>
 		/// Does folder exist.
 		/// </summary>
 		/// <param name="parentFolder">The parent folder to check.</param>
