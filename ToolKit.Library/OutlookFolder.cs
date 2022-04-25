@@ -39,8 +39,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private readonly OutlookAccount outlookAccount;
 
-		private uint totalFolders;
-
 		/// <summary>
 		/// Initializes a new instance of the
 		/// <see cref="OutlookFolder"/> class.
@@ -386,7 +384,6 @@ namespace DigitalZenWorks.Email.ToolKit
 						MergeFolderWithParent(path, folder, subFolder, dryRun);
 					}
 
-					totalFolders++;
 					Marshal.ReleaseComObject(subFolder);
 				}
 			}
@@ -452,7 +449,6 @@ namespace DigitalZenWorks.Email.ToolKit
 						duplicateCounts[0] += subFolderduplicateCounts[0];
 						duplicateCounts[1] += subFolderduplicateCounts[1];
 
-						totalFolders++;
 						Marshal.ReleaseComObject(subFolder);
 					}
 
