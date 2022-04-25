@@ -178,7 +178,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Remove all empty folders.
 		/// </summary>
-		public void RemoveEmptyFolders()
+		/// <returns>The count of removed folders.</returns>
+		public int RemoveEmptyFolders()
 		{
 			OutlookStore outlookStorage = new (this);
 
@@ -192,8 +193,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				removedFolders += outlookStorage.RemoveEmptyFolders(store);
 			}
 
-			Log.Info("Remove empty folder complete - total folder checked:" +
-				removedFolders);
+			return removedFolders;
 		}
 	}
 }
