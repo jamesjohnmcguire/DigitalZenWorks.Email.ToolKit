@@ -187,7 +187,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
-					DirectoryInfo directoryInfo = new DirectoryInfo(path);
+					DirectoryInfo directoryInfo = new (path);
 					string folderPath = directoryInfo.Name;
 
 					EmlDirectoryToPst(path, store, folderPath);
@@ -434,7 +434,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				foreach (string directory in directories)
 				{
-					DirectoryInfo directoryInfo = new DirectoryInfo(directory);
+					DirectoryInfo directoryInfo = new (directory);
 					string directoryName = directoryInfo.Name;
 
 					string thisFolderPath = folderPath + @"\" + directoryName;

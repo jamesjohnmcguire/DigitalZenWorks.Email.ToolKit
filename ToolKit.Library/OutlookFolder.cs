@@ -108,7 +108,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						"::", StringComparison.OrdinalIgnoreCase);
 					position += 2;
 
-					path = path.Substring(position);
+					path = path[position..];
 				}
 
 				string[] parts = path.Split(
