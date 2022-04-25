@@ -275,6 +275,48 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Remove folder from PST store.
+		/// </summary>
+		/// <param name="path">The path of current folder.</param>
+		/// <param name="subFolderIndex">The index of the sub-folder.</param>
+		/// <param name="subFolder">The sub-folder.</param>
+		/// <param name="force">Whether to force the removal.</param>
+		public static void RemoveFolder(
+			string path,
+			int subFolderIndex,
+			MAPIFolder subFolder,
+			bool force)
+		{
+			if (subFolder != null)
+			{
+				// Perhaps because interaction through COM interop, the count
+				// values sometimes seem a bit behind, so pause a little bit
+				// before moving on.
+				System.Threading.Thread.Sleep(400);
+
+				if (subFolder.Folders.Count > 0 || subFolder.Items.Count > 0)
+				{
+					Log.Warn("Attempting to remove non empty folder: " + path);
+				}
+
+				if (force == true || (subFolder.Folders.Count == 0 &&
+					subFolder.Items.Count == 0))
+				{
+					Log.Info("Removing empty folder: " + path);
+
+					bool isReserved = IsReservedFolder(subFolder);
+
+					if (isReserved == false)
+					{
+						MAPIFolder parentFolder = subFolder.Parent;
+
+						parentFolder.Folders.Remove(subFolderIndex);
+					}
+				}
+			}
+		}
+
+		/// <summary>
 		/// Add MSG file as MailItem in folder.
 		/// </summary>
 		/// <param name="pstFolder">The MSG file path.</param>
@@ -423,48 +465,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return duplicateCounts;
-		}
-
-		/// <summary>
-		/// Remove folder from PST store.
-		/// </summary>
-		/// <param name="path">The path of current folder.</param>
-		/// <param name="subFolderIndex">The index of the sub-folder.</param>
-		/// <param name="subFolder">The sub-folder.</param>
-		/// <param name="force">Whether to force the removal.</param>
-		public void RemoveFolder(
-			string path,
-			int subFolderIndex,
-			MAPIFolder subFolder,
-			bool force)
-		{
-			if (subFolder != null)
-			{
-				// Perhaps because interaction through COM interop, the count
-				// values sometimes seem a bit behind, so pause a little bit
-				// before moving on.
-				System.Threading.Thread.Sleep(400);
-
-				if (subFolder.Folders.Count > 0 || subFolder.Items.Count > 0)
-				{
-					Log.Warn("Attempting to remove non empty folder: " + path);
-				}
-
-				if (force == true || (subFolder.Folders.Count == 0 &&
-					subFolder.Items.Count == 0))
-				{
-					Log.Info("Removing empty folder: " + path);
-
-					bool isReserved = IsReservedFolder(subFolder);
-
-					if (isReserved == false)
-					{
-						MAPIFolder parentFolder = subFolder.Parent;
-
-						parentFolder.Folders.Remove(subFolderIndex);
-					}
-				}
-			}
 		}
 
 		private static bool DoesSiblingFolderExist(

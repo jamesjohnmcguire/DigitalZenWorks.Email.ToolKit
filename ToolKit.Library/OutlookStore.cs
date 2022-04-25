@@ -113,7 +113,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="path">The path of current folder.</param>
 		/// <param name="subFolder">The sub-folder.</param>
 		/// <param name="force">Whether to force the removal.</param>
-		public void RemoveFolder(
+		public static void RemoveFolder(
 			string path,
 			MAPIFolder subFolder,
 			bool force)
@@ -140,8 +140,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				path += "/" + subFolder.Name;
 
-				OutlookFolder outlookFolder = new (outlookAccount);
-				outlookFolder.RemoveFolder(path, index, subFolder, force);
+				OutlookFolder.RemoveFolder(path, index, subFolder, force);
 			}
 		}
 
@@ -278,7 +277,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (isReserved == false)
 						{
-							outlookFolder.RemoveFolder(
+							OutlookFolder.RemoveFolder(
 								subPath, subIndex, subFolder, false);
 						}
 					}
@@ -451,8 +450,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						OutlookFolder outlookFolder = new (outlookAccount);
-						outlookFolder.RemoveFolder(
+						OutlookFolder.RemoveFolder(
 							path, index, folder, false);
 						removedFolders++;
 					}
