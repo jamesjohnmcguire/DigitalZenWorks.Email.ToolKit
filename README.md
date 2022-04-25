@@ -17,7 +17,7 @@ PM> Install-Package DigitalZenWorks.Email.ToolKit
 
 ### Usage:
 
-NOTE: Always back up any data you might be modifying.  So, please back up your data before using this tool.  Did I mention that you should back up?  
+NOTE: Always back up any data you might be modifying.  This package has been tested with hundreds of thousands of messages, about 50 GBs of data, without any problems.  But there can always be a first.  So, please back up your data before using this tool.  Did I mention that you should back up?  
 
 #### Command line usage:
 
@@ -31,7 +31,7 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 | merge-stores         | Merge one store into another    |              |
 | remove-duplicates    | Remove duplicate messages       | -n, --dryrun |
 |                      |                                 | -s, --flush  |
-| remove-empty-folders | Prune empty folders             |              |
+| remove-empty-folders | Prune empty folders             | -n, --dryrun |
 | help                 | Display this information        |              |
 
 ##### Command line usage notes:
@@ -41,6 +41,8 @@ If the source-path is a directory, the command will attempt to process the files
 ###### Examples
 Det.exe remove-duplicates --dryrun \path\to\some.pst  
 Det.exe dbx-to-pst \path\to\some-dbx-files  
+Det eml-to-pst "%USERPROFILE%\AppData\Local\Microsoft\Windows Live Mail\Storage Folders" %USERPROFILE%\Import.pst  
+
 
 ###### merge-folders
 Sometimes, folders get duplicated, like in the following manner:  
