@@ -147,6 +147,93 @@ namespace DigitalZenWorks.Email.ToolKit
 			return hashBase64;
 		}
 
+		/// <summary>
+		/// Move item to destination folder.
+		/// </summary>
+		/// <param name="item">The item to move.</param>
+		/// <param name="destination">The destination folder.</param>
+		public static void Moveitem(object item, MAPIFolder destination)
+		{
+			switch (item)
+			{
+				case AppointmentItem appointmentItem:
+					appointmentItem.Move(destination);
+					Marshal.ReleaseComObject(appointmentItem);
+					break;
+				case ContactItem contactItem:
+					contactItem.Move(destination);
+					Marshal.ReleaseComObject(contactItem);
+					break;
+				case DistListItem distListItem:
+					distListItem.Move(destination);
+					Marshal.ReleaseComObject(distListItem);
+					break;
+				case DocumentItem documentItem:
+					documentItem.Move(destination);
+					Marshal.ReleaseComObject(documentItem);
+					break;
+				case JournalItem journalItem:
+					journalItem.Move(destination);
+					Marshal.ReleaseComObject(journalItem);
+					break;
+				case MailItem mailItem:
+					mailItem.Move(destination);
+					Marshal.ReleaseComObject(mailItem);
+					break;
+				case MeetingItem meetingItem:
+					meetingItem.Move(destination);
+					Marshal.ReleaseComObject(meetingItem);
+					break;
+				case NoteItem noteItem:
+					noteItem.Move(destination);
+					Marshal.ReleaseComObject(noteItem);
+					break;
+				case PostItem postItem:
+					postItem.Move(destination);
+					Marshal.ReleaseComObject(postItem);
+					break;
+				case RemoteItem remoteItem:
+					remoteItem.Move(destination);
+					Marshal.ReleaseComObject(remoteItem);
+					break;
+				case ReportItem reportItem:
+					reportItem.Move(destination);
+					Marshal.ReleaseComObject(reportItem);
+					break;
+				case TaskItem taskItem:
+					taskItem.Move(destination);
+					Marshal.ReleaseComObject(taskItem);
+					break;
+				case TaskRequestAcceptItem taskRequestAcceptItem:
+					taskRequestAcceptItem.Move(destination);
+					Marshal.ReleaseComObject(taskRequestAcceptItem);
+					break;
+				case TaskRequestDeclineItem taskRequestDeclineItem:
+					taskRequestDeclineItem.Move(destination);
+					Marshal.ReleaseComObject(taskRequestDeclineItem);
+					break;
+				case TaskRequestItem taskRequestItem:
+					taskRequestItem.Move(destination);
+					Marshal.ReleaseComObject(taskRequestItem);
+					break;
+				case TaskRequestUpdateItem taskRequestUpdateItem:
+					taskRequestUpdateItem.Move(destination);
+					Marshal.ReleaseComObject(taskRequestUpdateItem);
+					break;
+				default:
+					string message = "Folder item of unknown type";
+					if (item != null)
+					{
+						message += ": " + item.ToString();
+					}
+
+					Log.Warn(message);
+					break;
+			}
+
+			Marshal.ReleaseComObject(item);
+		}
+
 		private static long ArrayCopyConditional(
 			ref byte[] finalBuffer, long currentIndex, byte[] nextBuffer)
 		{
@@ -196,7 +283,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return bytes;
 		}
 
-		private static byte[] GetActions(string path, MailItem mailItem)
+		private static byte[] GetActions(MailItem mailItem)
 		{
 			byte[] actions = null;
 
@@ -259,7 +346,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
-				exception is System.Runtime.InteropServices.COMException ||
+				exception is COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -269,7 +356,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return actions;
 		}
 
-		private static byte[] GetAttachments(string path, MailItem mailItem)
+		private static byte[] GetAttachments(MailItem mailItem)
 		{
 			byte[] attachments = null;
 
@@ -342,7 +429,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
-				exception is System.Runtime.InteropServices.COMException ||
+				exception is COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -352,7 +439,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return attachments;
 		}
 
-		private static byte[] GetBody(string path, MailItem mailItem)
+		private static byte[] GetBody(MailItem mailItem)
 		{
 			byte[] allBody = null;
 
@@ -375,7 +462,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
-				exception is System.Runtime.InteropServices.COMException ||
+				exception is COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -385,7 +472,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return allBody;
 		}
 
-		private static ushort GetBooleans(string path, MailItem mailItem)
+		private static ushort GetBooleans(MailItem mailItem)
 		{
 			ushort boolHolder = 0;
 
@@ -439,7 +526,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				rawValue = mailItem.UnRead;
 				boolHolder = SetBit(boolHolder, 15, rawValue);
 			}
-			catch (System.Runtime.InteropServices.COMException exception)
+			catch (COMException exception)
 			{
 				Log.Error(exception.ToString());
 			}
@@ -498,7 +585,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return bufferSize;
 		}
 
-		private static byte[] GetDateTimes(string path, MailItem mailItem)
+		private static byte[] GetDateTimes(MailItem mailItem)
 		{
 			byte[] data = null;
 
@@ -551,7 +638,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
-				exception is System.Runtime.InteropServices.COMException ||
+				exception is COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -579,7 +666,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					permission = (int)mailItem.Permission;
 				}
-				catch (System.Runtime.InteropServices.COMException)
+				catch (COMException)
 				{
 				}
 
@@ -612,23 +699,22 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
-				exception is System.Runtime.InteropServices.COMException ||
+				exception is COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
 				string sentOn = mailItem.SentOn.ToString(
 					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				Log.Error("Exception at: " + path);
+
+				LogFormatMessage.Error(
 					"Item: {0}: From: {1}: {2} Subject: {3}",
 					sentOn,
 					mailItem.SenderName,
 					mailItem.SenderEmailAddress,
 					mailItem.Subject);
 
-				Log.Error("Exception at: " + path);
-				Log.Error(message);
 				Log.Error(exception.ToString());
 			}
 
@@ -643,11 +729,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				if (mailItem != null)
 				{
-					ushort booleans = GetBooleans(path, mailItem);
+					ushort booleans = GetBooleans(mailItem);
 
-					byte[] actions = GetActions(path, mailItem);
-					byte[] attachments = GetAttachments(path, mailItem);
-					byte[] dateTimes = GetDateTimes(path, mailItem);
+					byte[] actions = GetActions(mailItem);
+					byte[] attachments = GetAttachments(mailItem);
+					byte[] dateTimes = GetDateTimes(mailItem);
 					byte[] enums = GetEnums(path, mailItem);
 					byte[] rtfBody = null;
 
@@ -661,20 +747,18 @@ namespace DigitalZenWorks.Email.ToolKit
 							"yyyy-MM-dd HH:mm:ss",
 							CultureInfo.InvariantCulture);
 
-						string message = string.Format(
-							CultureInfo.InvariantCulture,
+						Log.Error("Exception on RTFBody at: " + path);
+
+						LogFormatMessage.Error(
 							"Item: {0}: From: {1}: {2} Subject: {3}",
 							sentOn,
 							mailItem.SenderName,
 							mailItem.SenderEmailAddress,
 							mailItem.Subject);
-
-						Log.Error("Exception on RTFBody at: " + path);
-						Log.Error(message);
 					}
 
-					byte[] strings = GetStringProperties(path, mailItem);
-					byte[] userProperties = GetUserProperties(path, mailItem);
+					byte[] strings = GetStringProperties(mailItem);
+					byte[] userProperties = GetUserProperties(mailItem);
 
 					long bufferSize = GetBufferSize(
 						actions,
@@ -726,7 +810,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			"StyleCop.CSharp.NamingRules",
 			"SA1305:Field names should not use Hungarian notation",
 			Justification = "It isn't hungarian notation.")]
-		private static string GetRecipients(string path, MailItem mailItem)
+		private static string GetRecipients(MailItem mailItem)
 		{
 			string recipients = string.Empty;
 			List<string> toList = new ();
@@ -793,8 +877,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return recipients;
 		}
 
-		private static byte[] GetStringProperties(
-			string path, MailItem mailItem)
+		private static byte[] GetStringProperties(MailItem mailItem)
 		{
 			byte[] data = null;
 
@@ -874,7 +957,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
-				exception is System.Runtime.InteropServices.COMException ||
+				exception is COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -884,7 +967,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return data;
 		}
 
-		private static byte[] GetUserProperties(string path, MailItem mailItem)
+		private static byte[] GetUserProperties(MailItem mailItem)
 		{
 			byte[] properties = null;
 
@@ -936,7 +1019,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is ArgumentNullException ||
 				exception is ArgumentOutOfRangeException ||
 				exception is ArrayTypeMismatchException ||
-				exception is System.Runtime.InteropServices.COMException ||
+				exception is COMException ||
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
@@ -953,16 +1036,14 @@ namespace DigitalZenWorks.Email.ToolKit
 				"yyyy-MM-dd HH:mm:ss",
 				CultureInfo.InvariantCulture);
 
-			string message = string.Format(
-				CultureInfo.InvariantCulture,
+			Log.Error("Exception " + extraInformation + "at: " + path);
+
+			LogFormatMessage.Error(
 				"Item: {0}: From: {1}: {2} Subject: {3}",
 				sentOn,
 				mailItem.SenderName,
 				mailItem.SenderEmailAddress,
 				mailItem.Subject);
-
-			Log.Error("Exception " + extraInformation + "at: " + path);
-			Log.Error(message);
 		}
 
 		private static byte[] MergeByteArrays(byte[] buffer1, byte[] buffer2)

@@ -2,7 +2,7 @@
   "profiles": {
     "DbxToPst": {
       "commandName": "Project",
-      "commandLineArgs": "dbx-to-pst %USERPROFILE%\\AppData\\Roaming\\DigitalZenWorks\\DbxToPst\\TestFolder"
+      "commandLineArgs": "eml-to-pst \"%USERPROFILE%\\AppData\\Local\\Microsoft\\Windows Live Mail.bak\\Storage Folders (1)\" %USERPROFILE%\\Data\\ProgramData\\Email\\EmailStores\\PstExports\\LiveMail.pst"
     }
   }
 }

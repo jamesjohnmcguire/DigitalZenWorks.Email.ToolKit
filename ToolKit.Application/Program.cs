@@ -17,6 +17,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+using CommonLogging = Common.Logging;
+
 [assembly: CLSCompliant(true)]
 
 namespace DigitalZenWorks.Email.ToolKit.Application
@@ -28,6 +30,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+		private static readonly string[] Commands =
+		{
+			"dbx-to-pst", "eml-to-pst", "help", "merge-folders",
+			"merge-stores", "remove-duplicates", "remove-empty-folders"
+		};
 
 		/// <summary>
 		/// The program's main entry point.
@@ -46,13 +54,16 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				Log.Info("Starting DigitalZenWorks.Email.ToolKit Version: " +
 					version);
 
-				bool valid = ValidateLocationArguments(arguments);
+				bool valid = ValidateArguments(arguments);
 
 				if (arguments != null && valid == true)
 				{
+					string command = arguments[0];
 					string pstLocation;
 
-					switch (arguments[0])
+					Log.Info("Command is: " + command);
+
+					switch (command)
 					{
 						case "dbx-to-pst":
 							string dbxLocation = arguments[1];
@@ -155,6 +166,29 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return result;
 		}
 
+		private static FileVersionInfo GetAssemblyInformation()
+		{
+			FileVersionInfo fileVersionInfo = null;
+
+			Assembly assembly = Assembly.GetExecutingAssembly();
+
+			string location = assembly.Location;
+
+			if (string.IsNullOrWhiteSpace(location))
+			{
+				// Single file apps have no assemblies.
+				Process process = Process.GetCurrentProcess();
+				location = process.MainModule.FileName;
+			}
+
+			if (!string.IsNullOrWhiteSpace(location))
+			{
+				fileVersionInfo = FileVersionInfo.GetVersionInfo(location);
+			}
+
+			return fileVersionInfo;
+		}
+
 		private static string GetPstLocation(
 			string[] arguments, string source, int index)
 		{
@@ -183,27 +217,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static string GetVersion()
 		{
-			Assembly assembly = Assembly.GetExecutingAssembly();
+			FileVersionInfo fileVersionInfo = GetAssemblyInformation();
 
-			AssemblyName assemblyName = assembly.GetName();
-			Version version = assemblyName.Version;
-			string assemblyVersion = version.ToString();
-
-			string location = assembly.Location;
-
-			if (string.IsNullOrWhiteSpace(location))
-			{
-				// Single file apps have no assemblies.
-				Process process = Process.GetCurrentProcess();
-				location = process.MainModule.FileName;
-			}
-
-			if (!string.IsNullOrWhiteSpace(location))
-			{
-				FileVersionInfo fileVersionInfo =
-					FileVersionInfo.GetVersionInfo(location);
-				assemblyVersion = fileVersionInfo.FileVersion;
-			}
+			string assemblyVersion = fileVersionInfo.FileVersion;
 
 			return assemblyVersion;
 		}
@@ -228,11 +244,19 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Serilog.Log.Logger = configuration.CreateLogger();
 
 			LogManager.Adapter =
-				new Common.Logging.Serilog.SerilogFactoryAdapter();
+				new CommonLogging.Serilog.SerilogFactoryAdapter();
 		}
 
 		private static int MergeFolders(string[] arguments)
 		{
+			bool dryRun = false;
+
+			if (arguments.Contains("-n") ||
+				arguments.Contains("--dryrun"))
+			{
+				dryRun = true;
+			}
+
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
 
@@ -242,11 +266,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string pstFile = arguments[pstFileIndex];
 
-				outlookStore.MergeFolders(pstFile);
+				outlookStore.MergeFolders(pstFile, dryRun);
 			}
 			else
 			{
-				outlookAccount.MergeFolders();
+				outlookAccount.MergeFolders(dryRun);
 			}
 
 			return 0;
@@ -351,10 +375,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				dryRun = true;
 			}
-
-			if (arguments.Contains("-s") ||
+			else if (arguments.Contains("-s") ||
 				arguments.Contains("--flush"))
 			{
+				// Obviously, ignore flush if dryRun is set.
 				flush = true;
 			}
 
@@ -383,18 +407,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 
 			int pstFileIndex = ArgumentsContainPstFile(arguments);
+			int removedFolders;
 
 			if (pstFileIndex > 0)
 			{
 				OutlookStore outlookStore = new (outlookAccount);
 				string pstFile = arguments[pstFileIndex];
 
-				outlookStore.RemoveEmptyFolders(pstFile);
+				removedFolders = outlookStore.RemoveEmptyFolders(pstFile);
 			}
 			else
 			{
-				outlookAccount.RemoveEmptyFolders();
+				removedFolders = outlookAccount.RemoveEmptyFolders();
 			}
+
+			Log.Info("Remove empty folder complete - total folders removed:" +
+				removedFolders);
 
 			return 0;
 		}
@@ -402,18 +430,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static void ShowHelp(string additionalMessage = null)
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly();
-			string location = assembly.Location;
-
-			FileVersionInfo versionInfo =
-				FileVersionInfo.GetVersionInfo(location);
-
-			string companyName = versionInfo.CompanyName;
-			string copyright = versionInfo.LegalCopyright;
-
 			AssemblyName assemblyName = assembly.GetName();
 			string name = assemblyName.Name;
-			Version version = assemblyName.Version;
-			string assemblyVersion = version.ToString();
+
+			FileVersionInfo versionInfo = GetAssemblyInformation();
+			string companyName = versionInfo.CompanyName;
+			string copyright = versionInfo.LegalCopyright;
+			string assemblyVersion = versionInfo.FileVersion;
 
 			string header = string.Format(
 				CultureInfo.CurrentCulture,
@@ -443,7 +466,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Log.Info("help                  Show this information");
 		}
 
-		private static bool ValidateLocationArguments(string[] arguments)
+		private static bool ValidateArguments(string[] arguments)
 		{
 			bool valid = false;
 
@@ -451,21 +474,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string command = arguments[0];
 
-				if (arguments.Length > 1)
-				{
-					if (arguments.Length > 2 || !command.Equals(
-						"merge-stores", StringComparison.OrdinalIgnoreCase))
-					{
-						string location = arguments[1];
-
-						if (Directory.Exists(location) ||
-							File.Exists(location))
-						{
-							valid = true;
-						}
-					}
-				}
-				else
+				if (Commands.Contains(command))
 				{
 					if (command.Equals(
 						"help", StringComparison.OrdinalIgnoreCase) ||
@@ -480,7 +489,24 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					{
 						valid = true;
 					}
-					else
+					else if (arguments.Length > 1)
+					{
+						if (arguments.Length > 2 || !command.Equals(
+							"merge-stores", StringComparison.OrdinalIgnoreCase))
+						{
+							string location = arguments[1];
+
+							if (Directory.Exists(location) ||
+								File.Exists(location))
+							{
+								valid = true;
+							}
+						}
+					}
+				}
+				else
+				{
+					if (File.Exists(command))
 					{
 						string extension = Path.GetExtension(command);
 
@@ -495,14 +521,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							valid = true;
 						}
 					}
+					else if (Directory.Exists(command))
+					{
+						string[] dbxFiles =
+							Directory.GetFiles(command, "*.dbx");
+						string[] emlFiles =
+							Directory.GetFiles(command, "*.eml");
+						string[] txtFiles =
+							Directory.GetFiles(command, "*.txt");
+
+						if (dbxFiles.Length > 0 || emlFiles.Length > 0 ||
+							txtFiles.Length > 0)
+						{
+							valid = true;
+						}
+					}
 				}
-			}
-
-			if (valid == false)
-			{
-				Log.Error("Invalid arguments");
-
-				ShowHelp();
 			}
 
 			return valid;

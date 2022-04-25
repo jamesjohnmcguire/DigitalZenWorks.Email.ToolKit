@@ -113,7 +113,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="path">The path of current folder.</param>
 		/// <param name="subFolder">The sub-folder.</param>
 		/// <param name="force">Whether to force the removal.</param>
-		public void RemoveFolder(
+		public static void RemoveFolder(
 			string path,
 			MAPIFolder subFolder,
 			bool force)
@@ -140,8 +140,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				path += "/" + subFolder.Name;
 
-				OutlookFolder outlookFolder = new (outlookAccount);
-				outlookFolder.RemoveFolder(path, index, subFolder, force);
+				OutlookFolder.RemoveFolder(path, index, subFolder, force);
 			}
 		}
 
@@ -168,11 +167,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Merge duplicate folders.
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>
-		public void MergeFolders(string pstFilePath)
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		public void MergeFolders(string pstFilePath, bool dryRun)
 		{
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			MergeFolders(store);
+			MergeFolders(store, dryRun);
 
 			Log.Info("Merge folders complete - total folders checked: " +
 				totalFolders);
@@ -182,8 +183,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Merge duplicate folders.
 		/// </summary>
 		/// <param name="store">The store to check.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
 		/// <returns>The total folders checked.</returns>
-		public uint MergeFolders(Store store)
+		public uint MergeFolders(Store store, bool dryRun)
 		{
 			if (store != null)
 			{
@@ -194,7 +197,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				outlookFolder.MergeFolders(storePath, rootFolder);
+				outlookFolder.MergeFolders(storePath, rootFolder, dryRun);
 
 				totalFolders++;
 
@@ -231,12 +234,10 @@ namespace DigitalZenWorks.Email.ToolKit
 				string sourcePath = GetStoreName(source);
 				string destinationPath = GetStoreName(destination);
 
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"Moving contents of {0} to {1}",
 					sourcePath,
 					destinationPath);
-				Log.Info(message);
 
 				MAPIFolder sourceRootFolder = source.GetRootFolder();
 				MAPIFolder destinationRootFolder = destination.GetRootFolder();
@@ -276,20 +277,18 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (isReserved == false)
 						{
-							outlookFolder.RemoveFolder(
+							OutlookFolder.RemoveFolder(
 								subPath, subIndex, subFolder, false);
 						}
 					}
 					else
 					{
 						// Folder doesn't already exist, so just move it.
-						message = string.Format(
-							CultureInfo.InvariantCulture,
+						LogFormatMessage.Info(
 							"at: {0} Moving {1} to {2}",
 							subPath,
 							folderName,
 							destinationPath);
-						Log.Info(message);
 
 						subFolder.MoveTo(destinationRootFolder);
 					}
@@ -336,7 +335,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				OutlookFolder outlookFolder = new (outlookAccount);
 				int[] duplicateCounts =
-					outlookFolder.RemoveDuplicatesFromSubFolders(
+					outlookFolder.RemoveDuplicates(
 						storePath, rootFolder, dryRun);
 
 				if (flush == true)
@@ -346,12 +345,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				int removedDuplicates =
 					duplicateCounts[1] - duplicateCounts[0];
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"Duplicates Removed in: {0}: {1}",
 					storePath,
 					removedDuplicates.ToString(CultureInfo.InvariantCulture));
-				Log.Info(message);
 
 				totalFolders++;
 				Marshal.ReleaseComObject(rootFolder);
@@ -362,11 +359,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Remove all empty folders.
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>
-		public void RemoveEmptyFolders(string pstFilePath)
+		/// <returns>The count of removed folders.</returns>
+		public int RemoveEmptyFolders(string pstFilePath)
 		{
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			RemoveEmptyFolders(store);
+			int removedFolders = RemoveEmptyFolders(store);
+
+			return removedFolders;
 		}
 
 		/// <summary>
@@ -450,8 +450,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						OutlookFolder outlookFolder = new (outlookAccount);
-						outlookFolder.RemoveFolder(
+						OutlookFolder.RemoveFolder(
 							path, index, folder, false);
 						removedFolders++;
 					}
@@ -483,8 +482,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static void EmptyDeletedItemsFolder(
 			MAPIFolder deletedItemsFolder)
 		{
+			Folders folders = deletedItemsFolder.Folders;
+			int totalItems = folders.Count;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group will change.
+			for (int index = totalItems; index > 0; index--)
+			{
+				MAPIFolder folder = folders[index];
+				folder.Delete();
+			}
+
 			Items items = deletedItemsFolder.Items;
-			int totalItems = items.Count;
+			totalItems = items.Count;
 
 			// Office uses 1 based indexes from VBA.
 			// Iterate in reverse order as the group will change.

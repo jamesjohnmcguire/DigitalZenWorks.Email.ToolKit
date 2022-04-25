@@ -24,18 +24,20 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		private static readonly string[] DeletedFolders =
+		{
+			"Deleted Items", "Deleted Messages"
+		};
+
 		private static readonly string[] ReservedFolders =
 		{
-				"Calendar", "Contacts", "Conversation Action Settings",
-				"Deleted Items", "Deleted Messages", "Drafts", "Junk E-mail",
-				"Journal", "Notes", "Outbox", "Quick Step Settings",
-				"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
+			"Calendar", "Contacts", "Conversation Action Settings",
+			"Deleted Items", "Deleted Messages", "Drafts", "Inbox",
+			"Junk E-mail", "Journal", "Notes", "Outbox", "Quick Step Settings",
+			"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
 		};
 
 		private readonly OutlookAccount outlookAccount;
-
-		private uint removedFolders;
-		private uint totalFolders;
 
 		/// <summary>
 		/// Initializes a new instance of the
@@ -66,7 +68,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (pstFolder == null)
 				{
-					Log.Info("Adding outlook folder: " + folderName);
+					string parentPath = GetFolderPath(parentFolder);
+					Log.Info("At: " + parentPath + " Adding outlook folder: " + folderName);
 
 					try
 					{
@@ -83,6 +86,43 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Create folder path.
+		/// </summary>
+		/// <param name="store">The PST file store to use.</param>
+		/// <param name="path">The full path to create.</param>
+		/// <returns>The folder with the full path.</returns>
+		public static MAPIFolder CreaterFolderPath(Store store, string path)
+		{
+			MAPIFolder currentFolder = null;
+
+			if (store != null && !string.IsNullOrWhiteSpace(path))
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				if (path.Contains("::", StringComparison.OrdinalIgnoreCase))
+				{
+					int position = path.IndexOf(
+						"::", StringComparison.OrdinalIgnoreCase);
+					position += 2;
+
+					path = path[position..];
+				}
+
+				string[] parts = path.Split(
+					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
+
+				currentFolder = rootFolder;
+
+				foreach (string part in parts)
+				{
+					currentFolder = AddFolder(currentFolder, part);
+				}
+			}
+
+			return currentFolder;
+		}
+
+		/// <summary>
 		/// Does folder exist.
 		/// </summary>
 		/// <param name="parentFolder">The parent folder to check.</param>
@@ -93,25 +133,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			bool folderExists = false;
 
-			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
+			MAPIFolder folder = GetSubFolder(parentFolder, folderName);
+
+			if (folder != null)
 			{
-				int total = parentFolder.Folders.Count;
-
-				for (int index = 1; index <= total; index++)
-				{
-					MAPIFolder subFolder = parentFolder.Folders[index];
-
-					string name = subFolder.Name;
-
-					if (folderName.Equals(
-						name, StringComparison.OrdinalIgnoreCase))
-					{
-						folderExists = true;
-						break;
-					}
-
-					Marshal.ReleaseComObject(subFolder);
-				}
+				folderExists = true;
 			}
 
 			return folderExists;
@@ -129,22 +155,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (folder != null)
 			{
 				path = folder.Name;
-				MAPIFolder parent = folder.Parent;
 
-				while (parent is not null && parent is MAPIFolder)
+				while (folder.Parent is not null &&
+					folder.Parent is MAPIFolder)
 				{
-					path = parent.Name + "/" + path;
-					folder = parent;
-
-					if (folder.Parent is not null &&
-						folder.Parent is MAPIFolder)
-					{
-						parent = folder.Parent;
-					}
-					else
-					{
-						parent = null;
-					}
+					folder = folder.Parent;
+					string name = folder.Name;
+					path = name + "/" + path;
 				}
 
 				string storeName = OutlookStore.GetStoreName(folder.Store);
@@ -167,24 +184,51 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
 			{
-				int total = parentFolder.Folders.Count;
-
-				for (int index = 1; index <= total; index++)
+				try
 				{
-					MAPIFolder subFolder = parentFolder.Folders[index];
-
-					if (folderName.Equals(
-						subFolder.Name, StringComparison.OrdinalIgnoreCase))
-					{
-						pstFolder = subFolder;
-						break;
-					}
-
-					Marshal.ReleaseComObject(subFolder);
+					pstFolder = parentFolder.Folders[folderName];
+				}
+				catch (COMException)
+				{
 				}
 			}
 
 			return pstFolder;
+		}
+
+		/// <summary>
+		/// Is deleted folder.
+		/// </summary>
+		/// <param name="folder">The folder to check.</param>
+		/// <returns>Indicates whether this is an system deleted items
+		/// folder.</returns>
+		public static bool IsDeletedFolder(MAPIFolder folder)
+		{
+			bool isDeletedFolder = false;
+
+			if (folder != null)
+			{
+				string name = folder.Name;
+
+				if (DeletedFolders.Contains(name))
+				{
+					// Only top level folders are reserved
+					if (folder.Parent is not null &&
+						folder.Parent is MAPIFolder)
+					{
+						MAPIFolder parent = folder.Parent;
+
+						// Check if root folder
+						if (parent.Parent is null ||
+							parent.Parent is not MAPIFolder)
+						{
+							isDeletedFolder = true;
+						}
+					}
+				}
+			}
+
+			return isDeletedFolder;
 		}
 
 		/// <summary>
@@ -203,11 +247,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (ReservedFolders.Contains(name))
 				{
-					MAPIFolder parent = folder.Parent;
-
 					// Only top level folders are reserved
-					if (parent is not null && parent is MAPIFolder)
+					if (folder.Parent is not null &&
+						folder.Parent is MAPIFolder)
 					{
+						MAPIFolder parent = folder.Parent;
+
 						// Check if root folder
 						if (parent.Parent is null ||
 							parent.Parent is not MAPIFolder)
@@ -225,6 +270,48 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return reserved;
+		}
+
+		/// <summary>
+		/// Remove folder from PST store.
+		/// </summary>
+		/// <param name="path">The path of current folder.</param>
+		/// <param name="subFolderIndex">The index of the sub-folder.</param>
+		/// <param name="subFolder">The sub-folder.</param>
+		/// <param name="force">Whether to force the removal.</param>
+		public static void RemoveFolder(
+			string path,
+			int subFolderIndex,
+			MAPIFolder subFolder,
+			bool force)
+		{
+			if (subFolder != null)
+			{
+				// Perhaps because interaction through COM interop, the count
+				// values sometimes seem a bit behind, so pause a little bit
+				// before moving on.
+				System.Threading.Thread.Sleep(400);
+
+				if (subFolder.Folders.Count > 0 || subFolder.Items.Count > 0)
+				{
+					Log.Warn("Attempting to remove non empty folder: " + path);
+				}
+
+				if (force == true || (subFolder.Folders.Count == 0 &&
+					subFolder.Items.Count == 0))
+				{
+					Log.Info("Removing empty folder: " + path);
+
+					bool isReserved = IsReservedFolder(subFolder);
+
+					if (isReserved == false)
+					{
+						MAPIFolder parentFolder = subFolder.Parent;
+
+						parentFolder.Folders.Remove(subFolderIndex);
+					}
+				}
+			}
 		}
 
 		/// <summary>
@@ -270,23 +357,33 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The current folder.</param>
-		public void MergeFolders(string path, MAPIFolder folder)
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		public void MergeFolders(string path, MAPIFolder folder, bool dryRun)
 		{
 			if (folder != null)
 			{
+				string parentName = folder.Name;
+
 				// Office uses 1 based indexes from VBA.
 				// Iterate in reverse order as the group may change.
 				for (int index = folder.Folders.Count; index > 0; index--)
 				{
 					MAPIFolder subFolder = folder.Folders[index];
+					string name = subFolder.Name;
 
-					string subPath = path + "/" + subFolder.Name;
+					string subPath = path + "/" + name;
 
-					MergeFolders(subPath, subFolder);
+					MergeFolders(subPath, subFolder, dryRun);
 
-					CheckForDuplicateFolders(path, index, subFolder);
+					CheckForDuplicateFolders(path, index, subFolder, dryRun);
 
-					totalFolders++;
+					if (parentName.Equals(
+						name, StringComparison.OrdinalIgnoreCase))
+					{
+						MergeFolderWithParent(path, folder, subFolder, dryRun);
+					}
+
 					Marshal.ReleaseComObject(subFolder);
 				}
 			}
@@ -306,45 +403,53 @@ namespace DigitalZenWorks.Email.ToolKit
 				string sourceName = source.Name;
 				string destinationName = destination.Name;
 
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"{0}: Merging {1} into {2}",
 					path,
 					sourceName,
 					destinationName);
-				Log.Info(message);
 
 				MoveFolderItems(source, destination);
-				MoveFolderFolders(path, source, destination);
+				MoveSubFolders(path, source, destination);
 			}
 		}
 
 		/// <summary>
 		/// Remove duplicates items from the given folder.
 		/// </summary>
+		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The MAPI folder to process.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		/// <param name="recurse">Indicates whether to recurse into
-		/// sub folders.</param>
 		/// <returns>An array of duplicate sets and total duplicate items
 		/// count.</returns>
 		public int[] RemoveDuplicates(
-			MAPIFolder folder, bool dryRun, bool recurse)
+			string path, MAPIFolder folder, bool dryRun)
 		{
 			int[] duplicateCounts = new int[2];
 
 			if (folder != null)
 			{
-				string folderName = folder.Name;
+				bool isDeletedFolder = IsDeletedFolder(folder);
 
-				if (!ReservedFolders.Contains(folderName))
+				// Skip processing of system deleted items folder.
+				if (isDeletedFolder == false)
 				{
-					if (recurse == true)
+					int folderCount = folder.Folders.Count;
+
+					// Office uses 1 based indexes from VBA.
+					// Iterate in reverse order as the group may change.
+					for (int index = folderCount; index > 0; index--)
 					{
-						string path = OutlookFolder.GetFolderPath(folder);
-						duplicateCounts = RemoveDuplicatesFromSubFolders(
-							path, folder, dryRun);
+						MAPIFolder subFolder = folder.Folders[index];
+
+						int[] subFolderduplicateCounts =
+							RemoveDuplicates(path, subFolder, dryRun);
+
+						duplicateCounts[0] += subFolderduplicateCounts[0];
+						duplicateCounts[1] += subFolderduplicateCounts[1];
+
+						Marshal.ReleaseComObject(subFolder);
 					}
 
 					int[] duplicateCountsThisFolder =
@@ -358,90 +463,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return duplicateCounts;
 		}
 
-		/// <summary>
-		/// Remove duplicates items from the given folder.
-		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
-		/// <param name="folder">The MAPI folder to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <returns>An array of duplicate sets and total duplicate items
-		/// count.</returns>
-		public int[] RemoveDuplicatesFromSubFolders(
-			string path, MAPIFolder folder, bool dryRun)
-		{
-			int[] duplicateCounts = new int[2];
-
-			if (folder != null)
-			{
-				int folderCount = folder.Folders.Count;
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int index = folderCount; index > 0; index--)
-				{
-					MAPIFolder subFolder = folder.Folders[index];
-
-					int[] subFolderduplicateCounts =
-						RemoveDuplicates(path, subFolder, dryRun, true);
-
-					duplicateCounts[0] += subFolderduplicateCounts[0];
-					duplicateCounts[1] += subFolderduplicateCounts[1];
-
-					totalFolders++;
-					Marshal.ReleaseComObject(subFolder);
-				}
-			}
-
-			return duplicateCounts;
-		}
-
-		/// <summary>
-		/// Remove folder from PST store.
-		/// </summary>
-		/// <param name="path">The path of current folder.</param>
-		/// <param name="subFolderIndex">The index of the sub-folder.</param>
-		/// <param name="subFolder">The sub-folder.</param>
-		/// <param name="force">Whether to force the removal.</param>
-		public void RemoveFolder(
-			string path,
-			int subFolderIndex,
-			MAPIFolder subFolder,
-			bool force)
-		{
-			if (subFolder != null)
-			{
-				// Perhaps because interaction through COM interop, the count
-				// values sometimes seem a bit behind, so pause a little bit
-				// before moving on.
-				System.Threading.Thread.Sleep(100);
-
-				if (subFolder.Folders.Count > 0 || subFolder.Items.Count > 0)
-				{
-					Log.Warn("Attempting to remove non empty folder: " + path);
-				}
-
-				if (force == true || (subFolder.Folders.Count == 0 &&
-					subFolder.Items.Count == 0))
-				{
-					Log.Info("Removing empty folder: " + path);
-
-					try
-					{
-						MAPIFolder parentFolder = subFolder.Parent;
-
-						parentFolder.Folders.Remove(subFolderIndex);
-					}
-					catch (COMException exception)
-					{
-						Log.Error(exception.ToString());
-					}
-
-					removedFolders++;
-				}
-			}
-		}
-
 		private static bool DoesSiblingFolderExist(
 			MAPIFolder folder, string folderName)
 		{
@@ -452,6 +473,24 @@ namespace DigitalZenWorks.Email.ToolKit
 			Marshal.ReleaseComObject(parentFolder);
 
 			return folderExists;
+		}
+
+		private static bool DoubleCheckDuplicate(
+			string baseSynopses, MailItem mailItem)
+		{
+			bool valid = true;
+			string duplicateSynopses = GetMailItemSynopses(mailItem);
+
+			if (!duplicateSynopses.Equals(
+				baseSynopses, StringComparison.Ordinal))
+			{
+				Log.Error("Warning! Duplicate Items Don't Seem to Match");
+				Log.Error("Not Matching Item: " + duplicateSynopses);
+
+				valid = false;
+			}
+
+			return valid;
 		}
 
 		private static IDictionary<string, IList<string>> GetFolderHashTable(
@@ -534,16 +573,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			string sentOn = mailItem.SentOn.ToString(
 				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 
-			string message = string.Format(
-				CultureInfo.InvariantCulture,
+			LogFormatMessage.Info(
 				"{0} {1}: From: {2}: {3} Subject: {4}",
 				prefixMessage,
 				sentOn,
 				mailItem.SenderName,
 				mailItem.SenderEmailAddress,
 				mailItem.Subject);
-
-			Log.Info(message);
 		}
 
 		private static void MoveFolderItems(
@@ -557,93 +593,31 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				object item = items[index];
 
-				switch (item)
-				{
-					case AppointmentItem appointmentItem:
-						appointmentItem.Move(destination);
-						Marshal.ReleaseComObject(appointmentItem);
-						break;
-					case ContactItem contactItem:
-						contactItem.Move(destination);
-						Marshal.ReleaseComObject(contactItem);
-						break;
-					case DistListItem distListItem:
-						distListItem.Move(destination);
-						Marshal.ReleaseComObject(distListItem);
-						break;
-					case DocumentItem documentItem:
-						documentItem.Move(destination);
-						Marshal.ReleaseComObject(documentItem);
-						break;
-					case JournalItem journalItem:
-						journalItem.Move(destination);
-						Marshal.ReleaseComObject(journalItem);
-						break;
-					case MailItem mailItem:
-						mailItem.Move(destination);
-						Marshal.ReleaseComObject(mailItem);
-						break;
-					case MeetingItem meetingItem:
-						meetingItem.Move(destination);
-						Marshal.ReleaseComObject(meetingItem);
-						break;
-					case NoteItem noteItem:
-						noteItem.Move(destination);
-						Marshal.ReleaseComObject(noteItem);
-						break;
-					case PostItem postItem:
-						postItem.Move(destination);
-						Marshal.ReleaseComObject(postItem);
-						break;
-					case RemoteItem remoteItem:
-						remoteItem.Move(destination);
-						Marshal.ReleaseComObject(remoteItem);
-						break;
-					case ReportItem reportItem:
-						reportItem.Move(destination);
-						Marshal.ReleaseComObject(reportItem);
-						break;
-					case TaskItem taskItem:
-						taskItem.Move(destination);
-						Marshal.ReleaseComObject(taskItem);
-						break;
-					case TaskRequestAcceptItem taskRequestAcceptItem:
-						taskRequestAcceptItem.Move(destination);
-						Marshal.ReleaseComObject(taskRequestAcceptItem);
-						break;
-					case TaskRequestDeclineItem taskRequestDeclineItem:
-						taskRequestDeclineItem.Move(destination);
-						Marshal.ReleaseComObject(taskRequestDeclineItem);
-						break;
-					case TaskRequestItem taskRequestItem:
-						taskRequestItem.Move(destination);
-						Marshal.ReleaseComObject(taskRequestItem);
-						break;
-					case TaskRequestUpdateItem taskRequestUpdateItem:
-						taskRequestUpdateItem.Move(destination);
-						Marshal.ReleaseComObject(taskRequestUpdateItem);
-						break;
-					default:
-						Log.Warn(
-							"folder item of unknown type: " + item.ToString());
-						break;
-				}
-
-				Marshal.ReleaseComObject(item);
+				MapiItem.Moveitem(item, destination);
 			}
 		}
 
 		private void CheckForDuplicateFolders(
-			string path, int index, MAPIFolder folder)
+			string path, int index, MAPIFolder folder, bool dryRun)
 		{
+			string folderName = folder.Name;
+
 			string[] duplicatePatterns =
 			{
-				@"\s*\(\d*?\)", @"\s*-\s*Copy"
+					@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^_+", @"_\d$"
 			};
 
 			foreach (string duplicatePattern in duplicatePatterns)
 			{
-				MergeDuplicateFolder(path, index, folder, duplicatePattern);
+				if (Regex.IsMatch(
+					folderName, duplicatePattern, RegexOptions.IgnoreCase))
+				{
+					MergeDuplicateFolder(
+						path, index, folder, duplicatePattern, dryRun);
+
+					// Best to not get multipe matches, at this point.
+					break;
+				}
 			}
 		}
 
@@ -669,43 +643,52 @@ namespace DigitalZenWorks.Email.ToolKit
 			foreach (string duplicateId in duplicateSet)
 			{
 				mailItem = session.GetItemFromID(duplicateId);
-				string duplicateSynopses = GetMailItemSynopses(mailItem);
 
-				if (!duplicateSynopses.Equals(
-					keeperSynopses, StringComparison.Ordinal))
+				if (mailItem != null)
 				{
-					Log.Error("Warning! Duplicate Items Don't Seem to Match");
-					Log.Error("Not Matching Item: " + duplicateSynopses);
-				}
+					bool isValidDuplicate =
+						DoubleCheckDuplicate(keeperSynopses, mailItem);
 
-				if (dryRun == false)
-				{
-					mailItem.Delete();
-				}
+					if (isValidDuplicate == true && dryRun == false)
+					{
+						mailItem.Delete();
+					}
 
-				Marshal.ReleaseComObject(mailItem);
+					Marshal.ReleaseComObject(mailItem);
+				}
 			}
 
 			return totalDuplicates;
 		}
 
 		private void MergeDuplicateFolder(
-			string path, int index, MAPIFolder folder, string duplicatePattern)
+			string path,
+			int index,
+			MAPIFolder folder,
+			string duplicatePattern,
+			bool dryRun)
 		{
-			if (Regex.IsMatch(
-				folder.Name, duplicatePattern, RegexOptions.IgnoreCase))
+			string newFolderName = Regex.Replace(
+				folder.Name,
+				duplicatePattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			bool folderExists = DoesSiblingFolderExist(folder, newFolderName);
+
+			string source = folder.Name;
+
+			if (folderExists == true)
 			{
-				string newFolderName = Regex.Replace(
-					folder.Name,
-					duplicatePattern,
-					string.Empty,
-					RegexOptions.ExplicitCapture);
-
-				bool folderExists =
-					DoesSiblingFolderExist(folder, newFolderName);
-
-				if (folderExists == true)
+				if (dryRun == true)
 				{
+					Log.Info(
+						"WOULD merge " + source + " into " + newFolderName);
+				}
+				else
+				{
+					path += "/" + folder.Name;
+
 					MAPIFolder parentFolder = folder.Parent;
 
 					// Move items
@@ -714,11 +697,16 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					MoveFolderContents(path, folder, destination);
 
-					path += "/" + folder.Name;
-
 					// Once all the items have been moved,
 					// now remove the folder.
 					RemoveFolder(path, index, folder, false);
+				}
+			}
+			else
+			{
+				if (dryRun == true)
+				{
+					Log.Info("WOULD move " + source + " to " + newFolderName);
 				}
 				else
 				{
@@ -739,88 +727,77 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private void MoveFolderFolders(
+		private void MergeFolderWithParent(
+			string path, MAPIFolder parent, MAPIFolder folder, bool dryRun)
+		{
+			string name = folder.Name;
+
+			if (dryRun == true)
+			{
+				Log.Info("At " + path + " WOULD Move into parent:" + name);
+			}
+			else
+			{
+				Log.Info("At " + path + "Moving into parent:" + name);
+				MoveFolderContents(path, folder, parent);
+
+				// Once all the items have been moved,
+				// now remove the folder.
+				folder.Delete();
+			}
+		}
+
+		private void MoveSubFolders(
 			string path, MAPIFolder source, MAPIFolder destination)
 		{
-			string destinationName = destination.Name;
-
 			// Office uses 1 based indexes from VBA.
 			// Iterate in reverse order as the group may change.
 			for (int index = source.Folders.Count; index > 0; index--)
 			{
 				MAPIFolder subFolder = source.Folders[index];
 
-				string name = subFolder.Name;
-				MAPIFolder destinationSubFolder =
-					OutlookFolder.GetSubFolder(destination, name);
-
-				if (destinationSubFolder == null)
-				{
-					// Folder doesn't already exist, so just move it.
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"at: {0} Moving {1} to {2}",
-						path,
-						name,
-						destinationName);
-					Log.Info(message);
-					subFolder.MoveTo(destination);
-				}
-				else
-				{
-					// Folder exists, so if just moving it, it will get
-					// renamed something FolderName (2), so need to merge.
-					string subPath = path + "/" + subFolder.Name;
-
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"at: {0} Merging {1} to {2}",
-						subPath,
-						name,
-						destinationName);
-					Log.Info(message);
-					MoveFolderContents(
-						subPath, subFolder, destinationSubFolder);
-
-					// Once all the items have been moved,
-					// now remove the folder.
-					RemoveFolder(subPath, index, subFolder, false);
-				}
+				MoveFolder(path, subFolder, destination, index);
 			}
 		}
 
-		/// <summary>
-		/// Remove duplicates items from the given folder.
-		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
-		/// <param name="folder">The MAPI folder to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <param name="recurse">Indicates whether to recurse into
-		/// sub folders.</param>
-		/// <returns>An array of duplicate sets and total duplicate items
-		/// count.</returns>
-		private int[] RemoveDuplicates(
-			string path, MAPIFolder folder, bool dryRun, bool recurse)
+		private void MoveFolder(
+			string path, MAPIFolder source, MAPIFolder destination, int index)
 		{
-			int[] duplicateCounts = new int[2];
+			string destinationName = destination.Name;
 
-			if (!ReservedFolders.Contains(folder.Name))
+			string name = source.Name;
+			MAPIFolder destinationSubFolder = GetSubFolder(destination, name);
+
+			if (destinationSubFolder == null)
 			{
-				if (recurse == true)
-				{
-					duplicateCounts =
-						RemoveDuplicatesFromSubFolders(path, folder, dryRun);
-				}
+				// Folder doesn't already exist, so just move it.
+				LogFormatMessage.Info(
+					"at: {0} Moving {1} to {2}",
+					path,
+					name,
+					destinationName);
 
-				int[] duplicateCountsThisFolder =
-					RemoveDuplicatesFromThisFolder(folder, dryRun);
-
-				duplicateCounts[0] += duplicateCountsThisFolder[0];
-				duplicateCounts[1] += duplicateCountsThisFolder[1];
+				source.MoveTo(destination);
 			}
+			else
+			{
+				// Folder exists, so if just moving it, it will get
+				// renamed something FolderName (2), so need to merge.
+				string subPath = path + "/" + source.Name;
 
-			return duplicateCounts;
+				LogFormatMessage.Info(
+					"at: {0} Merging {1} to {2}",
+					subPath,
+					name,
+					destinationName);
+
+				MoveFolderContents(
+					subPath, source, destinationSubFolder);
+
+				// Once all the items have been moved,
+				// now remove the folder.
+				RemoveFolder(subPath, index, source, false);
+			}
 		}
 
 		private int[] RemoveDuplicatesFromThisFolder(
@@ -828,7 +805,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int[] duplicateCounts = new int[2];
 
-			string path = OutlookFolder.GetFolderPath(folder);
+			string path = GetFolderPath(folder);
 
 			IDictionary<string, IList<string>> hashTable =
 				GetFolderHashTable(path, folder);

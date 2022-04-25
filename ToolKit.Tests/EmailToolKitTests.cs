@@ -247,26 +247,160 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				OutlookFolder.AddFolder(mainFolder, "Testing");
 			Marshal.ReleaseComObject(subFolder);
 
-			subFolder = OutlookFolder.AddFolder(mainFolder, "Testing (1)");
-
-			MailItem mailItem = outlookAccount.CreateMailItem(
-				"someone@example.com",
-				"This is the subject",
-				"This is the message.");
-			mailItem.Move(subFolder);
-
-			Marshal.ReleaseComObject(subFolder);
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"Testing (1)",
+				"This is the subject");
 
 			// Review
 			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder);
+			outlookFolder.MergeFolders(path, rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Testing (1)");
+
+			Assert.IsNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		[Test]
+		public void TestMergeFoldersAggresive()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"Testing_5",
+				"This is the subject 1");
+
+			MailItem mailItem2 = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"_Testing",
+				"This is the subject 3");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			outlookFolder.MergeFolders(path, rootFolder, false);
+
+			System.Threading.Thread.Sleep(200);
+
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "Testing_5");
+			Assert.IsNull(subFolder);
+
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "_Testing");
+			Assert.IsNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			mailItem2.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		[Test]
+		public void TestMergeFoldersAllNumbersFolder()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"2022",
+				"This is the subject");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			outlookFolder.MergeFolders(path, rootFolder, false);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "2022");
+
+			Assert.IsNotNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		[Test]
+		public void TestMergeFolderWithParent()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Main Test Folder");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"Main Test Folder",
+				"This is the subject");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			outlookFolder.MergeFolders(path, rootFolder, false);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "Main Test Folder");
 
 			Assert.IsNull(subFolder);
 
@@ -305,9 +439,11 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem3.Move(mainFolder);
 
+			string storePath = OutlookStore.GetStoreName(store);
+
 			OutlookFolder outlookFolder = new (outlookAccount);
 			int[] counts =
-				outlookFolder.RemoveDuplicates(mainFolder, false, true);
+				outlookFolder.RemoveDuplicates(storePath, mainFolder, false);
 
 			Assert.AreEqual(counts[0], 1);
 			Assert.AreEqual(counts[1], 2);
@@ -332,8 +468,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder subFolder = OutlookFolder.AddFolder(
 				rootFolder, "Temporary Test Folder");
 
-			OutlookStore outlookStore = new (outlookAccount);
-			outlookStore.RemoveFolder(rootFolder.Name, subFolder, false);
+			OutlookStore.RemoveFolder(rootFolder.Name, subFolder, false);
 
 			Marshal.ReleaseComObject(subFolder);
 
@@ -388,6 +523,29 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		public void TestSanityCheck()
 		{
 			Assert.Pass();
+		}
+
+		private static MailItem AddFolderAndMessage(
+			OutlookAccount outlookAccount,
+			MAPIFolder parentFolder,
+			string folderName,
+			string subject)
+		{
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(parentFolder, folderName);
+
+			MailItem mailItem = outlookAccount.CreateMailItem(
+				"someone@example.com",
+				subject,
+				"This is the message.");
+			mailItem.UnRead = false;
+			mailItem.Save();
+
+			mailItem.Move(subFolder);
+
+			Marshal.ReleaseComObject(subFolder);
+
+			return mailItem;
 		}
 	}
 }
