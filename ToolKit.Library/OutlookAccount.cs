@@ -136,7 +136,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Merge duplicate folders.
 		/// </summary>
-		public void MergeFolders()
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		public void MergeFolders(bool dryRun)
 		{
 			OutlookStore outlookStorage = new (this);
 			uint totalFolders = 0;
@@ -146,7 +148,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				Store store = session.Stores[index];
 
-				totalFolders += outlookStorage.MergeFolders(store);
+				totalFolders += outlookStorage.MergeFolders(store, dryRun);
 			}
 
 			Log.Info("Remove empty folder complete - total folders checked: " +
@@ -176,7 +178,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Remove all empty folders.
 		/// </summary>
-		public void RemoveEmptyFolders()
+		/// <returns>The count of removed folders.</returns>
+		public int RemoveEmptyFolders()
 		{
 			OutlookStore outlookStorage = new (this);
 
@@ -190,8 +193,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				removedFolders += outlookStorage.RemoveEmptyFolders(store);
 			}
 
-			Log.Info("Remove empty folder complete - total folder checked:" +
-				removedFolders);
+			return removedFolders;
 		}
 	}
 }
