@@ -468,8 +468,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder subFolder = OutlookFolder.AddFolder(
 				rootFolder, "Temporary Test Folder");
 
-			OutlookStore outlookStore = new (outlookAccount);
-			outlookStore.RemoveFolder(rootFolder.Name, subFolder, false);
+			OutlookStore.RemoveFolder(rootFolder.Name, subFolder, false);
 
 			Marshal.ReleaseComObject(subFolder);
 
