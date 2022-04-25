@@ -4,3 +4,6 @@
 [submodule "MsgKit"]
 	path = MsgKit
 	url = https://github.com/jamesjohnmcguire/MsgKit
+[submodule "UtilitiesNet"]
+	path = UtilitiesNet
+	url = https://github.com/jamesjohnmcguire/UtilitiesNet
