@@ -71,7 +71,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (pstFolder == null)
 				{
-					Log.Info("Adding outlook folder: " + folderName);
+					string parentPath = GetFolderPath(parentFolder);
+					Log.Info("At: " + parentPath + " Adding outlook folder: " + folderName);
 
 					try
 					{
