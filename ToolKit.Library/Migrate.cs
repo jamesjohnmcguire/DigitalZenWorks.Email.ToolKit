@@ -272,6 +272,14 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					Converter.ConvertEmlToMsg(emlFile, msgFile);
 				}
+				catch (System.IO.IOException exception)
+				{
+					Log.Warn(exception.ToString());
+
+					// Hmmmn, try one more time.
+					msgFile = GetTemporaryMsgFile();
+					Converter.ConvertEmlToMsg(emlFile, msgFile);
+				}
 				catch (System.Exception exception) when
 					(exception is InvalidCastException ||
 					exception is NullReferenceException)
