@@ -360,11 +360,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Remove all empty folders.
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>
-		public void RemoveEmptyFolders(string pstFilePath)
+		/// <returns>The count of removed folders.</returns>
+		public int RemoveEmptyFolders(string pstFilePath)
 		{
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			RemoveEmptyFolders(store);
+			int removedFolders = RemoveEmptyFolders(store);
+
+			return removedFolders;
 		}
 
 		/// <summary>

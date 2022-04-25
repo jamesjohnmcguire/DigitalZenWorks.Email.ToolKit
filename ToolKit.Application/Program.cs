@@ -407,18 +407,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 
 			int pstFileIndex = ArgumentsContainPstFile(arguments);
+			int removedFolders;
 
 			if (pstFileIndex > 0)
 			{
 				OutlookStore outlookStore = new (outlookAccount);
 				string pstFile = arguments[pstFileIndex];
 
-				outlookStore.RemoveEmptyFolders(pstFile);
+				removedFolders = outlookStore.RemoveEmptyFolders(pstFile);
 			}
 			else
 			{
-				outlookAccount.RemoveEmptyFolders();
+				removedFolders = outlookAccount.RemoveEmptyFolders();
 			}
+
+			Log.Info("Remove empty folder complete - total folders removed:" +
+				removedFolders);
 
 			return 0;
 		}

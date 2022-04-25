@@ -39,7 +39,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private readonly OutlookAccount outlookAccount;
 
-		private uint removedFolders;
 		private uint totalFolders;
 
 		/// <summary>
@@ -464,8 +463,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						parentFolder.Folders.Remove(subFolderIndex);
 					}
-
-					removedFolders++;
 				}
 			}
 		}
