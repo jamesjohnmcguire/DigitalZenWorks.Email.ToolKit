@@ -91,19 +91,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = MergeStores(arguments);
 							break;
 						case "move-folder":
-							string sourcePst = arguments[1];
-							string sourcePath = arguments[2];
-							string destinationPst = arguments[3];
-							string destinationPath = arguments[4];
-
-							OutlookAccount outlookAccount = OutlookAccount.Instance;
-							OutlookStore outlookStore = new (outlookAccount);
-
-							outlookStore.MoveFolder(
-								sourcePst,
-								sourcePath,
-								destinationPst,
-								destinationPath);
+							MoveFolder(arguments);
 							break;
 						case "remove-duplicates":
 							result = RemoveDuplicates(arguments);
@@ -305,6 +293,25 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				outlookStore.MergeStores(
 					sourcePst, destinationPst);
 			}
+
+			return 0;
+		}
+
+		private static int MoveFolder(string[] arguments)
+		{
+			string sourcePst = arguments[1];
+			string sourcePath = arguments[2];
+			string destinationPst = arguments[3];
+			string destinationPath = arguments[4];
+
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new(outlookAccount);
+
+			outlookStore.MoveFolder(
+				sourcePst,
+				sourcePath,
+				destinationPst,
+				destinationPath);
 
 			return 0;
 		}
