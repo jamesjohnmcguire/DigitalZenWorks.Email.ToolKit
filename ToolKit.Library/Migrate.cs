@@ -21,12 +21,6 @@ using System.Text;
 namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
-	/// The transfer folder call back type.
-	/// </summary>
-	/// <param name="id">The folder id.</param>
-	public delegate void TransferFolderCallBackType(int id);
-
-	/// <summary>
 	/// Migrate Dbx to Pst class.
 	/// </summary>
 	public static class Migrate
