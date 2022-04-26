@@ -113,8 +113,23 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				currentFolder = rootFolder;
 
-				foreach (string part in parts)
+				for (int index = 0; index < parts.Length; index++)
 				{
+					string part = parts[index];
+
+					if (index == 0)
+					{
+						string rootFolderName = rootFolder.Name;
+
+						if (part.Equals(
+							rootFolderName,
+							StringComparison.OrdinalIgnoreCase))
+						{
+							// root, so skip over
+							continue;
+						}
+					}
+
 					currentFolder = AddFolder(currentFolder, part);
 				}
 			}
