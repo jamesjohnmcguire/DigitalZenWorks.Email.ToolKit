@@ -619,7 +619,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			string[] duplicatePatterns =
 			{
-					@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^_+", @"_\d$"
+				@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^_+(?=[a-zA-Z])+", @"_\d$"
 			};
 
 			foreach (string duplicatePattern in duplicatePatterns)
