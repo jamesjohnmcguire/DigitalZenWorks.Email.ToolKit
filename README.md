@@ -27,11 +27,12 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 | -------------------- | ------------------------------  | -------------= |
 | dbx-to-pst           | Migrate dbx files to pst file   | -e, --encoding |
 | eml-to-pst           | Migrate eml files to pst file   |                |
-| merge-folders        | Merge duplicate Outlook folders |                |
+| merge-folders        | Merge duplicate Outlook folders | -n, --dryrun   |
 | merge-stores         | Merge one store into another    |                |
+| move-folder          | Move one folder to another      |                |
 | remove-duplicates    | Remove duplicate messages       | -n, --dryrun   |
 |                      |                                 | -s, --flush    |
-| remove-empty-folders | Prune empty folders             | -n, --dryrun   |
+| remove-empty-folders | Prune empty folders             |                |
 | help                 | Display this information        |                |
 
 ##### Command line usage notes:
@@ -41,7 +42,9 @@ If the source-path is a directory, the command will attempt to process the files
 ###### Examples
 Det.exe remove-duplicates --dryrun \path\to\some.pst  
 Det.exe dbx-to-pst --encoding shift_jis \path\to\some-dbx-files  
-Det eml-to-pst "%USERPROFILE%\AppData\Local\Microsoft\Windows Live Mail\Storage Folders" %USERPROFILE%\Import.pst  
+Det.exe dbx-to-pst \path\to\some-dbx-files \path\to\some.pst  
+Det.exe eml-to-pst "%USERPROFILE%\AppData\Local\Microsoft\Windows Live Mail\Storage Folders" %USERPROFILE%\Import.pst  
+Det.exe move-folder \path\to\some.pst source\folder\path  \path\to\some.pst destination\folder\path
 
 ###### dbx-to-pst
 The optional --encoding option allows you to add a preferred encoding, in the rare case, that encoding can not be detected properly.  It must be a string that is recognized by Encoding.GetEncoding, along with Encoding.RegisterProvider(CodePagesEncodingProvider).  
@@ -55,6 +58,9 @@ Testing (1) (1)
 Testing (1) (2()  
 
 If you ever try to move or copy a folder to a place where a folder with that name exists, Outlook will add, but will give it a name an appendix like ' (1)'.  In import or export processes, often these are the exact same folders, so you can end up with multiple duplicate folders like this.  This will merge these folders into a single folder.  If there are duplicate mail items, these will copied.  So, this wil not remove the duplicate mail items (That will come in the feature release).  But, it doesn't create any duplicates and the merging of folders, is an essential precursor to the eventual duplicates removal.  
+
+###### move-folder
+The third and fifth parameters specify the folder path with Outlook itself, starting with the root folder name.  The root folder name will almost always be the same as the PST file name.  You can also check at the very top folder for the PST within Outlook.  
 
 ###### remove-duplicates
 If no PST path is provided, it will attempt to remove all duplicates in all folders in all stores of the default or current Outlook account.  
