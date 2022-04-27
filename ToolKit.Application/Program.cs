@@ -241,6 +241,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						Encoding.RegisterProvider(
 							CodePagesEncodingProvider.Instance);
 						encoding = Encoding.GetEncoding(encodingName);
+
+						break;
 					}
 				}
 			}

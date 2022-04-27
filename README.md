@@ -23,16 +23,16 @@ NOTE: Always back up any data you might be modifying.  This package has been tes
 
 DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 
-| Commands:            |                                 | options      |
-| -------------------- | ------------------------------  | ------------ |
-| dbx-to-pst           | Migrate dbx files to pst file   |              |
-| eml-to-pst           | Migrate eml files to pst file   |              |
-| merge-folders        | Merge duplicate Outlook folders |              |
-| merge-stores         | Merge one store into another    |              |
-| remove-duplicates    | Remove duplicate messages       | -n, --dryrun |
-|                      |                                 | -s, --flush  |
-| remove-empty-folders | Prune empty folders             | -n, --dryrun |
-| help                 | Display this information        |              |
+| Commands:            |                                 | options        |
+| -------------------- | ------------------------------  | -------------= |
+| dbx-to-pst           | Migrate dbx files to pst file   | -e, --encoding |
+| eml-to-pst           | Migrate eml files to pst file   |                |
+| merge-folders        | Merge duplicate Outlook folders |                |
+| merge-stores         | Merge one store into another    |                |
+| remove-duplicates    | Remove duplicate messages       | -n, --dryrun   |
+|                      |                                 | -s, --flush    |
+| remove-empty-folders | Prune empty folders             | -n, --dryrun   |
+| help                 | Display this information        |                |
 
 ##### Command line usage notes:
 The command is optional if the command can be inferred from the source-path.  For example, if the source path is a directory containing *.eml files, they will processed accordingly.  
@@ -40,9 +40,12 @@ If the source-path is a directory, the command will attempt to process the files
 
 ###### Examples
 Det.exe remove-duplicates --dryrun \path\to\some.pst  
-Det.exe dbx-to-pst \path\to\some-dbx-files  
+Det.exe dbx-to-pst --encoding shift_jis \path\to\some-dbx-files  
 Det eml-to-pst "%USERPROFILE%\AppData\Local\Microsoft\Windows Live Mail\Storage Folders" %USERPROFILE%\Import.pst  
 
+###### dbx-to-pst
+The optional --encoding option allows you to add a preferred encoding, in the rare case, that encoding can not be detected properly.  It must be a string that is recognized by Encoding.GetEncoding, along with Encoding.RegisterProvider(CodePagesEncodingProvider).  
+If a PST file location is not specified, it will use the base location of the DBX files.
 
 ###### merge-folders
 Sometimes, folders get duplicated, like in the following manner:  
