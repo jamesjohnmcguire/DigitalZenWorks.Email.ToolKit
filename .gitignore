@@ -7,9 +7,6 @@
 *.userosscache
 *.sln.docstates
 
-# User-specific files (MonoDevelop/Xamarin Studio)
-*.userprefs
-
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -26,10 +23,6 @@ bld/
 .vs/
 
 # NUNIT
-*.VisualState.xml
 TestResult.xml
 
-/SourceCode/DevelopmentTools/GoogleDriveCli/LogFiles
-/SourceCode/DevelopmentTools/GoogleDriveCli/vendor
-
-/SourceCode/DevelopmentTools/GoogleDriveCli/GoogleDriveServiceAccount.json
+ToolKit.Application/Properties/launchSettings.json
