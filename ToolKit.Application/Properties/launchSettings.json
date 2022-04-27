@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "DbxToPst": {
-      "commandName": "Project",
-      "commandLineArgs": "eml-to-pst \"%USERPROFILE%\\AppData\\Local\\Microsoft\\Windows Live Mail.bak\\Storage Folders (1)\" %USERPROFILE%\\Data\\ProgramData\\Email\\EmailStores\\PstExports\\LiveMail.pst"
-    }
-  }
-}
