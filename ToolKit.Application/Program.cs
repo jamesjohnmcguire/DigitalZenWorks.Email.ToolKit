@@ -33,7 +33,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static readonly string[] Commands =
 		{
-			"dbx-to-pst", "eml-to-pst", "help", "merge-folders",
+			"dbx-to-pst", "eml-to-pst", "help", "list", "merge-folders",
 			"merge-stores", "move-folder", "remove-duplicates",
 			"remove-empty-folders"
 		};
@@ -84,6 +84,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						case "help":
 							ShowHelp();
 							result = 0;
+							break;
+						case "list":
+							result = List(arguments);
 							break;
 						case "merge-folders":
 							result = MergeFolders(arguments);
@@ -283,6 +286,30 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			string assemblyVersion = fileVersionInfo.FileVersion;
 
 			return assemblyVersion;
+		}
+
+		private static int List(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				string pstFile = arguments[pstFileIndex];
+				string folderPath = arguments[2];
+
+				IList<string> folderNames =
+					outlookStore.ListFolders(pstFile, folderPath);
+
+				foreach (string folderName in folderNames)
+				{
+					Console.WriteLine(folderName);
+				}
+			}
+
+			return 0;
 		}
 
 		private static void LogInitialization()
@@ -560,6 +587,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				{
 					if (command.Equals(
 						"help", StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"list", StringComparison.OrdinalIgnoreCase) ||
 						command.Equals(
 						"merge-folders", StringComparison.OrdinalIgnoreCase) ||
 						command.Equals(
