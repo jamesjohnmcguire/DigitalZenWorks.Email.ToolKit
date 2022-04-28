@@ -7,6 +7,7 @@
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -161,6 +162,37 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folder;
+		}
+
+		/// <summary>
+		/// List the folders.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <param name="folderPath">The folder path to check.</param>
+		/// <returns>The folders.</returns>
+		public IList<string> ListFolders(string pstFilePath, string folderPath)
+		{
+			IList<string> folderNames = new List<string>();
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			MAPIFolder sourceFolder = OutlookFolder.CreaterFolderPath(
+				store, folderPath);
+
+			int count = sourceFolder.Folders.Count;
+			for (int index = 1; index <= count; index++)
+			{
+				MAPIFolder folder = sourceFolder.Folders[index];
+
+				string folderName = folder.Name;
+				folderNames.Add(folderName);
+
+				Marshal.ReleaseComObject(folder);
+			}
+
+			Marshal.ReleaseComObject(sourceFolder);
+
+			return folderNames;
 		}
 
 		/// <summary>
