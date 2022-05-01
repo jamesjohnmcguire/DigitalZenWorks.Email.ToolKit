@@ -196,6 +196,44 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// List the top senders in  the store.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <param name="amount">The amout of senders to list.</param>
+		/// <returns>The top senders.</returns>
+		public IList<KeyValuePair<string, int>> ListTopSenders(
+			string pstFilePath, int amount)
+		{
+			IList<KeyValuePair<string, int>> topSenders =
+				new List<KeyValuePair<string, int>>();
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			string storePath = GetStoreName(store);
+			storePath += "::";
+
+			IDictionary<string, int> sendersCounts =
+				new Dictionary<string, int>();
+
+			sendersCounts = OutlookFolder.GetSendersCount(
+				storePath, rootFolder, sendersCounts);
+
+			Marshal.ReleaseComObject(rootFolder);
+			Marshal.ReleaseComObject(store);
+
+			IOrderedEnumerable<KeyValuePair<string, int>> orderedList =
+				sendersCounts.OrderByDescending(pair => pair.Value);
+			IEnumerable<KeyValuePair<string, int>> orderedListTop =
+				orderedList.Take(amount);
+
+			topSenders = orderedListTop.ToList();
+
+			return topSenders;
+		}
+
+		/// <summary>
 		/// Merge duplicate folders.
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>
