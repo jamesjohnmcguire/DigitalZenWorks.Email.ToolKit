@@ -268,9 +268,9 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						MAPIFolder parent = folder.Parent;
 
-						// Check if root folder
-						if (parent.Parent is null ||
-							parent.Parent is not MAPIFolder)
+						bool isRoot = IsRootFolder(parent);
+
+						if (isRoot == true)
 						{
 							reserved = true;
 						}
@@ -285,6 +285,55 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return reserved;
+		}
+
+		/// <summary>
+		/// Indicates whether the given folder is the root folder.
+		/// </summary>
+		/// <param name="folder">The folder to check.</param>
+		/// <returns>A value that indicates whether the given folder is the
+		/// root folder.</returns>
+		public static bool IsRootFolder(MAPIFolder folder)
+		{
+			bool isRootFolder = false;
+
+			if (folder != null)
+			{
+				if (folder.Parent is null || folder.Parent is not MAPIFolder)
+				{
+					isRootFolder = true;
+				}
+			}
+
+			return isRootFolder;
+		}
+
+		/// <summary>
+		/// Indicates whether the given folder is a top level folder.
+		/// </summary>
+		/// <param name="folder">The folder to check.</param>
+		/// <returns>A value that indicates whether the given folder is a
+		/// top level folder.</returns>
+		public static bool IsTopLevelFolder(MAPIFolder folder)
+		{
+			bool topLevel = false;
+
+			if (folder != null)
+			{
+				if (folder.Parent is not null &&
+					folder.Parent is MAPIFolder)
+				{
+					MAPIFolder parent = folder.Parent;
+					bool isRootFolder = IsRootFolder(parent);
+
+					if (isRootFolder == true)
+					{
+						topLevel = true;
+					}
+				}
+			}
+
+			return topLevel;
 		}
 
 		/// <summary>
@@ -393,7 +442,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					CheckForDuplicateFolders(path, index, subFolder, dryRun);
 
-					if (parentName.Equals(
+					bool topLevel = IsTopLevelFolder(subFolder);
+
+					if (topLevel == false && parentName.Equals(
 						name, StringComparison.OrdinalIgnoreCase))
 					{
 						MergeFolderWithParent(path, folder, subFolder, dryRun);
