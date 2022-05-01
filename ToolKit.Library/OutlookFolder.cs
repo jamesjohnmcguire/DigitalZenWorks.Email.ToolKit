@@ -187,6 +187,49 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get senders counts.
+		/// </summary>
+		/// <param name="path">The current folder path.</param>
+		/// <param name="folder">The folder to check.</param>
+		/// <param name="sendersCounts">The current counts of senders.</param>
+		/// <returns>The count of each sender.</returns>
+		public static IDictionary<string, int> GetSendersCount(
+			string path,
+			MAPIFolder folder,
+			IDictionary<string, int> sendersCounts)
+		{
+			if (folder != null && sendersCounts != null)
+			{
+				Folders folders = folder.Folders;
+				int count = folders.Count;
+
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int index = count; index > 0; index--)
+				{
+					MAPIFolder subFolder = folder.Folders[index];
+					string name = subFolder.Name;
+
+					string subPath = path + "/" + name;
+
+					sendersCounts =
+						GetSendersCount(subPath, subFolder, sendersCounts);
+
+					Marshal.ReleaseComObject(subFolder);
+				}
+
+				Items items = folder.Items;
+				int total = items.Count;
+				string totals = total.ToString(CultureInfo.InvariantCulture);
+				Log.Info("Checking senders in: " + path + ": " + totals);
+
+				sendersCounts = GetFolderSendersCount(folder, sendersCounts);
+			}
+
+			return sendersCounts;
+		}
+
+		/// <summary>
 		/// Get sub folder from parent.
 		/// </summary>
 		/// <param name="parentFolder">The parent folder.</param>
@@ -616,6 +659,57 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return hashTable;
+		}
+
+		private static IDictionary<string, int> GetFolderSendersCount(
+			MAPIFolder folder, IDictionary<string, int> sendersCounts)
+		{
+			if (folder != null && sendersCounts != null)
+			{
+				Items items = folder.Items;
+				int total = items.Count;
+
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group will change.
+				for (int index = total; index > 0; index--)
+				{
+					object item = items[index];
+
+					switch (item)
+					{
+						case MailItem mailItem:
+							string sender = mailItem.SenderEmailAddress;
+
+							if (!string.IsNullOrWhiteSpace(sender))
+							{
+								if (sendersCounts.ContainsKey(sender))
+								{
+									sendersCounts[sender]++;
+								}
+								else
+								{
+									sendersCounts.Add(sender, 1);
+								}
+							}
+							else
+							{
+								string subject = mailItem.Subject;
+								Log.Warn(
+									"Item has no sender - subject:" + subject);
+							}
+
+							Marshal.ReleaseComObject(mailItem);
+							break;
+						default:
+							Log.Info("Ignoring item of non-MailItem type: ");
+							break;
+					}
+
+					Marshal.ReleaseComObject(item);
+				}
+			}
+
+			return sendersCounts;
 		}
 
 		private static string GetMailItemSynopses(MailItem mailItem)
