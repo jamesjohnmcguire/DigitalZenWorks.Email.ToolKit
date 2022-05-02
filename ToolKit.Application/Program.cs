@@ -88,6 +88,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						case "list-folders":
 							result = ListFolders(arguments);
 							break;
+						case "list-top-senders":
+							result = ListTopSenders(arguments);
+							break;
 						case "merge-folders":
 							result = MergeFolders(arguments);
 							break;
@@ -223,6 +226,34 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return dbxLocation;
 		}
 
+		private static int GetCount(string[] arguments)
+		{
+			int count = 25;
+
+			if (arguments.Contains("-c") ||
+				arguments.Contains("--count"))
+			{
+				for (int index = 1; index < arguments.Length; index++)
+				{
+					string argument = arguments[index];
+
+					if (argument.Equals(
+						"--count", StringComparison.OrdinalIgnoreCase) ||
+						argument.Equals(
+							"-c", StringComparison.OrdinalIgnoreCase))
+					{
+						string rawCount = arguments[index + 1];
+						count = Convert.ToInt32(
+							rawCount, CultureInfo.InvariantCulture);
+
+						break;
+					}
+				}
+			}
+
+			return count;
+		}
+
 		private static Encoding GetEncoding(string[] arguments)
 		{
 			Encoding encoding = null;
@@ -306,6 +337,36 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				foreach (string folderName in folderNames)
 				{
 					Console.WriteLine(folderName);
+				}
+			}
+
+			return 0;
+		}
+
+		private static int ListTopSenders(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				string pstFile = arguments[pstFileIndex];
+
+				int count = GetCount(arguments);
+
+				IList<KeyValuePair<string, int>> topSenders =
+					outlookStore.ListTopSenders(pstFile, count);
+
+				foreach (KeyValuePair<string, int> sender in topSenders)
+				{
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"{0}: {1}",
+						sender.Key,
+						sender.Value.ToString(CultureInfo.InvariantCulture));
+					Console.WriteLine(message);
 				}
 			}
 
@@ -589,6 +650,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						"help", StringComparison.OrdinalIgnoreCase) ||
 						command.Equals(
 						"list-folders", StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"list-top-senders",
+						StringComparison.OrdinalIgnoreCase) ||
 						command.Equals(
 						"merge-folders", StringComparison.OrdinalIgnoreCase) ||
 						command.Equals(
