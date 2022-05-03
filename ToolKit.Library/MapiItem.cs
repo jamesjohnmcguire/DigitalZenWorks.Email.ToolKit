@@ -885,6 +885,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				string billingInformation = mailItem.BillingInformation;
 				string body = mailItem.Body;
 				body = body.TrimEnd();
+
 				string categories = mailItem.Categories;
 				string cc = mailItem.CC;
 				string companies = mailItem.Companies;
@@ -894,6 +895,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				string header = mailItem.PropertyAccessor.GetProperty(
 					"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
 				string htmlBody = mailItem.HTMLBody;
+				htmlBody = HtmlEmail.Trim(htmlBody);
+
 				string messageClass = mailItem.MessageClass;
 				string mileage = mailItem.Mileage;
 				string receivedByEntryID = mailItem.ReceivedByEntryID;
