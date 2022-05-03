@@ -151,12 +151,12 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			string htmlBody = @"<BR>\r\n<BR>\r\n</FONT>\r\n" +
 				@"</P>\r\n\r\n</BODY>\r\n</HTML>";
-			string afterHtmlBody = @"<BR>\r\n<BR>\r\n</FONT>\r\n" +
+			string afterHtmlBody = @"<BR>\r\n</FONT>\r\n" +
 				@"</P>\r\n</BODY>\r\n</HTML>";
 
 			htmlBody = HtmlEmail.Trim(htmlBody);
 
-			Assert.AreEqual(htmlBody, afterHtmlBody);
+			Assert.AreEqual(afterHtmlBody, htmlBody);
 		}
 
 		/// <summary>
