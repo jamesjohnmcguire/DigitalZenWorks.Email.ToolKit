@@ -691,8 +691,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				index += 4;
 				buffer = CopyIntToByteArray(
 					buffer, index, mailItem.InternetCodepage);
-				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, mailItem.Size);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
