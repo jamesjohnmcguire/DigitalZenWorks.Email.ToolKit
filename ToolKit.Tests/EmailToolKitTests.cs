@@ -549,6 +549,30 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test for checking if RtfEmail.Trim is correct.
+		/// </summary>
+		[Test]
+		public void TestRftBodyTrim()
+		{
+			byte[] sampleBytes = new byte[]
+			{
+				32, 32, 32, 32, 32, 32, 92, 112, 97, 114, 13, 10, 92, 112, 97,
+				114, 13, 10, 92, 112, 97, 114, 13, 10, 92, 112, 97, 114, 13,
+				10, 92, 112, 97, 114, 13, 10, 92, 112, 97, 114, 13, 10, 92,
+				112, 97, 114, 13, 10, 92, 112, 97, 114, 13, 10, 125, 13, 10, 0
+			};
+			byte[] afterBytes = new byte[]
+			{
+				32, 32, 32, 32, 32, 32, 92, 112, 97, 114, 13, 10, 125, 13,
+				10, 0
+			};
+
+			sampleBytes = RtfEmail.Trim(sampleBytes);
+
+			Assert.AreEqual(sampleBytes, afterBytes);
+		}
+
+		/// <summary>
 		/// Test for sanity check.
 		/// </summary>
 		[Test]
