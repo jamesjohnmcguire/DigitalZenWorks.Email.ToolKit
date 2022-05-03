@@ -884,6 +884,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				string bcc = mailItem.BCC;
 				string billingInformation = mailItem.BillingInformation;
 				string body = mailItem.Body;
+				body = body.TrimEnd();
 				string categories = mailItem.Categories;
 				string cc = mailItem.CC;
 				string companies = mailItem.Companies;
