@@ -131,6 +131,38 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		/// Test for comparing two different MailItems by content.
 		/// </summary>
 		[Test]
+		public void TestHtmlBodyTrimBr()
+		{
+			string htmlBody = @"<BR>\r\n<BR>\r\n<BR>\r\n<BR>\r\n</FONT>\r\n" +
+				@"</P>\r\n\r\n</BODY>\r\n</HTML>";
+			string afterHtmlBody = @"<BR>\r\n</FONT>\r\n" +
+				@"</P>\r\n</BODY>\r\n</HTML>";
+
+			htmlBody = HtmlEmail.Trim(htmlBody);
+
+			Assert.AreEqual(htmlBody, afterHtmlBody);
+		}
+
+		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
+		public void TestHtmlBodyTrimLineEndings()
+		{
+			string htmlBody = @"<BR>\r\n<BR>\r\n</FONT>\r\n" +
+				@"</P>\r\n\r\n</BODY>\r\n</HTML>";
+			string afterHtmlBody = @"<BR>\r\n<BR>\r\n</FONT>\r\n" +
+				@"</P>\r\n</BODY>\r\n</HTML>";
+
+			htmlBody = HtmlEmail.Trim(htmlBody);
+
+			Assert.AreEqual(htmlBody, afterHtmlBody);
+		}
+
+		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
 		public void TestMailItemsAreNotSameByContent()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
