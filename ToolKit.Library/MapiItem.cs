@@ -252,23 +252,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return header;
 		}
 
-		private static long ArrayCopyConditional(
-			ref byte[] finalBuffer, long currentIndex, byte[] nextBuffer)
-		{
-			if (nextBuffer != null)
-			{
-				Array.Copy(
-					nextBuffer,
-					0,
-					finalBuffer,
-					currentIndex,
-					nextBuffer.LongLength);
-				currentIndex += nextBuffer.LongLength;
-			}
-
-			return currentIndex;
-		}
-
 		private static byte[] CopyIntToByteArray(
 			byte[] bytes, long index, int value)
 		{
@@ -821,21 +804,21 @@ namespace DigitalZenWorks.Email.ToolKit
 					finalBuffer = new byte[bufferSize];
 
 					// combine the parts
-					long currentIndex = ArrayCopyConditional(
-						ref finalBuffer, 0, actions);
+					long currentIndex = BitBytes.ArrayCopyConditional(
+						actions, ref finalBuffer, 0);
 
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, attachments);
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, dateTimes);
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, enums);
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, rtfBody);
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, strings);
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, userProperties);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						attachments, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						dateTimes, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						enums, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						rtfBody, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						strings, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						userProperties, ref finalBuffer, currentIndex);
 
 					finalBuffer = CopyUshortToByteArray(
 						finalBuffer, currentIndex, booleans);
