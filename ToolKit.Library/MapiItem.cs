@@ -772,6 +772,11 @@ namespace DigitalZenWorks.Email.ToolKit
 							mailItem.Subject);
 					}
 
+					if (rtfBody != null)
+					{
+						rtfBody = RtfEmail.Trim(rtfBody);
+					}
+
 					byte[] strings = GetStringProperties(mailItem);
 					byte[] userProperties = GetUserProperties(mailItem);
 
@@ -915,6 +920,12 @@ namespace DigitalZenWorks.Email.ToolKit
 				string flagRequest = mailItem.FlagRequest;
 				string header = mailItem.PropertyAccessor.GetProperty(
 					"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
+
+				if (header != null)
+				{
+					header = RemoveMimeOleVersion(header);
+				}
+
 				string htmlBody = mailItem.HTMLBody;
 
 				if (htmlBody != null)
