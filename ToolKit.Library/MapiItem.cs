@@ -367,7 +367,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return actions;
@@ -450,7 +450,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return attachments;
@@ -483,7 +483,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return allBody;
@@ -545,7 +545,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			catch (COMException exception)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return boolHolder;
@@ -659,7 +659,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return data;
@@ -762,9 +762,9 @@ namespace DigitalZenWorks.Email.ToolKit
 							"yyyy-MM-dd HH:mm:ss",
 							CultureInfo.InvariantCulture);
 
-						Log.Error("Exception on RTFBody at: " + path);
+						Log.Warn("Exception on RTFBody at: " + path);
 
-						LogFormatMessage.Error(
+						LogFormatMessage.Warn(
 							"Item: {0}: From: {1}: {2} Subject: {3}",
 							sentOn,
 							mailItem.SenderName,
@@ -1061,7 +1061,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return properties;
