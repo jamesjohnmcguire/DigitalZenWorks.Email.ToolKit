@@ -5,6 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 using Common.Logging;
+using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
@@ -352,7 +353,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						actions = MergeByteArrays(actions, metaDataBytes);
+						actions = BitBytes.MergeByteArrays(actions, metaDataBytes);
 					}
 
 					Marshal.ReleaseComObject(action);
@@ -427,8 +428,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						attachments =
-							MergeByteArrays(attachments, metaDataBytes);
+						attachments = BitBytes.MergeByteArrays(
+							attachments, metaDataBytes);
 					}
 
 					string filePath = basePath + attachment.FileName;
@@ -436,7 +437,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					byte[] fileBytes = File.ReadAllBytes(filePath);
 
-					attachments = MergeByteArrays(attachments, fileBytes);
+					attachments =
+						BitBytes.MergeByteArrays(attachments, fileBytes);
 
 					Marshal.ReleaseComObject(attachment);
 				}
@@ -471,8 +473,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				byte[] htmlBodyBytes = encoding.GetBytes(htmlBody);
 				byte[] rtfBody = mailItem.RTFBody as byte[];
 
-				allBody = MergeByteArrays(bodyBytes, htmlBodyBytes);
-				allBody = MergeByteArrays(allBody, rtfBody);
+				allBody = BitBytes.MergeByteArrays(bodyBytes, htmlBodyBytes);
+				allBody = BitBytes.MergeByteArrays(allBody, rtfBody);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -1081,8 +1083,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						properties =
-							MergeByteArrays(properties, metaDataBytes);
+						properties = BitBytes.MergeByteArrays(
+							properties, metaDataBytes);
 					}
 
 					Marshal.ReleaseComObject(property);
@@ -1118,42 +1120,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				mailItem.SenderName,
 				mailItem.SenderEmailAddress,
 				mailItem.Subject);
-		}
-
-		private static byte[] MergeByteArrays(byte[] buffer1, byte[] buffer2)
-		{
-			byte[] newBuffer = null;
-
-			try
-			{
-				Encoding encoding = Encoding.UTF8;
-
-				long bufferSize =
-					buffer1.LongLength + buffer2.LongLength;
-				newBuffer = new byte[bufferSize];
-
-				// combine the parts
-				Array.Copy(buffer1, newBuffer, buffer1.LongLength);
-
-				Array.Copy(
-					buffer2,
-					0,
-					newBuffer,
-					buffer1.LongLength,
-					buffer2.LongLength);
-			}
-			catch (System.Exception exception) when
-			(exception is ArgumentException ||
-			exception is ArgumentNullException ||
-			exception is ArgumentOutOfRangeException ||
-			exception is ArrayTypeMismatchException ||
-			exception is InvalidCastException ||
-			exception is RankException)
-			{
-				Log.Error(exception.ToString());
-			}
-
-			return newBuffer;
 		}
 
 		private static byte SetBit(byte holder, byte bitIndex, bool value)
