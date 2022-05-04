@@ -252,38 +252,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return header;
 		}
 
-		private static byte[] CopyIntToByteArray(
-			byte[] bytes, long index, int value)
-		{
-			byte byteValue1 = (byte)value;
-			byte byteValue2 = (byte)(value >> 8);
-			byte byteValue3 = (byte)(value >> 0x10);
-			byte byteValue4 = (byte)(value >> 0x18);
-
-			bytes[index] = byteValue1;
-			index++;
-			bytes[index] = byteValue2;
-			index++;
-			bytes[index] = byteValue3;
-			index++;
-			bytes[index] = byteValue4;
-
-			return bytes;
-		}
-
-		private static byte[] CopyUshortToByteArray(
-			byte[] bytes, long index, ushort value)
-		{
-			byte byteValue1 = (byte)value;
-			byte byteValue2 = (byte)(value >> 8);
-
-			bytes[index] = byteValue1;
-			index++;
-			bytes[index] = byteValue2;
-
-			return bytes;
-		}
-
 		private static byte[] GetActions(MailItem mailItem)
 		{
 			byte[] actions = null;
@@ -704,21 +672,27 @@ namespace DigitalZenWorks.Email.ToolKit
 				buffer = new byte[bufferSize];
 
 				int index = 0;
-				buffer = CopyIntToByteArray(buffer, index, bodyFormat);
+				buffer =
+					BitBytes.CopyIntToByteArray(buffer, index, bodyFormat);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, itemClass);
+				buffer = BitBytes.CopyIntToByteArray(buffer, index, itemClass);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, importance);
+				buffer =
+					BitBytes.CopyIntToByteArray(buffer, index, importance);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, markForDownload);
+				buffer = BitBytes.CopyIntToByteArray(
+					buffer, index, markForDownload);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, permission);
+				buffer =
+					BitBytes.CopyIntToByteArray(buffer, index, permission);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, permissionService);
+				buffer = BitBytes.CopyIntToByteArray(
+					buffer, index, permissionService);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, sensitivity);
+				buffer =
+					BitBytes.CopyIntToByteArray(buffer, index, sensitivity);
 				index += 4;
-				buffer = CopyIntToByteArray(
+				buffer = BitBytes.CopyIntToByteArray(
 					buffer, index, mailItem.InternetCodepage);
 			}
 			catch (System.Exception exception) when
@@ -820,7 +794,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					currentIndex = BitBytes.ArrayCopyConditional(
 						userProperties, ref finalBuffer, currentIndex);
 
-					finalBuffer = CopyUshortToByteArray(
+					finalBuffer = BitBytes.CopyUshortToByteArray(
 						finalBuffer, currentIndex, booleans);
 				}
 			}
