@@ -13,6 +13,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -234,6 +235,22 @@ namespace DigitalZenWorks.Email.ToolKit
 			Marshal.ReleaseComObject(item);
 		}
 
+		/// <summary>
+		/// Removes the MimeOLE version number.
+		/// </summary>
+		/// <param name="header">The header to check.</param>
+		/// <returns>The modified header.</returns>
+		public static string RemoveMimeOleVersion(string header)
+		{
+			string pattern = @"(?<=Produced By Microsoft MimeOLE)" +
+				@" V(\d+)\.(\d+)\.(\d+)\.(\d+)";
+
+			header = Regex.Replace(
+				header, pattern, string.Empty, RegexOptions.ExplicitCapture);
+
+			return header;
+		}
+
 		private static long ArrayCopyConditional(
 			ref byte[] finalBuffer, long currentIndex, byte[] nextBuffer)
 		{
@@ -350,7 +367,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return actions;
@@ -398,7 +415,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						metaData += attachment.PathName;
 					}
-					catch (System.Runtime.InteropServices.COMException)
+					catch (COMException)
 					{
 					}
 
@@ -433,7 +450,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return attachments;
@@ -466,7 +483,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return allBody;
@@ -478,7 +495,16 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				bool rawValue = mailItem.AlternateRecipientAllowed;
+				bool rawValue = false;
+
+				try
+				{
+					rawValue = mailItem.AlternateRecipientAllowed;
+				}
+				catch (COMException)
+				{
+				}
+
 				boolHolder = SetBit(boolHolder, 0, rawValue);
 
 				rawValue = mailItem.AutoForwarded;
@@ -528,7 +554,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			catch (COMException exception)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return boolHolder;
@@ -591,8 +617,17 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				DateTime deferredDeliveryTimeDateTime =
-					mailItem.DeferredDeliveryTime;
+				DateTime deferredDeliveryTimeDateTime = DateTime.MinValue;
+
+				try
+				{
+					deferredDeliveryTimeDateTime =
+						mailItem.DeferredDeliveryTime;
+				}
+				catch (COMException)
+				{
+				}
+
 				DateTime expiryTimeDateTime = mailItem.ExpiryTime;
 				DateTime receivedTimeDateTime = mailItem.ReceivedTime;
 				DateTime reminderTimeDateTime = mailItem.ReminderTime;
@@ -642,7 +677,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return data;
@@ -654,7 +689,16 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				int bodyFormat = (int)mailItem.BodyFormat;
+				int bodyFormat = 0;
+
+				try
+				{
+					bodyFormat = (int)mailItem.BodyFormat;
+				}
+				catch (COMException)
+				{
+				}
+
 				int itemClass = (int)mailItem.Class;
 				int importance = (int)mailItem.Importance;
 				int markForDownload = (int)mailItem.MarkForDownload;
@@ -691,8 +735,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				index += 4;
 				buffer = CopyIntToByteArray(
 					buffer, index, mailItem.InternetCodepage);
-				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, mailItem.Size);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -747,14 +789,19 @@ namespace DigitalZenWorks.Email.ToolKit
 							"yyyy-MM-dd HH:mm:ss",
 							CultureInfo.InvariantCulture);
 
-						Log.Error("Exception on RTFBody at: " + path);
+						Log.Warn("Exception on RTFBody at: " + path);
 
-						LogFormatMessage.Error(
+						LogFormatMessage.Warn(
 							"Item: {0}: From: {1}: {2} Subject: {3}",
 							sentOn,
 							mailItem.SenderName,
 							mailItem.SenderEmailAddress,
 							mailItem.Subject);
+					}
+
+					if (rtfBody != null)
+					{
+						rtfBody = RtfEmail.Trim(rtfBody);
 					}
 
 					byte[] strings = GetStringProperties(mailItem);
@@ -884,8 +931,23 @@ namespace DigitalZenWorks.Email.ToolKit
 			try
 			{
 				string bcc = mailItem.BCC;
-				string billingInformation = mailItem.BillingInformation;
+				string billingInformation = null;
+
+				try
+				{
+					billingInformation = mailItem.BillingInformation;
+				}
+				catch (COMException)
+				{
+				}
+
 				string body = mailItem.Body;
+
+				if (body != null)
+				{
+					body = body.TrimEnd();
+				}
+
 				string categories = mailItem.Categories;
 				string cc = mailItem.CC;
 				string companies = mailItem.Companies;
@@ -894,7 +956,19 @@ namespace DigitalZenWorks.Email.ToolKit
 				string flagRequest = mailItem.FlagRequest;
 				string header = mailItem.PropertyAccessor.GetProperty(
 					"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
+
+				if (header != null)
+				{
+					header = RemoveMimeOleVersion(header);
+				}
+
 				string htmlBody = mailItem.HTMLBody;
+
+				if (htmlBody != null)
+				{
+					htmlBody = HtmlEmail.Trim(htmlBody);
+				}
+
 				string messageClass = mailItem.MessageClass;
 				string mileage = mailItem.Mileage;
 				string receivedByEntryID = mailItem.ReceivedByEntryID;
@@ -1023,7 +1097,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return properties;
