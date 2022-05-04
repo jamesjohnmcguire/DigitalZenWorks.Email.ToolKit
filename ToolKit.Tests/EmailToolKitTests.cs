@@ -149,10 +149,13 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[Test]
 		public void TestHtmlBodyTrimLineEndings()
 		{
-			string htmlBody = @"<BR>\r\n<BR>\r\n</FONT>\r\n" +
-				@"</P>\r\n\r\n</BODY>\r\n</HTML>";
-			string afterHtmlBody = @"<BR>\r\n</FONT>\r\n" +
-				@"</P>\r\n</BODY>\r\n</HTML>";
+			string htmlBody = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+				"&nbsp;&nbsp;&nbsp;<BR>\r\n<BR>\r\n<BR>\r\n<BR>\r\n<BR>\r\n" +
+				"<BR>\r\n<BR>\r\n</FONT>\r\n</P>\r\n\r\n</BODY>\r\n</HTML>";
+
+			string afterHtmlBody = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+				"&nbsp;&nbsp;&nbsp;" +
+				"<BR>\r\n</FONT>\r\n</P>\r\n</BODY>\r\n</HTML>";
 
 			htmlBody = HtmlEmail.Trim(htmlBody);
 
