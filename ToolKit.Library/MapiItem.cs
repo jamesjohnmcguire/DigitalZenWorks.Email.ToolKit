@@ -13,6 +13,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -232,6 +233,22 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			Marshal.ReleaseComObject(item);
+		}
+
+		/// <summary>
+		/// Removes the MimeOLE version number.
+		/// </summary>
+		/// <param name="header">The header to check.</param>
+		/// <returns>The modified header.</returns>
+		public static string RemoveMimeOleVersion(string header)
+		{
+			string pattern = @"(?<=Produced By Microsoft MimeOLE)" +
+				@" V(\d+)\.(\d+)\.(\d+)\.(\d+)";
+
+			header = Regex.Replace(
+				header, pattern, string.Empty, RegexOptions.ExplicitCapture);
+
+			return header;
 		}
 
 		private static long ArrayCopyConditional(
