@@ -4,20 +4,29 @@ This is a C# application and library for interacting with email messages and sto
 
 ## Getting Started
 
-### Prerequisites
+### Installation
+#### Downloading the Program
+
+If you are just interested in using the program, you can download the latest release by the following process:
+
+1 Go to the releases tab !["GitHub Release Tab"](GitHub1.png "GitHub Release Tab")  
+2 Then choose a package of your preferred choice !["Packages"](GitHub2.png "Packages")  
+
+Refer to 'Usage' section below.  
+
+#### Git
+    git clone --recurse-submodules https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit  
 
 This project includes the [DbxOutlookExpress project](https://github.com/jamesjohnmcguire/DbxOutlookExpress) as a submodule.  So, be sure to include submodules when retreiving the repository contents. 
 
-### Installation
-#### Git
-git clone --recurse-submodules https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
-
 #### Nuget
-PM> Install-Package DigitalZenWorks.Email.ToolKit
+    PM> Install-Package DigitalZenWorks.Email.ToolKit
 
 ### Usage:
 
 NOTE: Always back up any data you might be modifying.  This package has been tested with hundreds of thousands of messages, about 50 GBs of data, without any problems.  But there can always be a first.  So, please back up your data before using this tool.  Did I mention that you should back up?  
+
+This is, currently, a command line program to be run from the command line or terminal.  
 
 #### Command line usage:
 
