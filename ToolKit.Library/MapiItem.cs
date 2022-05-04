@@ -415,7 +415,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						metaData += attachment.PathName;
 					}
-					catch (System.Runtime.InteropServices.COMException)
+					catch (COMException)
 					{
 					}
 
@@ -495,7 +495,16 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				bool rawValue = mailItem.AlternateRecipientAllowed;
+				bool rawValue = false;
+
+				try
+				{
+					rawValue = mailItem.AlternateRecipientAllowed;
+				}
+				catch (COMException)
+				{
+				}
+
 				boolHolder = SetBit(boolHolder, 0, rawValue);
 
 				rawValue = mailItem.AutoForwarded;
@@ -608,8 +617,17 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				DateTime deferredDeliveryTimeDateTime =
-					mailItem.DeferredDeliveryTime;
+				DateTime deferredDeliveryTimeDateTime = DateTime.MinValue;
+
+				try
+				{
+					deferredDeliveryTimeDateTime =
+						mailItem.DeferredDeliveryTime;
+				}
+				catch (COMException)
+				{
+				}
+
 				DateTime expiryTimeDateTime = mailItem.ExpiryTime;
 				DateTime receivedTimeDateTime = mailItem.ReceivedTime;
 				DateTime reminderTimeDateTime = mailItem.ReminderTime;
@@ -671,7 +689,16 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				int bodyFormat = (int)mailItem.BodyFormat;
+				int bodyFormat = 0;
+
+				try
+				{
+					bodyFormat = (int)mailItem.BodyFormat;
+				}
+				catch (COMException)
+				{
+				}
+
 				int itemClass = (int)mailItem.Class;
 				int importance = (int)mailItem.Importance;
 				int markForDownload = (int)mailItem.MarkForDownload;
@@ -904,7 +931,16 @@ namespace DigitalZenWorks.Email.ToolKit
 			try
 			{
 				string bcc = mailItem.BCC;
-				string billingInformation = mailItem.BillingInformation;
+				string billingInformation = null;
+
+				try
+				{
+					billingInformation = mailItem.BillingInformation;
+				}
+				catch (COMException)
+				{
+				}
+
 				string body = mailItem.Body;
 
 				if (body != null)
