@@ -25,13 +25,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The trimmed HTML body.</returns>
 		public static string Trim(string htmlBody)
 		{
-			string pattern = @"(\\r\\n)+(?=\\r\\n</BODY>\\r\\n</HTML>$)";
+			string pattern = @"(\r\n)+(?=\r\n<\/BODY>\r\n<\/HTML>$)";
 
 			htmlBody = Regex.Replace(
 				htmlBody, pattern, string.Empty, RegexOptions.ExplicitCapture);
 
-			pattern = @"(<BR>\\r\\n)+(?=<BR>\\r\\n</FONT>\\r\\n" +
-				@"</P>\\r\\n</BODY>\\r\\n</HTML>$)";
+			pattern = @"(<BR>\r\n)+(?=<BR>\r\n<\/FONT>\r\n" +
+				@"<\/P>\r\n<\/BODY>\r\n<\/HTML>$)";
 
 			htmlBody = Regex.Replace(
 				htmlBody, pattern, string.Empty, RegexOptions.ExplicitCapture);
