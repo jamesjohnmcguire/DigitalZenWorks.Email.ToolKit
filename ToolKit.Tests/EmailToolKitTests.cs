@@ -549,6 +549,28 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
+		public void TestRemoveMimeOleVersion()
+		{
+			string header = @"X-Priority: 3\r\nX-MSMail-Priority: Normal\r\n" +
+				@"X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2900.2180" +
+				@"\r\nFrom: <admin@example.com>\r\nTo: " +
+				@"<somebody@example.com>,\t<somebodyelse@example.com>\r\n" +
+				@"Subject: Subject Statement\r\n";
+			string afterHeader = @"X-Priority: 3\r\nX-MSMail-Priority: " +
+				@"Normal\r\nX-MimeOLE: Produced By Microsoft MimeOLE" +
+				@"\r\nFrom: <admin@example.com>\r\nTo: " +
+				@"<somebody@example.com>,\t<somebodyelse@example.com>\r\n" +
+				@"Subject: Subject Statement\r\n";
+
+			header = MapiItem.RemoveMimeOleVersion(header);
+
+			Assert.AreEqual(afterHeader, header);
+		}
+
+		/// <summary>
 		/// Test for checking if RtfEmail.Trim is correct.
 		/// </summary>
 		[Test]
