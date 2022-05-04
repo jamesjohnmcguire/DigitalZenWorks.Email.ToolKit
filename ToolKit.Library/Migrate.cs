@@ -21,12 +21,6 @@ using System.Text;
 namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
-	/// The transfer folder call back type.
-	/// </summary>
-	/// <param name="id">The folder id.</param>
-	public delegate void TransferFolderCallBackType(int id);
-
-	/// <summary>
 	/// Migrate Dbx to Pst class.
 	/// </summary>
 	public static class Migrate
@@ -43,19 +37,21 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static void DbxDirectoryToPst(
 			string dbxFoldersPath, string pstPath)
 		{
+			DbxDirectoryToPst(dbxFoldersPath, pstPath, null);
+		}
+
+		/// <summary>
+		/// Dbx directory to pst.
+		/// </summary>
+		/// <param name="dbxFoldersPath">The path to dbx folders to
+		/// migrate.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <param name="encoding">The optional encoding to use.</param>
+		public static void DbxDirectoryToPst(
+			string dbxFoldersPath, string pstPath, Encoding encoding)
+		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 
-			// Personal preference... For me, most of these types will
-			// likely be Japansese.
-			Encoding.RegisterProvider(
-				CodePagesEncodingProvider.Instance);
-			Encoding encoding = Encoding.GetEncoding("shift_jis");
-
-			DbxSet dbxSet = new (dbxFoldersPath, encoding);
-
-			// Order the list, so that parents always come before their
-			// children.
-			dbxSet.SetTreeOrdered();
 			Store pstStore = outlookAccount.GetStore(pstPath);
 
 			if (pstStore == null)
@@ -64,6 +60,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
+				DbxSet dbxSet = new (dbxFoldersPath, encoding);
+
+				// Order the list, so that parents always come before their
+				// children.
+				dbxSet.SetTreeOrdered();
+
 				DbxFolder dbxFolder;
 				OutlookFolder outlookFolder = new (outlookAccount);
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
@@ -98,18 +100,24 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		public static void DbxFileToPst(string filePath, string pstPath)
 		{
-			// Personal preference... For me, most of these types will
-			// likely be Japansese.
-			Encoding.RegisterProvider(
-				CodePagesEncodingProvider.Instance);
-			Encoding encoding = Encoding.GetEncoding("shift_jis");
+			DbxFileToPst(filePath, pstPath, null);
+		}
 
+		/// <summary>
+		/// Dbx files to pst.
+		/// </summary>
+		/// <param name="filePath">The file path to migrate.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <param name="encoding">The optional encoding to use.</param>
+		public static void DbxFileToPst(
+			string filePath, string pstPath, Encoding encoding)
+		{
 			FileInfo fileInfo = new (filePath);
 
 			if (fileInfo.Name.Equals(
 				"Folders.dbx", StringComparison.OrdinalIgnoreCase))
 			{
-				DbxDirectoryToPst(filePath, pstPath);
+				DbxDirectoryToPst(filePath, pstPath, encoding);
 			}
 			else
 			{
@@ -142,18 +150,31 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		public static bool DbxToPst(string path, string pstPath)
 		{
+			return DbxToPst(path, pstPath, null);
+		}
+
+		/// <summary>
+		/// Dbx to pst.
+		/// </summary>
+		/// <param name="path">the path of the dbx element.</param>
+		/// <returns>A value indicating success or not.</returns>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <param name="encoding">The optional encoding to use.</param>
+		public static bool DbxToPst(
+		string path, string pstPath, Encoding encoding)
+		{
 			bool result = false;
 
 			Log.Info("Checking file: " + path);
 
 			if (Directory.Exists(path))
 			{
-				DbxDirectoryToPst(path, pstPath);
+				DbxDirectoryToPst(path, pstPath, encoding);
 				result = true;
 			}
 			else if (File.Exists(path))
 			{
-				DbxFileToPst(path, pstPath);
+				DbxFileToPst(path, pstPath, encoding);
 				result = true;
 			}
 			else

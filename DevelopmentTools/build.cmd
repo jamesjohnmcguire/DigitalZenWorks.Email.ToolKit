@@ -15,9 +15,8 @@ GOTO end
 
 :publish
 
-msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -restore -target:rebuild ToolKit.Library
+msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library;TargetFramework=net6.0-windows -restore -target:rebuild ToolKit.Library
 msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -target:pack ToolKit.Library
-
 cd ToolKit.Library\Bin\Release\Library
 nuget push DigitalZenWorks.Email.ToolKit.%2.nupkg %3 -Source https://api.nuget.org/v3/index.json
 GOTO end
