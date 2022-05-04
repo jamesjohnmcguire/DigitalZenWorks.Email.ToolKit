@@ -180,5 +180,31 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			Log.Info(message);
 		}
+
+		/// <summary>
+		/// Sends an error log message.
+		/// </summary>
+		/// <param name="template">The format template to use.</param>
+		/// <param name="parameter1">The first parameter.</param>
+		/// <param name="parameter2">The second parameter.</param>
+		/// <param name="parameter3">The third parameter.</param>
+		/// <param name="parameter4">The fourth parameter.</param>
+		public static void Warn(
+			string template,
+			string parameter1,
+			string parameter2,
+			string parameter3,
+			string parameter4)
+		{
+			string message = string.Format(
+				CultureInfo.InvariantCulture,
+				template,
+				parameter1,
+				parameter2,
+				parameter3,
+				parameter4);
+
+			Log.Warn(message);
+		}
 	}
 }
