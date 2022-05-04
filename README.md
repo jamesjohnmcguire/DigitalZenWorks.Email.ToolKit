@@ -30,10 +30,10 @@ This is, currently, a command line program to be run from the command line or te
 
 #### Command line usage:
 
-DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
+DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>  
 
 | Commands:            |                                 | options        |
-| -------------------- | ------------------------------  | -------------= |
+| -------------------- | ------------------------------  | -------------- |
 | dbx-to-pst           | Migrate dbx files to pst file   | -e, --encoding |
 | eml-to-pst           | Migrate eml files to pst file   |                |
 | merge-folders        | Merge duplicate Outlook folders | -n, --dryrun   |
