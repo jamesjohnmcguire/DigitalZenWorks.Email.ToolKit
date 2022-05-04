@@ -297,6 +297,57 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Move folder.
+		/// </summary>
+		/// <param name="sourcePstPath">The source PST path.</param>
+		/// <param name="sourceFolderPath">The source folder path.</param>
+		/// <param name="destinationPstPath">The desination PST path.</param>
+		/// <param name="destinationFolderPath">The destination folder path.</param>
+		public void MoveFolder(
+			string sourcePstPath,
+			string sourceFolderPath,
+			string destinationPstPath,
+			string destinationFolderPath)
+		{
+			Store source = outlookAccount.GetStore(sourcePstPath);
+			Store destination = outlookAccount.GetStore(destinationPstPath);
+
+			MoveFolder(
+				source, sourceFolderPath, destination, destinationFolderPath);
+		}
+
+		/// <summary>
+		/// Move folder.
+		/// </summary>
+		/// <param name="source">The source store.</param>
+		/// <param name="sourceFolderPath">The source folder path.</param>
+		/// <param name="destination">The destination store.</param>
+		/// <param name="destinationFolderPath">The destination folder path.</param>
+		public void MoveFolder(
+			Store source,
+			string sourceFolderPath,
+			Store destination,
+			string destinationFolderPath)
+		{
+			if (source != null)
+			{
+				MAPIFolder sourceFolder = OutlookFolder.CreaterFolderPath(
+					source, sourceFolderPath);
+				MAPIFolder destinationFolder = OutlookFolder.CreaterFolderPath(
+					destination, destinationFolderPath);
+
+				OutlookFolder outlookFolder = new (outlookAccount);
+
+				outlookFolder.MoveFolderContents(
+					destinationFolderPath, sourceFolder, destinationFolder);
+
+				// Once all the items have been moved,
+				// now remove the folder.
+				sourceFolder.Delete();
+			}
+		}
+
+		/// <summary>
 		/// Remove duplicates items from the given store.
 		/// </summary>
 		/// <param name="storePath">The path of the PST file to
@@ -334,8 +385,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				int[] duplicateCounts =
-					outlookFolder.RemoveDuplicates(
+				int[] duplicateCounts = outlookFolder.RemoveDuplicates(
 						storePath, rootFolder, dryRun);
 
 				if (flush == true)

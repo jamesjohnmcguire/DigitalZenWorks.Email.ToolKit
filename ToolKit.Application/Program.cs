@@ -16,7 +16,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
+using System.Text;
 using CommonLogging = Common.Logging;
 
 [assembly: CLSCompliant(true)]
@@ -34,7 +34,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static readonly string[] Commands =
 		{
 			"dbx-to-pst", "eml-to-pst", "help", "merge-folders",
-			"merge-stores", "remove-duplicates", "remove-empty-folders"
+			"merge-stores", "move-folder", "remove-duplicates",
+			"remove-empty-folders"
 		};
 
 		/// <summary>
@@ -66,11 +67,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					switch (command)
 					{
 						case "dbx-to-pst":
-							string dbxLocation = arguments[1];
+							string dbxLocation = GetDbxLocation(arguments);
+
 							pstLocation =
 								GetPstLocation(arguments, dbxLocation, 2);
 
-							result = DbxToPst(dbxLocation, pstLocation);
+							result = DbxToPst(arguments, dbxLocation, pstLocation);
 							break;
 						case "eml-to-pst":
 							string emlLocation = arguments[1];
@@ -88,6 +90,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							break;
 						case "merge-stores":
 							result = MergeStores(arguments);
+							break;
+						case "move-folder":
+							MoveFolder(arguments);
 							break;
 						case "remove-duplicates":
 							result = RemoveDuplicates(arguments);
@@ -138,11 +143,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return pstFileIndex;
 		}
 
-		private static int DbxToPst(string dbxLocation, string pstLocation)
+		private static int DbxToPst(
+			string[] arguments, string dbxLocation, string pstLocation)
 		{
 			int result = -1;
+			Encoding encoding = GetEncoding(arguments);
 
-			bool success = Migrate.DbxToPst(dbxLocation, pstLocation);
+			bool success = Migrate.DbxToPst(
+				dbxLocation, pstLocation, encoding);
 
 			if (success == true)
 			{
@@ -187,6 +195,59 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return fileVersionInfo;
+		}
+
+		private static string GetDbxLocation(string[] arguments)
+		{
+			string dbxLocation = null;
+
+			for (int index = 1; index < arguments.Length; index++)
+			{
+				string argument = arguments[index];
+
+				if (argument.Equals(
+					"--encoding", StringComparison.OrdinalIgnoreCase) ||
+					argument.Equals(
+						"-e", StringComparison.OrdinalIgnoreCase))
+				{
+					index += 2;
+
+					dbxLocation = arguments[index];
+					break;
+				}
+			}
+
+			return dbxLocation;
+		}
+
+		private static Encoding GetEncoding(string[] arguments)
+		{
+			Encoding encoding = null;
+
+			if (arguments.Contains("-e") ||
+				arguments.Contains("--encoding"))
+			{
+				for (int index = 1; index < arguments.Length; index++)
+				{
+					string argument = arguments[index];
+
+					if (argument.Equals(
+						"--encoding", StringComparison.OrdinalIgnoreCase) ||
+						argument.Equals(
+							"-e", StringComparison.OrdinalIgnoreCase))
+					{
+						string encodingName = arguments[index + 1];
+
+						Encoding.RegisterProvider(
+							CodePagesEncodingProvider.Instance);
+						encoding = Encoding.GetEncoding(encodingName);
+
+						break;
+					}
+				}
+			}
+
+			return encoding;
 		}
 
 		private static string GetPstLocation(
@@ -293,6 +354,25 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return 0;
 		}
 
+		private static int MoveFolder(string[] arguments)
+		{
+			string sourcePst = arguments[1];
+			string sourcePath = arguments[2];
+			string destinationPst = arguments[3];
+			string destinationPath = arguments[4];
+
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			outlookStore.MoveFolder(
+				sourcePst,
+				sourcePath,
+				destinationPst,
+				destinationPath);
+
+			return 0;
+		}
+
 		private static int ProcessDirect(string[] arguments)
 		{
 			int result = -1;
@@ -304,11 +384,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				string pstLocation = GetPstLocation(arguments, location, 1);
 				if (Directory.Exists(location))
 				{
-					result = ProcessDirectDirectory(location, pstLocation);
+					result = ProcessDirectDirectory(
+						arguments, location, pstLocation);
 				}
 				else if (File.Exists(location))
 				{
-					result = ProcessDirectFile(location, pstLocation);
+					result =
+						ProcessDirectFile(arguments, location, pstLocation);
 				}
 				else
 				{
@@ -322,7 +404,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		}
 
 		private static int ProcessDirectDirectory(
-			string location, string pstLocation)
+			string[] arguments, string location, string pstLocation)
 		{
 			int result = -1;
 
@@ -330,7 +412,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			if (files.Length > 0)
 			{
-				result = DbxToPst(location, pstLocation);
+				result = DbxToPst(arguments, location, pstLocation);
 			}
 			else
 			{
@@ -346,7 +428,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		}
 
 		private static int ProcessDirectFile(
-			string location, string pstLocation)
+			string[] arguments, string location, string pstLocation)
 		{
 			int result = -1;
 
@@ -354,7 +436,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			if (extension.Equals(".dbx", StringComparison.Ordinal))
 			{
-				result = DbxToPst(location, pstLocation);
+				result = DbxToPst(arguments, location, pstLocation);
 			}
 			else if (extension.Equals(".eml", StringComparison.Ordinal) ||
 				extension.Equals(".txt", StringComparison.Ordinal))
@@ -488,6 +570,25 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						StringComparison.OrdinalIgnoreCase))
 					{
 						valid = true;
+					}
+					else if (command.Equals(
+						"dbx-to-pst", StringComparison.OrdinalIgnoreCase))
+					{
+						string dbxLocation = GetDbxLocation(arguments);
+
+						if (Directory.Exists(dbxLocation) ||
+							File.Exists(dbxLocation))
+						{
+							valid = true;
+						}
+					}
+					else if (command.Equals(
+						"move-folder", StringComparison.OrdinalIgnoreCase))
+					{
+						if (arguments.Length > 4)
+						{
+							valid = true;
+						}
 					}
 					else if (arguments.Length > 1)
 					{
