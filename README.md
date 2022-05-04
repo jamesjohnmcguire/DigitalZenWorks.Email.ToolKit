@@ -10,7 +10,8 @@ This is a C# application and library for interacting with email messages and sto
 If you are just interested in using the program, you can download the latest release by the following process:
 
 1 Go to the releases tab !["GitHub Release Tab"](GitHub1.png "GitHub Release Tab")  
-2 Then choose a package of your preferred choice !["Packages"](GitHub2.png "Packages")  
+2 Then choose the DigitalZenWorks.Email.ToolKit.zip package !["Packages"](GitHub2.png "Packages")  
+3 Unzip the files somewhere accessable on your PATH  
 
 Refer to 'Usage' section below.  
 
