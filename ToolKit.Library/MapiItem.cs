@@ -458,52 +458,52 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 				}
 
-				boolHolder = SetBit(boolHolder, 0, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 0, rawValue);
 
 				rawValue = mailItem.AutoForwarded;
-				boolHolder = SetBit(boolHolder, 1, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 1, rawValue);
 
 				rawValue = mailItem.AutoResolvedWinner;
-				boolHolder = SetBit(boolHolder, 2, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 2, rawValue);
 
 				rawValue = mailItem.DeleteAfterSubmit;
-				boolHolder = SetBit(boolHolder, 3, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 3, rawValue);
 
 				rawValue = mailItem.IsMarkedAsTask;
-				boolHolder = SetBit(boolHolder, 4, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 4, rawValue);
 
 				rawValue = mailItem.NoAging;
-				boolHolder = SetBit(boolHolder, 5, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 5, rawValue);
 
 				rawValue = mailItem.OriginatorDeliveryReportRequested;
-				boolHolder = SetBit(boolHolder, 6, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 6, rawValue);
 
 				rawValue = mailItem.ReadReceiptRequested;
-				boolHolder = SetBit(boolHolder, 7, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 7, rawValue);
 
 				rawValue = mailItem.RecipientReassignmentProhibited;
-				boolHolder = SetBit(boolHolder, 8, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 8, rawValue);
 
 				rawValue = mailItem.ReminderOverrideDefault;
-				boolHolder = SetBit(boolHolder, 9, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 9, rawValue);
 
 				rawValue = mailItem.ReminderPlaySound;
-				boolHolder = SetBit(boolHolder, 10, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 10, rawValue);
 
 				rawValue = mailItem.ReminderSet;
-				boolHolder = SetBit(boolHolder, 11, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 11, rawValue);
 
 				rawValue = mailItem.Saved;
-				boolHolder = SetBit(boolHolder, 12, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 12, rawValue);
 
 				rawValue = mailItem.Sent;
-				boolHolder = SetBit(boolHolder, 13, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 13, rawValue);
 
 				rawValue = mailItem.Submitted;
-				boolHolder = SetBit(boolHolder, 14, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 14, rawValue);
 
 				rawValue = mailItem.UnRead;
-				boolHolder = SetBit(boolHolder, 15, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 15, rawValue);
 			}
 			catch (COMException exception)
 			{
@@ -1077,30 +1077,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				mailItem.SenderName,
 				mailItem.SenderEmailAddress,
 				mailItem.Subject);
-		}
-
-		private static byte SetBit(byte holder, byte bitIndex, bool value)
-		{
-			int intValue = Convert.ToInt32(value);
-
-			// 0 based
-			int shifter = intValue << bitIndex;
-			int intHolder = holder | shifter;
-			holder = (byte)intHolder;
-
-			return holder;
-		}
-
-		private static ushort SetBit(ushort holder, byte bitIndex, bool value)
-		{
-			int intValue = Convert.ToInt32(value);
-
-			// 0 based
-			int shifter = intValue << bitIndex;
-			int intHolder = holder | shifter;
-			holder = (ushort)intHolder;
-
-			return holder;
 		}
 	}
 }
