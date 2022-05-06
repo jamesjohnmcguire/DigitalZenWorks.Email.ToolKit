@@ -455,8 +455,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				int[] duplicateCounts =
-					outlookFolder.RemoveDuplicates(
+				int[] duplicateCounts = outlookFolder.RemoveDuplicates(
 						storePath, rootFolder, dryRun);
 
 				if (flush == true)

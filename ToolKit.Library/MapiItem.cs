@@ -5,6 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 using Common.Logging;
+using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -234,53 +236,20 @@ namespace DigitalZenWorks.Email.ToolKit
 			Marshal.ReleaseComObject(item);
 		}
 
-		private static long ArrayCopyConditional(
-			ref byte[] finalBuffer, long currentIndex, byte[] nextBuffer)
+		/// <summary>
+		/// Removes the MimeOLE version number.
+		/// </summary>
+		/// <param name="header">The header to check.</param>
+		/// <returns>The modified header.</returns>
+		public static string RemoveMimeOleVersion(string header)
 		{
-			if (nextBuffer != null)
-			{
-				Array.Copy(
-					nextBuffer,
-					0,
-					finalBuffer,
-					currentIndex,
-					nextBuffer.LongLength);
-				currentIndex += nextBuffer.LongLength;
-			}
+			string pattern = @"(?<=Produced By Microsoft MimeOLE)" +
+				@" V(\d+)\.(\d+)\.(\d+)\.(\d+)";
 
-			return currentIndex;
-		}
+			header = Regex.Replace(
+				header, pattern, string.Empty, RegexOptions.ExplicitCapture);
 
-		private static byte[] CopyIntToByteArray(
-			byte[] bytes, long index, int value)
-		{
-			byte byteValue1 = (byte)value;
-			byte byteValue2 = (byte)(value >> 8);
-			byte byteValue3 = (byte)(value >> 0x10);
-			byte byteValue4 = (byte)(value >> 0x18);
-
-			bytes[index] = byteValue1;
-			index++;
-			bytes[index] = byteValue2;
-			index++;
-			bytes[index] = byteValue3;
-			index++;
-			bytes[index] = byteValue4;
-
-			return bytes;
-		}
-
-		private static byte[] CopyUshortToByteArray(
-			byte[] bytes, long index, ushort value)
-		{
-			byte byteValue1 = (byte)value;
-			byte byteValue2 = (byte)(value >> 8);
-
-			bytes[index] = byteValue1;
-			index++;
-			bytes[index] = byteValue2;
-
-			return bytes;
+			return header;
 		}
 
 		private static byte[] GetActions(MailItem mailItem)
@@ -335,7 +304,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						actions = MergeByteArrays(actions, metaDataBytes);
+						actions = BitBytes.MergeByteArrays(actions, metaDataBytes);
 					}
 
 					Marshal.ReleaseComObject(action);
@@ -350,7 +319,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return actions;
@@ -398,7 +367,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						metaData += attachment.PathName;
 					}
-					catch (System.Runtime.InteropServices.COMException)
+					catch (COMException)
 					{
 					}
 
@@ -410,8 +379,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						attachments =
-							MergeByteArrays(attachments, metaDataBytes);
+						attachments = BitBytes.MergeByteArrays(
+							attachments, metaDataBytes);
 					}
 
 					string filePath = basePath + attachment.FileName;
@@ -419,7 +388,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					byte[] fileBytes = File.ReadAllBytes(filePath);
 
-					attachments = MergeByteArrays(attachments, fileBytes);
+					attachments =
+						BitBytes.MergeByteArrays(attachments, fileBytes);
 
 					Marshal.ReleaseComObject(attachment);
 				}
@@ -433,7 +403,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return attachments;
@@ -454,8 +424,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				byte[] htmlBodyBytes = encoding.GetBytes(htmlBody);
 				byte[] rtfBody = mailItem.RTFBody as byte[];
 
-				allBody = MergeByteArrays(bodyBytes, htmlBodyBytes);
-				allBody = MergeByteArrays(allBody, rtfBody);
+				allBody = BitBytes.MergeByteArrays(bodyBytes, htmlBodyBytes);
+				allBody = BitBytes.MergeByteArrays(allBody, rtfBody);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -466,7 +436,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return allBody;
@@ -478,57 +448,66 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				bool rawValue = mailItem.AlternateRecipientAllowed;
-				boolHolder = SetBit(boolHolder, 0, rawValue);
+				bool rawValue = false;
+
+				try
+				{
+					rawValue = mailItem.AlternateRecipientAllowed;
+				}
+				catch (COMException)
+				{
+				}
+
+				boolHolder = BitBytes.SetBit(boolHolder, 0, rawValue);
 
 				rawValue = mailItem.AutoForwarded;
-				boolHolder = SetBit(boolHolder, 1, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 1, rawValue);
 
 				rawValue = mailItem.AutoResolvedWinner;
-				boolHolder = SetBit(boolHolder, 2, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 2, rawValue);
 
 				rawValue = mailItem.DeleteAfterSubmit;
-				boolHolder = SetBit(boolHolder, 3, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 3, rawValue);
 
 				rawValue = mailItem.IsMarkedAsTask;
-				boolHolder = SetBit(boolHolder, 4, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 4, rawValue);
 
 				rawValue = mailItem.NoAging;
-				boolHolder = SetBit(boolHolder, 5, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 5, rawValue);
 
 				rawValue = mailItem.OriginatorDeliveryReportRequested;
-				boolHolder = SetBit(boolHolder, 6, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 6, rawValue);
 
 				rawValue = mailItem.ReadReceiptRequested;
-				boolHolder = SetBit(boolHolder, 7, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 7, rawValue);
 
 				rawValue = mailItem.RecipientReassignmentProhibited;
-				boolHolder = SetBit(boolHolder, 8, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 8, rawValue);
 
 				rawValue = mailItem.ReminderOverrideDefault;
-				boolHolder = SetBit(boolHolder, 9, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 9, rawValue);
 
 				rawValue = mailItem.ReminderPlaySound;
-				boolHolder = SetBit(boolHolder, 10, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 10, rawValue);
 
 				rawValue = mailItem.ReminderSet;
-				boolHolder = SetBit(boolHolder, 11, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 11, rawValue);
 
 				rawValue = mailItem.Saved;
-				boolHolder = SetBit(boolHolder, 12, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 12, rawValue);
 
 				rawValue = mailItem.Sent;
-				boolHolder = SetBit(boolHolder, 13, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 13, rawValue);
 
 				rawValue = mailItem.Submitted;
-				boolHolder = SetBit(boolHolder, 14, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 14, rawValue);
 
 				rawValue = mailItem.UnRead;
-				boolHolder = SetBit(boolHolder, 15, rawValue);
+				boolHolder = BitBytes.SetBit(boolHolder, 15, rawValue);
 			}
 			catch (COMException exception)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return boolHolder;
@@ -591,8 +570,17 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				DateTime deferredDeliveryTimeDateTime =
-					mailItem.DeferredDeliveryTime;
+				DateTime deferredDeliveryTimeDateTime = DateTime.MinValue;
+
+				try
+				{
+					deferredDeliveryTimeDateTime =
+						mailItem.DeferredDeliveryTime;
+				}
+				catch (COMException)
+				{
+				}
+
 				DateTime expiryTimeDateTime = mailItem.ExpiryTime;
 				DateTime receivedTimeDateTime = mailItem.ReceivedTime;
 				DateTime reminderTimeDateTime = mailItem.ReminderTime;
@@ -642,7 +630,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return data;
@@ -654,7 +642,16 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			try
 			{
-				int bodyFormat = (int)mailItem.BodyFormat;
+				int bodyFormat = 0;
+
+				try
+				{
+					bodyFormat = (int)mailItem.BodyFormat;
+				}
+				catch (COMException)
+				{
+				}
+
 				int itemClass = (int)mailItem.Class;
 				int importance = (int)mailItem.Importance;
 				int markForDownload = (int)mailItem.MarkForDownload;
@@ -675,24 +672,28 @@ namespace DigitalZenWorks.Email.ToolKit
 				buffer = new byte[bufferSize];
 
 				int index = 0;
-				buffer = CopyIntToByteArray(buffer, index, bodyFormat);
+				buffer =
+					BitBytes.CopyIntToByteArray(buffer, index, bodyFormat);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, itemClass);
+				buffer = BitBytes.CopyIntToByteArray(buffer, index, itemClass);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, importance);
+				buffer =
+					BitBytes.CopyIntToByteArray(buffer, index, importance);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, markForDownload);
+				buffer = BitBytes.CopyIntToByteArray(
+					buffer, index, markForDownload);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, permission);
+				buffer =
+					BitBytes.CopyIntToByteArray(buffer, index, permission);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, permissionService);
+				buffer = BitBytes.CopyIntToByteArray(
+					buffer, index, permissionService);
 				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, sensitivity);
+				buffer =
+					BitBytes.CopyIntToByteArray(buffer, index, sensitivity);
 				index += 4;
-				buffer = CopyIntToByteArray(
+				buffer = BitBytes.CopyIntToByteArray(
 					buffer, index, mailItem.InternetCodepage);
-				index += 4;
-				buffer = CopyIntToByteArray(buffer, index, mailItem.Size);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -747,14 +748,19 @@ namespace DigitalZenWorks.Email.ToolKit
 							"yyyy-MM-dd HH:mm:ss",
 							CultureInfo.InvariantCulture);
 
-						Log.Error("Exception on RTFBody at: " + path);
+						Log.Warn("Exception on RTFBody at: " + path);
 
-						LogFormatMessage.Error(
+						LogFormatMessage.Warn(
 							"Item: {0}: From: {1}: {2} Subject: {3}",
 							sentOn,
 							mailItem.SenderName,
 							mailItem.SenderEmailAddress,
 							mailItem.Subject);
+					}
+
+					if (rtfBody != null)
+					{
+						rtfBody = RtfEmail.Trim(rtfBody);
 					}
 
 					byte[] strings = GetStringProperties(mailItem);
@@ -772,23 +778,23 @@ namespace DigitalZenWorks.Email.ToolKit
 					finalBuffer = new byte[bufferSize];
 
 					// combine the parts
-					long currentIndex = ArrayCopyConditional(
-						ref finalBuffer, 0, actions);
+					long currentIndex = BitBytes.ArrayCopyConditional(
+						actions, ref finalBuffer, 0);
 
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, attachments);
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, dateTimes);
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, enums);
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, rtfBody);
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, strings);
-					currentIndex = ArrayCopyConditional(
-						ref finalBuffer, currentIndex, userProperties);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						attachments, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						dateTimes, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						enums, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						rtfBody, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						strings, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						userProperties, ref finalBuffer, currentIndex);
 
-					finalBuffer = CopyUshortToByteArray(
+					finalBuffer = BitBytes.CopyUshortToByteArray(
 						finalBuffer, currentIndex, booleans);
 				}
 			}
@@ -884,8 +890,23 @@ namespace DigitalZenWorks.Email.ToolKit
 			try
 			{
 				string bcc = mailItem.BCC;
-				string billingInformation = mailItem.BillingInformation;
+				string billingInformation = null;
+
+				try
+				{
+					billingInformation = mailItem.BillingInformation;
+				}
+				catch (COMException)
+				{
+				}
+
 				string body = mailItem.Body;
+
+				if (body != null)
+				{
+					body = body.TrimEnd();
+				}
+
 				string categories = mailItem.Categories;
 				string cc = mailItem.CC;
 				string companies = mailItem.Companies;
@@ -894,7 +915,19 @@ namespace DigitalZenWorks.Email.ToolKit
 				string flagRequest = mailItem.FlagRequest;
 				string header = mailItem.PropertyAccessor.GetProperty(
 					"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
+
+				if (header != null)
+				{
+					header = RemoveMimeOleVersion(header);
+				}
+
 				string htmlBody = mailItem.HTMLBody;
+
+				if (htmlBody != null)
+				{
+					htmlBody = HtmlEmail.Trim(htmlBody);
+				}
+
 				string messageClass = mailItem.MessageClass;
 				string mileage = mailItem.Mileage;
 				string receivedByEntryID = mailItem.ReceivedByEntryID;
@@ -1007,8 +1040,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						properties =
-							MergeByteArrays(properties, metaDataBytes);
+						properties = BitBytes.MergeByteArrays(
+							properties, metaDataBytes);
 					}
 
 					Marshal.ReleaseComObject(property);
@@ -1023,7 +1056,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				Log.Error(exception.ToString());
+				Log.Warn(exception.ToString());
 			}
 
 			return properties;
@@ -1044,66 +1077,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				mailItem.SenderName,
 				mailItem.SenderEmailAddress,
 				mailItem.Subject);
-		}
-
-		private static byte[] MergeByteArrays(byte[] buffer1, byte[] buffer2)
-		{
-			byte[] newBuffer = null;
-
-			try
-			{
-				Encoding encoding = Encoding.UTF8;
-
-				long bufferSize =
-					buffer1.LongLength + buffer2.LongLength;
-				newBuffer = new byte[bufferSize];
-
-				// combine the parts
-				Array.Copy(buffer1, newBuffer, buffer1.LongLength);
-
-				Array.Copy(
-					buffer2,
-					0,
-					newBuffer,
-					buffer1.LongLength,
-					buffer2.LongLength);
-			}
-			catch (System.Exception exception) when
-			(exception is ArgumentException ||
-			exception is ArgumentNullException ||
-			exception is ArgumentOutOfRangeException ||
-			exception is ArrayTypeMismatchException ||
-			exception is InvalidCastException ||
-			exception is RankException)
-			{
-				Log.Error(exception.ToString());
-			}
-
-			return newBuffer;
-		}
-
-		private static byte SetBit(byte holder, byte bitIndex, bool value)
-		{
-			int intValue = Convert.ToInt32(value);
-
-			// 0 based
-			int shifter = intValue << bitIndex;
-			int intHolder = holder | shifter;
-			holder = (byte)intHolder;
-
-			return holder;
-		}
-
-		private static ushort SetBit(ushort holder, byte bitIndex, bool value)
-		{
-			int intValue = Convert.ToInt32(value);
-
-			// 0 based
-			int shifter = intValue << bitIndex;
-			int intHolder = holder | shifter;
-			holder = (ushort)intHolder;
-
-			return holder;
 		}
 	}
 }
