@@ -460,6 +460,47 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get a list of item hashes from the given folder.
+		/// </summary>
+		/// <param name="path">The path of the curent folder.</param>
+		/// <param name="folder">The MAPI folder to process.</param>
+		/// <param name="hashTable">A list of item hashes.</param>
+		/// <returns>A list of item hashes from the given folder.</returns>
+		public IDictionary<string, IList<string>> GetItemHashes(
+			string path,
+			MAPIFolder folder,
+			IDictionary<string, IList<string>> hashTable)
+		{
+			int[] duplicateCounts = new int[2];
+
+			if (folder != null)
+			{
+				bool isDeletedFolder = IsDeletedFolder(folder);
+
+				// Skip processing of system deleted items folder.
+				if (isDeletedFolder == false)
+				{
+					int folderCount = folder.Folders.Count;
+
+					// Office uses 1 based indexes from VBA.
+					// Iterate in reverse order as the group may change.
+					for (int index = folderCount; index > 0; index--)
+					{
+						MAPIFolder subFolder = folder.Folders[index];
+
+						hashTable = GetItemHashes(path, subFolder, hashTable);
+
+						Marshal.ReleaseComObject(subFolder);
+					}
+
+					hashTable = GetFolderHashTable(path, folder, hashTable);
+				}
+			}
+
+			return hashTable;
+		}
+
+		/// <summary>
 		/// Merge folders.
 		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
@@ -610,6 +651,20 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (folder != null)
 			{
 				hashTable = new Dictionary<string, IList<string>>();
+
+				hashTable = GetFolderHashTable(path, folder, hashTable);
+			}
+
+			return hashTable;
+		}
+
+		private static IDictionary<string, IList<string>> GetFolderHashTable(
+			string path,
+			MAPIFolder folder,
+			IDictionary<string, IList<string>> hashTable)
+		{
+			if (folder != null)
+			{
 				Items items = folder.Items;
 				int total = items.Count;
 
