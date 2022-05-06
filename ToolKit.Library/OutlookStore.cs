@@ -165,6 +165,30 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the total duplicates in the store.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <returns>A list of total duplicates in the store.</returns>
+		public IDictionary<string, IList<string>> GetTotalDuplicates(
+			string pstFilePath)
+		{
+			IDictionary<string, IList<string>> hashTable =
+				new Dictionary<string, IList<string>>();
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			string storePath = GetStoreName(store);
+			storePath += "::";
+
+			hashTable = OutlookFolder.GetItemHashes(
+				storePath, rootFolder, hashTable);
+
+			return hashTable;
+		}
+
+		/// <summary>
 		/// List the folders.
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>
