@@ -131,6 +131,41 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		/// Test for comparing two different MailItems by content.
 		/// </summary>
 		[Test]
+		public void TestHtmlBodyTrimBr()
+		{
+			string htmlBody = @"<BR>\r\n<BR>\r\n<BR>\r\n<BR>\r\n</FONT>\r\n" +
+				@"</P>\r\n\r\n</BODY>\r\n</HTML>";
+			string afterHtmlBody = @"<BR>\r\n</FONT>\r\n" +
+				@"</P>\r\n</BODY>\r\n</HTML>";
+
+			htmlBody = HtmlEmail.Trim(htmlBody);
+
+			Assert.AreEqual(htmlBody, afterHtmlBody);
+		}
+
+		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
+		public void TestHtmlBodyTrimLineEndings()
+		{
+			string htmlBody = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+				"&nbsp;&nbsp;&nbsp;<BR>\r\n<BR>\r\n<BR>\r\n<BR>\r\n<BR>\r\n" +
+				"<BR>\r\n<BR>\r\n</FONT>\r\n</P>\r\n\r\n</BODY>\r\n</HTML>";
+
+			string afterHtmlBody = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+				"&nbsp;&nbsp;&nbsp;" +
+				"<BR>\r\n</FONT>\r\n</P>\r\n</BODY>\r\n</HTML>";
+
+			htmlBody = HtmlEmail.Trim(htmlBody);
+
+			Assert.AreEqual(afterHtmlBody, htmlBody);
+		}
+
+		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
 		public void TestMailItemsAreNotSameByContent()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
@@ -514,6 +549,52 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			}
 
 			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
+		public void TestRemoveMimeOleVersion()
+		{
+			string header = @"X-Priority: 3\r\nX-MSMail-Priority: Normal\r\n" +
+				@"X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2900.2180" +
+				@"\r\nFrom: <admin@example.com>\r\nTo: " +
+				@"<somebody@example.com>,\t<somebodyelse@example.com>\r\n" +
+				@"Subject: Subject Statement\r\n";
+			string afterHeader = @"X-Priority: 3\r\nX-MSMail-Priority: " +
+				@"Normal\r\nX-MimeOLE: Produced By Microsoft MimeOLE" +
+				@"\r\nFrom: <admin@example.com>\r\nTo: " +
+				@"<somebody@example.com>,\t<somebodyelse@example.com>\r\n" +
+				@"Subject: Subject Statement\r\n";
+
+			header = MapiItem.RemoveMimeOleVersion(header);
+
+			Assert.AreEqual(afterHeader, header);
+		}
+
+		/// <summary>
+		/// Test for checking if RtfEmail.Trim is correct.
+		/// </summary>
+		[Test]
+		public void TestRftBodyTrim()
+		{
+			byte[] sampleBytes = new byte[]
+			{
+				32, 32, 32, 32, 32, 32, 92, 112, 97, 114, 13, 10, 92, 112, 97,
+				114, 13, 10, 92, 112, 97, 114, 13, 10, 92, 112, 97, 114, 13,
+				10, 92, 112, 97, 114, 13, 10, 92, 112, 97, 114, 13, 10, 92,
+				112, 97, 114, 13, 10, 92, 112, 97, 114, 13, 10, 125, 13, 10, 0
+			};
+			byte[] afterBytes = new byte[]
+			{
+				32, 32, 32, 32, 32, 32, 92, 112, 97, 114, 13, 10, 125, 13,
+				10, 0
+			};
+
+			sampleBytes = RtfEmail.Trim(sampleBytes);
+
+			Assert.AreEqual(sampleBytes, afterBytes);
 		}
 
 		/// <summary>
