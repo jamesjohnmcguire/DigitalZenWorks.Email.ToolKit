@@ -671,7 +671,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			string[] duplicatePatterns =
 			{
 				@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^_+(?=[a-zA-Z])+",
-				@"_\d$", @"(?<=[a-zA-Z0-9])\s+[0-9a-fA-F]{3}$"
+				@"_\d$", @"(?<=[a-zA-Z0-9])\s+[0-9a-fA-F]{3}$",
+				@"(?<=[a-zA-Z0-9])_$"
 			};
 
 			foreach (string duplicatePattern in duplicatePatterns)
