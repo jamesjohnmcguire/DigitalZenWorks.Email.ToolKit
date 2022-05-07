@@ -213,7 +213,11 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						MAPIFolder subFolder = folder.Folders[index];
 
-						hashTable = GetItemHashes(path, subFolder, hashTable);
+						string name = subFolder.Name;
+						string subPath = path + "/" + name;
+
+						hashTable =
+							GetItemHashes(subPath, subFolder, hashTable);
 
 						Marshal.ReleaseComObject(subFolder);
 					}
