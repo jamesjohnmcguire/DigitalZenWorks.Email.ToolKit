@@ -32,84 +32,91 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="item">The item to delete.</param>
 		public static void DeleteItem(object item)
 		{
-			switch (item)
+			try
 			{
-				case AppointmentItem appointmentItem:
-					appointmentItem.Delete();
-					Marshal.ReleaseComObject(appointmentItem);
-					break;
-				case ContactItem contactItem:
-					contactItem.Delete();
-					Marshal.ReleaseComObject(contactItem);
-					break;
-				case DistListItem distListItem:
-					distListItem.Delete();
-					Marshal.ReleaseComObject(distListItem);
-					break;
-				case DocumentItem documentItem:
-					documentItem.Delete();
-					Marshal.ReleaseComObject(documentItem);
-					break;
-				case JournalItem journalItem:
-					journalItem.Delete();
-					Marshal.ReleaseComObject(journalItem);
-					break;
-				case MailItem mailItem:
-					mailItem.Delete();
-					Marshal.ReleaseComObject(mailItem);
-					break;
-				case MeetingItem meetingItem:
-					meetingItem.Delete();
-					Marshal.ReleaseComObject(meetingItem);
-					break;
-				case NoteItem noteItem:
-					noteItem.Delete();
-					Marshal.ReleaseComObject(noteItem);
-					break;
-				case PostItem postItem:
-					postItem.Delete();
-					Marshal.ReleaseComObject(postItem);
-					break;
-				case RemoteItem remoteItem:
-					remoteItem.Delete();
-					Marshal.ReleaseComObject(remoteItem);
-					break;
-				case ReportItem reportItem:
-					reportItem.Delete();
-					Marshal.ReleaseComObject(reportItem);
-					break;
-				case TaskItem taskItem:
-					taskItem.Delete();
-					Marshal.ReleaseComObject(taskItem);
-					break;
-				case TaskRequestAcceptItem taskRequestAcceptItem:
-					taskRequestAcceptItem.Delete();
-					Marshal.ReleaseComObject(taskRequestAcceptItem);
-					break;
-				case TaskRequestDeclineItem taskRequestDeclineItem:
-					taskRequestDeclineItem.Delete();
-					Marshal.ReleaseComObject(taskRequestDeclineItem);
-					break;
-				case TaskRequestItem taskRequestItem:
-					taskRequestItem.Delete();
-					Marshal.ReleaseComObject(taskRequestItem);
-					break;
-				case TaskRequestUpdateItem taskRequestUpdateItem:
-					taskRequestUpdateItem.Delete();
-					Marshal.ReleaseComObject(taskRequestUpdateItem);
-					break;
-				default:
-					string message = "Folder item of unknown type";
-					if (item != null)
-					{
-						message += ": " + item.ToString();
-					}
+				switch (item)
+				{
+					case AppointmentItem appointmentItem:
+						appointmentItem.Delete();
+						Marshal.ReleaseComObject(appointmentItem);
+						break;
+					case ContactItem contactItem:
+						contactItem.Delete();
+						Marshal.ReleaseComObject(contactItem);
+						break;
+					case DistListItem distListItem:
+						distListItem.Delete();
+						Marshal.ReleaseComObject(distListItem);
+						break;
+					case DocumentItem documentItem:
+						documentItem.Delete();
+						Marshal.ReleaseComObject(documentItem);
+						break;
+					case JournalItem journalItem:
+						journalItem.Delete();
+						Marshal.ReleaseComObject(journalItem);
+						break;
+					case MailItem mailItem:
+						mailItem.Delete();
+						Marshal.ReleaseComObject(mailItem);
+						break;
+					case MeetingItem meetingItem:
+						meetingItem.Delete();
+						Marshal.ReleaseComObject(meetingItem);
+						break;
+					case NoteItem noteItem:
+						noteItem.Delete();
+						Marshal.ReleaseComObject(noteItem);
+						break;
+					case PostItem postItem:
+						postItem.Delete();
+						Marshal.ReleaseComObject(postItem);
+						break;
+					case RemoteItem remoteItem:
+						remoteItem.Delete();
+						Marshal.ReleaseComObject(remoteItem);
+						break;
+					case ReportItem reportItem:
+						reportItem.Delete();
+						Marshal.ReleaseComObject(reportItem);
+						break;
+					case TaskItem taskItem:
+						taskItem.Delete();
+						Marshal.ReleaseComObject(taskItem);
+						break;
+					case TaskRequestAcceptItem taskRequestAcceptItem:
+						taskRequestAcceptItem.Delete();
+						Marshal.ReleaseComObject(taskRequestAcceptItem);
+						break;
+					case TaskRequestDeclineItem taskRequestDeclineItem:
+						taskRequestDeclineItem.Delete();
+						Marshal.ReleaseComObject(taskRequestDeclineItem);
+						break;
+					case TaskRequestItem taskRequestItem:
+						taskRequestItem.Delete();
+						Marshal.ReleaseComObject(taskRequestItem);
+						break;
+					case TaskRequestUpdateItem taskRequestUpdateItem:
+						taskRequestUpdateItem.Delete();
+						Marshal.ReleaseComObject(taskRequestUpdateItem);
+						break;
+					default:
+						string message = "Folder item of unknown type";
+						if (item != null)
+						{
+							message += ": " + item.ToString();
+						}
 
-					Log.Warn(message);
-					break;
+						Log.Warn(message);
+						break;
+				}
+
+				Marshal.ReleaseComObject(item);
 			}
-
-			Marshal.ReleaseComObject(item);
+			catch (COMException exception)
+			{
+				Log.Error(exception.ToString());
+			}
 		}
 
 		/// <summary>
@@ -121,6 +128,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static string GetItemHash(string path, MailItem mailItem)
 		{
 			string hashBase64 = null;
+
 			try
 			{
 				if (mailItem != null)
@@ -156,84 +164,91 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="destination">The destination folder.</param>
 		public static void Moveitem(object item, MAPIFolder destination)
 		{
-			switch (item)
+			try
 			{
-				case AppointmentItem appointmentItem:
-					appointmentItem.Move(destination);
-					Marshal.ReleaseComObject(appointmentItem);
-					break;
-				case ContactItem contactItem:
-					contactItem.Move(destination);
-					Marshal.ReleaseComObject(contactItem);
-					break;
-				case DistListItem distListItem:
-					distListItem.Move(destination);
-					Marshal.ReleaseComObject(distListItem);
-					break;
-				case DocumentItem documentItem:
-					documentItem.Move(destination);
-					Marshal.ReleaseComObject(documentItem);
-					break;
-				case JournalItem journalItem:
-					journalItem.Move(destination);
-					Marshal.ReleaseComObject(journalItem);
-					break;
-				case MailItem mailItem:
-					mailItem.Move(destination);
-					Marshal.ReleaseComObject(mailItem);
-					break;
-				case MeetingItem meetingItem:
-					meetingItem.Move(destination);
-					Marshal.ReleaseComObject(meetingItem);
-					break;
-				case NoteItem noteItem:
-					noteItem.Move(destination);
-					Marshal.ReleaseComObject(noteItem);
-					break;
-				case PostItem postItem:
-					postItem.Move(destination);
-					Marshal.ReleaseComObject(postItem);
-					break;
-				case RemoteItem remoteItem:
-					remoteItem.Move(destination);
-					Marshal.ReleaseComObject(remoteItem);
-					break;
-				case ReportItem reportItem:
-					reportItem.Move(destination);
-					Marshal.ReleaseComObject(reportItem);
-					break;
-				case TaskItem taskItem:
-					taskItem.Move(destination);
-					Marshal.ReleaseComObject(taskItem);
-					break;
-				case TaskRequestAcceptItem taskRequestAcceptItem:
-					taskRequestAcceptItem.Move(destination);
-					Marshal.ReleaseComObject(taskRequestAcceptItem);
-					break;
-				case TaskRequestDeclineItem taskRequestDeclineItem:
-					taskRequestDeclineItem.Move(destination);
-					Marshal.ReleaseComObject(taskRequestDeclineItem);
-					break;
-				case TaskRequestItem taskRequestItem:
-					taskRequestItem.Move(destination);
-					Marshal.ReleaseComObject(taskRequestItem);
-					break;
-				case TaskRequestUpdateItem taskRequestUpdateItem:
-					taskRequestUpdateItem.Move(destination);
-					Marshal.ReleaseComObject(taskRequestUpdateItem);
-					break;
-				default:
-					string message = "Folder item of unknown type";
-					if (item != null)
-					{
-						message += ": " + item.ToString();
-					}
+				switch (item)
+				{
+					case AppointmentItem appointmentItem:
+						appointmentItem.Move(destination);
+						Marshal.ReleaseComObject(appointmentItem);
+						break;
+					case ContactItem contactItem:
+						contactItem.Move(destination);
+						Marshal.ReleaseComObject(contactItem);
+						break;
+					case DistListItem distListItem:
+						distListItem.Move(destination);
+						Marshal.ReleaseComObject(distListItem);
+						break;
+					case DocumentItem documentItem:
+						documentItem.Move(destination);
+						Marshal.ReleaseComObject(documentItem);
+						break;
+					case JournalItem journalItem:
+						journalItem.Move(destination);
+						Marshal.ReleaseComObject(journalItem);
+						break;
+					case MailItem mailItem:
+						mailItem.Move(destination);
+						Marshal.ReleaseComObject(mailItem);
+						break;
+					case MeetingItem meetingItem:
+						meetingItem.Move(destination);
+						Marshal.ReleaseComObject(meetingItem);
+						break;
+					case NoteItem noteItem:
+						noteItem.Move(destination);
+						Marshal.ReleaseComObject(noteItem);
+						break;
+					case PostItem postItem:
+						postItem.Move(destination);
+						Marshal.ReleaseComObject(postItem);
+						break;
+					case RemoteItem remoteItem:
+						remoteItem.Move(destination);
+						Marshal.ReleaseComObject(remoteItem);
+						break;
+					case ReportItem reportItem:
+						reportItem.Move(destination);
+						Marshal.ReleaseComObject(reportItem);
+						break;
+					case TaskItem taskItem:
+						taskItem.Move(destination);
+						Marshal.ReleaseComObject(taskItem);
+						break;
+					case TaskRequestAcceptItem taskRequestAcceptItem:
+						taskRequestAcceptItem.Move(destination);
+						Marshal.ReleaseComObject(taskRequestAcceptItem);
+						break;
+					case TaskRequestDeclineItem taskRequestDeclineItem:
+						taskRequestDeclineItem.Move(destination);
+						Marshal.ReleaseComObject(taskRequestDeclineItem);
+						break;
+					case TaskRequestItem taskRequestItem:
+						taskRequestItem.Move(destination);
+						Marshal.ReleaseComObject(taskRequestItem);
+						break;
+					case TaskRequestUpdateItem taskRequestUpdateItem:
+						taskRequestUpdateItem.Move(destination);
+						Marshal.ReleaseComObject(taskRequestUpdateItem);
+						break;
+					default:
+						string message = "Folder item of unknown type";
+						if (item != null)
+						{
+							message += ": " + item.ToString();
+						}
 
-					Log.Warn(message);
-					break;
+						Log.Warn(message);
+						break;
+				}
+
+				Marshal.ReleaseComObject(item);
 			}
-
-			Marshal.ReleaseComObject(item);
+			catch (COMException exception)
+			{
+				Log.Error(exception.ToString());
+			}
 		}
 
 		/// <summary>
