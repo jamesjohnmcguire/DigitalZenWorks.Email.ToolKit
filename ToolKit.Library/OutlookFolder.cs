@@ -226,6 +226,32 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="mailItem">The MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		public static string GetMailItemSynopses(MailItem mailItem)
+		{
+			string synopses = null;
+
+			if (mailItem != null)
+			{
+				string sentOn = mailItem.SentOn.ToString(
+					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+				synopses = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: From: {1}: {2} Subject: {3}",
+					sentOn,
+					mailItem.SenderName,
+					mailItem.SenderEmailAddress,
+					mailItem.Subject);
+			}
+
+			return synopses;
+		}
+
+		/// <summary>
 		/// Get senders counts.
 		/// </summary>
 		/// <param name="path">The current folder path.</param>
@@ -763,22 +789,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return sendersCounts;
-		}
-
-		private static string GetMailItemSynopses(MailItem mailItem)
-		{
-			string sentOn = mailItem.SentOn.ToString(
-				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-			string synopses = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}: From: {1}: {2} Subject: {3}",
-				sentOn,
-				mailItem.SenderName,
-				mailItem.SenderEmailAddress,
-				mailItem.Subject);
-
-			return synopses;
 		}
 
 		private static void ListItem(MailItem mailItem, string prefixMessage)
