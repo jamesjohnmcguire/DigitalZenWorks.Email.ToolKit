@@ -6,6 +6,7 @@
 
 using Common.Logging;
 using DigitalZenWorks.Email.ToolKit;
+using Microsoft.Office.Interop.Outlook;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
@@ -34,8 +35,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static readonly string[] Commands =
 		{
 			"dbx-to-pst", "eml-to-pst", "help", "list-folders",
-			"list-top-senders", "merge-folders", "merge-stores", "move-folder",
-			"remove-duplicates", "remove-empty-folders"
+			"list-top-senders", "list-total-duplicates", "merge-folders",
+			"merge-stores", "move-folder", "remove-duplicates",
+			"remove-empty-folders"
 		};
 
 		/// <summary>
@@ -91,6 +93,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						case "list-top-senders":
 							result = ListTopSenders(arguments);
 							break;
+						case "list-total-duplicates":
+							result = ListTotalDuplicates(arguments);
+							break;
 						case "merge-folders":
 							result = MergeFolders(arguments);
 							break;
@@ -118,7 +123,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					ShowHelp();
 				}
 			}
-			catch (Exception exception)
+			catch (System.Exception exception)
 			{
 				Log.Error(exception.ToString());
 
@@ -367,6 +372,58 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						sender.Key,
 						sender.Value.ToString(CultureInfo.InvariantCulture));
 					Console.WriteLine(message);
+				}
+			}
+
+			return 0;
+		}
+
+		private static int ListTotalDuplicates(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				string pstFilePath = arguments[pstFileIndex];
+
+				IDictionary<string, IList<string>> duplicates =
+					outlookStore.GetTotalDuplicates(pstFilePath);
+
+				foreach (KeyValuePair<string, IList<string>> item in
+					duplicates)
+				{
+					IList<string> duplicateSet = item.Value;
+
+					if (duplicateSet.Count > 1)
+					{
+						string entryId1 = duplicateSet[0];
+
+						MailItem mailItem =
+							outlookStore.GetMailItemFromEntryId(entryId1);
+
+						string synopses =
+							OutlookFolder.GetMailItemSynopses(mailItem);
+
+						string message = string.Format(
+							CultureInfo.InvariantCulture,
+							"Duplicates Found for: {0}",
+							synopses);
+						Console.WriteLine(message);
+
+						foreach (string entryId in duplicateSet)
+						{
+							mailItem =
+								outlookStore.GetMailItemFromEntryId(entryId);
+
+							MAPIFolder parent = mailItem.Parent;
+							string path = OutlookFolder.GetFolderPath(parent);
+
+							Console.WriteLine("At: " + path);
+						}
+					}
 				}
 			}
 
@@ -652,6 +709,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						"list-folders", StringComparison.OrdinalIgnoreCase) ||
 						command.Equals(
 						"list-top-senders",
+						StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"list-total-duplicates",
 						StringComparison.OrdinalIgnoreCase) ||
 						command.Equals(
 						"merge-folders", StringComparison.OrdinalIgnoreCase) ||
