@@ -392,42 +392,69 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				IDictionary<string, IList<string>> duplicates =
 					outlookStore.GetTotalDuplicates(pstFilePath);
 
-				foreach (KeyValuePair<string, IList<string>> item in
-					duplicates)
+				ListTotalDuplicatesOutput(duplicates, true);
+				ListTotalDuplicatesOutput(duplicates, false);
+			}
+
+			return 0;
+		}
+
+		private static void ListTotalDuplicatesOutput(
+			IDictionary<string, IList<string>> duplicates, bool useLog)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			foreach (KeyValuePair<string, IList<string>> item in
+				duplicates)
+			{
+				IList<string> duplicateSet = item.Value;
+
+				if (duplicateSet.Count > 1)
 				{
-					IList<string> duplicateSet = item.Value;
+					string entryId1 = duplicateSet[0];
 
-					if (duplicateSet.Count > 1)
+					MailItem mailItem =
+						outlookStore.GetMailItemFromEntryId(entryId1);
+
+					string synopses =
+						OutlookFolder.GetMailItemSynopses(mailItem);
+
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Duplicates Found for: {0}",
+						synopses);
+
+					if (useLog == true)
 					{
-						string entryId1 = duplicateSet[0];
-
-						MailItem mailItem =
-							outlookStore.GetMailItemFromEntryId(entryId1);
-
-						string synopses =
-							OutlookFolder.GetMailItemSynopses(mailItem);
-
-						string message = string.Format(
-							CultureInfo.InvariantCulture,
-							"Duplicates Found for: {0}",
-							synopses);
+						Log.Info(message);
+					}
+					else
+					{
 						Console.WriteLine(message);
+					}
 
-						foreach (string entryId in duplicateSet)
+					foreach (string entryId in duplicateSet)
+					{
+						mailItem =
+							outlookStore.GetMailItemFromEntryId(entryId);
+
+						MAPIFolder parent = mailItem.Parent;
+						string path = OutlookFolder.GetFolderPath(parent);
+
+						message = "At: " + path;
+
+						if (useLog == true)
 						{
-							mailItem =
-								outlookStore.GetMailItemFromEntryId(entryId);
-
-							MAPIFolder parent = mailItem.Parent;
-							string path = OutlookFolder.GetFolderPath(parent);
-
-							Console.WriteLine("At: " + path);
+							Log.Info(message);
+						}
+						else
+						{
+							Console.WriteLine(message);
 						}
 					}
 				}
 			}
-
-			return 0;
 		}
 
 		private static void LogInitialization()
