@@ -165,6 +165,33 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="entryId">The entryId of the MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		public string GetItemSynopses(string entryId)
+		{
+			NameSpace session = outlookAccount.Session;
+			MailItem mailItem = session.GetItemFromID(entryId);
+			string synopses = OutlookFolder.GetMailItemSynopses(mailItem);
+
+			return synopses;
+		}
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="entryId">The entryId of the MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		public MailItem GetMailItemFromEntryId(string entryId)
+		{
+			NameSpace session = outlookAccount.Session;
+			MailItem mailItem = session.GetItemFromID(entryId);
+
+			return mailItem;
+		}
+
+		/// <summary>
 		/// Get the total duplicates in the store.
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>
