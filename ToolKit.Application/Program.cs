@@ -405,6 +405,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
 
+			bool duplicatesFound = false;
+
 			foreach (KeyValuePair<string, IList<string>> item in
 				duplicates)
 			{
@@ -412,6 +414,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				if (duplicateSet.Count > 1)
 				{
+					duplicatesFound = true;
 					string entryId1 = duplicateSet[0];
 
 					MailItem mailItem =
@@ -453,6 +456,20 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							Console.WriteLine(message);
 						}
 					}
+				}
+			}
+
+			if (duplicatesFound == false)
+			{
+				string message = "No duplicates found";
+
+				if (useLog == true)
+				{
+					Log.Info(message);
+				}
+				else
+				{
+					Console.WriteLine(message);
 				}
 			}
 		}
