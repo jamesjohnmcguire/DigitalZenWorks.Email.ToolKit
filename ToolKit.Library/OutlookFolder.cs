@@ -98,20 +98,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (store != null && !string.IsNullOrWhiteSpace(path))
 			{
 				MAPIFolder rootFolder = store.GetRootFolder();
+				currentFolder = rootFolder;
 
-				if (path.Contains("::", StringComparison.OrdinalIgnoreCase))
-				{
-					int position = path.IndexOf(
-						"::", StringComparison.OrdinalIgnoreCase);
-					position += 2;
-
-					path = path[position..];
-				}
+				path = RemoveStoreFromPath(path);
 
 				string[] parts = path.Split(
 					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
-
-				currentFolder = rootFolder;
 
 				for (int index = 0; index < parts.Length; index++)
 				{
@@ -661,6 +653,20 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MapiItem.Moveitem(item, destination);
 			}
+		}
+
+		private static string RemoveStoreFromPath(string path)
+		{
+			if (path.Contains("::", StringComparison.OrdinalIgnoreCase))
+			{
+				int position = path.IndexOf(
+					"::", StringComparison.OrdinalIgnoreCase);
+				position += 2;
+
+				path = path[position..];
+			}
+
+			return path;
 		}
 
 		private void CheckForDuplicateFolders(
