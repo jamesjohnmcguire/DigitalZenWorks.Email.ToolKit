@@ -151,6 +151,58 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Does folder exist.
+		/// </summary>
+		/// <param name="store">The PST file store to use.</param>
+		/// <param name="path">The full path of the folder to check.</param>
+		/// <returns>Indicates whether the folder exists.</returns>
+		public static bool DoesFolderExist(Store store, string path)
+		{
+			bool folderExists = false;
+
+			if (store != null && !string.IsNullOrWhiteSpace(path))
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
+				MAPIFolder currentFolder = rootFolder;
+
+				path = RemoveStoreFromPath(path);
+
+				string[] parts = path.Split(
+					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
+
+				folderExists = false;
+
+				for (int index = 0; index < parts.Length; index++)
+				{
+					string part = parts[index];
+
+					if (index == 0)
+					{
+						string rootFolderName = rootFolder.Name;
+
+						if (part.Equals(
+							rootFolderName,
+							StringComparison.OrdinalIgnoreCase))
+						{
+							// root, so skip over
+							continue;
+						}
+					}
+
+					currentFolder = GetSubFolder(currentFolder, part);
+
+					if (currentFolder == null)
+					{
+						folderExists = false;
+						break;
+					}
+				}
+			}
+
+			return folderExists;
+		}
+
+		/// <summary>
 		/// Get the folder's full path.
 		/// </summary>
 		/// <param name="folder">The folder to check.</param>
