@@ -825,6 +825,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
+					Log.Info(
+						"Merging " + source + " into " + newFolderName);
+
 					path += "/" + folder.Name;
 
 					MAPIFolder parentFolder = folder.Parent;

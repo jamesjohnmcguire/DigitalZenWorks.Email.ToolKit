@@ -541,6 +541,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Log.Info("Commands:");
 			Log.Info("dbx-to-pst            Migrate dbx files to pst file");
 			Log.Info("eml-to-pst            Migrate eml files to pst file");
+			Log.Info("move-folder           Move folder to a different location");
 			Log.Info("merge-folders         Merge duplicate folders");
 			Log.Info("merge-stores          Merge one store into another");
 			Log.Info("remove-duplicates     Prune empty folders");
