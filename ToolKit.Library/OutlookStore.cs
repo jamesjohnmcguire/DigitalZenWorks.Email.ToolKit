@@ -204,13 +204,16 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			MAPIFolder rootFolder = store.GetRootFolder();
+			if (store != null)
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
 
-			string storePath = GetStoreName(store);
-			storePath += "::";
+				string storePath = GetStoreName(store);
+				storePath += "::";
 
-			hashTable = OutlookFolder.GetItemHashes(
-				storePath, rootFolder, hashTable);
+				hashTable = OutlookFolder.GetItemHashes(
+					storePath, rootFolder, hashTable);
+			}
 
 			return hashTable;
 		}
