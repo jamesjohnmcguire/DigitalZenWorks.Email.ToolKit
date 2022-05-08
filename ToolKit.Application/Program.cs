@@ -711,14 +711,21 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				"command & gt; &lt; path & gt;");
 
 			Log.Info("Commands:");
-			Log.Info("dbx-to-pst            Migrate dbx files to pst file");
-			Log.Info("eml-to-pst            Migrate eml files to pst file");
-			Log.Info("move-folder           Move folder to a different location");
-			Log.Info("merge-folders         Merge duplicate folders");
-			Log.Info("merge-stores          Merge one store into another");
-			Log.Info("remove-duplicates     Prune empty folders");
-			Log.Info("remove-empty-folders  Prune empty folders");
-			Log.Info("help                  Show this information");
+			Log.Info("dbx-to-pst             Migrate dbx files to pst file");
+			Log.Info("eml-to-pst             Migrate eml files to pst file");
+			Log.Info("list-folders           " +
+				"List all sub folders of a given folder");
+			Log.Info("list-top-senders       " +
+				"List the top senders of a given store");
+			Log.Info("list-total-duplicates  " +
+				"List all duplicates in all folders in a given store");
+			Log.Info("move-folder            " +
+				"Move folder to a different location");
+			Log.Info("merge-folders          Merge duplicate folders");
+			Log.Info("merge-stores           Merge one store into another");
+			Log.Info("remove-duplicates      Prune empty folders");
+			Log.Info("remove-empty-folders   Prune empty folders");
+			Log.Info("help                   Show this information");
 		}
 
 		private static bool ValidateArguments(string[] arguments)
