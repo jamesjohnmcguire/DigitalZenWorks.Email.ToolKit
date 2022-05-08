@@ -98,20 +98,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (store != null && !string.IsNullOrWhiteSpace(path))
 			{
 				MAPIFolder rootFolder = store.GetRootFolder();
+				currentFolder = rootFolder;
 
-				if (path.Contains("::", StringComparison.OrdinalIgnoreCase))
-				{
-					int position = path.IndexOf(
-						"::", StringComparison.OrdinalIgnoreCase);
-					position += 2;
-
-					path = path[position..];
-				}
+				path = RemoveStoreFromPath(path);
 
 				string[] parts = path.Split(
 					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
-
-				currentFolder = rootFolder;
 
 				for (int index = 0; index < parts.Length; index++)
 				{
@@ -153,6 +145,58 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (folder != null)
 			{
 				folderExists = true;
+			}
+
+			return folderExists;
+		}
+
+		/// <summary>
+		/// Does folder exist.
+		/// </summary>
+		/// <param name="store">The PST file store to use.</param>
+		/// <param name="path">The full path of the folder to check.</param>
+		/// <returns>Indicates whether the folder exists.</returns>
+		public static bool DoesFolderExist(Store store, string path)
+		{
+			bool folderExists = false;
+
+			if (store != null && !string.IsNullOrWhiteSpace(path))
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
+				MAPIFolder currentFolder = rootFolder;
+
+				path = RemoveStoreFromPath(path);
+
+				string[] parts = path.Split(
+					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
+
+				folderExists = true;
+
+				for (int index = 0; index < parts.Length; index++)
+				{
+					string part = parts[index];
+
+					if (index == 0)
+					{
+						string rootFolderName = rootFolder.Name;
+
+						if (part.Equals(
+							rootFolderName,
+							StringComparison.OrdinalIgnoreCase))
+						{
+							// root, so skip over
+							continue;
+						}
+					}
+
+					currentFolder = GetSubFolder(currentFolder, part);
+
+					if (currentFolder == null)
+					{
+						folderExists = false;
+						break;
+					}
+				}
 			}
 
 			return folderExists;
@@ -824,28 +868,54 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		private static string RemoveStoreFromPath(string path)
+		{
+			if (path.Contains("::", StringComparison.OrdinalIgnoreCase))
+			{
+				int position = path.IndexOf(
+					"::", StringComparison.OrdinalIgnoreCase);
+				position += 2;
+
+				path = path[position..];
+			}
+
+			return path;
+		}
+
 		private void CheckForDuplicateFolders(
 			string path, int index, MAPIFolder folder, bool dryRun)
 		{
 			string folderName = folder.Name;
 
-			string[] duplicatePatterns =
+			if (DeletedFolders.Contains(folderName))
 			{
-				@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^\s+(?=[a-zA-Z])+",
-				@"^_+(?=[a-zA-Z])+", @"_\d$",
-				@"(?<=[a-zA-Z0-9])\s+[0-9a-fA-F]{3}$", @"(?<=[a-zA-Z0-9])_$"
-			};
+				bool isReservedFolder = IsDeletedFolder(folder);
 
-			foreach (string duplicatePattern in duplicatePatterns)
-			{
-				if (Regex.IsMatch(
-					folderName, duplicatePattern, RegexOptions.IgnoreCase))
+				if (isReservedFolder == false)
 				{
-					MergeDuplicateFolder(
-						path, index, folder, duplicatePattern, dryRun);
+					folder.Delete();
+				}
+			}
+			else
+			{
+				string[] duplicatePatterns =
+				{
+					@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
+					@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
+					@"(?<=[a-zA-Z0-9])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$"
+				};
 
-					// Best to not get multipe matches, at this point.
-					break;
+				foreach (string duplicatePattern in duplicatePatterns)
+				{
+					if (Regex.IsMatch(
+						folderName, duplicatePattern, RegexOptions.IgnoreCase))
+					{
+						MergeDuplicateFolder(
+							path, index, folder, duplicatePattern, dryRun);
+
+						// Best to not get multipe matches, at this point.
+						break;
+					}
 				}
 			}
 		}
@@ -916,6 +986,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
+					Log.Info(
+						"Merging " + source + " into " + newFolderName);
+
 					path += "/" + folder.Name;
 
 					MAPIFolder parentFolder = folder.Parent;
