@@ -726,23 +726,35 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string folderName = folder.Name;
 
-			string[] duplicatePatterns =
+			if (DeletedFolders.Contains(folderName))
 			{
-				@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^\s+(?=[a-zA-Z])+",
-				@"^_+(?=[a-zA-Z])+", @"_\d$",
-				@"(?<=[a-zA-Z0-9])\s+[0-9a-fA-F]{3}$", @"(?<=[a-zA-Z0-9])_$"
-			};
+				bool isReservedFolder = IsDeletedFolder(folder);
 
-			foreach (string duplicatePattern in duplicatePatterns)
-			{
-				if (Regex.IsMatch(
-					folderName, duplicatePattern, RegexOptions.IgnoreCase))
+				if (isReservedFolder == false)
 				{
-					MergeDuplicateFolder(
-						path, index, folder, duplicatePattern, dryRun);
+					folder.Delete();
+				}
+			}
+			else
+			{
+				string[] duplicatePatterns =
+				{
+					@"\s*\(\d*?\)$", @"\s*-\s*Copy$", @"^\s+(?=[a-zA-Z])+",
+					@"^_+(?=[a-zA-Z])+", @"_\d$",
+					@"(?<=[a-zA-Z0-9])\s+[0-9a-fA-F]{3}$", @"(?<=[a-zA-Z0-9])_$"
+				};
 
-					// Best to not get multipe matches, at this point.
-					break;
+				foreach (string duplicatePattern in duplicatePatterns)
+				{
+					if (Regex.IsMatch(
+						folderName, duplicatePattern, RegexOptions.IgnoreCase))
+					{
+						MergeDuplicateFolder(
+							path, index, folder, duplicatePattern, dryRun);
+
+						// Best to not get multipe matches, at this point.
+						break;
+					}
 				}
 			}
 		}
