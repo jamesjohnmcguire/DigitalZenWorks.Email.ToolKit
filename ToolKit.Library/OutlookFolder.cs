@@ -170,7 +170,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				string[] parts = path.Split(
 					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
 
-				folderExists = false;
+				folderExists = true;
 
 				for (int index = 0; index < parts.Length; index++)
 				{
