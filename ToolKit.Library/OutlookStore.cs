@@ -331,19 +331,25 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (source != null)
 			{
-				MAPIFolder sourceFolder = OutlookFolder.CreaterFolderPath(
+				bool folderExists = OutlookFolder.DoesFolderExist(
 					source, sourceFolderPath);
-				MAPIFolder destinationFolder = OutlookFolder.CreaterFolderPath(
-					destination, destinationFolderPath);
 
-				OutlookFolder outlookFolder = new (outlookAccount);
+				if (folderExists == true)
+				{
+					MAPIFolder sourceFolder = OutlookFolder.CreaterFolderPath(
+						source, sourceFolderPath);
+					MAPIFolder destinationFolder =
+						OutlookFolder.CreaterFolderPath(
+							destination, destinationFolderPath);
 
-				outlookFolder.MoveFolderContents(
-					destinationFolderPath, sourceFolder, destinationFolder);
+					OutlookFolder outlookFolder = new (outlookAccount);
 
-				// Once all the items have been moved,
-				// now remove the folder.
-				sourceFolder.Delete();
+					outlookFolder.MoveFolderContents(
+						destinationFolderPath, sourceFolder, destinationFolder);
+
+					// Once all the items have been moved, remove the folder.
+					sourceFolder.Delete();
+				}
 			}
 		}
 
