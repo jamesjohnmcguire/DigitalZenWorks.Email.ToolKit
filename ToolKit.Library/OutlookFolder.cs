@@ -904,13 +904,13 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
 					@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
-					@"(?<=[a-zA-Z0-9])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$"
+					@"(?<=[a-zA-Z0-9&])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$",
+					@"^[A-F]{1}_"
 				};
 
 				foreach (string duplicatePattern in duplicatePatterns)
 				{
-					if (Regex.IsMatch(
-						folderName, duplicatePattern, RegexOptions.IgnoreCase))
+					if (Regex.IsMatch(folderName, duplicatePattern))
 					{
 						MergeDuplicateFolder(
 							path, index, folder, duplicatePattern, dryRun);
