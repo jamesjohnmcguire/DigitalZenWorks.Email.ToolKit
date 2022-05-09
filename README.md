@@ -33,17 +33,20 @@ This is, currently, a command line program to be run from the command line or te
 
 DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>  
 
-| Commands:            |                                 | options        |
-| -------------------- | ------------------------------  | -------------- |
-| dbx-to-pst           | Migrate dbx files to pst file   | -e, --encoding |
-| eml-to-pst           | Migrate eml files to pst file   |                |
-| merge-folders        | Merge duplicate Outlook folders | -n, --dryrun   |
-| merge-stores         | Merge one store into another    |                |
-| move-folder          | Move one folder to another      |                |
-| remove-duplicates    | Remove duplicate messages       | -n, --dryrun   |
-|                      |                                 | -s, --flush    |
-| remove-empty-folders | Prune empty folders             |                |
-| help                 | Display this information        |                |
+| Commands:              |                                         | options        |
+| ---------------------- | --------------------------------------- | -------------- |
+| dbx-to-pst             | Migrate dbx files to pst file           | -e, --encoding |
+| eml-to-pst             | Migrate eml files to pst file           |                |
+| list-folders           | List all sub folders of a given folder  |                |
+| list-top-senders       | List the top senders of a given store   |                |
+| list-total-duplicates  | List all duplicates in a given store    |                |
+| merge-folders          | Merge duplicate Outlook folders         | -n, --dryrun   |
+| merge-stores           | Merge one store into another            |                |
+| move-folder            | Move one folder to another              |                |
+| remove-duplicates      | Remove duplicate messages               | -n, --dryrun   |
+|                        |                                         | -s, --flush    |
+| remove-empty-folders   | Prune empty folders                     |                |
+| help                   | Display this information                |                |
 
 ##### Command line usage notes:
 The command is optional if the command can be inferred from the source-path.  For example, if the source path is a directory containing *.eml files, they will processed accordingly.  
@@ -55,6 +58,9 @@ Det.exe dbx-to-pst --encoding shift_jis \path\to\some-dbx-files
 Det.exe dbx-to-pst \path\to\some-dbx-files \path\to\some.pst  
 Det.exe eml-to-pst "%USERPROFILE%\AppData\Local\Microsoft\Windows Live Mail\Storage Folders" %USERPROFILE%\Import.pst  
 Det.exe move-folder \path\to\some.pst source\folder\path  \path\to\some.pst destination\folder\path
+Det.exe list-folders \path\to\some.pst
+Det.exe list-top-senders \path\to\some.pst
+Det.exe list-total-duplicates \path\to\some.pst
 
 ###### dbx-to-pst
 The optional --encoding option allows you to add a preferred encoding, in the rare case, that encoding can not be detected properly.  It must be a string that is recognized by Encoding.GetEncoding, along with Encoding.RegisterProvider(CodePagesEncodingProvider).  

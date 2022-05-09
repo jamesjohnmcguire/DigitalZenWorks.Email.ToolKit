@@ -7,6 +7,7 @@
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -161,6 +162,129 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folder;
+		}
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="entryId">The entryId of the MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		public string GetItemSynopses(string entryId)
+		{
+			NameSpace session = outlookAccount.Session;
+			MailItem mailItem = session.GetItemFromID(entryId);
+			string synopses = OutlookFolder.GetMailItemSynopses(mailItem);
+
+			return synopses;
+		}
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="entryId">The entryId of the MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		public MailItem GetMailItemFromEntryId(string entryId)
+		{
+			NameSpace session = outlookAccount.Session;
+			MailItem mailItem = session.GetItemFromID(entryId);
+
+			return mailItem;
+		}
+
+		/// <summary>
+		/// Get the total duplicates in the store.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <returns>A list of total duplicates in the store.</returns>
+		public IDictionary<string, IList<string>> GetTotalDuplicates(
+			string pstFilePath)
+		{
+			IDictionary<string, IList<string>> hashTable =
+				new Dictionary<string, IList<string>>();
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			if (store != null)
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				string storePath = GetStoreName(store);
+				storePath += "::";
+
+				hashTable = OutlookFolder.GetItemHashes(
+					storePath, rootFolder, hashTable);
+			}
+
+			return hashTable;
+		}
+
+		/// <summary>
+		/// List the folders.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <param name="folderPath">The folder path to check.</param>
+		/// <returns>The folders.</returns>
+		public IList<string> ListFolders(string pstFilePath, string folderPath)
+		{
+			IList<string> folderNames = new List<string>();
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			MAPIFolder sourceFolder = OutlookFolder.CreaterFolderPath(
+				store, folderPath);
+
+			int count = sourceFolder.Folders.Count;
+			for (int index = 1; index <= count; index++)
+			{
+				MAPIFolder folder = sourceFolder.Folders[index];
+
+				string folderName = folder.Name;
+				folderNames.Add(folderName);
+
+				Marshal.ReleaseComObject(folder);
+			}
+
+			Marshal.ReleaseComObject(sourceFolder);
+
+			return folderNames;
+		}
+
+		/// <summary>
+		/// List the top senders in  the store.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <param name="amount">The amout of senders to list.</param>
+		/// <returns>The top senders.</returns>
+		public IList<KeyValuePair<string, int>> ListTopSenders(
+			string pstFilePath, int amount)
+		{
+			IList<KeyValuePair<string, int>> topSenders =
+				new List<KeyValuePair<string, int>>();
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			string storePath = GetStoreName(store);
+			storePath += "::";
+
+			IDictionary<string, int> sendersCounts =
+				new Dictionary<string, int>();
+
+			sendersCounts = OutlookFolder.GetSendersCount(
+				storePath, rootFolder, sendersCounts);
+
+			Marshal.ReleaseComObject(rootFolder);
+			Marshal.ReleaseComObject(store);
+
+			IOrderedEnumerable<KeyValuePair<string, int>> orderedList =
+				sendersCounts.OrderByDescending(pair => pair.Value);
+			IEnumerable<KeyValuePair<string, int>> orderedListTop =
+				orderedList.Take(amount);
+
+			topSenders = orderedListTop.ToList();
+
+			return topSenders;
 		}
 
 		/// <summary>
