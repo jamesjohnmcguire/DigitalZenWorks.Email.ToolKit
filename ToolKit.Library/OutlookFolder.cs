@@ -631,6 +631,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					sourceName,
 					destinationName);
 
+				path += "/" + destinationName;
+
 				MoveFolderItems(source, destination);
 				MoveSubFolders(path, source, destination);
 			}
@@ -986,11 +988,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
-					Log.Info(
-						"Merging " + source + " into " + newFolderName);
-
-					path += "/" + folder.Name;
-
 					MAPIFolder parentFolder = folder.Parent;
 
 					// Move items
