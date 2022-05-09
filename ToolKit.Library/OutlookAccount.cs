@@ -122,7 +122,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					string filePath = store.FilePath;
 
 					if (!string.IsNullOrWhiteSpace(filePath) &&
-						store.FilePath == path)
+						filePath.Equals(
+							path, StringComparison.OrdinalIgnoreCase))
 					{
 						newPst = store;
 						break;
