@@ -493,6 +493,53 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// List the folders.
+		/// </summary>
+		/// <param name="folderNames">The current list of folder names.</param>
+		/// <param name="folderPath">The folder path to check.</param>
+		/// <param name="folder">The folder to act upon.</param>
+		/// <param name="recurse">Indicates whether to recurse into
+		/// sub-folders or not.</param>
+		/// <returns>The folders.</returns>
+		public static IList<string> ListFolders(
+			IList<string> folderNames,
+			string folderPath,
+			MAPIFolder folder,
+			bool recurse)
+		{
+			if (folderNames != null && folder != null)
+			{
+				int count = folder.Folders.Count;
+				for (int index = 1; index <= count; index++)
+				{
+					MAPIFolder subFolder = folder.Folders[index];
+
+					string subFolderName = subFolder.Name;
+
+					if (recurse == true)
+					{
+						string subFolderPath =
+							folderPath + "/" + subFolderName;
+						folderNames.Add(subFolderPath);
+
+						folderNames = ListFolders(
+							folderNames, subFolderPath, subFolder, true);
+					}
+					else
+					{
+						folderNames.Add(subFolderName);
+					}
+
+					Marshal.ReleaseComObject(subFolder);
+				}
+
+				Marshal.ReleaseComObject(folder);
+			}
+
+			return folderNames;
+		}
+
+		/// <summary>
 		/// Remove folder from PST store.
 		/// </summary>
 		/// <param name="path">The path of current folder.</param>

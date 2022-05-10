@@ -289,6 +289,30 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return encoding;
 		}
 
+		private static string GetFolderPath(string[] arguments)
+		{
+			string folderPath = null;
+
+			for (int index = 1; index < arguments.Length; index++)
+			{
+				string argument = arguments[index];
+
+				// if the file exists, it is the PST file argument
+				bool fileExists = File.Exists(argument);
+
+				if (fileExists == false && !argument.Equals(
+					"--recurse", StringComparison.OrdinalIgnoreCase) &&
+					!argument.Equals(
+						"-r", StringComparison.OrdinalIgnoreCase))
+				{
+					folderPath = arguments[index];
+					break;
+				}
+			}
+
+			return folderPath;
+		}
+
 		private static string GetPstLocation(
 			string[] arguments, string source, int index)
 		{
@@ -329,15 +353,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
 
+			bool recurse = false;
+
+			if (arguments.Contains("-r") || arguments.Contains("--recurse"))
+			{
+				recurse = true;
+			}
+
 			int pstFileIndex = ArgumentsContainPstFile(arguments);
 
 			if (pstFileIndex > 0)
 			{
 				string pstFile = arguments[pstFileIndex];
-				string folderPath = arguments[2];
+				string folderPath = GetFolderPath(arguments);
 
 				IList<string> folderNames =
-					outlookStore.ListFolders(pstFile, folderPath);
+					outlookStore.ListFolders(pstFile, folderPath, recurse);
 
 				foreach (string folderName in folderNames)
 				{
