@@ -457,17 +457,42 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					MAPIFolder sourceFolder = OutlookFolder.CreaterFolderPath(
 						source, sourceFolderPath);
-					MAPIFolder destinationFolder =
+
+					MAPIFolder destinationParent = OutlookFolder.GetPathParent(
+						destination, destinationFolderPath);
+
+					folderExists = OutlookFolder.DoesFolderExist(
+						destination, destinationFolderPath);
+
+					if (folderExists == true)
+					{
+						MAPIFolder destinationFolder =
 						OutlookFolder.CreaterFolderPath(
 							destination, destinationFolderPath);
 
-					OutlookFolder outlookFolder = new (outlookAccount);
+						OutlookFolder outlookFolder = new (outlookAccount);
 
-					outlookFolder.MoveFolderContents(
-						destinationFolderPath, sourceFolder, destinationFolder);
+						outlookFolder.MoveFolderContents(
+							destinationFolderPath, sourceFolder, destinationFolder);
 
-					// Once all the items have been moved, remove the folder.
-					sourceFolder.Delete();
+						// Once all the items have been moved, remove the folder.
+						sourceFolder.Delete();
+					}
+					else
+					{
+						// Folder doesn't already exist, so just move it.
+						string parentPath =
+							OutlookFolder.GetFolderPath(destinationParent);
+						string folderName = sourceFolder.Name;
+
+						LogFormatMessage.Info(
+							"at: {0} Moving {1} to {2}",
+							parentPath,
+							folderName,
+							folderName);
+
+						sourceFolder.MoveTo(destinationParent);
+					}
 				}
 			}
 		}
