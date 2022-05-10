@@ -300,6 +300,50 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the parent folder of the given path.
+		/// </summary>
+		/// <param name="store">The PST file store to use.</param>
+		/// <param name="folderPath">The folder path to check.</param>
+		/// <returns>The parent folder of the given path.</returns>
+		public static MAPIFolder GetPathParent(Store store, string folderPath)
+		{
+			MAPIFolder parent = null;
+
+			if (store != null && !string.IsNullOrWhiteSpace(folderPath))
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
+				parent = rootFolder;
+
+				folderPath = RemoveStoreFromPath(folderPath);
+
+				string[] parts = folderPath.Split(
+					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
+
+				for (int index = 0; index < parts.Length - 1; index++)
+				{
+					string part = parts[index];
+
+					if (index == 0)
+					{
+						string rootFolderName = rootFolder.Name;
+
+						if (part.Equals(
+							rootFolderName,
+							StringComparison.OrdinalIgnoreCase))
+						{
+							// root, so skip over
+							continue;
+						}
+					}
+
+					parent = AddFolder(parent, part);
+				}
+			}
+
+			return parent;
+		}
+
+		/// <summary>
 		/// Get senders counts.
 		/// </summary>
 		/// <param name="path">The current folder path.</param>
