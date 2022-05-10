@@ -223,28 +223,23 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>
 		/// <param name="folderPath">The folder path to check.</param>
+		/// <param name="recurse">Indicates whether to recurse into
+		/// sub-folders or not.</param>
 		/// <returns>The folders.</returns>
-		public IList<string> ListFolders(string pstFilePath, string folderPath)
+		public IList<string> ListFolders(
+			string pstFilePath, string folderPath, bool recurse)
 		{
 			IList<string> folderNames = new List<string>();
 
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			MAPIFolder sourceFolder = OutlookFolder.CreaterFolderPath(
+			MAPIFolder folder = OutlookFolder.CreaterFolderPath(
 				store, folderPath);
 
-			int count = sourceFolder.Folders.Count;
-			for (int index = 1; index <= count; index++)
-			{
-				MAPIFolder folder = sourceFolder.Folders[index];
+			folderNames = OutlookFolder.ListFolders(
+				folderNames, folderPath, folder, recurse);
 
-				string folderName = folder.Name;
-				folderNames.Add(folderName);
-
-				Marshal.ReleaseComObject(folder);
-			}
-
-			Marshal.ReleaseComObject(sourceFolder);
+			Marshal.ReleaseComObject(folder);
 
 			return folderNames;
 		}
