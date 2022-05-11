@@ -161,26 +161,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Is same folder.
-		/// </summary>
-		/// <param name="folder">The folder.</param>
-		/// <param name="name">The name of the folder.</param>
-		/// <returns>Indicates whether the name of the folder is the same.</returns>
-		public static bool IsSameFolder(MAPIFolder folder, string name)
-		{
-			bool folderExists = false;
-			string folderName = folder.Name;
-
-			if (folderName.Equals(
-				name, StringComparison.OrdinalIgnoreCase))
-			{
-				folderExists = true;
-			}
-
-			return folderExists;
-		}
-
-		/// <summary>
 		/// Create folder path.
 		/// </summary>
 		/// <param name="store">The PST file store to use.</param>
@@ -239,27 +219,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (folder != null)
 			{
-				FolderAction folderAction = IsSameFolder;
-
-				folderExists = RecurseFolders(parentFolder, folderName, folderAction);
-
-				//int total = parentFolder.Folders.Count;
-
-				//for (int index = 1; index <= total; index++)
-				//{
-				//	MAPIFolder subFolder = parentFolder.Folders[index];
-
-				//	string name = subFolder.Name;
-
-				//	if (folderName.Equals(
-				//		name, StringComparison.OrdinalIgnoreCase))
-				//	{
-				//		folderExists = true;
-				//		break;
-				//	}
-
-				//	Marshal.ReleaseComObject(subFolder);
-				//}
 				folderExists = true;
 			}
 
@@ -843,45 +802,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				MoveFolderItems(source, destination);
 				MoveSubFolders(path, source, destination);
 			}
-		}
-
-		/// <summary>
-		/// Remove duplicates items from the given folder.
-		/// </summary>
-		/// <param name="folder">The MAPI folder to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <param name="recurse">Indicates whether to recurse into
-		/// sub folders.</param>
-		/// <returns>An array of duplicate sets and total duplicate items
-		/// count.</returns>
-		public int[] RemoveDuplicates(
-			MAPIFolder folder, bool dryRun, bool recurse)
-		{
-			int[] duplicateCounts = new int[2];
-
-			if (folder != null)
-			{
-				string folderName = folder.Name;
-
-				if (!ReservedFolders.Contains(folderName))
-				{
-					if (recurse == true)
-					{
-						string path = GetFolderPath(folder);
-						duplicateCounts = RemoveDuplicatesFromSubFolders(
-							path, folder, dryRun);
-					}
-
-					int[] duplicateCountsThisFolder =
-						RemoveDuplicatesFromThisFolder(folder, dryRun);
-
-					duplicateCounts[0] += duplicateCountsThisFolder[0];
-					duplicateCounts[1] += duplicateCountsThisFolder[1];
-				}
-			}
-
-			return duplicateCounts;
 		}
 
 		/// <summary>
