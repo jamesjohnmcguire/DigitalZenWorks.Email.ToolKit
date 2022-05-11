@@ -131,6 +131,41 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		/// Test for comparing two different MailItems by content.
 		/// </summary>
 		[Test]
+		public void TestHtmlBodyTrimBr()
+		{
+			string htmlBody = @"<BR>\r\n<BR>\r\n<BR>\r\n<BR>\r\n</FONT>\r\n" +
+				@"</P>\r\n\r\n</BODY>\r\n</HTML>";
+			string afterHtmlBody = @"<BR>\r\n</FONT>\r\n" +
+				@"</P>\r\n</BODY>\r\n</HTML>";
+
+			htmlBody = HtmlEmail.Trim(htmlBody);
+
+			Assert.AreEqual(htmlBody, afterHtmlBody);
+		}
+
+		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
+		public void TestHtmlBodyTrimLineEndings()
+		{
+			string htmlBody = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+				"&nbsp;&nbsp;&nbsp;<BR>\r\n<BR>\r\n<BR>\r\n<BR>\r\n<BR>\r\n" +
+				"<BR>\r\n<BR>\r\n</FONT>\r\n</P>\r\n\r\n</BODY>\r\n</HTML>";
+
+			string afterHtmlBody = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+				"&nbsp;&nbsp;&nbsp;" +
+				"<BR>\r\n</FONT>\r\n</P>\r\n</BODY>\r\n</HTML>";
+
+			htmlBody = HtmlEmail.Trim(htmlBody);
+
+			Assert.AreEqual(afterHtmlBody, htmlBody);
+		}
+
+		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
 		public void TestMailItemsAreNotSameByContent()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
@@ -247,26 +282,160 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				OutlookFolder.AddFolder(mainFolder, "Testing");
 			Marshal.ReleaseComObject(subFolder);
 
-			subFolder = OutlookFolder.AddFolder(mainFolder, "Testing (1)");
-
-			MailItem mailItem = outlookAccount.CreateMailItem(
-				"someone@example.com",
-				"This is the subject",
-				"This is the message.");
-			mailItem.Move(subFolder);
-
-			Marshal.ReleaseComObject(subFolder);
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"Testing (1)",
+				"This is the subject");
 
 			// Review
 			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder);
+			outlookFolder.MergeFolders(path, rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Testing (1)");
+
+			Assert.IsNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		[Test]
+		public void TestMergeFoldersAggresive()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"Testing_5",
+				"This is the subject 1");
+
+			MailItem mailItem2 = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"_Testing",
+				"This is the subject 3");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			outlookFolder.MergeFolders(path, rootFolder, false);
+
+			System.Threading.Thread.Sleep(200);
+
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "Testing_5");
+			Assert.IsNull(subFolder);
+
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "_Testing");
+			Assert.IsNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			mailItem2.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		[Test]
+		public void TestMergeFoldersAllNumbersFolder()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"2022",
+				"This is the subject");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			outlookFolder.MergeFolders(path, rootFolder, false);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "2022");
+
+			Assert.IsNotNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		[Test]
+		public void TestMergeFolderWithParent()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Main Test Folder");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"Main Test Folder",
+				"This is the subject");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			outlookFolder.MergeFolders(path, rootFolder, false);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "Main Test Folder");
 
 			Assert.IsNull(subFolder);
 
@@ -305,9 +474,11 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem3.Move(mainFolder);
 
+			string storePath = OutlookStore.GetStoreName(store);
+
 			OutlookFolder outlookFolder = new (outlookAccount);
 			int[] counts =
-				outlookFolder.RemoveDuplicates(mainFolder, false, true);
+				outlookFolder.RemoveDuplicates(storePath, mainFolder, false);
 
 			Assert.AreEqual(counts[0], 1);
 			Assert.AreEqual(counts[1], 2);
@@ -332,8 +503,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder subFolder = OutlookFolder.AddFolder(
 				rootFolder, "Temporary Test Folder");
 
-			OutlookStore outlookStore = new (outlookAccount);
-			outlookStore.RemoveFolder(rootFolder.Name, subFolder, false);
+			OutlookStore.RemoveFolder(rootFolder.Name, subFolder, false);
 
 			Marshal.ReleaseComObject(subFolder);
 
@@ -382,12 +552,81 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
+		public void TestRemoveMimeOleVersion()
+		{
+			string header = @"X-Priority: 3\r\nX-MSMail-Priority: Normal\r\n" +
+				@"X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2900.2180" +
+				@"\r\nFrom: <admin@example.com>\r\nTo: " +
+				@"<somebody@example.com>,\t<somebodyelse@example.com>\r\n" +
+				@"Subject: Subject Statement\r\n";
+			string afterHeader = @"X-Priority: 3\r\nX-MSMail-Priority: " +
+				@"Normal\r\nX-MimeOLE: Produced By Microsoft MimeOLE" +
+				@"\r\nFrom: <admin@example.com>\r\nTo: " +
+				@"<somebody@example.com>,\t<somebodyelse@example.com>\r\n" +
+				@"Subject: Subject Statement\r\n";
+
+			header = MapiItem.RemoveMimeOleVersion(header);
+
+			Assert.AreEqual(afterHeader, header);
+		}
+
+		/// <summary>
+		/// Test for checking if RtfEmail.Trim is correct.
+		/// </summary>
+		[Test]
+		public void TestRftBodyTrim()
+		{
+			byte[] sampleBytes = new byte[]
+			{
+				32, 32, 32, 32, 32, 32, 92, 112, 97, 114, 13, 10, 92, 112, 97,
+				114, 13, 10, 92, 112, 97, 114, 13, 10, 92, 112, 97, 114, 13,
+				10, 92, 112, 97, 114, 13, 10, 92, 112, 97, 114, 13, 10, 92,
+				112, 97, 114, 13, 10, 92, 112, 97, 114, 13, 10, 125, 13, 10, 0
+			};
+			byte[] afterBytes = new byte[]
+			{
+				32, 32, 32, 32, 32, 32, 92, 112, 97, 114, 13, 10, 125, 13,
+				10, 0
+			};
+
+			sampleBytes = RtfEmail.Trim(sampleBytes);
+
+			Assert.AreEqual(sampleBytes, afterBytes);
+		}
+
+		/// <summary>
 		/// Test for sanity check.
 		/// </summary>
 		[Test]
 		public void TestSanityCheck()
 		{
 			Assert.Pass();
+		}
+
+		private static MailItem AddFolderAndMessage(
+			OutlookAccount outlookAccount,
+			MAPIFolder parentFolder,
+			string folderName,
+			string subject)
+		{
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(parentFolder, folderName);
+
+			MailItem mailItem = outlookAccount.CreateMailItem(
+				"someone@example.com",
+				subject,
+				"This is the message.");
+			mailItem.UnRead = false;
+			mailItem.Save();
+
+			mailItem.Move(subFolder);
+
+			Marshal.ReleaseComObject(subFolder);
+
+			return mailItem;
 		}
 	}
 }

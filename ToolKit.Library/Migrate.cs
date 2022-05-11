@@ -21,12 +21,6 @@ using System.Text;
 namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
-	/// The transfer folder call back type.
-	/// </summary>
-	/// <param name="id">The folder id.</param>
-	public delegate void TransferFolderCallBackType(int id);
-
-	/// <summary>
 	/// Migrate Dbx to Pst class.
 	/// </summary>
 	public static class Migrate
@@ -43,19 +37,21 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static void DbxDirectoryToPst(
 			string dbxFoldersPath, string pstPath)
 		{
+			DbxDirectoryToPst(dbxFoldersPath, pstPath, null);
+		}
+
+		/// <summary>
+		/// Dbx directory to pst.
+		/// </summary>
+		/// <param name="dbxFoldersPath">The path to dbx folders to
+		/// migrate.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <param name="encoding">The optional encoding to use.</param>
+		public static void DbxDirectoryToPst(
+			string dbxFoldersPath, string pstPath, Encoding encoding)
+		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 
-			// Personal preference... For me, most of these types will
-			// likely be Japansese.
-			Encoding.RegisterProvider(
-				CodePagesEncodingProvider.Instance);
-			Encoding encoding = Encoding.GetEncoding("shift_jis");
-
-			DbxSet dbxSet = new (dbxFoldersPath, encoding);
-
-			// Order the list, so that parents always come before their
-			// children.
-			dbxSet.SetTreeOrdered();
 			Store pstStore = outlookAccount.GetStore(pstPath);
 
 			if (pstStore == null)
@@ -64,6 +60,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
+				DbxSet dbxSet = new (dbxFoldersPath, encoding);
+
+				// Order the list, so that parents always come before their
+				// children.
+				dbxSet.SetTreeOrdered();
+
 				DbxFolder dbxFolder;
 				OutlookFolder outlookFolder = new (outlookAccount);
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
@@ -98,18 +100,24 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		public static void DbxFileToPst(string filePath, string pstPath)
 		{
-			// Personal preference... For me, most of these types will
-			// likely be Japansese.
-			Encoding.RegisterProvider(
-				CodePagesEncodingProvider.Instance);
-			Encoding encoding = Encoding.GetEncoding("shift_jis");
+			DbxFileToPst(filePath, pstPath, null);
+		}
 
+		/// <summary>
+		/// Dbx files to pst.
+		/// </summary>
+		/// <param name="filePath">The file path to migrate.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <param name="encoding">The optional encoding to use.</param>
+		public static void DbxFileToPst(
+			string filePath, string pstPath, Encoding encoding)
+		{
 			FileInfo fileInfo = new (filePath);
 
 			if (fileInfo.Name.Equals(
 				"Folders.dbx", StringComparison.OrdinalIgnoreCase))
 			{
-				DbxDirectoryToPst(filePath, pstPath);
+				DbxDirectoryToPst(filePath, pstPath, encoding);
 			}
 			else
 			{
@@ -142,18 +150,31 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		public static bool DbxToPst(string path, string pstPath)
 		{
+			return DbxToPst(path, pstPath, null);
+		}
+
+		/// <summary>
+		/// Dbx to pst.
+		/// </summary>
+		/// <param name="path">the path of the dbx element.</param>
+		/// <returns>A value indicating success or not.</returns>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <param name="encoding">The optional encoding to use.</param>
+		public static bool DbxToPst(
+		string path, string pstPath, Encoding encoding)
+		{
 			bool result = false;
 
 			Log.Info("Checking file: " + path);
 
 			if (Directory.Exists(path))
 			{
-				DbxDirectoryToPst(path, pstPath);
+				DbxDirectoryToPst(path, pstPath, encoding);
 				result = true;
 			}
 			else if (File.Exists(path))
 			{
-				DbxFileToPst(path, pstPath);
+				DbxFileToPst(path, pstPath, encoding);
 				result = true;
 			}
 			else
@@ -178,8 +199,21 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (Directory.Exists(path))
 			{
-				EmlDirectoryToPst(path, pstPath);
-				result = true;
+				OutlookAccount outlookAccount = OutlookAccount.Instance;
+				Store store = outlookAccount.GetStore(pstPath);
+
+				if (store == null)
+				{
+					Log.Error("PST store not created");
+				}
+				else
+				{
+					DirectoryInfo directoryInfo = new (path);
+					string folderPath = directoryInfo.Name;
+
+					EmlDirectoryToPst(path, store, folderPath);
+					result = true;
+				}
 			}
 			else if (File.Exists(path))
 			{
@@ -204,13 +238,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (keyExists == true)
 			{
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"Duplicate key mapping! Folder Id: {1} Name: {0} ",
 					dbxFolder.FolderName,
-					dbxFolder.FolderId);
-
-				Log.Info(message);
+					dbxFolder.FolderId.ToString(CultureInfo.InvariantCulture));
 			}
 			else
 			{
@@ -252,8 +283,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return pstFolder;
 		}
 
-		private static void CopyEmlToPst(
-			OutlookFolder outlookFolder, MAPIFolder mapiFolder, string emlFile)
+		private static void CopyEmlToPst(MAPIFolder mapiFolder, string emlFile)
 		{
 			if (!string.IsNullOrWhiteSpace(emlFile) && File.Exists(emlFile))
 			{
@@ -263,12 +293,23 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					Converter.ConvertEmlToMsg(emlFile, msgFile);
 				}
+				catch (System.IO.IOException exception)
+				{
+					Log.Warn(exception.ToString());
+
+					// Hmmmn, try one more time.
+					msgFile = GetTemporaryMsgFile();
+					Converter.ConvertEmlToMsg(emlFile, msgFile);
+				}
 				catch (System.Exception exception) when
 					(exception is InvalidCastException ||
 					exception is NullReferenceException)
 				{
 					Log.Error(exception.ToString());
 				}
+
+				OutlookAccount outlookAccount = OutlookAccount.Instance;
+				OutlookFolder outlookFolder = new (outlookAccount);
 
 				outlookFolder.AddMsgFile(mapiFolder, msgFile);
 
@@ -305,9 +346,20 @@ namespace DigitalZenWorks.Email.ToolKit
 					// add folder to pst
 					if (dbxFolder.FolderParentId == 0)
 					{
-						// top level folder
-						pstFolder = OutlookFolder.AddFolder(
-							rootFolder, dbxFolder.FolderName);
+						if (dbxFolder.IsOrphan == true)
+						{
+							MAPIFolder orphanFolders =
+								OutlookFolder.AddFolder(
+									rootFolder, "Orphan Folders");
+							pstFolder = OutlookFolder.AddFolder(
+								orphanFolders, dbxFolder.FolderName);
+						}
+						else
+						{
+							// top level folder
+							pstFolder = OutlookFolder.AddFolder(
+								rootFolder, dbxFolder.FolderName);
+						}
 					}
 					else
 					{
@@ -394,42 +446,37 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		/// <summary>
-		/// Dbx directory to pst.
-		/// </summary>
-		/// <param name="emlFilesPath">The path to dbx folders to
-		/// migrate.</param>
-		/// <param name="pstPath">The path to pst file to copy to.</param>
 		private static void EmlDirectoryToPst(
-			string emlFilesPath, string pstPath)
+			string emlFilesPath, Store store, string folderPath)
 		{
-			OutlookAccount outlookAccount = OutlookAccount.Instance;
-			Store pstStore = outlookAccount.GetStore(pstPath);
+			string[] directories = Directory.GetDirectories(emlFilesPath);
 
-			if (pstStore == null)
+			if (directories.Length > 0)
 			{
-				Log.Error("PST store not created");
-			}
-			else
-			{
-				string baseName = Path.GetFileNameWithoutExtension(pstPath);
-
-				IEnumerable<string> emlFiles =
-					EmlMessages.GetFiles(emlFilesPath);
-
-				if (emlFiles.Any())
+				foreach (string directory in directories)
 				{
-					OutlookFolder outlookFolder = new (outlookAccount);
-					MAPIFolder pstFolder =
-						OutlookStore.GetTopLevelFolder(pstStore, baseName);
+					DirectoryInfo directoryInfo = new (directory);
+					string directoryName = directoryInfo.Name;
 
-					foreach (string file in emlFiles)
-					{
-						CopyEmlToPst(outlookFolder, pstFolder, file);
-					}
-
-					Marshal.ReleaseComObject(pstFolder);
+					string thisFolderPath = folderPath + @"\" + directoryName;
+					EmlDirectoryToPst(directory, store, thisFolderPath);
 				}
+			}
+
+			IEnumerable<string> emlFiles =
+				EmlMessages.GetFiles(emlFilesPath);
+
+			if (emlFiles.Any())
+			{
+				MAPIFolder folder =
+					OutlookFolder.CreaterFolderPath(store, folderPath);
+
+				foreach (string file in emlFiles)
+				{
+					CopyEmlToPst(folder, file);
+				}
+
+				Marshal.ReleaseComObject(folder);
 			}
 		}
 
@@ -448,8 +495,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			MAPIFolder pstFolder =
 				OutlookStore.GetTopLevelFolder(pstStore, baseName);
 
-			OutlookFolder outlookFolder = new (outlookAccount);
-			CopyEmlToPst(outlookFolder, pstFolder, filePath);
+			CopyEmlToPst(pstFolder, filePath);
 
 			Marshal.ReleaseComObject(pstFolder);
 		}
