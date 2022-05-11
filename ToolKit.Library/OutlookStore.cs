@@ -7,6 +7,7 @@
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -113,7 +114,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="path">The path of current folder.</param>
 		/// <param name="subFolder">The sub-folder.</param>
 		/// <param name="force">Whether to force the removal.</param>
-		public void RemoveFolder(
+		public static void RemoveFolder(
 			string path,
 			MAPIFolder subFolder,
 			bool force)
@@ -140,8 +141,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				path += "/" + subFolder.Name;
 
-				OutlookFolder outlookFolder = new (outlookAccount);
-				outlookFolder.RemoveFolder(path, index, subFolder, force);
+				OutlookFolder.RemoveFolder(path, index, subFolder, force);
 			}
 		}
 
@@ -165,14 +165,134 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="entryId">The entryId of the MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		public string GetItemSynopses(string entryId)
+		{
+			NameSpace session = outlookAccount.Session;
+			MailItem mailItem = session.GetItemFromID(entryId);
+			string synopses = OutlookFolder.GetMailItemSynopses(mailItem);
+
+			return synopses;
+		}
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="entryId">The entryId of the MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		public MailItem GetMailItemFromEntryId(string entryId)
+		{
+			NameSpace session = outlookAccount.Session;
+			MailItem mailItem = session.GetItemFromID(entryId);
+
+			return mailItem;
+		}
+
+		/// <summary>
+		/// Get the total duplicates in the store.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <returns>A list of total duplicates in the store.</returns>
+		public IDictionary<string, IList<string>> GetTotalDuplicates(
+			string pstFilePath)
+		{
+			IDictionary<string, IList<string>> hashTable =
+				new Dictionary<string, IList<string>>();
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			if (store != null)
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				string storePath = GetStoreName(store);
+				storePath += "::";
+
+				hashTable = OutlookFolder.GetItemHashes(
+					storePath, rootFolder, hashTable);
+			}
+
+			return hashTable;
+		}
+
+		/// <summary>
+		/// List the folders.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <param name="folderPath">The folder path to check.</param>
+		/// <param name="recurse">Indicates whether to recurse into
+		/// sub-folders or not.</param>
+		/// <returns>The folders.</returns>
+		public IList<string> ListFolders(
+			string pstFilePath, string folderPath, bool recurse)
+		{
+			IList<string> folderNames = new List<string>();
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			MAPIFolder folder = OutlookFolder.CreaterFolderPath(
+				store, folderPath);
+
+			folderNames = OutlookFolder.ListFolders(
+				folderNames, folderPath, folder, recurse);
+
+			Marshal.ReleaseComObject(folder);
+
+			return folderNames;
+		}
+
+		/// <summary>
+		/// List the top senders in  the store.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <param name="amount">The amout of senders to list.</param>
+		/// <returns>The top senders.</returns>
+		public IList<KeyValuePair<string, int>> ListTopSenders(
+			string pstFilePath, int amount)
+		{
+			IList<KeyValuePair<string, int>> topSenders =
+				new List<KeyValuePair<string, int>>();
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			string storePath = GetStoreName(store);
+			storePath += "::";
+
+			IDictionary<string, int> sendersCounts =
+				new Dictionary<string, int>();
+
+			sendersCounts = OutlookFolder.GetSendersCount(
+				storePath, rootFolder, sendersCounts);
+
+			Marshal.ReleaseComObject(rootFolder);
+			Marshal.ReleaseComObject(store);
+
+			IOrderedEnumerable<KeyValuePair<string, int>> orderedList =
+				sendersCounts.OrderByDescending(pair => pair.Value);
+			IEnumerable<KeyValuePair<string, int>> orderedListTop =
+				orderedList.Take(amount);
+
+			topSenders = orderedListTop.ToList();
+
+			return topSenders;
+		}
+
+		/// <summary>
 		/// Merge duplicate folders.
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>
-		public void MergeFolders(string pstFilePath)
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		public void MergeFolders(string pstFilePath, bool dryRun)
 		{
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			MergeFolders(store);
+			MergeFolders(store, dryRun);
 
 			Log.Info("Merge folders complete - total folders checked: " +
 				totalFolders);
@@ -182,8 +302,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Merge duplicate folders.
 		/// </summary>
 		/// <param name="store">The store to check.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
 		/// <returns>The total folders checked.</returns>
-		public uint MergeFolders(Store store)
+		public uint MergeFolders(Store store, bool dryRun)
 		{
 			if (store != null)
 			{
@@ -194,7 +316,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				outlookFolder.MergeFolders(storePath, rootFolder);
+				outlookFolder.MergeFolders(storePath, rootFolder, dryRun);
 
 				totalFolders++;
 
@@ -231,12 +353,10 @@ namespace DigitalZenWorks.Email.ToolKit
 				string sourcePath = GetStoreName(source);
 				string destinationPath = GetStoreName(destination);
 
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"Moving contents of {0} to {1}",
 					sourcePath,
 					destinationPath);
-				Log.Info(message);
 
 				MAPIFolder sourceRootFolder = source.GetRootFolder();
 				MAPIFolder destinationRootFolder = destination.GetRootFolder();
@@ -276,22 +396,102 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (isReserved == false)
 						{
-							outlookFolder.RemoveFolder(
+							OutlookFolder.RemoveFolder(
 								subPath, subIndex, subFolder, false);
 						}
 					}
 					else
 					{
 						// Folder doesn't already exist, so just move it.
-						message = string.Format(
-							CultureInfo.InvariantCulture,
+						LogFormatMessage.Info(
 							"at: {0} Moving {1} to {2}",
 							subPath,
 							folderName,
 							destinationPath);
-						Log.Info(message);
 
 						subFolder.MoveTo(destinationRootFolder);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Move folder.
+		/// </summary>
+		/// <param name="sourcePstPath">The source PST path.</param>
+		/// <param name="sourceFolderPath">The source folder path.</param>
+		/// <param name="destinationPstPath">The desination PST path.</param>
+		/// <param name="destinationFolderPath">The destination folder path.</param>
+		public void MoveFolder(
+			string sourcePstPath,
+			string sourceFolderPath,
+			string destinationPstPath,
+			string destinationFolderPath)
+		{
+			Store source = outlookAccount.GetStore(sourcePstPath);
+			Store destination = outlookAccount.GetStore(destinationPstPath);
+
+			MoveFolder(
+				source, sourceFolderPath, destination, destinationFolderPath);
+		}
+
+		/// <summary>
+		/// Move folder.
+		/// </summary>
+		/// <param name="source">The source store.</param>
+		/// <param name="sourceFolderPath">The source folder path.</param>
+		/// <param name="destination">The destination store.</param>
+		/// <param name="destinationFolderPath">The destination folder path.</param>
+		public void MoveFolder(
+			Store source,
+			string sourceFolderPath,
+			Store destination,
+			string destinationFolderPath)
+		{
+			if (source != null)
+			{
+				bool folderExists = OutlookFolder.DoesFolderExist(
+					source, sourceFolderPath);
+
+				if (folderExists == true)
+				{
+					MAPIFolder sourceFolder = OutlookFolder.CreaterFolderPath(
+						source, sourceFolderPath);
+
+					MAPIFolder destinationParent = OutlookFolder.GetPathParent(
+						destination, destinationFolderPath);
+
+					folderExists = OutlookFolder.DoesFolderExist(
+						destination, destinationFolderPath);
+
+					if (folderExists == true)
+					{
+						MAPIFolder destinationFolder =
+						OutlookFolder.CreaterFolderPath(
+							destination, destinationFolderPath);
+
+						OutlookFolder outlookFolder = new (outlookAccount);
+
+						outlookFolder.MoveFolderContents(
+							destinationFolderPath, sourceFolder, destinationFolder);
+
+						// Once all the items have been moved, remove the folder.
+						sourceFolder.Delete();
+					}
+					else
+					{
+						// Folder doesn't already exist, so just move it.
+						string parentPath =
+							OutlookFolder.GetFolderPath(destinationParent);
+						string folderName = sourceFolder.Name;
+
+						LogFormatMessage.Info(
+							"at: {0} Moving {1} to {2}",
+							parentPath,
+							folderName,
+							folderName);
+
+						sourceFolder.MoveTo(destinationParent);
 					}
 				}
 			}
@@ -335,8 +535,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				int[] duplicateCounts =
-					outlookFolder.RemoveDuplicatesFromSubFolders(
+				int[] duplicateCounts = outlookFolder.RemoveDuplicates(
 						storePath, rootFolder, dryRun);
 
 				if (flush == true)
@@ -346,12 +545,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				int removedDuplicates =
 					duplicateCounts[1] - duplicateCounts[0];
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
+				LogFormatMessage.Info(
 					"Duplicates Removed in: {0}: {1}",
 					storePath,
 					removedDuplicates.ToString(CultureInfo.InvariantCulture));
-				Log.Info(message);
 
 				totalFolders++;
 				Marshal.ReleaseComObject(rootFolder);
@@ -362,11 +559,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Remove all empty folders.
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>
-		public void RemoveEmptyFolders(string pstFilePath)
+		/// <returns>The count of removed folders.</returns>
+		public int RemoveEmptyFolders(string pstFilePath)
 		{
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			RemoveEmptyFolders(store);
+			int removedFolders = RemoveEmptyFolders(store);
+
+			return removedFolders;
 		}
 
 		/// <summary>
@@ -450,8 +650,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						OutlookFolder outlookFolder = new (outlookAccount);
-						outlookFolder.RemoveFolder(
+						OutlookFolder.RemoveFolder(
 							path, index, folder, false);
 						removedFolders++;
 					}
@@ -483,8 +682,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static void EmptyDeletedItemsFolder(
 			MAPIFolder deletedItemsFolder)
 		{
+			Folders folders = deletedItemsFolder.Folders;
+			int totalItems = folders.Count;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group will change.
+			for (int index = totalItems; index > 0; index--)
+			{
+				MAPIFolder folder = folders[index];
+				folder.Delete();
+			}
+
 			Items items = deletedItemsFolder.Items;
-			int totalItems = items.Count;
+			totalItems = items.Count;
 
 			// Office uses 1 based indexes from VBA.
 			// Iterate in reverse order as the group will change.

@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "DbxToPst": {
-      "commandName": "Project",
-      "commandLineArgs": "dbx-to-pst %USERPROFILE%\\AppData\\Roaming\\DigitalZenWorks\\DbxToPst\\TestFolder"
-    }
-  }
-}

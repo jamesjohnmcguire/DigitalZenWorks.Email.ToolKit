@@ -6,6 +6,7 @@
 
 using Common.Logging;
 using DigitalZenWorks.Email.ToolKit;
+using Microsoft.Office.Interop.Outlook;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
@@ -16,6 +17,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using CommonLogging = Common.Logging;
 
 [assembly: CLSCompliant(true)]
 
@@ -28,6 +31,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+		private static readonly string[] Commands =
+		{
+			"dbx-to-pst", "eml-to-pst", "help", "list-folders",
+			"list-top-senders", "list-total-duplicates", "merge-folders",
+			"merge-stores", "move-folder", "remove-duplicates",
+			"remove-empty-folders"
+		};
 
 		/// <summary>
 		/// The program's main entry point.
@@ -46,20 +57,24 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				Log.Info("Starting DigitalZenWorks.Email.ToolKit Version: " +
 					version);
 
-				bool valid = ValidateLocationArguments(arguments);
+				bool valid = ValidateArguments(arguments);
 
 				if (arguments != null && valid == true)
 				{
+					string command = arguments[0];
 					string pstLocation;
 
-					switch (arguments[0])
+					Log.Info("Command is: " + command);
+
+					switch (command)
 					{
 						case "dbx-to-pst":
-							string dbxLocation = arguments[1];
+							string dbxLocation = GetDbxLocation(arguments);
+
 							pstLocation =
 								GetPstLocation(arguments, dbxLocation, 2);
 
-							result = DbxToPst(dbxLocation, pstLocation);
+							result = DbxToPst(arguments, dbxLocation, pstLocation);
 							break;
 						case "eml-to-pst":
 							string emlLocation = arguments[1];
@@ -72,11 +87,23 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							ShowHelp();
 							result = 0;
 							break;
+						case "list-folders":
+							result = ListFolders(arguments);
+							break;
+						case "list-top-senders":
+							result = ListTopSenders(arguments);
+							break;
+						case "list-total-duplicates":
+							result = ListTotalDuplicates(arguments);
+							break;
 						case "merge-folders":
 							result = MergeFolders(arguments);
 							break;
 						case "merge-stores":
 							result = MergeStores(arguments);
+							break;
+						case "move-folder":
+							MoveFolder(arguments);
 							break;
 						case "remove-duplicates":
 							result = RemoveDuplicates(arguments);
@@ -96,7 +123,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					ShowHelp();
 				}
 			}
-			catch (Exception exception)
+			catch (System.Exception exception)
 			{
 				Log.Error(exception.ToString());
 
@@ -127,11 +154,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return pstFileIndex;
 		}
 
-		private static int DbxToPst(string dbxLocation, string pstLocation)
+		private static int DbxToPst(
+			string[] arguments, string dbxLocation, string pstLocation)
 		{
 			int result = -1;
+			Encoding encoding = GetEncoding(arguments);
 
-			bool success = Migrate.DbxToPst(dbxLocation, pstLocation);
+			bool success = Migrate.DbxToPst(
+				dbxLocation, pstLocation, encoding);
 
 			if (success == true)
 			{
@@ -153,6 +183,134 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return result;
+		}
+
+		private static FileVersionInfo GetAssemblyInformation()
+		{
+			FileVersionInfo fileVersionInfo = null;
+
+			Assembly assembly = Assembly.GetExecutingAssembly();
+
+			string location = assembly.Location;
+
+			if (string.IsNullOrWhiteSpace(location))
+			{
+				// Single file apps have no assemblies.
+				Process process = Process.GetCurrentProcess();
+				location = process.MainModule.FileName;
+			}
+
+			if (!string.IsNullOrWhiteSpace(location))
+			{
+				fileVersionInfo = FileVersionInfo.GetVersionInfo(location);
+			}
+
+			return fileVersionInfo;
+		}
+
+		private static string GetDbxLocation(string[] arguments)
+		{
+			string dbxLocation = null;
+
+			for (int index = 1; index < arguments.Length; index++)
+			{
+				string argument = arguments[index];
+
+				if (argument.Equals(
+					"--encoding", StringComparison.OrdinalIgnoreCase) ||
+					argument.Equals(
+						"-e", StringComparison.OrdinalIgnoreCase))
+				{
+					index += 2;
+
+					dbxLocation = arguments[index];
+					break;
+				}
+			}
+
+			return dbxLocation;
+		}
+
+		private static int GetCount(string[] arguments)
+		{
+			int count = 25;
+
+			if (arguments.Contains("-c") ||
+				arguments.Contains("--count"))
+			{
+				for (int index = 1; index < arguments.Length; index++)
+				{
+					string argument = arguments[index];
+
+					if (argument.Equals(
+						"--count", StringComparison.OrdinalIgnoreCase) ||
+						argument.Equals(
+							"-c", StringComparison.OrdinalIgnoreCase))
+					{
+						string rawCount = arguments[index + 1];
+						count = Convert.ToInt32(
+							rawCount, CultureInfo.InvariantCulture);
+
+						break;
+					}
+				}
+			}
+
+			return count;
+		}
+
+		private static Encoding GetEncoding(string[] arguments)
+		{
+			Encoding encoding = null;
+
+			if (arguments.Contains("-e") ||
+				arguments.Contains("--encoding"))
+			{
+				for (int index = 1; index < arguments.Length; index++)
+				{
+					string argument = arguments[index];
+
+					if (argument.Equals(
+						"--encoding", StringComparison.OrdinalIgnoreCase) ||
+						argument.Equals(
+							"-e", StringComparison.OrdinalIgnoreCase))
+					{
+						string encodingName = arguments[index + 1];
+
+						Encoding.RegisterProvider(
+							CodePagesEncodingProvider.Instance);
+						encoding = Encoding.GetEncoding(encodingName);
+
+						break;
+					}
+				}
+			}
+
+			return encoding;
+		}
+
+		private static string GetFolderPath(string[] arguments)
+		{
+			string folderPath = null;
+
+			for (int index = 1; index < arguments.Length; index++)
+			{
+				string argument = arguments[index];
+
+				// if the file exists, it is the PST file argument
+				bool fileExists = File.Exists(argument);
+
+				if (fileExists == false && !argument.Equals(
+					"--recurse", StringComparison.OrdinalIgnoreCase) &&
+					!argument.Equals(
+						"-r", StringComparison.OrdinalIgnoreCase))
+				{
+					folderPath = arguments[index];
+					break;
+				}
+			}
+
+			return folderPath;
 		}
 
 		private static string GetPstLocation(
@@ -183,29 +341,168 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static string GetVersion()
 		{
-			Assembly assembly = Assembly.GetExecutingAssembly();
+			FileVersionInfo fileVersionInfo = GetAssemblyInformation();
 
-			AssemblyName assemblyName = assembly.GetName();
-			Version version = assemblyName.Version;
-			string assemblyVersion = version.ToString();
-
-			string location = assembly.Location;
-
-			if (string.IsNullOrWhiteSpace(location))
-			{
-				// Single file apps have no assemblies.
-				Process process = Process.GetCurrentProcess();
-				location = process.MainModule.FileName;
-			}
-
-			if (!string.IsNullOrWhiteSpace(location))
-			{
-				FileVersionInfo fileVersionInfo =
-					FileVersionInfo.GetVersionInfo(location);
-				assemblyVersion = fileVersionInfo.FileVersion;
-			}
+			string assemblyVersion = fileVersionInfo.FileVersion;
 
 			return assemblyVersion;
+		}
+
+		private static int ListFolders(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			bool recurse = false;
+
+			if (arguments.Contains("-r") || arguments.Contains("--recurse"))
+			{
+				recurse = true;
+			}
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				string pstFile = arguments[pstFileIndex];
+				string folderPath = GetFolderPath(arguments);
+
+				IList<string> folderNames =
+					outlookStore.ListFolders(pstFile, folderPath, recurse);
+
+				foreach (string folderName in folderNames)
+				{
+					Console.WriteLine(folderName);
+				}
+			}
+
+			return 0;
+		}
+
+		private static int ListTopSenders(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				string pstFile = arguments[pstFileIndex];
+
+				int count = GetCount(arguments);
+
+				IList<KeyValuePair<string, int>> topSenders =
+					outlookStore.ListTopSenders(pstFile, count);
+
+				foreach (KeyValuePair<string, int> sender in topSenders)
+				{
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"{0}: {1}",
+						sender.Key,
+						sender.Value.ToString(CultureInfo.InvariantCulture));
+					Console.WriteLine(message);
+				}
+			}
+
+			return 0;
+		}
+
+		private static int ListTotalDuplicates(string[] arguments)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			int pstFileIndex = ArgumentsContainPstFile(arguments);
+
+			if (pstFileIndex > 0)
+			{
+				string pstFilePath = arguments[pstFileIndex];
+
+				IDictionary<string, IList<string>> duplicates =
+					outlookStore.GetTotalDuplicates(pstFilePath);
+
+				ListTotalDuplicatesOutput(duplicates, true);
+				ListTotalDuplicatesOutput(duplicates, false);
+			}
+
+			return 0;
+		}
+
+		private static void ListTotalDuplicatesOutput(
+			IDictionary<string, IList<string>> duplicates, bool useLog)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			bool duplicatesFound = false;
+
+			foreach (KeyValuePair<string, IList<string>> item in
+				duplicates)
+			{
+				IList<string> duplicateSet = item.Value;
+
+				if (duplicateSet.Count > 1)
+				{
+					duplicatesFound = true;
+					string entryId1 = duplicateSet[0];
+
+					MailItem mailItem =
+						outlookStore.GetMailItemFromEntryId(entryId1);
+
+					string synopses =
+						OutlookFolder.GetMailItemSynopses(mailItem);
+
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Duplicates Found for: {0}",
+						synopses);
+
+					if (useLog == true)
+					{
+						Log.Info(message);
+					}
+					else
+					{
+						Console.WriteLine(message);
+					}
+
+					foreach (string entryId in duplicateSet)
+					{
+						mailItem =
+							outlookStore.GetMailItemFromEntryId(entryId);
+
+						MAPIFolder parent = mailItem.Parent;
+						string path = OutlookFolder.GetFolderPath(parent);
+
+						message = "At: " + path;
+
+						if (useLog == true)
+						{
+							Log.Info(message);
+						}
+						else
+						{
+							Console.WriteLine(message);
+						}
+					}
+				}
+			}
+
+			if (duplicatesFound == false)
+			{
+				string message = "No duplicates found";
+
+				if (useLog == true)
+				{
+					Log.Info(message);
+				}
+				else
+				{
+					Console.WriteLine(message);
+				}
+			}
 		}
 
 		private static void LogInitialization()
@@ -228,11 +525,19 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Serilog.Log.Logger = configuration.CreateLogger();
 
 			LogManager.Adapter =
-				new Common.Logging.Serilog.SerilogFactoryAdapter();
+				new CommonLogging.Serilog.SerilogFactoryAdapter();
 		}
 
 		private static int MergeFolders(string[] arguments)
 		{
+			bool dryRun = false;
+
+			if (arguments.Contains("-n") ||
+				arguments.Contains("--dryrun"))
+			{
+				dryRun = true;
+			}
+
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
 
@@ -242,11 +547,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string pstFile = arguments[pstFileIndex];
 
-				outlookStore.MergeFolders(pstFile);
+				outlookStore.MergeFolders(pstFile, dryRun);
 			}
 			else
 			{
-				outlookAccount.MergeFolders();
+				outlookAccount.MergeFolders(dryRun);
 			}
 
 			return 0;
@@ -269,6 +574,25 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return 0;
 		}
 
+		private static int MoveFolder(string[] arguments)
+		{
+			string sourcePst = arguments[1];
+			string sourcePath = arguments[2];
+			string destinationPst = arguments[3];
+			string destinationPath = arguments[4];
+
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			outlookStore.MoveFolder(
+				sourcePst,
+				sourcePath,
+				destinationPst,
+				destinationPath);
+
+			return 0;
+		}
+
 		private static int ProcessDirect(string[] arguments)
 		{
 			int result = -1;
@@ -280,11 +604,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				string pstLocation = GetPstLocation(arguments, location, 1);
 				if (Directory.Exists(location))
 				{
-					result = ProcessDirectDirectory(location, pstLocation);
+					result = ProcessDirectDirectory(
+						arguments, location, pstLocation);
 				}
 				else if (File.Exists(location))
 				{
-					result = ProcessDirectFile(location, pstLocation);
+					result =
+						ProcessDirectFile(arguments, location, pstLocation);
 				}
 				else
 				{
@@ -298,7 +624,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		}
 
 		private static int ProcessDirectDirectory(
-			string location, string pstLocation)
+			string[] arguments, string location, string pstLocation)
 		{
 			int result = -1;
 
@@ -306,7 +632,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			if (files.Length > 0)
 			{
-				result = DbxToPst(location, pstLocation);
+				result = DbxToPst(arguments, location, pstLocation);
 			}
 			else
 			{
@@ -322,7 +648,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		}
 
 		private static int ProcessDirectFile(
-			string location, string pstLocation)
+			string[] arguments, string location, string pstLocation)
 		{
 			int result = -1;
 
@@ -330,7 +656,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			if (extension.Equals(".dbx", StringComparison.Ordinal))
 			{
-				result = DbxToPst(location, pstLocation);
+				result = DbxToPst(arguments, location, pstLocation);
 			}
 			else if (extension.Equals(".eml", StringComparison.Ordinal) ||
 				extension.Equals(".txt", StringComparison.Ordinal))
@@ -351,10 +677,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				dryRun = true;
 			}
-
-			if (arguments.Contains("-s") ||
+			else if (arguments.Contains("-s") ||
 				arguments.Contains("--flush"))
 			{
+				// Obviously, ignore flush if dryRun is set.
 				flush = true;
 			}
 
@@ -383,18 +709,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 
 			int pstFileIndex = ArgumentsContainPstFile(arguments);
+			int removedFolders;
 
 			if (pstFileIndex > 0)
 			{
 				OutlookStore outlookStore = new (outlookAccount);
 				string pstFile = arguments[pstFileIndex];
 
-				outlookStore.RemoveEmptyFolders(pstFile);
+				removedFolders = outlookStore.RemoveEmptyFolders(pstFile);
 			}
 			else
 			{
-				outlookAccount.RemoveEmptyFolders();
+				removedFolders = outlookAccount.RemoveEmptyFolders();
 			}
+
+			Log.Info("Remove empty folder complete - total folders removed:" +
+				removedFolders);
 
 			return 0;
 		}
@@ -402,18 +732,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static void ShowHelp(string additionalMessage = null)
 		{
 			Assembly assembly = Assembly.GetExecutingAssembly();
-			string location = assembly.Location;
-
-			FileVersionInfo versionInfo =
-				FileVersionInfo.GetVersionInfo(location);
-
-			string companyName = versionInfo.CompanyName;
-			string copyright = versionInfo.LegalCopyright;
-
 			AssemblyName assemblyName = assembly.GetName();
 			string name = assemblyName.Name;
-			Version version = assemblyName.Version;
-			string assemblyVersion = version.ToString();
+
+			FileVersionInfo versionInfo = GetAssemblyInformation();
+			string companyName = versionInfo.CompanyName;
+			string copyright = versionInfo.LegalCopyright;
+			string assemblyVersion = versionInfo.FileVersion;
 
 			string header = string.Format(
 				CultureInfo.CurrentCulture,
@@ -434,16 +759,24 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				"command & gt; &lt; path & gt;");
 
 			Log.Info("Commands:");
-			Log.Info("dbx-to-pst            Migrate dbx files to pst file");
-			Log.Info("eml-to-pst            Migrate eml files to pst file");
-			Log.Info("merge-folders         Merge duplicate folders");
-			Log.Info("merge-stores          Merge one store into another");
-			Log.Info("remove-duplicates     Prune empty folders");
-			Log.Info("remove-empty-folders  Prune empty folders");
-			Log.Info("help                  Show this information");
+			Log.Info("dbx-to-pst             Migrate dbx files to pst file");
+			Log.Info("eml-to-pst             Migrate eml files to pst file");
+			Log.Info("list-folders           " +
+				"List all sub folders of a given folder");
+			Log.Info("list-top-senders       " +
+				"List the top senders of a given store");
+			Log.Info("list-total-duplicates  " +
+				"List all duplicates in all folders in a given store");
+			Log.Info("move-folder            " +
+				"Move folder to a different location");
+			Log.Info("merge-folders          Merge duplicate folders");
+			Log.Info("merge-stores           Merge one store into another");
+			Log.Info("remove-duplicates      Prune empty folders");
+			Log.Info("remove-empty-folders   Prune empty folders");
+			Log.Info("help                   Show this information");
 		}
 
-		private static bool ValidateLocationArguments(string[] arguments)
+		private static bool ValidateArguments(string[] arguments)
 		{
 			bool valid = false;
 
@@ -451,24 +784,18 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string command = arguments[0];
 
-				if (arguments.Length > 1)
-				{
-					if (arguments.Length > 2 || !command.Equals(
-						"merge-stores", StringComparison.OrdinalIgnoreCase))
-					{
-						string location = arguments[1];
-
-						if (Directory.Exists(location) ||
-							File.Exists(location))
-						{
-							valid = true;
-						}
-					}
-				}
-				else
+				if (Commands.Contains(command))
 				{
 					if (command.Equals(
 						"help", StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"list-folders", StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"list-top-senders",
+						StringComparison.OrdinalIgnoreCase) ||
+						command.Equals(
+						"list-total-duplicates",
+						StringComparison.OrdinalIgnoreCase) ||
 						command.Equals(
 						"merge-folders", StringComparison.OrdinalIgnoreCase) ||
 						command.Equals(
@@ -480,7 +807,43 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					{
 						valid = true;
 					}
-					else
+					else if (command.Equals(
+						"dbx-to-pst", StringComparison.OrdinalIgnoreCase))
+					{
+						string dbxLocation = GetDbxLocation(arguments);
+
+						if (Directory.Exists(dbxLocation) ||
+							File.Exists(dbxLocation))
+						{
+							valid = true;
+						}
+					}
+					else if (command.Equals(
+						"move-folder", StringComparison.OrdinalIgnoreCase))
+					{
+						if (arguments.Length > 4)
+						{
+							valid = true;
+						}
+					}
+					else if (arguments.Length > 1)
+					{
+						if (arguments.Length > 2 || !command.Equals(
+							"merge-stores", StringComparison.OrdinalIgnoreCase))
+						{
+							string location = arguments[1];
+
+							if (Directory.Exists(location) ||
+								File.Exists(location))
+							{
+								valid = true;
+							}
+						}
+					}
+				}
+				else
+				{
+					if (File.Exists(command))
 					{
 						string extension = Path.GetExtension(command);
 
@@ -495,14 +858,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							valid = true;
 						}
 					}
+					else if (Directory.Exists(command))
+					{
+						string[] dbxFiles =
+							Directory.GetFiles(command, "*.dbx");
+						string[] emlFiles =
+							Directory.GetFiles(command, "*.eml");
+						string[] txtFiles =
+							Directory.GetFiles(command, "*.txt");
+
+						if (dbxFiles.Length > 0 || emlFiles.Length > 0 ||
+							txtFiles.Length > 0)
+						{
+							valid = true;
+						}
+					}
 				}
-			}
-
-			if (valid == false)
-			{
-				Log.Error("Invalid arguments");
-
-				ShowHelp();
 			}
 
 			return valid;
