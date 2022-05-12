@@ -801,22 +801,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					Marshal.ReleaseComObject(subFolder);
 				}
 
-				CheckForDuplicateFolders(path, folder, dryRun);
-
-				bool topLevel = IsTopLevelFolder(folder);
-
-				if (topLevel == false)
-				{
-					name = folder.Name;
-					MAPIFolder parent = folder.Parent;
-					string parentName = parent.Name;
-
-					if (parentName.Equals(
-						name, StringComparison.OrdinalIgnoreCase))
-					{
-						MergeFolderWithParent(path, folder, folder, dryRun);
-					}
-				}
+				MergeThisFolder(path, folder, dryRun);
 			}
 		}
 
@@ -1098,35 +1083,23 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string folderName = folder.Name;
 
-			if (DeletedFolders.Contains(folderName))
+			string[] duplicatePatterns =
 			{
-				bool isReservedFolder = IsDeletedFolder(folder);
+				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
+				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
+				@"(?<=[a-zA-Z0-9&])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$",
+				@"^[A-F]{1}_"
+			};
 
-				if (isReservedFolder == false)
-				{
-					folder.Delete();
-				}
-			}
-			else
+			foreach (string duplicatePattern in duplicatePatterns)
 			{
-				string[] duplicatePatterns =
+				if (Regex.IsMatch(folderName, duplicatePattern))
 				{
-					@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
-					@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
-					@"(?<=[a-zA-Z0-9&])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$",
-					@"^[A-F]{1}_"
-				};
+					MergeDuplicateFolder(
+						path, folder, duplicatePattern, dryRun);
 
-				foreach (string duplicatePattern in duplicatePatterns)
-				{
-					if (Regex.IsMatch(folderName, duplicatePattern))
-					{
-						MergeDuplicateFolder(
-							path, folder, duplicatePattern, dryRun);
-
-						// Best to not get multipe matches, at this point.
-						break;
-					}
+					// Best to not get multipe matches, at this point.
+					break;
 				}
 			}
 		}
@@ -1169,6 +1142,25 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return totalDuplicates;
+		}
+
+		private bool MergeDeletedItemsFolder(MAPIFolder folder)
+		{
+			bool removed = false;
+			string name = folder.Name;
+
+			if (DeletedFolders.Contains(name))
+			{
+				bool isReservedFolder = IsDeletedFolder(folder);
+
+				if (isReservedFolder == false)
+				{
+					folder.Delete();
+					removed = true;
+				}
+			}
+
+			return removed;
 		}
 
 		private void MergeDuplicateFolder(
@@ -1250,6 +1242,32 @@ namespace DigitalZenWorks.Email.ToolKit
 				// Once all the items have been moved,
 				// now remove the folder.
 				folder.Delete();
+			}
+		}
+
+		private void MergeThisFolder(
+			string path, MAPIFolder folder, bool dryRun)
+		{
+			CheckForDuplicateFolders(path, folder, dryRun);
+
+			bool removed = MergeDeletedItemsFolder(folder);
+
+			if (removed == false)
+			{
+				bool topLevel = IsTopLevelFolder(folder);
+
+				if (topLevel == false)
+				{
+					string name = folder.Name;
+					MAPIFolder parent = folder.Parent;
+					string parentName = parent.Name;
+
+					if (parentName.Equals(
+						name, StringComparison.OrdinalIgnoreCase))
+					{
+						MergeFolderWithParent(path, folder, folder, dryRun);
+					}
+				}
 			}
 		}
 
