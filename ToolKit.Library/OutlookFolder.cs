@@ -606,6 +606,11 @@ namespace DigitalZenWorks.Email.ToolKit
 						topLevel = true;
 					}
 				}
+				else
+				{
+					// Also, include the root
+					topLevel = true;
+				}
 			}
 
 			return topLevel;
@@ -780,30 +785,37 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
-				string parentName = folder.Name;
+				string name;
 
 				// Office uses 1 based indexes from VBA.
 				// Iterate in reverse order as the group may change.
 				for (int index = folder.Folders.Count; index > 0; index--)
 				{
 					MAPIFolder subFolder = folder.Folders[index];
-					string name = subFolder.Name;
+					name = subFolder.Name;
 
 					string subPath = path + "/" + name;
 
 					MergeFolders(subPath, subFolder, dryRun);
 
-					CheckForDuplicateFolders(path, index, subFolder, dryRun);
+					Marshal.ReleaseComObject(subFolder);
+				}
 
-					bool topLevel = IsTopLevelFolder(subFolder);
+				CheckForDuplicateFolders(path, folder, dryRun);
 
-					if (topLevel == false && parentName.Equals(
+				bool topLevel = IsTopLevelFolder(folder);
+
+				if (topLevel == false)
+				{
+					name = folder.Name;
+					MAPIFolder parent = folder.Parent;
+					string parentName = parent.Name;
+
+					if (parentName.Equals(
 						name, StringComparison.OrdinalIgnoreCase))
 					{
-						MergeFolderWithParent(path, folder, subFolder, dryRun);
+						MergeFolderWithParent(path, folder, folder, dryRun);
 					}
-
-					Marshal.ReleaseComObject(subFolder);
 				}
 			}
 		}
@@ -1082,7 +1094,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private void CheckForDuplicateFolders(
-			string path, int index, MAPIFolder folder, bool dryRun)
+			string path, MAPIFolder folder, bool dryRun)
 		{
 			string folderName = folder.Name;
 
@@ -1110,7 +1122,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					if (Regex.IsMatch(folderName, duplicatePattern))
 					{
 						MergeDuplicateFolder(
-							path, index, folder, duplicatePattern, dryRun);
+							path, folder, duplicatePattern, dryRun);
 
 						// Best to not get multipe matches, at this point.
 						break;
@@ -1161,7 +1173,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private void MergeDuplicateFolder(
 			string path,
-			int index,
 			MAPIFolder folder,
 			string duplicatePattern,
 			bool dryRun)
@@ -1193,9 +1204,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					MoveFolderContents(path, folder, destination);
 
-					// Once all the items have been moved,
-					// now remove the folder.
-					RemoveFolder(path, index, folder, false);
+					// Once all the items have been moved, remove the folder.
+					folder.Delete();
 				}
 			}
 			else
