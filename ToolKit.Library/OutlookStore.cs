@@ -109,6 +109,44 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Remove all empty folders.
+		/// </summary>
+		/// <param name="store">The PST store to process.</param>
+		/// <returns>The count of removed folders.</returns>
+		public static int RemoveEmptyFolders(Store store)
+		{
+			int removedFolders = 0;
+
+			if (store != null)
+			{
+				string path = store.FilePath;
+				string extension = Path.GetExtension(path);
+
+				if (!extension.Equals(
+					".ost", StringComparison.OrdinalIgnoreCase))
+				{
+					string storePath = GetStoreName(store);
+
+					Log.Info("Checking for empty folders in: " +
+						storePath);
+					storePath += "::";
+
+					MAPIFolder rootFolder = store.GetRootFolder();
+
+					removedFolders = OutlookFolder.RemoveEmptyFolders(
+						storePath, rootFolder, 1);
+
+					Marshal.ReleaseComObject(rootFolder);
+				}
+			}
+
+			Log.Info("Remove empty folder complete - total folders removed: " +
+				removedFolders);
+
+			return removedFolders;
+		}
+
+		/// <summary>
 		/// Remove folder from PST store.
 		/// </summary>
 		/// <param name="path">The path of current folder.</param>
@@ -565,97 +603,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			Store store = outlookAccount.GetStore(pstFilePath);
 
 			int removedFolders = RemoveEmptyFolders(store);
-
-			return removedFolders;
-		}
-
-		/// <summary>
-		/// Remove all empty folders.
-		/// </summary>
-		/// <param name="store">The PST store to process.</param>
-		/// <returns>The count of removed folders.</returns>
-		public int RemoveEmptyFolders(Store store)
-		{
-			int removedFolders = 0;
-
-			if (store != null)
-			{
-				string path = store.FilePath;
-				string extension = Path.GetExtension(path);
-
-				if (!extension.Equals(
-					".ost", StringComparison.OrdinalIgnoreCase))
-				{
-					string storePath = GetStoreName(store);
-
-					Log.Info("Checking for empty folders in: " +
-						storePath);
-					storePath += "::";
-
-					MAPIFolder rootFolder = store.GetRootFolder();
-
-					removedFolders =
-						RemoveEmptyFolders(storePath, rootFolder, 1);
-
-					Marshal.ReleaseComObject(rootFolder);
-				}
-			}
-
-			Log.Info("Remove empty folder complete - total folders removed: " +
-				removedFolders);
-
-			return removedFolders;
-		}
-
-		/// <summary>
-		/// Remove all empty folders.
-		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
-		/// <param name="folder">The current folder.</param>
-		/// <param name="index">The index of the folder.</param>
-		/// <returns>The count of removed folders.</returns>
-		public int RemoveEmptyFolders(
-			string path, MAPIFolder folder, int index)
-		{
-			int removedFolders = 0;
-
-			if (folder != null)
-			{
-				int subFolderCount = folder.Folders.Count;
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int subIndex = subFolderCount; subIndex > 0; subIndex--)
-				{
-					MAPIFolder subFolder = folder.Folders[subIndex];
-
-					string subPath = path + "/" + subFolder.Name;
-
-					removedFolders +=
-						RemoveEmptyFolders(subPath, subFolder, subIndex);
-
-					Marshal.ReleaseComObject(subFolder);
-				}
-
-				if (folder.Folders.Count == 0 && folder.Items.Count == 0)
-				{
-					bool isReservedFolder =
-						OutlookFolder.IsReservedFolder(folder);
-
-					if (isReservedFolder == true)
-					{
-						string name = folder.Name;
-						Log.Warn("Not deleting reserved folder: " +
-							name);
-					}
-					else
-					{
-						OutlookFolder.RemoveFolder(
-							path, index, folder, false);
-						removedFolders++;
-					}
-				}
-			}
 
 			return removedFolders;
 		}
