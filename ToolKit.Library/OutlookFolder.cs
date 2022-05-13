@@ -32,6 +32,16 @@ namespace DigitalZenWorks.Email.ToolKit
 	public delegate void FolderAction2(string path, MAPIFolder folder);
 
 	/// <summary>
+	/// Delegate for a folder.
+	/// </summary>
+	/// <param name="path">The path of the folder.</param>
+	/// <param name="folder">The folder to act upon.</param>
+	/// <param name="conditional">A conditional clause to use within
+	/// the delegate.</param>
+	public delegate void FolderActionConditional(
+		string path, MAPIFolder folder, bool conditional);
+
+	/// <summary>
 	/// Represents an Outlook Folder.
 	/// </summary>
 	public class OutlookFolder
@@ -139,9 +149,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="path">The path of the folder.</param>
 		/// <param name="folder">The folder to check.</param>
+		/// <param name="condition">A conditional to check.</param>
 		/// <param name="folderAction">The delegate to act uoon.</param>
 		public static void RecurseFolders(
-			string path, MAPIFolder folder, FolderAction2 folderAction)
+			string path,
+			MAPIFolder folder,
+			bool condition,
+			FolderActionConditional folderAction)
 		{
 			if (folder != null && folderAction != null)
 			{
@@ -151,9 +165,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					MAPIFolder subFolder = folder.Folders[index];
 
-					RecurseFolders(path, subFolder, folderAction);
+					RecurseFolders(path, subFolder, condition, folderAction);
 
-					folderAction(path, subFolder);
+					folderAction(path, subFolder, condition);
 
 					Marshal.ReleaseComObject(subFolder);
 				}
