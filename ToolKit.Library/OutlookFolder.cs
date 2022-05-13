@@ -683,10 +683,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The current folder.</param>
-		/// <param name="index">The index of the folder.</param>
 		/// <returns>The count of removed folders.</returns>
-		public static int RemoveEmptyFolders(
-			string path, MAPIFolder folder, int index)
+		public static int RemoveEmptyFolders(string path, MAPIFolder folder)
 		{
 			int removedFolders = 0;
 
@@ -702,8 +700,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					string subPath = path + "/" + subFolder.Name;
 
-					removedFolders +=
-						RemoveEmptyFolders(subPath, subFolder, subIndex);
+					removedFolders += RemoveEmptyFolders(subPath, subFolder);
 
 					Marshal.ReleaseComObject(subFolder);
 				}
@@ -720,7 +717,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						RemoveFolder(path, index, folder, false);
+						folder.Delete();
 						removedFolders++;
 					}
 				}
