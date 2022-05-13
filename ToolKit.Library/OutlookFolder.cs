@@ -159,9 +159,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null && folderAction != null)
 			{
-				int total = folder.Folders.Count;
+				int folderCount = folder.Folders.Count;
 
-				for (int index = 1; index <= total; index++)
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int index = folderCount; index > 0; index--)
 				{
 					MAPIFolder subFolder = folder.Folders[index];
 
