@@ -167,7 +167,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					MAPIFolder subFolder = folder.Folders[index];
 
-					RecurseFolders(path, subFolder, condition, folderAction);
+					string name = subFolder.Name;
+					string subPath = path + "/" + name;
+
+					RecurseFolders(
+						subPath, subFolder, condition, folderAction);
 
 					folderAction(path, subFolder, condition);
 
@@ -801,23 +805,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
-				string name;
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int index = folder.Folders.Count; index > 0; index--)
-				{
-					MAPIFolder subFolder = folder.Folders[index];
-					name = subFolder.Name;
-
-					string subPath = path + "/" + name;
-
-					MergeFolders(subPath, subFolder, dryRun);
-
-					Marshal.ReleaseComObject(subFolder);
-				}
-
-				MergeThisFolder(path, folder, dryRun);
+				RecurseFolders(path, folder, dryRun, MergeThisFolder);
 			}
 		}
 
