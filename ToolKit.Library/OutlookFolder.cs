@@ -30,7 +30,8 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <param name="folder">The folder to act upon.</param>
 	/// <param name="conditional">A conditional clause to use within
 	/// the delegate.</param>
-	public delegate void FolderActionConditional(
+	/// <returns>A value processed from the delegate.</returns>
+	public delegate int FolderActionConditional(
 		string path, MAPIFolder folder, bool conditional);
 
 	/// <summary>
@@ -643,12 +644,15 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="folder">The folder to check.</param>
 		/// <param name="condition">A conditional to check.</param>
 		/// <param name="folderAction">The delegate to act uoon.</param>
-		public static void RecurseFolders(
+		/// <returns>A value processed from the delegate.</returns>
+		public static int RecurseFolders(
 			string path,
 			MAPIFolder folder,
 			bool condition,
 			FolderActionConditional folderAction)
 		{
+			int processed = 0;
+
 			if (folder != null && folderAction != null)
 			{
 				bool isDeletedFolder = IsDeletedFolder(folder);
@@ -667,7 +671,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						string name = subFolder.Name;
 						string subPath = path + "/" + name;
 
-						RecurseFolders(
+						processed += RecurseFolders(
 							subPath, subFolder, condition, folderAction);
 
 						folderAction(path, subFolder, condition);
@@ -676,6 +680,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 				}
 			}
+
+			return processed;
 		}
 
 		/// <summary>
@@ -1261,9 +1267,10 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private void MergeThisFolder(
+		private int MergeThisFolder(
 			string path, MAPIFolder folder, bool dryRun)
 		{
+			int processed = 0;
 			CheckForDuplicateFolders(path, folder, dryRun);
 
 			bool removed = MergeDeletedItemsFolder(folder);
@@ -1282,9 +1289,16 @@ namespace DigitalZenWorks.Email.ToolKit
 						name, StringComparison.OrdinalIgnoreCase))
 					{
 						MergeFolderWithParent(path, folder, folder, dryRun);
+						processed = 1;
 					}
 				}
 			}
+			else
+			{
+				processed = 1;
+			}
+
+			return processed;
 		}
 
 		private void MoveSubFolders(
