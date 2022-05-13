@@ -103,48 +103,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Recurse folders.
-		/// </summary>
-		/// <param name="path">The path of the folder.</param>
-		/// <param name="folder">The folder to check.</param>
-		/// <param name="condition">A conditional to check.</param>
-		/// <param name="folderAction">The delegate to act uoon.</param>
-		public static void RecurseFolders(
-			string path,
-			MAPIFolder folder,
-			bool condition,
-			FolderActionConditional folderAction)
-		{
-			if (folder != null && folderAction != null)
-			{
-				bool isDeletedFolder = IsDeletedFolder(folder);
-
-				// Skip processing of system deleted items folder.
-				if (isDeletedFolder == false)
-				{
-					int folderCount = folder.Folders.Count;
-
-					// Office uses 1 based indexes from VBA.
-					// Iterate in reverse order as the group may change.
-					for (int index = folderCount; index > 0; index--)
-					{
-						MAPIFolder subFolder = folder.Folders[index];
-
-						string name = subFolder.Name;
-						string subPath = path + "/" + name;
-
-						RecurseFolders(
-							subPath, subFolder, condition, folderAction);
-
-						folderAction(path, subFolder, condition);
-
-						Marshal.ReleaseComObject(subFolder);
-					}
-				}
-			}
-		}
-
-		/// <summary>
 		/// Create folder path.
 		/// </summary>
 		/// <param name="store">The PST file store to use.</param>
@@ -676,6 +634,48 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folderNames;
+		}
+
+		/// <summary>
+		/// Recurse folders.
+		/// </summary>
+		/// <param name="path">The path of the folder.</param>
+		/// <param name="folder">The folder to check.</param>
+		/// <param name="condition">A conditional to check.</param>
+		/// <param name="folderAction">The delegate to act uoon.</param>
+		public static void RecurseFolders(
+			string path,
+			MAPIFolder folder,
+			bool condition,
+			FolderActionConditional folderAction)
+		{
+			if (folder != null && folderAction != null)
+			{
+				bool isDeletedFolder = IsDeletedFolder(folder);
+
+				// Skip processing of system deleted items folder.
+				if (isDeletedFolder == false)
+				{
+					int folderCount = folder.Folders.Count;
+
+					// Office uses 1 based indexes from VBA.
+					// Iterate in reverse order as the group may change.
+					for (int index = folderCount; index > 0; index--)
+					{
+						MAPIFolder subFolder = folder.Folders[index];
+
+						string name = subFolder.Name;
+						string subPath = path + "/" + name;
+
+						RecurseFolders(
+							subPath, subFolder, condition, folderAction);
+
+						folderAction(path, subFolder, condition);
+
+						Marshal.ReleaseComObject(subFolder);
+					}
+				}
+			}
 		}
 
 		/// <summary>
