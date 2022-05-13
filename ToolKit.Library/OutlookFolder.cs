@@ -562,37 +562,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// List the folders.
 		/// </summary>
-		/// <param name="folderPath">The folder path to check.</param>
-		/// <param name="folder">The folder to act upon.</param>
-		/// <returns>The folders.</returns>
-		public static IList<string> ListFolders(
-			string folderPath,
-			MAPIFolder folder)
-		{
-			IList<string> folderNames = new List<string>();
-
-			if (folder != null)
-			{
-				int count = folder.Folders.Count;
-				for (int index = 1; index <= count; index++)
-				{
-					MAPIFolder subFolder = folder.Folders[index];
-
-					string subFolderName = subFolder.Name;
-					folderNames.Add(subFolderName);
-
-					Marshal.ReleaseComObject(subFolder);
-				}
-
-				Marshal.ReleaseComObject(folder);
-			}
-
-			return folderNames;
-		}
-
-		/// <summary>
-		/// List the folders.
-		/// </summary>
 		/// <param name="folderNames">The current list of folder names.</param>
 		/// <param name="folderPath">The folder path to check.</param>
 		/// <param name="folder">The folder to act upon.</param>
