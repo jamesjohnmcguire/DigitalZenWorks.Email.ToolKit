@@ -182,8 +182,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The count of removed folders.</returns>
 		public int RemoveEmptyFolders()
 		{
-			OutlookStore outlookStorage = new (this);
-
 			int total = session.Stores.Count;
 			int removedFolders = 0;
 
@@ -191,7 +189,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				Store store = session.Stores[index];
 
-				removedFolders += outlookStorage.RemoveEmptyFolders(store);
+				removedFolders += OutlookStore.RemoveEmptyFolders(store);
 			}
 
 			return removedFolders;
