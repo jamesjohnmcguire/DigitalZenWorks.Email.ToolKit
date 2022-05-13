@@ -134,7 +134,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					MAPIFolder rootFolder = store.GetRootFolder();
 
 					removedFolders = OutlookFolder.RemoveEmptyFolders(
-						storePath, rootFolder);
+						storePath, rootFolder, true);
 
 					Marshal.ReleaseComObject(rootFolder);
 				}
