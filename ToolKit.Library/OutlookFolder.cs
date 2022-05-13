@@ -689,44 +689,18 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The current folder.</param>
+		/// <param name="condition">A condition to check for. Currently
+		/// unused. Set here to match delegate signature.</param>
 		/// <returns>The count of removed folders.</returns>
-		public static int RemoveEmptyFolders(string path, MAPIFolder folder)
+		public static int RemoveEmptyFolders(
+			string path, MAPIFolder folder, bool condition)
 		{
 			int removedFolders = 0;
 
 			if (folder != null)
 			{
-				int subFolderCount = folder.Folders.Count;
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int subIndex = subFolderCount; subIndex > 0; subIndex--)
-				{
-					MAPIFolder subFolder = folder.Folders[subIndex];
-
-					string subPath = path + "/" + subFolder.Name;
-
-					removedFolders += RemoveEmptyFolders(subPath, subFolder);
-
-					Marshal.ReleaseComObject(subFolder);
-				}
-
-				if (folder.Folders.Count == 0 && folder.Items.Count == 0)
-				{
-					bool isReservedFolder = IsReservedFolder(folder);
-
-					if (isReservedFolder == true)
-					{
-						string name = folder.Name;
-						Log.Warn("Not deleting reserved folder: " +
-							name);
-					}
-					else
-					{
-						folder.Delete();
-						removedFolders++;
-					}
-				}
+				removedFolders =
+					RecurseFolders(path, folder, condition, RemoveEmptyFolder);
 			}
 
 			return removedFolders;
@@ -1103,6 +1077,34 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MapiItem.Moveitem(item, destination);
 			}
+		}
+
+		private static int RemoveEmptyFolder(
+			string path, MAPIFolder folder, bool condition)
+		{
+			int removedFolders = 0;
+
+			if (folder != null)
+			{
+				if (folder.Folders.Count == 0 && folder.Items.Count == 0)
+				{
+					bool isReservedFolder = IsReservedFolder(folder);
+
+					if (isReservedFolder == true)
+					{
+						string name = folder.Name;
+						Log.Warn("Not deleting reserved folder: " +
+							name);
+					}
+					else
+					{
+						folder.Delete();
+						removedFolders++;
+					}
+				}
+			}
+
+			return removedFolders;
 		}
 
 		private static string RemoveStoreFromPath(string path)
