@@ -1053,6 +1053,25 @@ namespace DigitalZenWorks.Email.ToolKit
 				mailItem.Subject);
 		}
 
+		private static bool MergeDeletedItemsFolder(MAPIFolder folder)
+		{
+			bool removed = false;
+			string name = folder.Name;
+
+			if (DeletedFolders.Contains(name))
+			{
+				bool isReservedFolder = IsDeletedFolder(folder);
+
+				if (isReservedFolder == false)
+				{
+					folder.Delete();
+					removed = true;
+				}
+			}
+
+			return removed;
+		}
+
 		private static void MoveFolderItems(
 			MAPIFolder source, MAPIFolder destination)
 		{
@@ -1146,25 +1165,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return totalDuplicates;
-		}
-
-		private bool MergeDeletedItemsFolder(MAPIFolder folder)
-		{
-			bool removed = false;
-			string name = folder.Name;
-
-			if (DeletedFolders.Contains(name))
-			{
-				bool isReservedFolder = IsDeletedFolder(folder);
-
-				if (isReservedFolder == false)
-				{
-					folder.Delete();
-					removed = true;
-				}
-			}
-
-			return removed;
 		}
 
 		private void MergeDuplicateFolder(
