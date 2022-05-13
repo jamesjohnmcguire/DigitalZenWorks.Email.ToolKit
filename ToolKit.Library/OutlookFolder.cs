@@ -679,6 +679,57 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Remove all empty folders.
+		/// </summary>
+		/// <param name="path">The path of the curent folder.</param>
+		/// <param name="folder">The current folder.</param>
+		/// <param name="index">The index of the folder.</param>
+		/// <returns>The count of removed folders.</returns>
+		public static int RemoveEmptyFolders(
+			string path, MAPIFolder folder, int index)
+		{
+			int removedFolders = 0;
+
+			if (folder != null)
+			{
+				int subFolderCount = folder.Folders.Count;
+
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int subIndex = subFolderCount; subIndex > 0; subIndex--)
+				{
+					MAPIFolder subFolder = folder.Folders[subIndex];
+
+					string subPath = path + "/" + subFolder.Name;
+
+					removedFolders +=
+						RemoveEmptyFolders(subPath, subFolder, subIndex);
+
+					Marshal.ReleaseComObject(subFolder);
+				}
+
+				if (folder.Folders.Count == 0 && folder.Items.Count == 0)
+				{
+					bool isReservedFolder = IsReservedFolder(folder);
+
+					if (isReservedFolder == true)
+					{
+						string name = folder.Name;
+						Log.Warn("Not deleting reserved folder: " +
+							name);
+					}
+					else
+					{
+						RemoveFolder(path, index, folder, false);
+						removedFolders++;
+					}
+				}
+			}
+
+			return removedFolders;
+		}
+
+		/// <summary>
 		/// Remove folder from PST store.
 		/// </summary>
 		/// <param name="path">The path of current folder.</param>
