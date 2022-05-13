@@ -19,17 +19,9 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <summary>
 	/// Delegate for a folder.
 	/// </summary>
-	/// <param name="folder">The folder to act upon.</param>
-	/// <param name="name">The name of the folder.</param>
-	/// <returns>indicates success of the method.</returns>
-	public delegate bool FolderAction(MAPIFolder folder, string name);
-
-	/// <summary>
-	/// Delegate for a folder.
-	/// </summary>
 	/// <param name="path">The path of the folder.</param>
 	/// <param name="folder">The folder to act upon.</param>
-	public delegate void FolderAction2(string path, MAPIFolder folder);
+	public delegate void FolderAction(string path, MAPIFolder folder);
 
 	/// <summary>
 	/// Delegate for a folder.
@@ -108,40 +100,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return pstFolder;
-		}
-
-		/// <summary>
-		/// Recurse folders.
-		/// </summary>
-		/// <param name="parentFolder">The parent folder to check.</param>
-		/// <param name="folderName">The name of the folder.</param>
-		/// <param name="folderAction">The delegate to act uoon.</param>
-		/// <returns>Indicates whether the folder exists.</returns>
-		public static bool RecurseFolders(
-			MAPIFolder parentFolder, string folderName, FolderAction folderAction)
-		{
-			bool folderExists = false;
-
-			if (parentFolder != null && folderAction != null)
-			{
-				int total = parentFolder.Folders.Count;
-
-				for (int index = 1; index <= total; index++)
-				{
-					MAPIFolder subFolder = parentFolder.Folders[index];
-
-					folderExists = folderAction(subFolder, folderName);
-
-					if (folderExists == true)
-					{
-						break;
-					}
-
-					Marshal.ReleaseComObject(subFolder);
-				}
-			}
-
-			return folderExists;
 		}
 
 		/// <summary>
