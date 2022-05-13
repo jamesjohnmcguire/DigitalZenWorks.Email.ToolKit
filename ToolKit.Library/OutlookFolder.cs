@@ -120,8 +120,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				path = RemoveStoreFromPath(path);
 
+				char[] charSeparators = new char[] { '\\', '/' };
 				string[] parts = path.Split(
-					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
+					charSeparators, StringSplitOptions.RemoveEmptyEntries);
 
 				for (int index = 0; index < parts.Length; index++)
 				{
@@ -185,8 +186,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				path = RemoveStoreFromPath(path);
 
+				char[] charSeparators = new char[] { '\\', '/' };
 				string[] parts = path.Split(
-					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
+					charSeparators, StringSplitOptions.RemoveEmptyEntries);
 
 				folderExists = true;
 
@@ -334,8 +336,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				folderPath = RemoveStoreFromPath(folderPath);
 
+				char[] charSeparators = new char[] { '\\', '/' };
 				string[] parts = folderPath.Split(
-					'\\', '/', StringSplitOptions.RemoveEmptyEntries);
+					charSeparators, StringSplitOptions.RemoveEmptyEntries);
 
 				for (int index = 0; index < parts.Length - 1; index++)
 				{
