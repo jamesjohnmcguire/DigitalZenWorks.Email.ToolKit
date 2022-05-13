@@ -159,23 +159,29 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null && folderAction != null)
 			{
-				int folderCount = folder.Folders.Count;
+				bool isDeletedFolder = IsDeletedFolder(folder);
 
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int index = folderCount; index > 0; index--)
+				// Skip processing of system deleted items folder.
+				if (isDeletedFolder == false)
 				{
-					MAPIFolder subFolder = folder.Folders[index];
+					int folderCount = folder.Folders.Count;
 
-					string name = subFolder.Name;
-					string subPath = path + "/" + name;
+					// Office uses 1 based indexes from VBA.
+					// Iterate in reverse order as the group may change.
+					for (int index = folderCount; index > 0; index--)
+					{
+						MAPIFolder subFolder = folder.Folders[index];
 
-					RecurseFolders(
-						subPath, subFolder, condition, folderAction);
+						string name = subFolder.Name;
+						string subPath = path + "/" + name;
 
-					folderAction(path, subFolder, condition);
+						RecurseFolders(
+							subPath, subFolder, condition, folderAction);
 
-					Marshal.ReleaseComObject(subFolder);
+						folderAction(path, subFolder, condition);
+
+						Marshal.ReleaseComObject(subFolder);
+					}
 				}
 			}
 		}
