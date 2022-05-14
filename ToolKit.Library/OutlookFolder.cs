@@ -111,39 +111,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The folder with the full path.</returns>
 		public static MAPIFolder CreaterFolderPath(Store store, string path)
 		{
-			MAPIFolder currentFolder = null;
-
-			if (store != null && !string.IsNullOrWhiteSpace(path))
-			{
-				MAPIFolder rootFolder = store.GetRootFolder();
-				currentFolder = rootFolder;
-
-				path = RemoveStoreFromPath(path);
-
-				char[] charSeparators = new char[] { '\\', '/' };
-				string[] parts = path.Split(
-					charSeparators, StringSplitOptions.RemoveEmptyEntries);
-
-				for (int index = 0; index < parts.Length; index++)
-				{
-					string part = parts[index];
-
-					if (index == 0)
-					{
-						string rootFolderName = rootFolder.Name;
-
-						if (part.Equals(
-							rootFolderName,
-							StringComparison.OrdinalIgnoreCase))
-						{
-							// root, so skip over
-							continue;
-						}
-					}
-
-					currentFolder = AddFolder(currentFolder, part);
-				}
-			}
+			MAPIFolder currentFolder = GetPathFolder(store, path, false);
 
 			return currentFolder;
 		}
@@ -181,14 +149,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (store != null && !string.IsNullOrWhiteSpace(path))
 			{
-				MAPIFolder rootFolder = store.GetRootFolder();
-				MAPIFolder currentFolder = rootFolder;
+				MAPIFolder currentFolder = store.GetRootFolder();
 
-				path = RemoveStoreFromPath(path);
-
-				char[] charSeparators = new char[] { '\\', '/' };
-				string[] parts = path.Split(
-					charSeparators, StringSplitOptions.RemoveEmptyEntries);
+				string[] parts = GetPathParts(store, path);
 
 				folderExists = true;
 
@@ -198,7 +161,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (index == 0)
 					{
-						string rootFolderName = rootFolder.Name;
+						string rootFolderName = currentFolder.Name;
 
 						if (part.Equals(
 							rootFolderName,
@@ -327,39 +290,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The parent folder of the given path.</returns>
 		public static MAPIFolder GetPathParent(Store store, string folderPath)
 		{
-			MAPIFolder parent = null;
-
-			if (store != null && !string.IsNullOrWhiteSpace(folderPath))
-			{
-				MAPIFolder rootFolder = store.GetRootFolder();
-				parent = rootFolder;
-
-				folderPath = RemoveStoreFromPath(folderPath);
-
-				char[] charSeparators = new char[] { '\\', '/' };
-				string[] parts = folderPath.Split(
-					charSeparators, StringSplitOptions.RemoveEmptyEntries);
-
-				for (int index = 0; index < parts.Length - 1; index++)
-				{
-					string part = parts[index];
-
-					if (index == 0)
-					{
-						string rootFolderName = rootFolder.Name;
-
-						if (part.Equals(
-							rootFolderName,
-							StringComparison.OrdinalIgnoreCase))
-						{
-							// root, so skip over
-							continue;
-						}
-					}
-
-					parent = AddFolder(parent, part);
-				}
-			}
+			MAPIFolder parent = GetPathFolder(store, folderPath, true);
 
 			return parent;
 		}
@@ -1001,6 +932,61 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return sendersCounts;
+		}
+
+		private static MAPIFolder GetPathFolder(
+			Store store, string path, bool justParent)
+		{
+			MAPIFolder currentFolder = null;
+
+			if (store != null && !string.IsNullOrWhiteSpace(path))
+			{
+				currentFolder = store.GetRootFolder();
+
+				string[] parts = GetPathParts(store, path);
+
+				int maxParts = parts.Length;
+
+				if (justParent == true)
+				{
+					maxParts = parts.Length - 1;
+				}
+
+				for (int index = 0; index < maxParts; index++)
+				{
+					string part = parts[index];
+
+					if (index == 0)
+					{
+						string rootFolderName = currentFolder.Name;
+
+						if (part.Equals(
+							rootFolderName,
+							StringComparison.OrdinalIgnoreCase))
+						{
+							// root, so skip over
+							continue;
+						}
+					}
+
+					currentFolder = AddFolder(currentFolder, part);
+				}
+			}
+
+			return currentFolder;
+		}
+
+		private static string[] GetPathParts(Store store, string path)
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			path = RemoveStoreFromPath(path);
+
+			char[] charSeparators = new char[] { '\\', '/' };
+			string[] parts = path.Split(
+				charSeparators, StringSplitOptions.RemoveEmptyEntries);
+
+			return parts;
 		}
 
 		private static void ListItem(MailItem mailItem, string prefixMessage)
