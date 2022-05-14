@@ -577,10 +577,10 @@ namespace DigitalZenWorks.Email.ToolKit
 						processed += RecurseFolders(
 							subPath, subFolder, condition, folderAction);
 
-						folderAction(path, subFolder, condition);
-
 						Marshal.ReleaseComObject(subFolder);
 					}
+
+					folderAction(path, folder, condition);
 				}
 			}
 
