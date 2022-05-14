@@ -1248,7 +1248,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					if (parentName.Equals(
 						name, StringComparison.OrdinalIgnoreCase))
 					{
-						MergeFolderWithParent(path, folder, folder, dryRun);
+						MergeFolderWithParent(path, folder, parent, dryRun);
 						processed = 1;
 					}
 				}
