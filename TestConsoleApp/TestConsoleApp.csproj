@@ -8,6 +8,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<NeutralLanguage>en-US</NeutralLanguage>
+		<NoWarn>NU1701</NoWarn>
 		<Nullable>enable</Nullable>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<OutputType>Exe</OutputType>

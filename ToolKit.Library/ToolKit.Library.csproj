@@ -19,6 +19,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>Latest</LangVersion>
 		<NeutralLanguage>en-US</NeutralLanguage>
+		<NoWarn>NU1701</NoWarn>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<PackageId>DigitalZenWorks.Email.ToolKit</PackageId>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>

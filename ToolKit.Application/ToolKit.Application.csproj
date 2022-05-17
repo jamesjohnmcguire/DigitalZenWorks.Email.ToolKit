@@ -12,6 +12,7 @@
 		<FileVersion>1.5.27.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NeutralLanguage>en-US</NeutralLanguage>
+		<NoWarn>NU1701</NoWarn>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net6.0-windows</TargetFramework>
