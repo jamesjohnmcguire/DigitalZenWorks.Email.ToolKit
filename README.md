@@ -73,7 +73,7 @@ Testing (1)
 Testing (1) (1)  
 Testing (1) (2()  
 
-If you ever try to move or copy a folder to a place where a folder with that name exists, Outlook will add, but will give it a name an appendix like ' (1)'.  In import or export processes, often these are the exact same folders, so you can end up with multiple duplicate folders like this.  This will merge these folders into a single folder.  If there are duplicate mail items, these will copied.  So, this wil not remove the duplicate mail items (That will come in the feature release).  But, it doesn't create any duplicates and the merging of folders, is an essential precursor to the eventual duplicates removal.  
+If you ever try to move or copy a folder to a place where a folder with that name exists, Outlook will add, but will give it a name an appendix like ' (1)'.  In import or export processes, often these are the exact same folders, so you can end up with multiple duplicate folders like this.  This will merge these folders into a single folder.  If there are duplicate mail items, these will copied.  So, this wil not remove the duplicate mail items.  But, it doesn't create any duplicates and the merging of folders, is an essential precursor to the eventual duplicates removal.  
 
 ###### move-folder
 The third and fifth parameters specify the folder path with Outlook itself, starting with the root folder name.  The root folder name will almost always be the same as the PST file name.  You can also check at the very top folder for the PST within Outlook.  
