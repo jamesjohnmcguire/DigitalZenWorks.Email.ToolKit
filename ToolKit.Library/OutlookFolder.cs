@@ -738,8 +738,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					sourceName,
 					destinationName);
 
-				path += "/" + destinationName;
-
 				MoveFolderItems(source, destination);
 				MoveSubFolders(path, source, destination);
 			}
@@ -1234,6 +1232,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			else
 			{
 				Log.Info("At: " + path + " Moving into parent: " + name);
+
+				path = GetFolderPath(parent);
 				MoveFolderContents(path, folder, parent);
 
 				// Once all the items have been moved,
