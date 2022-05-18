@@ -271,7 +271,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			MAPIFolder folder = OutlookFolder.CreaterFolderPath(
+			MAPIFolder folder = OutlookFolder.CreateFolderPath(
 				store, folderPath);
 
 			folderNames = OutlookFolder.ListFolders(
@@ -493,7 +493,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (folderExists == true)
 				{
-					MAPIFolder sourceFolder = OutlookFolder.CreaterFolderPath(
+					MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
 						source, sourceFolderPath);
 
 					MAPIFolder destinationParent = OutlookFolder.GetPathParent(
@@ -505,7 +505,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					if (folderExists == true)
 					{
 						MAPIFolder destinationFolder =
-						OutlookFolder.CreaterFolderPath(
+						OutlookFolder.CreateFolderPath(
 							destination, destinationFolderPath);
 
 						OutlookFolder outlookFolder = new (outlookAccount);

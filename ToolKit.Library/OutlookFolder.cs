@@ -109,7 +109,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="store">The PST file store to use.</param>
 		/// <param name="path">The full path to create.</param>
 		/// <returns>The folder with the full path.</returns>
-		public static MAPIFolder CreaterFolderPath(Store store, string path)
+		public static MAPIFolder CreateFolderPath(Store store, string path)
 		{
 			MAPIFolder currentFolder = GetPathFolder(store, path, false);
 
