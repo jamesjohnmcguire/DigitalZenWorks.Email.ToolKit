@@ -80,6 +80,21 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test for creating folder from path.
+		/// </summary>
+		[Test]
+		public void TestCreateFolderPath()
+		{
+			MAPIFolder folder =
+				OutlookFolder.CreateFolderPath(store, "Testing/Test");
+
+			Assert.NotNull(folder);
+
+			folder.Delete();
+			Marshal.ReleaseComObject(folder);
+		}
+
+		/// <summary>
 		/// Test for create pst store.
 		/// </summary>
 		[Test]
