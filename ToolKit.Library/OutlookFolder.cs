@@ -1222,9 +1222,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private void MergeFolderWithParent(
-			string path, MAPIFolder parent, MAPIFolder folder, bool dryRun)
+			string path, MAPIFolder folder, bool dryRun)
 		{
 			string name = folder.Name;
+			MAPIFolder parent = folder.Parent;
 
 			if (dryRun == true)
 			{
@@ -1262,7 +1263,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					if (parentName.Equals(
 						name, StringComparison.OrdinalIgnoreCase))
 					{
-						MergeFolderWithParent(path, folder, parent, dryRun);
+						MergeFolderWithParent(path, folder, dryRun);
 						processed = 1;
 					}
 				}
