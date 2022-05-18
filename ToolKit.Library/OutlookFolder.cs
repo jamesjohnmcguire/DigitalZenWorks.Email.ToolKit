@@ -990,8 +990,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static string[] GetPathParts(Store store, string path)
 		{
-			MAPIFolder rootFolder = store.GetRootFolder();
-
 			path = RemoveStoreFromPath(path);
 
 			char[] charSeparators = new char[] { '\\', '/' };
