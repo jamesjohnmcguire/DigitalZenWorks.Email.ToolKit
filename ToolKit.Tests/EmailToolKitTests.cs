@@ -104,6 +104,45 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test for does folder exist.
+		/// </summary>
+		[Test]
+		public void TestDoesFolderExistFalse()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			bool exists =
+				OutlookFolder.DoesFolderExist(mainFolder, "Some Sub Folder");
+			Assert.False(exists);
+
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for does folder exist.
+		/// </summary>
+		[Test]
+		public void TestDoesFolderExistTrue()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+			MAPIFolder subFolder = OutlookFolder.AddFolder(
+				mainFolder, "Some Sub Folder");
+
+			bool exists =
+				OutlookFolder.DoesFolderExist(mainFolder, "Some Sub Folder");
+			Assert.True(exists);
+
+			Marshal.ReleaseComObject(subFolder);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
 		/// Test for checking of duplicate items.
 		/// </summary>
 		[Test]
