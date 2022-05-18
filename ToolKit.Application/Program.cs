@@ -723,9 +723,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				removedFolders = outlookAccount.RemoveEmptyFolders();
 			}
 
-			Log.Info("Remove empty folder complete - total folders removed:" +
-				removedFolders);
-
 			return 0;
 		}
 
