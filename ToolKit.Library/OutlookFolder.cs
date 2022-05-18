@@ -1228,11 +1228,11 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (dryRun == true)
 			{
-				Log.Info("At " + path + " WOULD Move into parent:" + name);
+				Log.Info("At: " + path + " WOULD Move into parent: " + name);
 			}
 			else
 			{
-				Log.Info("At " + path + "Moving into parent:" + name);
+				Log.Info("At: " + path + " Moving into parent: " + name);
 				MoveFolderContents(path, folder, parent);
 
 				// Once all the items have been moved,
