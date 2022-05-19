@@ -151,7 +151,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				MAPIFolder currentFolder = store.GetRootFolder();
 
-				string[] parts = GetPathParts(store, path);
+				string[] parts = GetPathParts(path);
 
 				folderExists = true;
 
@@ -955,7 +955,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				currentFolder = store.GetRootFolder();
 
-				string[] parts = GetPathParts(store, path);
+				string[] parts = GetPathParts(path);
 
 				int maxParts = parts.Length;
 
@@ -988,7 +988,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return currentFolder;
 		}
 
-		private static string[] GetPathParts(Store store, string path)
+		private static string[] GetPathParts(string path)
 		{
 			path = RemoveStoreFromPath(path);
 
