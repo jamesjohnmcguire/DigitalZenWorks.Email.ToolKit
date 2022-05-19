@@ -182,6 +182,61 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test to check if trying to get a folder with a name in a
+		/// different case sensitivity fails.
+		/// </summary>
+		[Test]
+		public void TestGetSubFolderCaseSensitiveFail()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create test sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "testing", true);
+
+			Assert.Null(subFolder);
+
+			// Clean up
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test to check if trying to get a folder with a name in a
+		/// different case sensitivity fails.
+		/// </summary>
+		[Test]
+		public void TestGetSubFolderCaseSensitiveTrue()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create test sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "Testing", true);
+
+			Assert.NotNull(subFolder);
+
+			// Clean up
+			Marshal.ReleaseComObject(subFolder);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
 		/// Test for comparing two different MailItems by content.
 		/// </summary>
 		[Test]
