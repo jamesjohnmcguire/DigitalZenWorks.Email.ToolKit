@@ -186,6 +186,24 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the base folder name.
+		/// </summary>
+		/// <param name="folderPath">The folder path to check.</param>
+		/// <returns>The base folder name.</returns>
+		public static string GetBaseFolderName(string folderPath)
+		{
+			string folderName = null;
+
+			if (!string.IsNullOrEmpty(folderPath))
+			{
+				string[] parts = GetPathParts(folderPath);
+				folderName = parts[^1];
+			}
+
+			return folderName;
+		}
+
+		/// <summary>
 		/// Get the folder's full path.
 		/// </summary>
 		/// <param name="folder">The folder to check.</param>
