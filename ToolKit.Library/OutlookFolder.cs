@@ -172,7 +172,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						}
 					}
 
-					currentFolder = GetSubFolder(currentFolder, part);
+					currentFolder = GetSubFolder(currentFolder, part, true);
 
 					if (currentFolder == null)
 					{
@@ -343,20 +343,45 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="parentFolder">The parent folder.</param>
 		/// <param name="folderName">The new folder name.</param>
+		/// <param name="caseSensitive">Indicates whether the check should
+		/// be case-sensitive.</param>
 		/// <returns>The added folder.</returns>
 		public static MAPIFolder GetSubFolder(
-			MAPIFolder parentFolder, string folderName)
+			MAPIFolder parentFolder,
+			string folderName,
+			bool caseSensitive = false)
 		{
 			MAPIFolder pstFolder = null;
 
 			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
 			{
-				try
+				if (caseSensitive == false)
 				{
-					pstFolder = parentFolder.Folders[folderName];
+					try
+					{
+						pstFolder = parentFolder.Folders[folderName];
+					}
+					catch (COMException)
+					{
+					}
 				}
-				catch (COMException)
+				else
 				{
+					int total = parentFolder.Folders.Count;
+
+					for (int index = 1; index <= total; index++)
+					{
+						MAPIFolder subFolder = parentFolder.Folders[index];
+
+						if (folderName.Equals(
+							subFolder.Name, StringComparison.Ordinal))
+						{
+							pstFolder = subFolder;
+							break;
+						}
+
+						Marshal.ReleaseComObject(subFolder);
+					}
 				}
 			}
 
