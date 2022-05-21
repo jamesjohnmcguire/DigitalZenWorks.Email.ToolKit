@@ -469,7 +469,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (emlFiles.Any())
 			{
 				MAPIFolder folder =
-					OutlookFolder.CreaterFolderPath(store, folderPath);
+					OutlookFolder.CreateFolderPath(store, folderPath);
 
 				foreach (string file in emlFiles)
 				{

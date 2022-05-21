@@ -80,12 +80,66 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test for creating folder from path.
+		/// </summary>
+		[Test]
+		public void TestCreateFolderPath()
+		{
+			MAPIFolder folder =
+				OutlookFolder.CreateFolderPath(store, "Testing/Test");
+
+			Assert.NotNull(folder);
+
+			folder.Delete();
+			Marshal.ReleaseComObject(folder);
+		}
+
+		/// <summary>
 		/// Test for create pst store.
 		/// </summary>
 		[Test]
 		public void TestCreatePstStore()
 		{
 			Assert.NotNull(store);
+		}
+
+		/// <summary>
+		/// Test for does folder exist.
+		/// </summary>
+		[Test]
+		public void TestDoesFolderExistFalse()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			bool exists =
+				OutlookFolder.DoesFolderExist(mainFolder, "Some Sub Folder");
+			Assert.False(exists);
+
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for does folder exist.
+		/// </summary>
+		[Test]
+		public void TestDoesFolderExistTrue()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+			MAPIFolder subFolder = OutlookFolder.AddFolder(
+				mainFolder, "Some Sub Folder");
+
+			bool exists =
+				OutlookFolder.DoesFolderExist(mainFolder, "Some Sub Folder");
+			Assert.True(exists);
+
+			Marshal.ReleaseComObject(subFolder);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
 		}
 
 		/// <summary>
@@ -123,6 +177,61 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			mailItem2.Delete();
 			Marshal.ReleaseComObject(mailItem);
 			Marshal.ReleaseComObject(mailItem2);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test to check if trying to get a folder with a name in a
+		/// different case sensitivity fails.
+		/// </summary>
+		[Test]
+		public void TestGetSubFolderCaseSensitiveFail()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create test sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "testing", true);
+
+			Assert.Null(subFolder);
+
+			// Clean up
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test to check if trying to get a folder with a name in a
+		/// different case sensitivity fails.
+		/// </summary>
+		[Test]
+		public void TestGetSubFolderCaseSensitiveTrue()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create test sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "Testing", true);
+
+			Assert.NotNull(subFolder);
+
+			// Clean up
+			Marshal.ReleaseComObject(subFolder);
 			Marshal.ReleaseComObject(mainFolder);
 			Marshal.ReleaseComObject(rootFolder);
 		}

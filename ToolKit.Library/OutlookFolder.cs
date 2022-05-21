@@ -109,7 +109,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="store">The PST file store to use.</param>
 		/// <param name="path">The full path to create.</param>
 		/// <returns>The folder with the full path.</returns>
-		public static MAPIFolder CreaterFolderPath(Store store, string path)
+		public static MAPIFolder CreateFolderPath(Store store, string path)
 		{
 			MAPIFolder currentFolder = GetPathFolder(store, path, false);
 
@@ -151,7 +151,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				MAPIFolder currentFolder = store.GetRootFolder();
 
-				string[] parts = GetPathParts(store, path);
+				string[] parts = GetPathParts(path);
 
 				folderExists = true;
 
@@ -172,7 +172,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						}
 					}
 
-					currentFolder = GetSubFolder(currentFolder, part);
+					currentFolder = GetSubFolder(currentFolder, part, true);
 
 					if (currentFolder == null)
 					{
@@ -183,6 +183,24 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folderExists;
+		}
+
+		/// <summary>
+		/// Get the base folder name.
+		/// </summary>
+		/// <param name="folderPath">The folder path to check.</param>
+		/// <returns>The base folder name.</returns>
+		public static string GetBaseFolderName(string folderPath)
+		{
+			string folderName = null;
+
+			if (!string.IsNullOrEmpty(folderPath))
+			{
+				string[] parts = GetPathParts(folderPath);
+				folderName = parts[^1];
+			}
+
+			return folderName;
 		}
 
 		/// <summary>
@@ -343,20 +361,45 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="parentFolder">The parent folder.</param>
 		/// <param name="folderName">The new folder name.</param>
+		/// <param name="caseSensitive">Indicates whether the check should
+		/// be case-sensitive.</param>
 		/// <returns>The added folder.</returns>
 		public static MAPIFolder GetSubFolder(
-			MAPIFolder parentFolder, string folderName)
+			MAPIFolder parentFolder,
+			string folderName,
+			bool caseSensitive = false)
 		{
 			MAPIFolder pstFolder = null;
 
 			if (parentFolder != null && !string.IsNullOrWhiteSpace(folderName))
 			{
-				try
+				if (caseSensitive == false)
 				{
-					pstFolder = parentFolder.Folders[folderName];
+					try
+					{
+						pstFolder = parentFolder.Folders[folderName];
+					}
+					catch (COMException)
+					{
+					}
 				}
-				catch (COMException)
+				else
 				{
+					int total = parentFolder.Folders.Count;
+
+					for (int index = 1; index <= total; index++)
+					{
+						MAPIFolder subFolder = parentFolder.Folders[index];
+
+						if (folderName.Equals(
+							subFolder.Name, StringComparison.Ordinal))
+						{
+							pstFolder = subFolder;
+							break;
+						}
+
+						Marshal.ReleaseComObject(subFolder);
+					}
 				}
 			}
 
@@ -738,8 +781,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					sourceName,
 					destinationName);
 
-				path += "/" + destinationName;
-
 				MoveFolderItems(source, destination);
 				MoveSubFolders(path, source, destination);
 			}
@@ -957,7 +998,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				currentFolder = store.GetRootFolder();
 
-				string[] parts = GetPathParts(store, path);
+				string[] parts = GetPathParts(path);
 
 				int maxParts = parts.Length;
 
@@ -990,10 +1031,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			return currentFolder;
 		}
 
-		private static string[] GetPathParts(Store store, string path)
+		private static string[] GetPathParts(string path)
 		{
-			MAPIFolder rootFolder = store.GetRootFolder();
-
 			path = RemoveStoreFromPath(path);
 
 			char[] charSeparators = new char[] { '\\', '/' };
@@ -1222,17 +1261,20 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private void MergeFolderWithParent(
-			string path, MAPIFolder parent, MAPIFolder folder, bool dryRun)
+			string path, MAPIFolder folder, bool dryRun)
 		{
 			string name = folder.Name;
+			MAPIFolder parent = folder.Parent;
 
 			if (dryRun == true)
 			{
-				Log.Info("At " + path + " WOULD Move into parent:" + name);
+				Log.Info("At: " + path + " WOULD Move into parent: " + name);
 			}
 			else
 			{
-				Log.Info("At " + path + "Moving into parent:" + name);
+				Log.Info("At: " + path + " Moving into parent: " + name);
+
+				path = GetFolderPath(parent);
 				MoveFolderContents(path, folder, parent);
 
 				// Once all the items have been moved,
@@ -1262,7 +1304,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					if (parentName.Equals(
 						name, StringComparison.OrdinalIgnoreCase))
 					{
-						MergeFolderWithParent(path, folder, parent, dryRun);
+						MergeFolderWithParent(path, folder, dryRun);
 						processed = 1;
 					}
 				}
