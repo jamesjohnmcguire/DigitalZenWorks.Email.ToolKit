@@ -1,5 +1,14 @@
 #pragma once
-class Session
+
+#include "MapiLibrary.h"
+
+namespace MapiLibrary
 {
-};
+	class Session
+	{
+		public:
+			DllExport Session();
+			~Session() = default;
+	};
+}
 
