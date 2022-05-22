@@ -109,6 +109,7 @@
 
 	<ItemGroup>
 		<ClInclude Include="framework.h" />
+		<ClInclude Include="MapiLibrary.h" />
 		<ClInclude Include="pch.h" />
 		<ClInclude Include="Session.h" />
 	</ItemGroup>
