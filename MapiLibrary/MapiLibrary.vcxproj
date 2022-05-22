@@ -58,6 +58,7 @@
 
 	<ItemDefinitionGroup>
 		<ClCompile>
+			<AdditionalIncludeDirectories>$(ProjectDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<ConformanceMode>true</ConformanceMode>
 			<LanguageStandard_C>stdc11</LanguageStandard_C>
 			<PrecompiledHeader>Use</PrecompiledHeader>
