@@ -9,6 +9,8 @@ namespace MapiLibrary
 		public:
 			DllExport Session();
 			~Session() = default;
+
+		private:
+			LPMAPISESSION mapiSession;
 	};
 }
-
