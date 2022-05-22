@@ -48,6 +48,7 @@
 
 	<ImportGroup Label="ExtensionSettings">
 	</ImportGroup>
+
 	<ImportGroup Label="Shared">
 	</ImportGroup>
 
@@ -58,6 +59,7 @@
 	<ItemDefinitionGroup>
 		<ClCompile>
 			<ConformanceMode>true</ConformanceMode>
+			<LanguageStandard_C>stdc11</LanguageStandard_C>
 			<PrecompiledHeader>Use</PrecompiledHeader>
 			<PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
 			<SDLCheck>true</SDLCheck>
@@ -108,13 +110,15 @@
 	<ItemGroup>
 		<ClInclude Include="framework.h" />
 		<ClInclude Include="pch.h" />
+		<ClInclude Include="Session.h" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ClCompile Include="dllmain.cpp" />
 		<ClCompile Include="pch.cpp">
-		<PrecompiledHeader>Create</PrecompiledHeader>
+			<PrecompiledHeader>Create</PrecompiledHeader>
 		</ClCompile>
+		<ClCompile Include="Session.cpp" />
 	</ItemGroup>
 
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
