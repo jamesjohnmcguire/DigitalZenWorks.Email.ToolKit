@@ -677,11 +677,19 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				dryRun = true;
 			}
-			else if (arguments.Contains("-s") ||
+
+			if (arguments.Contains("-s") ||
 				arguments.Contains("--flush"))
 			{
-				// Obviously, ignore flush if dryRun is set.
-				flush = true;
+				if (dryRun == true)
+				{
+					// Obviously, ignore flush if dryRun is set.
+					Log.Warn("Ignoring flush option as dryRun is set");
+				}
+				else
+				{
+					flush = true;
+				}
 			}
 
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
