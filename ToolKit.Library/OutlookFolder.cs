@@ -87,7 +87,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (pstFolder == null)
 				{
 					string parentPath = GetFolderPath(parentFolder);
-					Log.Info("At: " + parentPath + " Adding outlook folder: " + folderName);
+					Log.Info("At: " + parentPath + " Adding outlook folder: " +
+						folderName);
 
 					try
 					{
@@ -581,6 +582,21 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folderNames;
+		}
+
+		/// <summary>
+		/// Normalize folder path with forward slashes.
+		/// </summary>
+		/// <param name="path">The folder path.</param>
+		/// <returns>The normalized folder path.</returns>
+		public static string NormalizePath(string path)
+		{
+			if (!string.IsNullOrWhiteSpace(path))
+			{
+				path = path.Replace('\\', '/');
+			}
+
+			return path;
 		}
 
 		/// <summary>
