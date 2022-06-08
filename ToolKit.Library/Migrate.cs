@@ -188,7 +188,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Dbx to pst.
 		/// </summary>
-		/// <param name="path">the path of the eml file.</param>
+		/// <param name="path">the path of the eml directory or file.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		/// <returns>A value indicating success or not.</returns>
 		public static bool EmlToPst(string path, string pstPath)
@@ -208,10 +208,16 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
+					MAPIFolder rootFolder = store.GetRootFolder();
+
+					string baseName =
+						Path.GetFileNameWithoutExtension(pstPath);
+					rootFolder.Name = baseName;
+
 					DirectoryInfo directoryInfo = new (path);
 					string folderPath = directoryInfo.Name;
 
-					EmlDirectoryToPst(path, store, folderPath);
+					EmlDirectoryToPst(rootFolder, path);
 					result = true;
 				}
 			}
@@ -447,36 +453,51 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static void EmlDirectoryToPst(
-			string emlFilesPath, Store store, string folderPath)
+			MAPIFolder pstParent, string emlFolderFilePath)
 		{
-			string[] directories = Directory.GetDirectories(emlFilesPath);
-
-			if (directories.Length > 0)
-			{
-				foreach (string directory in directories)
-				{
-					DirectoryInfo directoryInfo = new (directory);
-					string directoryName = directoryInfo.Name;
-
-					string thisFolderPath = folderPath + @"\" + directoryName;
-					EmlDirectoryToPst(directory, store, thisFolderPath);
-				}
-			}
+			string[] directories = Directory.GetDirectories(emlFolderFilePath);
 
 			IEnumerable<string> emlFiles =
-				EmlMessages.GetFiles(emlFilesPath);
+				EmlMessages.GetFiles(emlFolderFilePath);
 
-			if (emlFiles.Any())
+			if (directories.Length > 0 || emlFiles.Any())
 			{
-				MAPIFolder folder =
-					OutlookFolder.CreateFolderPath(store, folderPath);
+				DirectoryInfo directoryInfo = new (emlFolderFilePath);
+				string directoryName = directoryInfo.Name;
 
-				foreach (string file in emlFiles)
+				MAPIFolder thisFolder = pstParent;
+
+				bool isRoot = OutlookFolder.IsRootFolder(pstParent);
+
+				if (isRoot == false || (!directoryName.Equals(
+					"Local Folders", StringComparison.OrdinalIgnoreCase) &&
+					!directoryName.StartsWith(
+						"Imported Fo", StringComparison.OrdinalIgnoreCase)))
 				{
-					CopyEmlToPst(folder, file);
+					thisFolder =
+						OutlookFolder.AddFolder(pstParent, directoryName);
 				}
 
-				Marshal.ReleaseComObject(folder);
+				if (directories.Length > 0)
+				{
+					foreach (string directory in directories)
+					{
+						directoryInfo = new (directory);
+						string thisFolderPath = directoryInfo.FullName;
+
+						EmlDirectoryToPst(thisFolder, thisFolderPath);
+					}
+				}
+
+				if (emlFiles.Any())
+				{
+					foreach (string file in emlFiles)
+					{
+						CopyEmlToPst(thisFolder, file);
+					}
+				}
+
+				Marshal.ReleaseComObject(thisFolder);
 			}
 		}
 
