@@ -466,13 +466,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder thisFolder = pstParent;
 
-				bool isRoot = OutlookFolder.IsRootFolder(pstParent);
+				bool isInterimFolder =
+					CheckIfInterimFolder(pstParent, directoryName);
 
-				if (adjust == true && (isRoot == false ||
-					(!directoryName.Equals(
-					"Local Folders", StringComparison.OrdinalIgnoreCase) &&
-					!directoryName.StartsWith(
-						"Imported Fo", StringComparison.OrdinalIgnoreCase))))
+				if (adjust == false || isInterimFolder == false)
 				{
 					thisFolder =
 						OutlookFolder.AddFolder(pstParent, directoryName);
@@ -528,12 +525,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			bool isRoot = OutlookFolder.IsRootFolder(pstParent);
 
-			if (isRoot == false ||
-				(!currentDirectory.Equals(
-					"Local Folders", StringComparison.OrdinalIgnoreCase) &&
-				!currentDirectory.Equals(
-					"Storage Folders", StringComparison.OrdinalIgnoreCase) &&
-				!currentDirectory.StartsWith(
+			if (isRoot == true &&
+				(currentDirectory.Equals(
+					"Local Folders", StringComparison.OrdinalIgnoreCase) ||
+				currentDirectory.Equals(
+					"Storage Folders", StringComparison.OrdinalIgnoreCase) ||
+				currentDirectory.StartsWith(
 					"Imported Fo", StringComparison.OrdinalIgnoreCase)))
 			{
 				interimFolder = true;
