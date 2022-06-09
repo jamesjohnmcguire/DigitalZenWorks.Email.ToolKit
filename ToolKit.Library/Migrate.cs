@@ -161,7 +161,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		/// <param name="encoding">The optional encoding to use.</param>
 		public static bool DbxToPst(
-		string path, string pstPath, Encoding encoding)
+			string path, string pstPath, Encoding encoding)
 		{
 			bool result = false;
 
