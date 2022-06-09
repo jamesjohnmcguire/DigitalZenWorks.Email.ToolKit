@@ -190,8 +190,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="path">the path of the eml directory or file.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <param name="adjust">Indicates whether to exclude interim
+		/// folders.</param>
 		/// <returns>A value indicating success or not.</returns>
-		public static bool EmlToPst(string path, string pstPath)
+		public static bool EmlToPst(string path, string pstPath, bool adjust)
 		{
 			bool result = false;
 
@@ -214,10 +216,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						Path.GetFileNameWithoutExtension(pstPath);
 					rootFolder.Name = baseName;
 
-					DirectoryInfo directoryInfo = new (path);
-					string folderPath = directoryInfo.Name;
-
-					EmlDirectoryToPst(rootFolder, path);
+					EmlDirectoryToPst(rootFolder, path, adjust);
 					result = true;
 				}
 			}
@@ -453,7 +452,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static void EmlDirectoryToPst(
-			MAPIFolder pstParent, string emlFolderFilePath)
+			MAPIFolder pstParent, string emlFolderFilePath, bool adjust)
 		{
 			string[] directories = Directory.GetDirectories(emlFolderFilePath);
 
@@ -469,10 +468,11 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				bool isRoot = OutlookFolder.IsRootFolder(pstParent);
 
-				if (isRoot == false || (!directoryName.Equals(
+				if (adjust == true && (isRoot == false ||
+					(!directoryName.Equals(
 					"Local Folders", StringComparison.OrdinalIgnoreCase) &&
 					!directoryName.StartsWith(
-						"Imported Fo", StringComparison.OrdinalIgnoreCase)))
+						"Imported Fo", StringComparison.OrdinalIgnoreCase))))
 				{
 					thisFolder =
 						OutlookFolder.AddFolder(pstParent, directoryName);
@@ -485,7 +485,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						directoryInfo = new (directory);
 						string thisFolderPath = directoryInfo.FullName;
 
-						EmlDirectoryToPst(thisFolder, thisFolderPath);
+						EmlDirectoryToPst(thisFolder, thisFolderPath, adjust);
 					}
 				}
 
