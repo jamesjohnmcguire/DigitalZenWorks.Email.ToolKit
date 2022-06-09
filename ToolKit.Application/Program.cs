@@ -81,7 +81,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							pstLocation =
 								GetPstLocation(arguments, emlLocation, 2);
 
-							result = EmlToPst(emlLocation, pstLocation);
+							result = EmlToPst(arguments, emlLocation, pstLocation);
 							break;
 						case "help":
 							ShowHelp();
@@ -171,11 +171,20 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return result;
 		}
 
-		private static int EmlToPst(string emlLocation, string pstLocation)
+		private static int EmlToPst(
+			string[] arguments, string emlLocation, string pstLocation)
 		{
 			int result = -1;
 
-			bool success = Migrate.EmlToPst(emlLocation, pstLocation);
+			bool adjust = false;
+
+			if (arguments.Contains("-a") ||
+				arguments.Contains("--adjust"))
+			{
+				adjust = true;
+			}
+
+			bool success = Migrate.EmlToPst(emlLocation, pstLocation, adjust);
 
 			if (success == true)
 			{
@@ -640,7 +649,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				if (emlFiles.Any())
 				{
-					result = EmlToPst(location, pstLocation);
+					result = EmlToPst(arguments, location, pstLocation);
 				}
 			}
 
@@ -661,7 +670,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			else if (extension.Equals(".eml", StringComparison.Ordinal) ||
 				extension.Equals(".txt", StringComparison.Ordinal))
 			{
-				result = EmlToPst(location, pstLocation);
+				result = EmlToPst(arguments, location, pstLocation);
 			}
 
 			return result;
@@ -730,6 +739,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				removedFolders = outlookAccount.RemoveEmptyFolders();
 			}
+
+			Console.WriteLine("Folder removed: " +
+				removedFolders.ToString(CultureInfo.InvariantCulture));
 
 			return 0;
 		}
