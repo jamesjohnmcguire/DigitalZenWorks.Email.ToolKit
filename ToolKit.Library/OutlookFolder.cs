@@ -884,7 +884,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			foreach (string pattern in duplicatePatterns)
 			{
-				if (Regex.IsMatch(folderName, duplicatePattern))
+				if (Regex.IsMatch(folderName, pattern))
 				{
 					duplicatePattern = pattern;
 					break;
