@@ -851,6 +851,29 @@ namespace DigitalZenWorks.Email.ToolKit
 			return duplicateCounts;
 		}
 
+		private static string CheckForDuplicateFolders(string folderName)
+		{
+			string duplicatePattern = null;
+			string[] duplicatePatterns =
+			{
+				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
+				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
+				@"(?<=[a-zA-Z0-9&])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$",
+				@"^[A-F]{1}_"
+			};
+
+			foreach (string pattern in duplicatePatterns)
+			{
+				if (Regex.IsMatch(folderName, duplicatePattern))
+				{
+					duplicatePattern = pattern;
+					break;
+				}
+			}
+
+			return duplicatePattern;
+		}
+
 		private static bool DoesSiblingFolderExist(
 			MAPIFolder folder, string folderName)
 		{
@@ -1153,24 +1176,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string folderName = folder.Name;
 
-			string[] duplicatePatterns =
-			{
-				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
-				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
-				@"(?<=[a-zA-Z0-9&])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$",
-				@"^[A-F]{1}_"
-			};
+			string duplicatePattern = CheckForDuplicateFolders(folderName);
 
-			foreach (string duplicatePattern in duplicatePatterns)
+			if (!string.IsNullOrWhiteSpace(duplicatePattern))
 			{
-				if (Regex.IsMatch(folderName, duplicatePattern))
-				{
-					MergeDuplicateFolder(
-						path, folder, duplicatePattern, dryRun);
-
-					// Best to not get multipe matches, at this point.
-					break;
-				}
+				MergeDuplicateFolder(
+					path, folder, duplicatePattern, dryRun);
 			}
 		}
 
