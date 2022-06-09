@@ -869,7 +869,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return duplicateCounts;
 		}
 
-		private static string CheckForDuplicateFolders(string folderName)
+		private static string CheckFolderNameNormalization(string folderName)
 		{
 			string duplicatePattern = null;
 			string[] duplicatePatterns =
@@ -1194,7 +1194,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string folderName = folder.Name;
 
-			string duplicatePattern = CheckForDuplicateFolders(folderName);
+			string duplicatePattern = CheckFolderNameNormalization(folderName);
 
 			if (!string.IsNullOrWhiteSpace(duplicatePattern))
 			{
