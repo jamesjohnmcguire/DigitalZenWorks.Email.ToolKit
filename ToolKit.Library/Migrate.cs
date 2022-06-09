@@ -471,10 +471,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (adjust == false || isInterimFolder == false)
 				{
-					string folderName = OutlookFolder.GetNormalizedFolderName(
-						directoryName, string pattern)
+					string folderName =
+						OutlookFolder.NormalizeFolderName(directoryName);
 					thisFolder =
-						OutlookFolder.AddFolder(pstParent, directoryName);
+						OutlookFolder.AddFolder(pstParent, folderName);
 				}
 
 				if (directories.Length > 0)

@@ -302,24 +302,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Get the normalized folder name.
-		/// </summary>
-		/// <param name="folderName">The folder name to check.</param>
-		/// <param name="pattern">The pattern to use.</param>
-		/// <returns>The new folder name.</returns>
-		public static string GetNormalizedFolderName(
-			string folderName, string pattern)
-		{
-			string newFolderName = Regex.Replace(
-				folderName,
-				pattern,
-				string.Empty,
-				RegexOptions.ExplicitCapture);
-
-			return newFolderName;
-		}
-
-		/// <summary>
 		/// Get the parent folder of the given path.
 		/// </summary>
 		/// <param name="store">The PST file store to use.</param>
@@ -600,6 +582,26 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folderNames;
+		}
+
+		/// <summary>
+		/// Normalize the folder name.
+		/// </summary>
+		/// <param name="folderName">The name of the folder to check.</param>
+		/// <returns>The new folder name.</returns>
+		/// <remarks>The returned folder name may often be the same as
+		/// the given parameter.</remarks>
+		public static string NormalizeFolderName(string folderName)
+		{
+			string duplicatePattern = CheckFolderNameNormalization(folderName);
+
+			if (!string.IsNullOrWhiteSpace(duplicatePattern))
+			{
+				folderName =
+					GetNormalizedFolderName(folderName, duplicatePattern);
+			}
+
+			return folderName;
 		}
 
 		/// <summary>
@@ -1044,6 +1046,18 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return sendersCounts;
+		}
+
+		private static string GetNormalizedFolderName(
+			string folderName, string pattern)
+		{
+			string newFolderName = Regex.Replace(
+				folderName,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			return newFolderName;
 		}
 
 		private static MAPIFolder GetPathFolder(
