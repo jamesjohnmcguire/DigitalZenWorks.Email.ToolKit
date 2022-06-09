@@ -521,6 +521,27 @@ namespace DigitalZenWorks.Email.ToolKit
 			Marshal.ReleaseComObject(pstFolder);
 		}
 
+		private static bool CheckIfInterimFolder(
+			MAPIFolder pstParent, string currentDirectory)
+		{
+			bool interimFolder = false;
+
+			bool isRoot = OutlookFolder.IsRootFolder(pstParent);
+
+			if (isRoot == false ||
+				(!currentDirectory.Equals(
+					"Local Folders", StringComparison.OrdinalIgnoreCase) &&
+				!currentDirectory.Equals(
+					"Storage Folders", StringComparison.OrdinalIgnoreCase) &&
+				!currentDirectory.StartsWith(
+					"Imported Fo", StringComparison.OrdinalIgnoreCase)))
+			{
+				interimFolder = true;
+			}
+
+			return interimFolder;
+		}
+
 		private static string GetTemporaryMsgFile()
 		{
 			string msgFile = Path.GetTempFileName();
