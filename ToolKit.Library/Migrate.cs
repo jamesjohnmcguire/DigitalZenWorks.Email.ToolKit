@@ -471,6 +471,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (adjust == false || isInterimFolder == false)
 				{
+					string folderName = OutlookFolder.GetNormalizedFolderName(
+						directoryName, string pattern)
 					thisFolder =
 						OutlookFolder.AddFolder(pstParent, directoryName);
 				}
