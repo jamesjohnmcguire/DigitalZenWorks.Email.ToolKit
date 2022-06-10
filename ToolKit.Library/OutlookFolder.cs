@@ -585,6 +585,26 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Normalize the folder name.
+		/// </summary>
+		/// <param name="folderName">The name of the folder to check.</param>
+		/// <returns>The new folder name.</returns>
+		/// <remarks>The returned folder name may often be the same as
+		/// the given parameter.</remarks>
+		public static string NormalizeFolderName(string folderName)
+		{
+			string duplicatePattern = CheckFolderNameNormalization(folderName);
+
+			if (!string.IsNullOrWhiteSpace(duplicatePattern))
+			{
+				folderName =
+					GetNormalizedFolderName(folderName, duplicatePattern);
+			}
+
+			return folderName;
+		}
+
+		/// <summary>
 		/// Normalize folder path with forward slashes.
 		/// </summary>
 		/// <param name="path">The folder path.</param>
@@ -851,6 +871,29 @@ namespace DigitalZenWorks.Email.ToolKit
 			return duplicateCounts;
 		}
 
+		private static string CheckFolderNameNormalization(string folderName)
+		{
+			string duplicatePattern = null;
+			string[] duplicatePatterns =
+			{
+				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
+				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
+				@"(?<=[a-zA-Z0-9&])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$",
+				@"^[A-F]{1}_"
+			};
+
+			foreach (string pattern in duplicatePatterns)
+			{
+				if (Regex.IsMatch(folderName, pattern))
+				{
+					duplicatePattern = pattern;
+					break;
+				}
+			}
+
+			return duplicatePattern;
+		}
+
 		private static bool DoesSiblingFolderExist(
 			MAPIFolder folder, string folderName)
 		{
@@ -1005,6 +1048,18 @@ namespace DigitalZenWorks.Email.ToolKit
 			return sendersCounts;
 		}
 
+		private static string GetNormalizedFolderName(
+			string folderName, string pattern)
+		{
+			string newFolderName = Regex.Replace(
+				folderName,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			return newFolderName;
+		}
+
 		private static MAPIFolder GetPathFolder(
 			Store store, string path, bool justParent)
 		{
@@ -1153,24 +1208,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string folderName = folder.Name;
 
-			string[] duplicatePatterns =
-			{
-				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
-				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
-				@"(?<=[a-zA-Z0-9&])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$",
-				@"^[A-F]{1}_"
-			};
+			string duplicatePattern = CheckFolderNameNormalization(folderName);
 
-			foreach (string duplicatePattern in duplicatePatterns)
+			if (!string.IsNullOrWhiteSpace(duplicatePattern))
 			{
-				if (Regex.IsMatch(folderName, duplicatePattern))
-				{
-					MergeDuplicateFolder(
-						path, folder, duplicatePattern, dryRun);
-
-					// Best to not get multipe matches, at this point.
-					break;
-				}
+				MergeDuplicateFolder(
+					path, folder, duplicatePattern, dryRun);
 			}
 		}
 
@@ -1220,11 +1263,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			string duplicatePattern,
 			bool dryRun)
 		{
-			string newFolderName = Regex.Replace(
-				folder.Name,
-				duplicatePattern,
-				string.Empty,
-				RegexOptions.ExplicitCapture);
+			string newFolderName =
+				GetNormalizedFolderName(folder.Name, duplicatePattern);
 
 			bool folderExists = DoesSiblingFolderExist(folder, newFolderName);
 
