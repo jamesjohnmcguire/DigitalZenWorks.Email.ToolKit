@@ -9,14 +9,14 @@
 		<Company>James John McGuire</Company>
 		<Copyright>Copyright © 2021 - 2022</Copyright>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<FileVersion>1.6.28.0</FileVersion>
+		<FileVersion>1.6.29.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<NoWarn>NU1701</NoWarn>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net6.0-windows</TargetFramework>
-		<Version>1.6.28</Version>
+		<Version>1.6.29</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
