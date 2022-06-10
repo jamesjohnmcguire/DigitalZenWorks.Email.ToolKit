@@ -637,43 +637,56 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (folder != null && folderAction != null)
 			{
-				bool isDeletedFolder = IsDeletedFolder(folder);
-
-				// Skip processing of system deleted items folder.
-				if (isDeletedFolder == false)
+				try
 				{
-					int folderCount = folder.Folders.Count;
+					bool isDeletedFolder = IsDeletedFolder(folder);
 
-					// Office uses 1 based indexes from VBA.
-					// Iterate in reverse order as the group may change.
-					for (int index = folderCount; index > 0; index--)
+					// Skip processing of system deleted items folder.
+					if (isDeletedFolder == false)
 					{
-						try
+						int folderCount = folder.Folders.Count;
+
+						// Office uses 1 based indexes from VBA.
+						// Iterate in reverse order as the group may change.
+						for (int index = folderCount; index > 0; index--)
 						{
-							MAPIFolder subFolder = folder.Folders[index];
+							try
+							{
+								MAPIFolder subFolder = folder.Folders[index];
 
-							string name = subFolder.Name;
-							string subPath = path + "/" + name;
+								string name = subFolder.Name;
+								string subPath = path + "/" + name;
 
-							processed += RecurseFolders(
-								subPath, subFolder, condition, folderAction);
+								processed += RecurseFolders(
+									subPath, subFolder, condition, folderAction);
 
-							Marshal.ReleaseComObject(subFolder);
+								Marshal.ReleaseComObject(subFolder);
+							}
+							catch (COMException exception)
+							{
+								string message = string.Format(
+									CultureInfo.InvariantCulture,
+									"Exception at: {0} index: {1}",
+									path,
+									index.ToString(CultureInfo.InvariantCulture));
+
+								Log.Error(message);
+								Log.Error(exception.ToString());
+							}
 						}
-						catch (COMException exception)
-						{
-							string message = string.Format(
-								CultureInfo.InvariantCulture,
-								"Exception at: {0} index: {1}",
-								path,
-								index.ToString(CultureInfo.InvariantCulture));
 
-							Log.Error(message);
-							Log.Error(exception.ToString());
-						}
+						folderAction(path, folder, condition);
 					}
+				}
+				catch (COMException exception)
+				{
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Exception at: {0}",
+						path);
 
-					folderAction(path, folder, condition);
+					Log.Error(message);
+					Log.Error(exception.ToString());
 				}
 			}
 
