@@ -758,6 +758,39 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Safely delete the folder.
+		/// </summary>
+		/// <param name="folder">The folder to delete.</param>
+		/// <returns>Indicates whether the folder was actually deleted
+		/// or not.</returns>
+		public static bool SafeDelete(MAPIFolder folder)
+		{
+			bool isDeleted = false;
+
+			if (folder != null)
+			{
+				if (folder.Folders.Count == 0 && folder.Items.Count == 0)
+				{
+					bool isReservedFolder = IsReservedFolder(folder);
+
+					if (isReservedFolder == true)
+					{
+						string name = folder.Name;
+						Log.Warn("Not deleting reserved folder: " +
+							name);
+					}
+					else
+					{
+						folder.Delete();
+						isDeleted = true;
+					}
+				}
+			}
+
+			return isDeleted;
+		}
+
+		/// <summary>
 		/// Add MSG file as MailItem in folder.
 		/// </summary>
 		/// <param name="pstFolder">The MSG file path.</param>
@@ -1147,13 +1180,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (DeletedFolders.Contains(name))
 			{
-				bool isReservedFolder = IsDeletedFolder(folder);
-
-				if (isReservedFolder == false)
-				{
-					folder.Delete();
-					removed = true;
-				}
+				removed = SafeDelete(folder);
 			}
 
 			return removed;
@@ -1177,29 +1204,15 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static int RemoveEmptyFolder(
 			string path, MAPIFolder folder, bool condition)
 		{
-			int removedFolders = 0;
+			int count = 0;
+			bool isDeleted = SafeDelete(folder);
 
-			if (folder != null)
+			if (isDeleted == true)
 			{
-				if (folder.Folders.Count == 0 && folder.Items.Count == 0)
-				{
-					bool isReservedFolder = IsReservedFolder(folder);
-
-					if (isReservedFolder == true)
-					{
-						string name = folder.Name;
-						Log.Warn("Not deleting reserved folder: " +
-							name);
-					}
-					else
-					{
-						folder.Delete();
-						removedFolders++;
-					}
-				}
+				count = 1;
 			}
 
-			return removedFolders;
+			return count;
 		}
 
 		private static string RemoveStoreFromPath(string path)
@@ -1301,7 +1314,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					MoveFolderContents(path, folder, destination);
 
 					// Once all the items have been moved, remove the folder.
-					folder.Delete();
+					SafeDelete(folder);
 				}
 			}
 			else
@@ -1348,7 +1361,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				// Once all the items have been moved,
 				// now remove the folder.
-				folder.Delete();
+				SafeDelete(folder);
 			}
 		}
 
