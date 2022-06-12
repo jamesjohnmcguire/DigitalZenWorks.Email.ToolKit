@@ -516,7 +516,7 @@ namespace DigitalZenWorks.Email.ToolKit
 								destinationFolderPath, sourceFolder, destinationFolder);
 
 							// Once all the items have been moved, remove the folder.
-							sourceFolder.Delete();
+							OutlookFolder.SafeDelete(sourceFolder);
 						}
 						else
 						{
