@@ -67,7 +67,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				dbxSet.SetTreeOrdered();
 
 				DbxFolder dbxFolder;
-				OutlookFolder outlookFolder = new (outlookAccount);
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
 
 				string baseName = Path.GetFileNameWithoutExtension(pstPath);
@@ -82,7 +81,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					CopyFolderToPst(
 						mappings,
-						outlookFolder,
 						pstStore,
 						rootFolder,
 						dbxFolder);
@@ -122,7 +120,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			else
 			{
 				OutlookAccount outlookAccount = OutlookAccount.Instance;
-				OutlookFolder outlookFolder = new (outlookAccount);
 				Store pstStore = outlookAccount.GetStore(pstPath);
 
 				MAPIFolder rootFolder = pstStore.GetRootFolder();
@@ -135,7 +132,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder pstFolder = OutlookFolder.AddFolder(
 					rootFolder, rootFolder.Name);
 
-				CopyMessages(outlookFolder, pstFolder, dbxFolder);
+				CopyMessages(pstFolder, dbxFolder);
 
 				Marshal.ReleaseComObject(pstFolder);
 				Marshal.ReleaseComObject(rootFolder);
@@ -161,7 +158,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		/// <param name="encoding">The optional encoding to use.</param>
 		public static bool DbxToPst(
-		string path, string pstPath, Encoding encoding)
+			string path, string pstPath, Encoding encoding)
 		{
 			bool result = false;
 
@@ -188,10 +185,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Dbx to pst.
 		/// </summary>
-		/// <param name="path">the path of the eml file.</param>
+		/// <param name="path">the path of the eml directory or file.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <param name="adjust">Indicates whether to exclude interim
+		/// folders.</param>
 		/// <returns>A value indicating success or not.</returns>
-		public static bool EmlToPst(string path, string pstPath)
+		public static bool EmlToPst(string path, string pstPath, bool adjust)
 		{
 			bool result = false;
 
@@ -208,10 +207,13 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
-					DirectoryInfo directoryInfo = new (path);
-					string folderPath = directoryInfo.Name;
+					MAPIFolder rootFolder = store.GetRootFolder();
 
-					EmlDirectoryToPst(path, store, folderPath);
+					string baseName =
+						Path.GetFileNameWithoutExtension(pstPath);
+					rootFolder.Name = baseName;
+
+					EmlDirectoryToPst(rootFolder, path, adjust);
 					result = true;
 				}
 			}
@@ -321,19 +323,16 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Copy folder to pst store.
 		/// </summary>
 		/// <param name="mappings">The mappings file to add to.</param>
-		/// <param name="outlookFolder">The Outlook folder to use.</param>
 		/// <param name="pstStore">The store to use.</param>
 		/// <param name="rootFolder">The root folder of the store.</param>
 		/// <param name="dbxFolder">The dbx folder to add.</param>
 		private static void CopyFolderToPst(
 			IDictionary<uint, string> mappings,
-			OutlookFolder outlookFolder,
 			Store pstStore,
 			MAPIFolder rootFolder,
 			DbxFolder dbxFolder)
 		{
-			if (mappings != null && outlookFolder != null &&
-				pstStore != null && dbxFolder != null)
+			if (mappings != null && pstStore != null && dbxFolder != null)
 			{
 				MAPIFolder pstFolder;
 
@@ -378,7 +377,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						AddMappingSafe(mappings, pstFolder, dbxFolder);
 
-						CopyMessages(outlookFolder, pstFolder, dbxFolder);
+						CopyMessages(pstFolder, dbxFolder);
 					}
 					else
 					{
@@ -389,7 +388,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static void CopyMessages(
-			OutlookFolder outlookFolder,
 			MAPIFolder pstFolder,
 			DbxFolder dbxFolder)
 		{
@@ -400,7 +398,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				dbxMessage = dbxFolder.GetNextMessage();
 
-				CopyMessageToPst(outlookFolder, pstFolder, dbxMessage);
+				CopyMessageToPst(pstFolder, dbxMessage);
 			}
 			while (dbxMessage != null);
 
@@ -408,7 +406,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static void CopyMessageToPst(
-			OutlookFolder outlookFolder,
 			MAPIFolder mapiFolder,
 			DbxMessage dbxMessage)
 		{
@@ -440,6 +437,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				msgStream.Dispose();
 
+				OutlookAccount outlookAccount = OutlookAccount.Instance;
+				OutlookFolder outlookFolder = new (outlookAccount);
+
 				outlookFolder.AddMsgFile(mapiFolder, msgFile);
 
 				File.Delete(msgFile);
@@ -447,36 +447,51 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static void EmlDirectoryToPst(
-			string emlFilesPath, Store store, string folderPath)
+			MAPIFolder pstParent, string emlFolderFilePath, bool adjust)
 		{
-			string[] directories = Directory.GetDirectories(emlFilesPath);
-
-			if (directories.Length > 0)
-			{
-				foreach (string directory in directories)
-				{
-					DirectoryInfo directoryInfo = new (directory);
-					string directoryName = directoryInfo.Name;
-
-					string thisFolderPath = folderPath + @"\" + directoryName;
-					EmlDirectoryToPst(directory, store, thisFolderPath);
-				}
-			}
+			string[] directories = Directory.GetDirectories(emlFolderFilePath);
 
 			IEnumerable<string> emlFiles =
-				EmlMessages.GetFiles(emlFilesPath);
+				EmlMessages.GetFiles(emlFolderFilePath);
 
-			if (emlFiles.Any())
+			if (directories.Length > 0 || emlFiles.Any())
 			{
-				MAPIFolder folder =
-					OutlookFolder.CreateFolderPath(store, folderPath);
+				DirectoryInfo directoryInfo = new (emlFolderFilePath);
+				string directoryName = directoryInfo.Name;
 
-				foreach (string file in emlFiles)
+				MAPIFolder thisFolder = pstParent;
+
+				bool isInterimFolder =
+					CheckIfInterimFolder(pstParent, directoryName);
+
+				if (adjust == false || isInterimFolder == false)
 				{
-					CopyEmlToPst(folder, file);
+					string folderName =
+						OutlookFolder.NormalizeFolderName(directoryName);
+					thisFolder =
+						OutlookFolder.AddFolder(pstParent, folderName);
 				}
 
-				Marshal.ReleaseComObject(folder);
+				if (directories.Length > 0)
+				{
+					foreach (string directory in directories)
+					{
+						directoryInfo = new (directory);
+						string thisFolderPath = directoryInfo.FullName;
+
+						EmlDirectoryToPst(thisFolder, thisFolderPath, adjust);
+					}
+				}
+
+				if (emlFiles.Any())
+				{
+					foreach (string file in emlFiles)
+					{
+						CopyEmlToPst(thisFolder, file);
+					}
+				}
+
+				Marshal.ReleaseComObject(thisFolder);
 			}
 		}
 
@@ -498,6 +513,27 @@ namespace DigitalZenWorks.Email.ToolKit
 			CopyEmlToPst(pstFolder, filePath);
 
 			Marshal.ReleaseComObject(pstFolder);
+		}
+
+		private static bool CheckIfInterimFolder(
+			MAPIFolder pstParent, string currentDirectory)
+		{
+			bool interimFolder = false;
+
+			bool isRoot = OutlookFolder.IsRootFolder(pstParent);
+
+			if (isRoot == true &&
+				(currentDirectory.Equals(
+					"Local Folders", StringComparison.OrdinalIgnoreCase) ||
+				currentDirectory.Equals(
+					"Storage Folders", StringComparison.OrdinalIgnoreCase) ||
+				currentDirectory.StartsWith(
+					"Imported Fo", StringComparison.OrdinalIgnoreCase)))
+			{
+				interimFolder = true;
+			}
+
+			return interimFolder;
 		}
 
 		private static string GetTemporaryMsgFile()

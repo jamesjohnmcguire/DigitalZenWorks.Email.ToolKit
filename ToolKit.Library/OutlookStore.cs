@@ -488,65 +488,72 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (source != null)
 			{
-				bool folderExists = OutlookFolder.DoesFolderExist(
-					source, sourceFolderPath);
-
-				if (folderExists == true)
+				try
 				{
-					MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
+					bool folderExists = OutlookFolder.DoesFolderExist(
 						source, sourceFolderPath);
-
-					MAPIFolder destinationParent = OutlookFolder.GetPathParent(
-						destination, destinationFolderPath);
-
-					folderExists = OutlookFolder.DoesFolderExist(
-						destination, destinationFolderPath);
 
 					if (folderExists == true)
 					{
-						MAPIFolder destinationFolder =
-							OutlookFolder.CreateFolderPath(
-								destination, destinationFolderPath);
+						MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
+							source, sourceFolderPath);
 
-						OutlookFolder outlookFolder = new (outlookAccount);
+						MAPIFolder destinationParent = OutlookFolder.GetPathParent(
+							destination, destinationFolderPath);
 
-						outlookFolder.MoveFolderContents(
-							destinationFolderPath, sourceFolder, destinationFolder);
+						folderExists = OutlookFolder.DoesFolderExist(
+							destination, destinationFolderPath);
 
-						// Once all the items have been moved, remove the folder.
-						sourceFolder.Delete();
-					}
-					else
-					{
-						// Folder doesn't already exist, so just move it.
-						string parentPath =
-							OutlookFolder.GetFolderPath(destinationParent);
-						string folderName = sourceFolder.Name;
-						string destinationName =
-							OutlookFolder.GetBaseFolderName(
-								destinationFolderPath);
-
-						LogFormatMessage.Info(
-							"at: {0} Moving {1} to {2}",
-							parentPath,
-							folderName,
-							destinationName);
-
-						MAPIFolder sourceParent = sourceFolder.Parent;
-						string sourceParentId = sourceParent.EntryID;
-						string destinationParentId = destinationParent.EntryID;
-
-						if (sourceParentId.Equals(
-							destinationParentId,
-							StringComparison.OrdinalIgnoreCase))
+						if (folderExists == true)
 						{
-							sourceFolder.Name = destinationName;
+							MAPIFolder destinationFolder =
+								OutlookFolder.CreateFolderPath(
+									destination, destinationFolderPath);
+
+							OutlookFolder outlookFolder = new (outlookAccount);
+
+							outlookFolder.MoveFolderContents(
+								destinationFolderPath, sourceFolder, destinationFolder);
+
+							// Once all the items have been moved, remove the folder.
+							OutlookFolder.SafeDelete(sourceFolder);
 						}
 						else
 						{
-							sourceFolder.MoveTo(destinationParent);
+							// Folder doesn't already exist, so just move it.
+							string parentPath =
+								OutlookFolder.GetFolderPath(destinationParent);
+							string folderName = sourceFolder.Name;
+							string destinationName =
+								OutlookFolder.GetBaseFolderName(
+									destinationFolderPath);
+
+							LogFormatMessage.Info(
+								"at: {0} Moving {1} to {2}",
+								parentPath,
+								folderName,
+								destinationName);
+
+							MAPIFolder sourceParent = sourceFolder.Parent;
+							string sourceParentId = sourceParent.EntryID;
+							string destinationParentId = destinationParent.EntryID;
+
+							if (sourceParentId.Equals(
+								destinationParentId,
+								StringComparison.OrdinalIgnoreCase))
+							{
+								sourceFolder.Name = destinationName;
+							}
+							else
+							{
+								sourceFolder.MoveTo(destinationParent);
+							}
 						}
 					}
+				}
+				catch (COMException exception)
+				{
+					Log.Error(exception.ToString());
 				}
 			}
 		}
