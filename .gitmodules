@@ -7,3 +7,6 @@
 [submodule "UtilitiesNet"]
 	path = UtilitiesNet
 	url = https://github.com/jamesjohnmcguire/UtilitiesNet
+[submodule "MapiLibrary/MAPIStubLibrary"]
+	path = MapiLibrary/MAPIStubLibrary
+	url = https://github.com/stephenegriffin/MAPIStubLibrary
