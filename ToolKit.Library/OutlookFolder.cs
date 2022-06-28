@@ -87,7 +87,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (pstFolder == null)
 				{
 					string parentPath = GetFolderPath(parentFolder);
-					Log.Info("At: " + parentPath + " Adding outlook folder: " + folderName);
+					Log.Info("At: " + parentPath + " Adding outlook folder: " +
+						folderName);
 
 					try
 					{
@@ -584,6 +585,41 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Normalize the folder name.
+		/// </summary>
+		/// <param name="folderName">The name of the folder to check.</param>
+		/// <returns>The new folder name.</returns>
+		/// <remarks>The returned folder name may often be the same as
+		/// the given parameter.</remarks>
+		public static string NormalizeFolderName(string folderName)
+		{
+			string duplicatePattern = CheckFolderNameNormalization(folderName);
+
+			if (!string.IsNullOrWhiteSpace(duplicatePattern))
+			{
+				folderName =
+					GetNormalizedFolderName(folderName, duplicatePattern);
+			}
+
+			return folderName;
+		}
+
+		/// <summary>
+		/// Normalize folder path with forward slashes.
+		/// </summary>
+		/// <param name="path">The folder path.</param>
+		/// <returns>The normalized folder path.</returns>
+		public static string NormalizePath(string path)
+		{
+			if (!string.IsNullOrWhiteSpace(path))
+			{
+				path = path.Replace('\\', '/');
+			}
+
+			return path;
+		}
+
+		/// <summary>
 		/// Recurse folders.
 		/// </summary>
 		/// <param name="path">The path of the folder.</param>
@@ -601,43 +637,56 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (folder != null && folderAction != null)
 			{
-				bool isDeletedFolder = IsDeletedFolder(folder);
-
-				// Skip processing of system deleted items folder.
-				if (isDeletedFolder == false)
+				try
 				{
-					int folderCount = folder.Folders.Count;
+					bool isDeletedFolder = IsDeletedFolder(folder);
 
-					// Office uses 1 based indexes from VBA.
-					// Iterate in reverse order as the group may change.
-					for (int index = folderCount; index > 0; index--)
+					// Skip processing of system deleted items folder.
+					if (isDeletedFolder == false)
 					{
-						try
+						int folderCount = folder.Folders.Count;
+
+						// Office uses 1 based indexes from VBA.
+						// Iterate in reverse order as the group may change.
+						for (int index = folderCount; index > 0; index--)
 						{
-							MAPIFolder subFolder = folder.Folders[index];
+							try
+							{
+								MAPIFolder subFolder = folder.Folders[index];
 
-							string name = subFolder.Name;
-							string subPath = path + "/" + name;
+								string name = subFolder.Name;
+								string subPath = path + "/" + name;
 
-							processed += RecurseFolders(
-								subPath, subFolder, condition, folderAction);
+								processed += RecurseFolders(
+									subPath, subFolder, condition, folderAction);
 
-							Marshal.ReleaseComObject(subFolder);
+								Marshal.ReleaseComObject(subFolder);
+							}
+							catch (COMException exception)
+							{
+								string message = string.Format(
+									CultureInfo.InvariantCulture,
+									"Exception at: {0} index: {1}",
+									path,
+									index.ToString(CultureInfo.InvariantCulture));
+
+								Log.Error(message);
+								Log.Error(exception.ToString());
+							}
 						}
-						catch (COMException exception)
-						{
-							string message = string.Format(
-								CultureInfo.InvariantCulture,
-								"Exception at: {0} index: {1}",
-								path,
-								index.ToString(CultureInfo.InvariantCulture));
 
-							Log.Error(message);
-							Log.Error(exception.ToString());
-						}
+						folderAction(path, folder, condition);
 					}
+				}
+				catch (COMException exception)
+				{
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Exception at: {0}",
+						path);
 
-					folderAction(path, folder, condition);
+					Log.Error(message);
+					Log.Error(exception.ToString());
 				}
 			}
 
@@ -706,6 +755,39 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 				}
 			}
+		}
+
+		/// <summary>
+		/// Safely delete the folder.
+		/// </summary>
+		/// <param name="folder">The folder to delete.</param>
+		/// <returns>Indicates whether the folder was actually deleted
+		/// or not.</returns>
+		public static bool SafeDelete(MAPIFolder folder)
+		{
+			bool isDeleted = false;
+
+			if (folder != null)
+			{
+				if (folder.Folders.Count == 0 && folder.Items.Count == 0)
+				{
+					bool isReservedFolder = IsReservedFolder(folder);
+
+					if (isReservedFolder == true)
+					{
+						string name = folder.Name;
+						Log.Warn("Not deleting reserved folder: " +
+							name);
+					}
+					else
+					{
+						folder.Delete();
+						isDeleted = true;
+					}
+				}
+			}
+
+			return isDeleted;
 		}
 
 		/// <summary>
@@ -833,6 +915,29 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return duplicateCounts;
+		}
+
+		private static string CheckFolderNameNormalization(string folderName)
+		{
+			string duplicatePattern = null;
+			string[] duplicatePatterns =
+			{
+				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
+				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
+				@"(?<=[a-zA-Z0-9&])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$",
+				@"^[A-F]{1}_"
+			};
+
+			foreach (string pattern in duplicatePatterns)
+			{
+				if (Regex.IsMatch(folderName, pattern))
+				{
+					duplicatePattern = pattern;
+					break;
+				}
+			}
+
+			return duplicatePattern;
 		}
 
 		private static bool DoesSiblingFolderExist(
@@ -989,6 +1094,18 @@ namespace DigitalZenWorks.Email.ToolKit
 			return sendersCounts;
 		}
 
+		private static string GetNormalizedFolderName(
+			string folderName, string pattern)
+		{
+			string newFolderName = Regex.Replace(
+				folderName,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture);
+
+			return newFolderName;
+		}
+
 		private static MAPIFolder GetPathFolder(
 			Store store, string path, bool justParent)
 		{
@@ -1063,13 +1180,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (DeletedFolders.Contains(name))
 			{
-				bool isReservedFolder = IsDeletedFolder(folder);
-
-				if (isReservedFolder == false)
-				{
-					folder.Delete();
-					removed = true;
-				}
+				removed = SafeDelete(folder);
 			}
 
 			return removed;
@@ -1093,29 +1204,15 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static int RemoveEmptyFolder(
 			string path, MAPIFolder folder, bool condition)
 		{
-			int removedFolders = 0;
+			int count = 0;
+			bool isDeleted = SafeDelete(folder);
 
-			if (folder != null)
+			if (isDeleted == true)
 			{
-				if (folder.Folders.Count == 0 && folder.Items.Count == 0)
-				{
-					bool isReservedFolder = IsReservedFolder(folder);
-
-					if (isReservedFolder == true)
-					{
-						string name = folder.Name;
-						Log.Warn("Not deleting reserved folder: " +
-							name);
-					}
-					else
-					{
-						folder.Delete();
-						removedFolders++;
-					}
-				}
+				count = 1;
 			}
 
-			return removedFolders;
+			return count;
 		}
 
 		private static string RemoveStoreFromPath(string path)
@@ -1137,24 +1234,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string folderName = folder.Name;
 
-			string[] duplicatePatterns =
-			{
-				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
-				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
-				@"(?<=[a-zA-Z0-9&])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$",
-				@"^[A-F]{1}_"
-			};
+			string duplicatePattern = CheckFolderNameNormalization(folderName);
 
-			foreach (string duplicatePattern in duplicatePatterns)
+			if (!string.IsNullOrWhiteSpace(duplicatePattern))
 			{
-				if (Regex.IsMatch(folderName, duplicatePattern))
-				{
-					MergeDuplicateFolder(
-						path, folder, duplicatePattern, dryRun);
-
-					// Best to not get multipe matches, at this point.
-					break;
-				}
+				MergeDuplicateFolder(
+					path, folder, duplicatePattern, dryRun);
 			}
 		}
 
@@ -1204,11 +1289,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			string duplicatePattern,
 			bool dryRun)
 		{
-			string newFolderName = Regex.Replace(
-				folder.Name,
-				duplicatePattern,
-				string.Empty,
-				RegexOptions.ExplicitCapture);
+			string newFolderName =
+				GetNormalizedFolderName(folder.Name, duplicatePattern);
 
 			bool folderExists = DoesSiblingFolderExist(folder, newFolderName);
 
@@ -1232,7 +1314,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					MoveFolderContents(path, folder, destination);
 
 					// Once all the items have been moved, remove the folder.
-					folder.Delete();
+					SafeDelete(folder);
 				}
 			}
 			else
@@ -1279,7 +1361,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				// Once all the items have been moved,
 				// now remove the folder.
-				folder.Delete();
+				SafeDelete(folder);
 			}
 		}
 

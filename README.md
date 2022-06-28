@@ -36,7 +36,7 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 | Commands:              |                                         | options        |
 | ---------------------- | --------------------------------------- | -------------- |
 | dbx-to-pst             | Migrate dbx files to pst file           | -e, --encoding |
-| eml-to-pst             | Migrate eml files to pst file           |                |
+| eml-to-pst             | Migrate eml files to pst file           | -a, --adjust   |
 | list-folders           | List all sub folders of a given folder  |                |
 | list-top-senders       | List the top senders of a given store   |                |
 | list-total-duplicates  | List all duplicates in a given store    |                |
@@ -56,7 +56,7 @@ If the source-path is a directory, the command will attempt to process the files
 Det.exe remove-duplicates --dryrun \path\to\some.pst  
 Det.exe dbx-to-pst --encoding shift_jis \path\to\some-dbx-files  
 Det.exe dbx-to-pst \path\to\some-dbx-files \path\to\some.pst  
-Det.exe eml-to-pst "%USERPROFILE%\AppData\Local\Microsoft\Windows Live Mail\Storage Folders" %USERPROFILE%\Import.pst  
+Det.exe eml-to-pst --adjust "%USERPROFILE%\AppData\Local\Microsoft\Windows Live Mail\Storage Folders" %USERPROFILE%\Import.pst  
 Det.exe move-folder \path\to\some.pst source\folder\path  \path\to\some.pst destination\folder\path
 Det.exe list-folders \path\to\some.pst
 Det.exe list-top-senders \path\to\some.pst
@@ -65,6 +65,9 @@ Det.exe list-total-duplicates \path\to\some.pst
 ###### dbx-to-pst
 The optional --encoding option allows you to add a preferred encoding, in the rare case, that encoding can not be detected properly.  It must be a string that is recognized by Encoding.GetEncoding, along with Encoding.RegisterProvider(CodePagesEncodingProvider).  
 If a PST file location is not specified, it will use the base location of the DBX files.
+
+###### eml-to-pst
+Some applications, like 'Windows Live Mail' often include interim folders, such as 'Imported Folders', 'Local Folders' and 'Storage Folders', creating unnecessary levels of nesting.  Using the --adjust option will remove these interim folders in the PST file.
 
 ###### merge-folders
 Sometimes, folders get duplicated, like in the following manner:  
