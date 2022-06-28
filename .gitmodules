@@ -9,4 +9,4 @@
 	url = https://github.com/jamesjohnmcguire/UtilitiesNet
 [submodule "MapiLibrary/MAPIStubLibrary"]
 	path = MapiLibrary/MAPIStubLibrary
-	url = https://github.com/stephenegriffin/MAPIStubLibrary
+	url = https://github.com/jamesjohnmcguire/MAPIStubLibrary
