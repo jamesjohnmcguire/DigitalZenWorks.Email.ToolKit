@@ -4,6 +4,8 @@
 
 namespace MapiLibrary
 {
+	MAPIINIT_0 MAPIINIT = { 0, MAPI_MULTITHREAD_NOTIFICATIONS };
+
 	class Session
 	{
 		public:
@@ -11,6 +13,8 @@ namespace MapiLibrary
 			~Session() = default;
 
 		private:
-			LPMAPISESSION mapiSession;
+			ULONG logonFlags = MAPI_ALLOW_OTHERS | MAPI_EXTENDED |
+				MAPI_NO_MAIL | MAPI_USE_DEFAULT | MAPI_UNICODE;
+			LPMAPISESSION mapiSession{};
 	};
 }
