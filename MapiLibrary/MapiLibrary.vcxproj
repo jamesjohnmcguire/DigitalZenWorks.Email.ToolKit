@@ -39,7 +39,6 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
-		<LinkIncremental>true</LinkIncremental>
 		<UseDebugLibraries>false</UseDebugLibraries>
 		<WholeProgramOptimization>true</WholeProgramOptimization>
 	</PropertyGroup>
@@ -58,7 +57,7 @@
 
 	<ItemDefinitionGroup>
 		<ClCompile>
-			<AdditionalIncludeDirectories>$(ProjectDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<ConformanceMode>true</ConformanceMode>
 			<LanguageStandard_C>stdc11</LanguageStandard_C>
 			<PrecompiledHeader>Use</PrecompiledHeader>
@@ -69,6 +68,7 @@
 		<Link>
 			<EnableUAC>false</EnableUAC>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IgnoreSpecificDefaultLibraries>libcmt.lib; libcmtd.lib</IgnoreSpecificDefaultLibraries>
 			<SubSystem>Windows</SubSystem>
 		</Link>
 	</ItemDefinitionGroup>
@@ -107,6 +107,12 @@
 			<PreprocessorDefinitions>NDEBUG;MAPILIBRARY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ClCompile>
 	</ItemDefinitionGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="MAPIStubLibrary\mapistub.vcxproj">
+			<Project>{ACD4DD9F-0FB8-42C8-BC1C-25A5A29CB40C}</Project>
+		</ProjectReference>
+	</ItemGroup>
 
 	<ItemGroup>
 		<ClInclude Include="framework.h" />
