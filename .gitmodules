@@ -12,4 +12,4 @@
 	url = https://github.com/jamesjohnmcguire/CommandLineCommands.git
 [submodule "MapiLibrary/MAPIStubLibrary"]
 	path = MapiLibrary/MAPIStubLibrary
-	url = https://github.com/stephenegriffin/MAPIStubLibrary
+	url = https://github.com/jamesjohnmcguire/MAPIStubLibrary
