@@ -773,7 +773,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			Log.Info("Usage:");
 			Log.Info("DigitalZenWorks.Email.ToolKit & lt; " +
-				"command & gt; &lt; path & gt;");
+				"command <options> <path.to.source> <path.to.pst>");
 
 			Log.Info("Commands:");
 			Log.Info("dbx-to-pst             Migrate dbx files to pst file");
