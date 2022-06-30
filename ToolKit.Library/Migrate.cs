@@ -461,39 +461,47 @@ namespace DigitalZenWorks.Email.ToolKit
 				DirectoryInfo directoryInfo = new (emlFolderFilePath);
 				string directoryName = directoryInfo.Name;
 
-				MAPIFolder thisFolder = pstParent;
-
-				bool isInterimFolder =
-					CheckIfInterimFolder(pstParent, directoryName);
-
-				if (adjust == false || isInterimFolder == false)
+				try
 				{
-					string folderName =
-						OutlookFolder.NormalizeFolderName(directoryName);
-					thisFolder =
-						OutlookFolder.AddFolder(pstParent, folderName);
-				}
+					MAPIFolder thisFolder = pstParent;
 
-				if (directories.Length > 0)
-				{
-					foreach (string directory in directories)
+					bool isInterimFolder =
+						CheckIfInterimFolder(pstParent, directoryName);
+
+					if (adjust == false || isInterimFolder == false)
 					{
-						directoryInfo = new (directory);
-						string thisFolderPath = directoryInfo.FullName;
-
-						EmlDirectoryToPst(thisFolder, thisFolderPath, adjust);
+						string folderName =
+							OutlookFolder.NormalizeFolderName(directoryName);
+						thisFolder =
+							OutlookFolder.AddFolder(pstParent, folderName);
 					}
-				}
 
-				if (emlFiles.Any())
-				{
-					foreach (string file in emlFiles)
+					if (directories.Length > 0)
 					{
-						CopyEmlToPst(thisFolder, file);
-					}
-				}
+						foreach (string directory in directories)
+						{
+							directoryInfo = new (directory);
+							string thisFolderPath = directoryInfo.FullName;
 
-				Marshal.ReleaseComObject(thisFolder);
+							EmlDirectoryToPst(
+								thisFolder, thisFolderPath, adjust);
+						}
+					}
+
+					if (emlFiles.Any())
+					{
+						foreach (string file in emlFiles)
+						{
+							CopyEmlToPst(thisFolder, file);
+						}
+					}
+
+					Marshal.ReleaseComObject(thisFolder);
+				}
+				catch (InvalidComObjectException exception)
+				{
+					Log.Error(exception.ToString());
+				}
 			}
 		}
 
