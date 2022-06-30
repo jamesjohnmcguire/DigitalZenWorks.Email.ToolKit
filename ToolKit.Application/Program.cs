@@ -244,12 +244,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static string GetEmlLocation(string[] arguments)
 		{
-			string emlLocation = null;
-
 			// skip pst path
 			int index = arguments.Length - 2;
 
-			emlLocation = arguments[index];
+			string emlLocation = arguments[index];
 
 			return emlLocation;
 		}
