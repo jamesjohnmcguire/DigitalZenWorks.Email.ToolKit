@@ -214,6 +214,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					rootFolder.Name = baseName;
 
 					EmlDirectoryToPst(rootFolder, path, adjust);
+
+					Marshal.ReleaseComObject(rootFolder);
 					result = true;
 				}
 			}
