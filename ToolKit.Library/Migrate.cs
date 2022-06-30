@@ -496,7 +496,10 @@ namespace DigitalZenWorks.Email.ToolKit
 						}
 					}
 
-					Marshal.ReleaseComObject(thisFolder);
+					if (adjust == false || isInterimFolder == false)
+					{
+						Marshal.ReleaseComObject(thisFolder);
+					}
 				}
 				catch (InvalidComObjectException exception)
 				{
