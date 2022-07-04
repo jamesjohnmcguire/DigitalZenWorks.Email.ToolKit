@@ -6,7 +6,11 @@ namespace MapiLibrary
 {
 	class Store
 	{
-		private:
+	public:
+		DllExport Store(ULONG entryIdLength, LPENTRYID entryId);
+		DllExport ~Store();
+
+	private:
 			LPENTRYID entryId;
 			ULONG entryIdLength;
 	};
