@@ -214,6 +214,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					rootFolder.Name = baseName;
 
 					EmlDirectoryToPst(rootFolder, path, adjust);
+
+					Marshal.ReleaseComObject(rootFolder);
 					result = true;
 				}
 			}
@@ -459,39 +461,50 @@ namespace DigitalZenWorks.Email.ToolKit
 				DirectoryInfo directoryInfo = new (emlFolderFilePath);
 				string directoryName = directoryInfo.Name;
 
-				MAPIFolder thisFolder = pstParent;
-
-				bool isInterimFolder =
-					CheckIfInterimFolder(pstParent, directoryName);
-
-				if (adjust == false || isInterimFolder == false)
+				try
 				{
-					string folderName =
-						OutlookFolder.NormalizeFolderName(directoryName);
-					thisFolder =
-						OutlookFolder.AddFolder(pstParent, folderName);
-				}
+					MAPIFolder thisFolder = pstParent;
 
-				if (directories.Length > 0)
-				{
-					foreach (string directory in directories)
+					bool isInterimFolder =
+						CheckIfInterimFolder(pstParent, directoryName);
+
+					if (adjust == false || isInterimFolder == false)
 					{
-						directoryInfo = new (directory);
-						string thisFolderPath = directoryInfo.FullName;
+						string folderName =
+							OutlookFolder.NormalizeFolderName(directoryName);
+						thisFolder =
+							OutlookFolder.AddFolder(pstParent, folderName);
+					}
 
-						EmlDirectoryToPst(thisFolder, thisFolderPath, adjust);
+					if (directories.Length > 0)
+					{
+						foreach (string directory in directories)
+						{
+							directoryInfo = new (directory);
+							string thisFolderPath = directoryInfo.FullName;
+
+							EmlDirectoryToPst(
+								thisFolder, thisFolderPath, adjust);
+						}
+					}
+
+					if (emlFiles.Any())
+					{
+						foreach (string file in emlFiles)
+						{
+							CopyEmlToPst(thisFolder, file);
+						}
+					}
+
+					if (adjust == false || isInterimFolder == false)
+					{
+						Marshal.ReleaseComObject(thisFolder);
 					}
 				}
-
-				if (emlFiles.Any())
+				catch (InvalidComObjectException exception)
 				{
-					foreach (string file in emlFiles)
-					{
-						CopyEmlToPst(thisFolder, file);
-					}
+					Log.Error(exception.ToString());
 				}
-
-				Marshal.ReleaseComObject(thisFolder);
 			}
 		}
 
