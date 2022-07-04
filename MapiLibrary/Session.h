@@ -12,6 +12,8 @@ namespace MapiLibrary
 			DllExport Session();
 			~Session() = default;
 
+			DllExport void Close();
+
 		private:
 			ULONG logonFlags = MAPI_ALLOW_OTHERS | MAPI_EXTENDED |
 				MAPI_NO_MAIL | MAPI_USE_DEFAULT | MAPI_UNICODE;

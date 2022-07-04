@@ -18,4 +18,15 @@ namespace MapiLibrary
 			);
 		}
 	}
+
+	void Session::Close()
+	{
+		if (mapiSession != nullptr)
+		{
+			mapiSession->Release();
+			mapiSession = nullptr;
+		}
+
+		MAPIUninitialize();
+	}
 }
