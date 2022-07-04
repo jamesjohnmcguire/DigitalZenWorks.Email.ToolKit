@@ -31,6 +31,15 @@ namespace MapiLibrary
 
 	void Session::Close()
 	{
+		int size = stores.size();
+		for (int index = 0; index < size; index++)
+		{
+			Store* store = stores[index];
+			delete store;
+		}
+
+		stores.clear();
+
 		if (mapiSession != nullptr)
 		{
 			mapiSession->Release();
