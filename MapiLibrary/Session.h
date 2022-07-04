@@ -10,7 +10,7 @@ namespace MapiLibrary
 	{
 		public:
 			DllExport Session();
-			~Session() = default;
+			~Session();
 
 			DllExport void Close();
 

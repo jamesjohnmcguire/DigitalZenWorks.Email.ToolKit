@@ -19,6 +19,11 @@ namespace MapiLibrary
 		}
 	}
 
+	Session::~Session()
+	{
+		Close();
+	}
+
 	void Session::Close()
 	{
 		if (mapiSession != nullptr)
