@@ -77,11 +77,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = DbxToPst(arguments, dbxLocation, pstLocation);
 							break;
 						case "eml-to-pst":
-							string emlLocation = arguments[1];
+							string emlLocation = GetEmlLocation(arguments);
+							int index = arguments.Length - 1;
 							pstLocation =
-								GetPstLocation(arguments, emlLocation, 2);
+								GetPstLocation(arguments, emlLocation, index);
 
-							result = EmlToPst(arguments, emlLocation, pstLocation);
+							result =
+								EmlToPst(arguments, emlLocation, pstLocation);
 							break;
 						case "help":
 							ShowHelp();
@@ -238,6 +240,16 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return dbxLocation;
+		}
+
+		private static string GetEmlLocation(string[] arguments)
+		{
+			// skip pst path
+			int index = arguments.Length - 2;
+
+			string emlLocation = arguments[index];
+
+			return emlLocation;
 		}
 
 		private static int GetCount(string[] arguments)
@@ -773,7 +785,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			Log.Info("Usage:");
 			Log.Info("DigitalZenWorks.Email.ToolKit & lt; " +
-				"command & gt; &lt; path & gt;");
+				"command <options> <path.to.source> <path.to.pst>");
 
 			Log.Info("Commands:");
 			Log.Info("dbx-to-pst             Migrate dbx files to pst file");
@@ -831,6 +843,17 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 						if (Directory.Exists(dbxLocation) ||
 							File.Exists(dbxLocation))
+						{
+							valid = true;
+						}
+					}
+					else if (command.Equals(
+						"eml-to-pst", StringComparison.OrdinalIgnoreCase))
+					{
+						string emlLocation = GetEmlLocation(arguments);
+
+						if (Directory.Exists(emlLocation) ||
+							File.Exists(emlLocation))
 						{
 							valid = true;
 						}

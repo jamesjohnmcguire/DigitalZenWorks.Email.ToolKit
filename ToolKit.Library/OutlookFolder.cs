@@ -435,6 +435,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						{
 							isDeletedFolder = true;
 						}
+
+						Marshal.ReleaseComObject(parent);
 					}
 				}
 			}
@@ -470,6 +472,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						{
 							reserved = true;
 						}
+
+						Marshal.ReleaseComObject(parent);
 					}
 				}
 				else if (folder.Parent is null ||
@@ -526,6 +530,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						topLevel = true;
 					}
+
+					Marshal.ReleaseComObject(parent);
 				}
 				else
 				{
