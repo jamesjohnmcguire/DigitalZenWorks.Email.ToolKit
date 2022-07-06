@@ -7,7 +7,7 @@
 
 namespace MapiLibrary
 {
-	extern "C" __declspec(dllexport) void MapiTest()
+	LIB_API(void) MapiTest()
 	{
 		std::cout << "This is a test." << std::endl;
 
