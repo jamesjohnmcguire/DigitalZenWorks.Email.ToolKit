@@ -1,6 +1,5 @@
 #pragma once
-
-#include "MapiLibrary.h"
+#include "DeclarationsSpecifications.h"
 
 namespace MapiLibrary
 {
