@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "MapiLibrary.h"
+#include "DeclarationsSpecifications.h"
 #include "Store.h"
 
 namespace MapiLibrary
