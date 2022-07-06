@@ -8,6 +8,12 @@
 
 namespace MapiLibrary
 {
+	MAPIINIT_0 MAPIINIT =
+	{
+		MAPI_INIT_VERSION,
+		MAPI_MULTITHREAD_NOTIFICATIONS
+	};
+
 	Session::Session()
 	{
 		HRESULT result = MAPIInitialize(&MAPIINIT);
