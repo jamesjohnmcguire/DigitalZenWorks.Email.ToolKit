@@ -111,6 +111,9 @@
     <ClInclude Include="include\MSPST.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DeclarationsSpecifications.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -125,10 +128,8 @@
     <ClCompile Include="Store.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="include\Readme.txt">
-      <Filter>Header Files</Filter>
-    </Text>
+    <ClCompile Include="Api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
