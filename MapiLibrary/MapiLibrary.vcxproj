@@ -115,33 +115,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ClInclude Include="include\abhelp.h" />
-		<ClInclude Include="include\actMgmt.h" />
-		<ClInclude Include="include\EdkGuid.h" />
-		<ClInclude Include="include\EdkMdb.h" />
-		<ClInclude Include="include\EMSABTAG.H" />
-		<ClInclude Include="include\ExchForm.h" />
-		<ClInclude Include="include\IMessage.h" />
-		<ClInclude Include="include\IMSCapabilities.h" />
-		<ClInclude Include="include\MAPI.h" />
-		<ClInclude Include="include\MAPIAux.h" />
-		<ClInclude Include="include\MAPICode.h" />
-		<ClInclude Include="include\MAPIDbg.h" />
-		<ClInclude Include="include\MAPIDefS.h" />
-		<ClInclude Include="include\MAPIForm.h" />
-		<ClInclude Include="include\MAPIGuid.h" />
-		<ClInclude Include="include\MAPIHook.h" />
-		<ClInclude Include="include\MAPINls.h" />
-		<ClInclude Include="include\MAPIOID.h" />
-		<ClInclude Include="include\MAPISPI.h" />
-		<ClInclude Include="include\MAPITags.h" />
-		<ClInclude Include="include\MAPIUtil.h" />
-		<ClInclude Include="include\MAPIVal.h" />
-		<ClInclude Include="include\MAPIWin.h" />
-		<ClInclude Include="include\MAPIWz.h" />
-		<ClInclude Include="include\MAPIX.h" />
-		<ClInclude Include="include\mimeole.h" />
-		<ClInclude Include="include\MSPST.h" />
 		<ClInclude Include="DeclarationsSpecifications.h" />
 		<ClInclude Include="framework.h" />
 		<ClInclude Include="MapiLibrary.h" />
