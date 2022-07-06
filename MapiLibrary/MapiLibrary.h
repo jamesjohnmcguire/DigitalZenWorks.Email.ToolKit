@@ -3,5 +3,5 @@
 
 namespace MapiLibrary
 {
-	LIB_API(void) MapiTest();
+	extern "C" __declspec(dllimport) void MapiTest();
 }
