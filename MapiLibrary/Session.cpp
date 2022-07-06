@@ -37,8 +37,8 @@ namespace MapiLibrary
 
 	void Session::Close()
 	{
-		int size = stores.size();
-		for (int index = 0; index < size; index++)
+		size_t size = stores.size();
+		for (size_t index = 0; index < size; index++)
 		{
 			Store* store = stores[index];
 			delete store;
