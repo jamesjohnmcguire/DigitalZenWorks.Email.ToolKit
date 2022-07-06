@@ -6,12 +6,6 @@
 
 namespace MapiLibrary
 {
-	MAPIINIT_0 MAPIINIT =
-	{
-		MAPI_INIT_VERSION,
-		MAPI_MULTITHREAD_NOTIFICATIONS
-	};
-
 	class Session
 	{
 		public:
