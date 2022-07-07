@@ -7,7 +7,7 @@
 
 namespace MapiLibrary
 {
-	LIB_API(void) MapiTest()
+	API void MapiTest()
 	{
 		std::cout << "This is a test." << std::endl;
 
