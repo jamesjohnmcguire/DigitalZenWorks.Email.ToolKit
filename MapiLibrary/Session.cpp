@@ -60,7 +60,7 @@ namespace MapiLibrary
 		HRESULT result;
 		LPMAPITABLE tableStores = nullptr;
 
-		result = mapiSession->GetMsgStoresTable(MAPI_UNICODE, &tableStores);
+		result = mapiSession->GetMsgStoresTable(0, &tableStores);
 
 		if (result == S_OK)
 		{
