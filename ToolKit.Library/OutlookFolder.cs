@@ -1435,7 +1435,19 @@ namespace DigitalZenWorks.Email.ToolKit
 					name,
 					destinationName);
 
-				source.MoveTo(destination);
+				try
+				{
+					// In some rare occasions, the folder is actually already
+					// deleted, but isn't acknowledged in time, but by the
+					// time the process gets to here, it seems deleted. Thus,
+					// trying to move the folder is going to cause an
+					// exception.  Just catch it and move on.
+					source.MoveTo(destination);
+				}
+				catch (COMException exception)
+				{
+					Log.Warn(exception.ToString());
+				}
 			}
 			else
 			{
