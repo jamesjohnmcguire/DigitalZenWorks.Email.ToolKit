@@ -13,7 +13,7 @@ namespace MapiLibrary
 
 		Session* session = new Session();
 
-		std::vector<Store*> stores = session->GetStores();
+		std::vector<std::shared_ptr<Store>> stores = session->GetStores();
 
 		session->Close();
 		session = nullptr;
