@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <memory>
 #include <vector>
 
 #include <MAPIUtil.h>
@@ -37,13 +38,6 @@ namespace MapiLibrary
 
 	void Session::Close()
 	{
-		size_t size = stores.size();
-		for (size_t index = 0; index < size; index++)
-		{
-			Store* store = stores[index];
-			delete store;
-		}
-
 		stores.clear();
 
 		if (mapiSession != nullptr)
@@ -55,7 +49,7 @@ namespace MapiLibrary
 		MAPIUninitialize();
 	}
 
-	std::vector<Store*> Session::GetStores()
+	std::vector<std::shared_ptr<Store>> Session::GetStores()
 	{
 		HRESULT result;
 		LPMAPITABLE tableStores = nullptr;
@@ -88,7 +82,9 @@ namespace MapiLibrary
 					entryIdLength = value->Value.bin.cb;
 					entryId = (LPENTRYID)value->Value.bin.lpb;
 
-					Store* store = new Store(entryIdLength, entryId);
+					std::shared_ptr<Store> store =
+						std::make_shared<Store>(entryIdLength, entryId);
+
 					stores.push_back(store);
 				}
 			}
