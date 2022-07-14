@@ -82,8 +82,8 @@ namespace MapiLibrary
 					entryIdLength = value->Value.bin.cb;
 					entryId = (LPENTRYID)value->Value.bin.lpb;
 
-					std::shared_ptr<Store> store =
-						std::make_shared<Store>(entryIdLength, entryId);
+					std::shared_ptr<Store> store = std::make_shared<Store>(
+						mapiSession, entryIdLength, entryId);
 
 					stores.push_back(store);
 				}
