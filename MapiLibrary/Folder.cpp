@@ -13,6 +13,15 @@ namespace MapiLibrary
 	{
 		int duplicatesRemoved = 0;
 
+		duplicatesRemoved += RemoveDuplicatesInThisFolder();
+
+		return duplicatesRemoved;
+	}
+
+	int Folder::RemoveDuplicatesInThisFolder()
+	{
+		int duplicatesRemoved = 0;
+
 		return duplicatesRemoved;
 	}
 }
