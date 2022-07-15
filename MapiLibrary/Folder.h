@@ -9,6 +9,8 @@ namespace MapiLibrary
 			int RemoveDuplicates();
 	
 		private:
+			int RemoveDuplicatesInThisFolder();
+
 			LPMAPIFOLDER mapiFolder;
 	};
 }
