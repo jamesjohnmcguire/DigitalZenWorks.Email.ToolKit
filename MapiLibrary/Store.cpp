@@ -1,8 +1,6 @@
 #include "pch.h"
 #include <memory>
 
-#include <MAPIUtil.h>
-
 #include "Folder.h"
 #include "Store.h"
 
