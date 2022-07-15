@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <memory>
 
 #include "Folder.h"
 #include "Store.h"

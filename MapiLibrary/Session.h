@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 
 #include "DeclarationsSpecifications.h"
 #include "Store.h"
