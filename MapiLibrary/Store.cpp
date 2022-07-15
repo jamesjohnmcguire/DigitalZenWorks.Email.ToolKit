@@ -1,4 +1,9 @@
 #include "pch.h"
+#include <memory>
+
+#include <MAPIUtil.h>
+
+#include "Folder.h"
 #include "Store.h"
 
 namespace MapiLibrary
@@ -30,15 +35,36 @@ namespace MapiLibrary
 
 		if (result == S_OK)
 		{
-			ULONG objectType = 0;
+			SPropValue* ipmEntryId;
+			result = HrGetOneProp(
+				mapiDatabase, PR_IPM_SUBTREE_ENTRYID, &ipmEntryId);
 
-			result = mapiDatabase->OpenEntry(
-				0,
-				nullptr,
-				nullptr,
-				MAPI_MODIFY | MAPI_DEFERRED_ERRORS,
-				&objectType,
-				(LPUNKNOWN*)&rootFolder);
+			if (result == S_OK)
+			{
+				ULONG objectType = 0;
+				ULONG propSize = UlPropSize(ipmEntryId);
+
+				result = mapiDatabase->OpenEntry(
+					propSize,
+					(LPENTRYID)ipmEntryId,
+					nullptr,
+					MAPI_MODIFY,
+					&objectType,
+					(LPUNKNOWN*)&rootFolder);
+
+				//result = mapiDatabase->OpenEntry(
+				//	0,
+				//	nullptr,
+				//	nullptr,
+				//	MAPI_MODIFY | MAPI_DEFERRED_ERRORS,
+				//	&objectType,
+				//	(LPUNKNOWN*)&rootFolder);
+
+				std::unique_ptr<Folder> folder =
+					std::make_unique<Folder>(rootFolder);
+
+				duplicatesRemoved += folder->RemoveDuplicates();
+			}
 		}
 
 		return duplicatesRemoved;
