@@ -5,6 +5,7 @@
 
 #include "framework.h"
 
+#include <MAPIUtil.h>
 #include <MAPIX.h>
 
 #endif //PCH_H

@@ -2,8 +2,6 @@
 #include <memory>
 #include <vector>
 
-#include <MAPIUtil.h>
-
 #include "Session.h"
 #include "Store.h"
 
