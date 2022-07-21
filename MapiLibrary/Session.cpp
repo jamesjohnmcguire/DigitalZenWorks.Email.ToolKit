@@ -38,6 +38,7 @@ namespace MapiLibrary
 
 		if (mapiSession != nullptr)
 		{
+			mapiSession->Logoff(0, 0, 0);
 			mapiSession->Release();
 			mapiSession = nullptr;
 		}
@@ -65,13 +66,13 @@ namespace MapiLibrary
 
 			if (result == S_OK)
 			{
-				ULONG entryIdLength;
+				unsigned long entryIdLength;
 				LPENTRYID entryId;
 				LPSPropValue value;
 
-				ULONG StoresCount = rows->cRows;
+				unsigned long StoresCount = rows->cRows;
 
-				for (ULONG index = 0; index < StoresCount; index++)
+				for (unsigned long index = 0; index < StoresCount; index++)
 				{
 					value = rows->aRow[index].lpProps;
 
