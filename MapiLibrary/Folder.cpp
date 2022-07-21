@@ -60,9 +60,9 @@ namespace MapiLibrary
 					result = childTable->SeekRow(
 						BOOKMARK_BEGINNING,
 						0,
-						&rowsSeeked);
+						nullptr);
 
-					if (result == S_OK && rowsSeeked > 0)
+					if (result == S_OK)
 					{
 						folders = QueryForChildFolders(childTable, rowCount);
 					}
