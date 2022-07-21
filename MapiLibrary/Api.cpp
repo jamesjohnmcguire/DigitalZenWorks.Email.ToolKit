@@ -13,6 +13,15 @@ namespace MapiLibrary
 
 		std::vector<std::shared_ptr<Store>> stores = session->GetStores();
 
+		size_t count = stores.size();
+		for (size_t index = 0; index < count; index++)
+		{
+			std::shared_ptr<Store> storePointer = stores[index];
+			Store* store = storePointer.get();
+
+			store->RemoveDuplicates();
+		}
+
 		session->Close();
 		session = nullptr;
 	}
