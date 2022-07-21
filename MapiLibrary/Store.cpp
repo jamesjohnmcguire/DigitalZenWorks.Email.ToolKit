@@ -32,38 +32,28 @@ namespace MapiLibrary
 
 		if (result == S_OK)
 		{
-			SPropValue* ipmEntryId;
-			result = HrGetOneProp(
-				mapiDatabase, PR_IPM_SUBTREE_ENTRYID, &ipmEntryId);
+			unsigned long objectType = 0;
 
-			if (result == S_OK)
+			result = mapiDatabase->OpenEntry(
+				0,
+				nullptr,
+				nullptr,
+				MAPI_MODIFY | MAPI_DEFERRED_ERRORS,
+				&objectType,
+				(LPUNKNOWN*)&rootFolder);
+
+			if (result == S_OK && rootFolder != nullptr)
 			{
-				unsigned long objectType = 0;
-				unsigned long propSize = UlPropSize(ipmEntryId);
+				std::unique_ptr<Folder> folder =
+					std::make_unique<Folder>(rootFolder);
 
-				result = mapiDatabase->OpenEntry(
-					propSize,
-					(LPENTRYID)ipmEntryId,
-					nullptr,
-					MAPI_MODIFY,
-					&objectType,
-					(LPUNKNOWN*)&rootFolder);
+				duplicatesRemoved += folder->RemoveDuplicates();
+			}
 
-				//result = mapiDatabase->OpenEntry(
-				//	0,
-				//	nullptr,
-				//	nullptr,
-				//	MAPI_MODIFY | MAPI_DEFERRED_ERRORS,
-				//	&objectType,
-				//	(LPUNKNOWN*)&rootFolder);
-
-				if (result == S_OK && rootFolder != nullptr)
-				{
-					std::unique_ptr<Folder> folder =
-						std::make_unique<Folder>(rootFolder);
-
-					duplicatesRemoved += folder->RemoveDuplicates();
-				}
+			if (rootFolder != nullptr)
+			{
+				rootFolder->Release();
+				rootFolder = nullptr;
 			}
 		}
 
