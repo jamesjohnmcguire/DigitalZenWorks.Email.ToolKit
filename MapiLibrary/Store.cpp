@@ -38,8 +38,8 @@ namespace MapiLibrary
 
 			if (result == S_OK)
 			{
-				ULONG objectType = 0;
-				ULONG propSize = UlPropSize(ipmEntryId);
+				unsigned long objectType = 0;
+				unsigned long propSize = UlPropSize(ipmEntryId);
 
 				result = mapiDatabase->OpenEntry(
 					propSize,
@@ -57,10 +57,13 @@ namespace MapiLibrary
 				//	&objectType,
 				//	(LPUNKNOWN*)&rootFolder);
 
-				std::unique_ptr<Folder> folder =
-					std::make_unique<Folder>(rootFolder);
+				if (result == S_OK && rootFolder != nullptr)
+				{
+					std::unique_ptr<Folder> folder =
+						std::make_unique<Folder>(rootFolder);
 
-				duplicatesRemoved += folder->RemoveDuplicates();
+					duplicatesRemoved += folder->RemoveDuplicates();
+				}
 			}
 		}
 
