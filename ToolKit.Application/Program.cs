@@ -66,6 +66,17 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 					Log.Info("Command is: " + command);
 
+					for (int index = 1; index < arguments.Length; index++)
+					{
+						string message = string.Format(
+							CultureInfo.InvariantCulture,
+							"Parameter {0}: {1}",
+							index.ToString(CultureInfo.InvariantCulture),
+							arguments[index]);
+
+						Log.Info(message);
+					}
+
 					switch (command)
 					{
 						case "dbx-to-pst":
