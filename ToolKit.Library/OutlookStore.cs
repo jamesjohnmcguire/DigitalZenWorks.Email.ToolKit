@@ -467,7 +467,18 @@ namespace DigitalZenWorks.Email.ToolKit
 			string destinationFolderPath)
 		{
 			Store source = outlookAccount.GetStore(sourcePstPath);
-			Store destination = outlookAccount.GetStore(destinationPstPath);
+			Store destination;
+
+			if (string.IsNullOrWhiteSpace(destinationPstPath) ||
+				destinationPstPath.Equals(
+					sourcePstPath, StringComparison.OrdinalIgnoreCase))
+			{
+				destination = source;
+			}
+			else
+			{
+				destination = outlookAccount.GetStore(destinationPstPath);
+			}
 
 			MoveFolder(
 				source, sourceFolderPath, destination, destinationFolderPath);
