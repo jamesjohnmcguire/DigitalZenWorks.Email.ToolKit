@@ -13,6 +13,12 @@ namespace MapiLibrary
 	int Folder::RemoveDuplicates()
 	{
 		int duplicatesRemoved = 0;
+
+		LPSPropValue property = nullptr;
+		HRESULT result = HrGetOneProp(mapiFolder, PR_DISPLAY_NAME, &property);
+		LPWSTR name = property->Value.lpszW;
+		std::wcout << "Folder: " << name << std::endl;
+
 		std::vector<std::shared_ptr<Folder>> folders = GetChildFolders();
 
 		size_t size = folders.size();
