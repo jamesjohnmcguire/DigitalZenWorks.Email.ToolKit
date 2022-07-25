@@ -25,7 +25,7 @@ namespace MapiLibrary
 		for (size_t index = 0; index < size; index++)
 		{
 			std::shared_ptr<Folder> folderPointer = folders[index];
-			auto folder = folderPointer.get();
+			Folder* folder = folderPointer.get();
 			duplicatesRemoved += folder->RemoveDuplicates();
 		}
 
@@ -177,6 +177,7 @@ namespace MapiLibrary
 
 				for (unsigned long index = 0; index < count; index++)
 				{
+					SRow row = rows->aRow[index];
 
 				}
 			}
