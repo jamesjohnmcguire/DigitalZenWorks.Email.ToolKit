@@ -34,6 +34,11 @@ namespace MapiLibrary
 		{
 			unsigned long objectType = 0;
 
+			LPSPropValue property = nullptr;
+			result = HrGetOneProp(mapiDatabase, PR_DISPLAY_NAME, &property);
+			LPWSTR name = property->Value.lpszW;
+			std::wcout << "Store: " << name << std::endl;
+
 			result = mapiDatabase->OpenEntry(
 				0,
 				nullptr,
