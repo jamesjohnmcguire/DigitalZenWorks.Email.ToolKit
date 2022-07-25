@@ -108,8 +108,7 @@ namespace MapiLibrary
 
 			if (result == S_OK)
 			{
-				std::shared_ptr<Folder> folder =
-					std::make_shared<Folder>(childFolder);
+				folder = std::make_shared<Folder>(childFolder);
 			}
 		}
 
