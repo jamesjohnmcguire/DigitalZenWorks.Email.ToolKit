@@ -467,7 +467,18 @@ namespace DigitalZenWorks.Email.ToolKit
 			string destinationFolderPath)
 		{
 			Store source = outlookAccount.GetStore(sourcePstPath);
-			Store destination = outlookAccount.GetStore(destinationPstPath);
+			Store destination;
+
+			if (string.IsNullOrWhiteSpace(destinationPstPath) ||
+				destinationPstPath.Equals(
+					sourcePstPath, StringComparison.OrdinalIgnoreCase))
+			{
+				destination = source;
+			}
+			else
+			{
+				destination = outlookAccount.GetStore(destinationPstPath);
+			}
 
 			MoveFolder(
 				source, sourceFolderPath, destination, destinationFolderPath);
@@ -493,6 +504,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					bool folderExists = OutlookFolder.DoesFolderExist(
 						source, sourceFolderPath);
 
+					// If source folder doesn't exist, there is nothing to do.
 					if (folderExists == true)
 					{
 						MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
@@ -504,6 +516,13 @@ namespace DigitalZenWorks.Email.ToolKit
 						folderExists = OutlookFolder.DoesFolderExist(
 							destination, destinationFolderPath);
 
+						string parentPath =
+							OutlookFolder.GetFolderPath(destinationParent);
+						string folderName = sourceFolder.Name;
+						string destinationName =
+							OutlookFolder.GetBaseFolderName(
+								destinationFolderPath);
+
 						if (folderExists == true)
 						{
 							MAPIFolder destinationFolder =
@@ -511,6 +530,12 @@ namespace DigitalZenWorks.Email.ToolKit
 									destination, destinationFolderPath);
 
 							OutlookFolder outlookFolder = new (outlookAccount);
+
+							LogFormatMessage.Info(
+								"at: {0} Moving contents of {1} to {2}",
+								parentPath,
+								folderName,
+								destinationName);
 
 							outlookFolder.MoveFolderContents(
 								destinationFolderPath, sourceFolder, destinationFolder);
@@ -521,13 +546,6 @@ namespace DigitalZenWorks.Email.ToolKit
 						else
 						{
 							// Folder doesn't already exist, so just move it.
-							string parentPath =
-								OutlookFolder.GetFolderPath(destinationParent);
-							string folderName = sourceFolder.Name;
-							string destinationName =
-								OutlookFolder.GetBaseFolderName(
-									destinationFolderPath);
-
 							LogFormatMessage.Info(
 								"at: {0} Moving {1} to {2}",
 								parentPath,
