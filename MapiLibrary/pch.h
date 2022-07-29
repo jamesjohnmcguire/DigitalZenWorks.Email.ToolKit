@@ -9,6 +9,9 @@
 
 #include "framework.h"
 
+#include <MAPIDefS.h>
+#include <EdkMdb.h>
+#include <MAPITags.h>
 #include <MAPIUtil.h>
 #include <MAPIX.h>
 
