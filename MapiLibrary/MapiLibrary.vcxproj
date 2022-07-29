@@ -1,143 +1,123 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-	<ItemGroup Label="ProjectConfigurations">
-		<ProjectConfiguration Include="Debug|Win32">
-			<Configuration>Debug</Configuration>
-			<Platform>Win32</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Debug|x64">
-			<Configuration>Debug</Configuration>
-			<Platform>x64</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Release|Win32">
-			<Configuration>Release</Configuration>
-			<Platform>Win32</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Release|x64">
-			<Configuration>Release</Configuration>
-			<Platform>x64</Platform>
-		</ProjectConfiguration>
-	</ItemGroup>
-
-	<PropertyGroup Label="Globals">
-		<CharacterSet>Unicode</CharacterSet>
-		<ConfigurationType>DynamicLibrary</ConfigurationType>
-		<Keyword>Win32Proj</Keyword>
-		<PlatformToolset>v143</PlatformToolset>
-		<ProjectGuid>{7a846964-8a20-46f3-a714-a5fba41ae093}</ProjectGuid>
-		<RootNamespace>MapiLibrary</RootNamespace>
-		<VCProjectVersion>16.0</VCProjectVersion>
-		<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-	</PropertyGroup>
-
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-
-	<PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
-		<LinkIncremental>true</LinkIncremental>
-		<UseDebugLibraries>true</UseDebugLibraries>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
-		<UseDebugLibraries>false</UseDebugLibraries>
-		<WholeProgramOptimization>true</WholeProgramOptimization>
-	</PropertyGroup>
-
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-
-	<ImportGroup Label="ExtensionSettings">
-	</ImportGroup>
-
-	<ImportGroup Label="Shared">
-	</ImportGroup>
-
-	<ImportGroup Label="PropertySheets">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-
-	<ItemDefinitionGroup>
-		<ClCompile>
-			<AdditionalIncludeDirectories>$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<ConformanceMode>true</ConformanceMode>
-			<LanguageStandard_C>stdc11</LanguageStandard_C>
-			<PrecompiledHeader>Use</PrecompiledHeader>
-			<PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-			<SDLCheck>true</SDLCheck>
-			<WarningLevel>Level3</WarningLevel>
-		</ClCompile>
-		<Link>
-			<EnableUAC>false</EnableUAC>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<IgnoreSpecificDefaultLibraries>libcmt.lib; libcmtd.lib</IgnoreSpecificDefaultLibraries>
-			<SubSystem>Windows</SubSystem>
-		</Link>
-	</ItemDefinitionGroup>
-
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-		<ClCompile>
-			<PreprocessorDefinitions>WIN32;_DEBUG;MAPILIBRARY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ClCompile>
-	</ItemDefinitionGroup>
-
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<ClCompile>
-			<PreprocessorDefinitions>_DEBUG;MAPILIBRARY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ClCompile>
-	</ItemDefinitionGroup>
-
-	<ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
-		<ClCompile>
-			<FunctionLevelLinking>true</FunctionLevelLinking>
-			<IntrinsicFunctions>true</IntrinsicFunctions>
-		</ClCompile>
-		<Link>
-			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<OptimizeReferences>true</OptimizeReferences>
-		</Link>
-	</ItemDefinitionGroup>
-
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-		<ClCompile>
-			<PreprocessorDefinitions>WIN32;NDEBUG;MAPILIBRARY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ClCompile>
-	</ItemDefinitionGroup>
-
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<ClCompile>
-			<PreprocessorDefinitions>NDEBUG;MAPILIBRARY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ClCompile>
-	</ItemDefinitionGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="MAPIStubLibrary\mapistub.vcxproj">
-			<Project>{ACD4DD9F-0FB8-42C8-BC1C-25A5A29CB40C}</Project>
-		</ProjectReference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<ClInclude Include="DeclarationsSpecifications.h" />
-		<ClInclude Include="Folder.h" />
-		<ClInclude Include="framework.h" />
-		<ClInclude Include="MapiLibrary.h" />
-		<ClInclude Include="pch.h" />
-		<ClInclude Include="Session.h" />
-		<ClInclude Include="Store.h" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ClCompile Include="Api.cpp" />
-		<ClCompile Include="dllmain.cpp" />
-		<ClCompile Include="Folder.cpp" />
-		<ClCompile Include="pch.cpp">
-			<PrecompiledHeader>Create</PrecompiledHeader>
-		</ClCompile>
-		<ClCompile Include="Session.cpp" />
-		<ClCompile Include="Store.cpp" />
-	</ItemGroup>
-
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-
-	<ImportGroup Label="ExtensionTargets">
-	</ImportGroup>
-
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <CharacterSet>Unicode</CharacterSet>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <Keyword>Win32Proj</Keyword>
+    <PlatformToolset>v143</PlatformToolset>
+    <ProjectGuid>{7a846964-8a20-46f3-a714-a5fba41ae093}</ProjectGuid>
+    <RootNamespace>MapiLibrary</RootNamespace>
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <LinkIncremental>true</LinkIncremental>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <SDLCheck>true</SDLCheck>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <EnableUAC>false</EnableUAC>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib; libcmtd.lib</IgnoreSpecificDefaultLibraries>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;MAPILIBRARY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_DEBUG;MAPILIBRARY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;MAPILIBRARY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>NDEBUG;MAPILIBRARY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="MAPIStubLibrary\mapistub.vcxproj">
+      <Project>{ACD4DD9F-0FB8-42C8-BC1C-25A5A29CB40C}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DeclarationsSpecifications.h" />
+    <ClInclude Include="Folder.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="MapiLibrary.h" />
+    <ClInclude Include="MapiProperties.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Session.h" />
+    <ClInclude Include="Store.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Api.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Folder.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Session.cpp" />
+    <ClCompile Include="Store.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
 </Project>
