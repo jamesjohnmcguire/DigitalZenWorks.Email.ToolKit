@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "Folder.h"
+#include "Message.h"
 
 namespace MapiLibrary
 {
@@ -156,15 +157,13 @@ namespace MapiLibrary
 
 		if (result == S_OK)
 		{
-			SizedSPropTagArray(5, itemTags) =
+			SizedSPropTagArray(4, itemTags) =
 			{
-				5,
+				3,
 				{
 					PR_ENTRYID,
-					PR_DISPLAY_NAME,
-					PR_SUBJECT,
-					PR_SENT_REPRESENTING_NAME,
-					PR_MESSAGE_DELIVERY_TIME
+					PR_MESSAGE_CLASS,
+					PR_SUBJECT
 				}
 			};
 
@@ -178,7 +177,39 @@ namespace MapiLibrary
 				for (unsigned long index = 0; index < count; index++)
 				{
 					SRow row = rows->aRow[index];
+					LPSPropValue properties = row.lpProps;
+					SPropValue property = properties[0];
 
+					unsigned long tag = property.ulPropTag;
+
+					if (tag == PR_ENTRYID)
+					{
+						LPMAPIFOLDER childFolder = nullptr;
+						unsigned long objectType = 0;
+
+						unsigned long entryIdSize = property.Value.bin.cb;
+						LPENTRYID entryId = (LPENTRYID)property.Value.bin.lpb;
+
+						LPMESSAGE mapiMessage = nullptr;
+						ULONG messageType;
+						result = mapiFolder->OpenEntry(
+							entryIdSize,
+							entryId,
+							nullptr,
+							0,
+							&messageType,
+							(IUnknown**)&mapiMessage);
+						if (result == S_OK)
+						{
+							std::unique_ptr<Message> message =
+								std::make_unique<Message>(mapiMessage);
+
+							Message* rawMessage = message.get();
+
+							std::vector<byte> hash =
+								rawMessage->GetMessageHash();
+						}
+					}
 				}
 			}
 		}
