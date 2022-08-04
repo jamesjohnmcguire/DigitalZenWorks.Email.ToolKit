@@ -119,6 +119,8 @@
 		<ClInclude Include="Folder.h" />
 		<ClInclude Include="framework.h" />
 		<ClInclude Include="MapiLibrary.h" />
+		<ClInclude Include="MapiProperties.h" />
+		<ClInclude Include="MapiLibrary.h" />
 		<ClInclude Include="pch.h" />
 		<ClInclude Include="Session.h" />
 		<ClInclude Include="Store.h" />
