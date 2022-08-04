@@ -120,7 +120,7 @@
 		<ClInclude Include="framework.h" />
 		<ClInclude Include="MapiLibrary.h" />
 		<ClInclude Include="MapiProperties.h" />
-		<ClInclude Include="MapiLibrary.h" />
+		<ClInclude Include="Message.h" />
 		<ClInclude Include="pch.h" />
 		<ClInclude Include="Session.h" />
 		<ClInclude Include="Store.h" />
@@ -130,6 +130,7 @@
 		<ClCompile Include="Api.cpp" />
 		<ClCompile Include="dllmain.cpp" />
 		<ClCompile Include="Folder.cpp" />
+		<ClCompile Include="Message.cpp" />
 		<ClCompile Include="pch.cpp">
 			<PrecompiledHeader>Create</PrecompiledHeader>
 		</ClCompile>
