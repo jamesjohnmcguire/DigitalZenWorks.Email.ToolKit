@@ -37,7 +37,7 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 | ---------------------- | --------------------------------------- | -------------- |
 | dbx-to-pst             | Migrate dbx files to pst file           | -e, --encoding |
 | eml-to-pst             | Migrate eml files to pst file           | -a, --adjust   |
-| list-folders           | List all sub folders of a given folder  |                |
+| list-folders           | List all sub folders of a given folder  | -r, --recurse  |
 | list-top-senders       | List the top senders of a given store   |                |
 | list-total-duplicates  | List all duplicates in a given store    |                |
 | merge-folders          | Merge duplicate Outlook folders         | -n, --dryrun   |
@@ -58,7 +58,7 @@ Det.exe dbx-to-pst --encoding shift_jis \path\to\some-dbx-files
 Det.exe dbx-to-pst \path\to\some-dbx-files \path\to\some.pst  
 Det.exe eml-to-pst --adjust "%USERPROFILE%\AppData\Local\Microsoft\Windows Live Mail\Storage Folders" %USERPROFILE%\Import.pst  
 Det.exe move-folder \path\to\some.pst source\folder\path  \path\to\some.pst destination\folder\path
-Det.exe list-folders \path\to\some.pst
+Det.exe list-folders \path\to\some.pst some\folder\path
 Det.exe list-top-senders \path\to\some.pst
 Det.exe list-total-duplicates \path\to\some.pst
 
@@ -92,19 +92,21 @@ Except for command line argument processing, all of the functionality is located
 
 The main classes are MapiItem, Migrate, OutlookOutlook, OutlookFolder and OutlookStore.  
 Migrate is for migrating messages in other formats into Outlook.  Some examples:  
+```c#
 Migrate.DbxToPst(dbxPath, pstPath);  
 Migrate.EmlToPst(dbxPath, pstPath);  
-
+```
 OutlookAccount acts on the entire default or current Outlook account.  OutlookStore acts on a specific store (PST file).  OutlookFolder acts on a specific folder. 
 For cleaning up Outlook, you could use the following:  
+```c#
 OutlookAccount outlookAccont = new ();  
 outlookAccont.MergeFolders();  
 outlookAccont.RemoveDuplicates();  
-
+```
 
 ## Contributing
 
-Any contributions you make are **greatly appreciated**.  If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
 
 ### Process:
 
