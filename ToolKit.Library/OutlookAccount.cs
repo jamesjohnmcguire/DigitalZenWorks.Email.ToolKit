@@ -111,7 +111,16 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			for (int index = 1; index <= total; index++)
 			{
-				Store store = session.Stores[index];
+				Store store = null;
+
+				try
+				{
+					store = session.Stores[index];
+				}
+				catch (UnauthorizedAccessException exception)
+				{
+					Log.Error(exception.ToString());
+				}
 
 				if (store == null)
 				{
