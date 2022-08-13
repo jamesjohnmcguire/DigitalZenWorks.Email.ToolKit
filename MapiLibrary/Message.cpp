@@ -50,6 +50,22 @@ namespace MapiLibrary
 
 		if (result == S_OK)
 		{
+			SPropValue property = messageProperties[2];
+			LPWSTR test = property.Value.lpszW;
+
+			const std::wstring ws = test;
+			const std::string s(ws.begin(), ws.end());
+
+			std::cout << "body: " << s << std::endl;
+
+			unsigned long size = property.Value.bin.cb;
+			byte* bytes = property.Value.bin.lpb;
+			hash.resize(size);
+
+			byte* end = bytes + size;
+
+//			copy(bytes, end, back_inserter(hash));
+			hash.insert(hash.end(), bytes, end);
 		}
 
 		return hash;
