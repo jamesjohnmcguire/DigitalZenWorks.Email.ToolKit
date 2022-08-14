@@ -271,13 +271,19 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			MAPIFolder folder = OutlookFolder.CreateFolderPath(
-				store, folderPath);
+			if (store != null)
+			{
+				MAPIFolder folder = OutlookFolder.CreateFolderPath(
+					store, folderPath);
 
-			folderNames = OutlookFolder.ListFolders(
-				folderNames, folderPath, folder, recurse);
+				if (folder != null)
+				{
+					folderNames = OutlookFolder.ListFolders(
+						folderNames, folderPath, folder, recurse);
 
-			Marshal.ReleaseComObject(folder);
+					Marshal.ReleaseComObject(folder);
+				}
+			}
 
 			return folderNames;
 		}
