@@ -8,7 +8,7 @@ namespace MapiLibrary
 	{
 		public:
 			Message(LPMESSAGE messageIn);
-			std::vector<byte> GetMessageHash();
+			std::string GetMessageHash();
 
 		private:
 			LPMESSAGE message;
