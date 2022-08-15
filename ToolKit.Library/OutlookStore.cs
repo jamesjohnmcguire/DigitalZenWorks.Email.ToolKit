@@ -271,13 +271,19 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			Store store = outlookAccount.GetStore(pstFilePath);
 
-			MAPIFolder folder = OutlookFolder.CreateFolderPath(
-				store, folderPath);
+			if (store != null)
+			{
+				MAPIFolder folder = OutlookFolder.CreateFolderPath(
+					store, folderPath);
 
-			folderNames = OutlookFolder.ListFolders(
-				folderNames, folderPath, folder, recurse);
+				if (folder != null)
+				{
+					folderNames = OutlookFolder.ListFolders(
+						folderNames, folderPath, folder, recurse);
 
-			Marshal.ReleaseComObject(folder);
+					Marshal.ReleaseComObject(folder);
+				}
+			}
 
 			return folderNames;
 		}
@@ -552,19 +558,30 @@ namespace DigitalZenWorks.Email.ToolKit
 								folderName,
 								destinationName);
 
-							MAPIFolder sourceParent = sourceFolder.Parent;
-							string sourceParentId = sourceParent.EntryID;
-							string destinationParentId = destinationParent.EntryID;
+							bool isRootFolder =
+								OutlookFolder.IsRootFolder(sourceFolder);
 
-							if (sourceParentId.Equals(
-								destinationParentId,
-								StringComparison.OrdinalIgnoreCase))
+							if (isRootFolder == true)
 							{
-								sourceFolder.Name = destinationName;
+								sourceFolder.MoveTo(destinationParent);
 							}
 							else
 							{
-								sourceFolder.MoveTo(destinationParent);
+								MAPIFolder sourceParent = sourceFolder.Parent;
+								string sourceParentId = sourceParent.EntryID;
+								string destinationParentId =
+									destinationParent.EntryID;
+
+								if (sourceParentId.Equals(
+									destinationParentId,
+									StringComparison.OrdinalIgnoreCase))
+								{
+									sourceFolder.Name = destinationName;
+								}
+								else
+								{
+									sourceFolder.MoveTo(destinationParent);
+								}
 							}
 						}
 					}
