@@ -36,8 +36,9 @@ namespace MapiLibrary
 
 	}
 
-	std::vector<byte> Message::GetMessageHash()
+	std::string Message::GetMessageHash()
 	{
+		std::string base64Hash = "This is a test";
 		std::vector<byte> hash;
 
 		unsigned long values;
@@ -68,6 +69,6 @@ namespace MapiLibrary
 			hash.insert(hash.end(), bytes, end);
 		}
 
-		return hash;
+		return base64Hash;
 	}
 }

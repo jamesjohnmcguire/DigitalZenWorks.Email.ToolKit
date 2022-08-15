@@ -1,5 +1,8 @@
 #include "pch.h"
 
+#include <unordered_map>
+#include <string>
+
 #include "Folder.h"
 #include "Message.h"
 
@@ -172,6 +175,9 @@ namespace MapiLibrary
 				mapiTable, (SPropTagArray*)&itemTags, NULL, NULL, 0, &rows);
 			if (result == S_OK)
 			{
+				std::unordered_map<
+					std::string,
+					std::vector<std::shared_ptr<LPENTRYID>>> hashMap;
 				unsigned long count = rows->cRows;
 
 				for (unsigned long index = 0; index < count; index++)
@@ -206,8 +212,29 @@ namespace MapiLibrary
 
 							Message* rawMessage = message.get();
 
-							std::vector<byte> hash =
+							std::string hash =
 								rawMessage->GetMessageHash();
+
+							bool exists = hashMap.contains(hash);
+
+							if (exists == true)
+							{
+								std::vector<std::shared_ptr<LPENTRYID>>
+									entryIds = hashMap.at(hash);
+								std::shared_ptr<LPENTRYID> pointer =
+									std::make_shared<LPENTRYID>(entryId);
+								entryIds.push_back(pointer);
+								hashMap[hash] = entryIds;
+							}
+							else
+							{
+								std::vector<std::shared_ptr<LPENTRYID>>
+									entryIds;
+								std::shared_ptr<LPENTRYID> pointer =
+									std::make_shared<LPENTRYID>(entryId);
+								entryIds.push_back(pointer);
+								hashMap[hash] = entryIds;
+							}
 						}
 					}
 				}
