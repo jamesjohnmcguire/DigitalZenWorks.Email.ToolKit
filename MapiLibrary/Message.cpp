@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 
 #include "Message.h"
 
@@ -49,13 +49,13 @@ namespace MapiLibrary
 			&values,
 			&messageProperties);
 
-		if (result == S_OK)
+		if (result == S_OK || result == MAPI_W_ERRORS_RETURNED)
 		{
 			SPropValue property = messageProperties[2];
 			LPWSTR test = property.Value.lpszW;
 
-			const std::wstring ws = test;
-			const std::string s(ws.begin(), ws.end());
+			const std::wstring ws(L"ブランド株式会社");
+			const std::string s("ブランド株式会社");
 
 			std::cout << "body: " << s << std::endl;
 
