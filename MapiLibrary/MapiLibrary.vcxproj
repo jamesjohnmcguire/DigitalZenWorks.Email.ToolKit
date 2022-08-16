@@ -124,6 +124,7 @@
 		<ClInclude Include="Message.h" />
 		<ClInclude Include="pch.h" />
 		<ClInclude Include="Session.h" />
+		<ClInclude Include="sha256.h" />
 		<ClInclude Include="Store.h" />
 	</ItemGroup>
 
@@ -136,6 +137,7 @@
 			<PrecompiledHeader>Create</PrecompiledHeader>
 		</ClCompile>
 		<ClCompile Include="Session.cpp" />
+		<ClCompile Include="sha256.cpp" />
 		<ClCompile Include="Store.cpp" />
 	</ItemGroup>
 
