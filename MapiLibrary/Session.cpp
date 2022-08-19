@@ -13,7 +13,7 @@ namespace MapiLibrary
 
 	Session::Session()
 	{
-		logger = spdlog::stdout_logger_st("wchar_logger");
+		logger = spdlog::stdout_color_mt("console");
 		logger->set_pattern("%+");
 		logger->set_level(spdlog::level::trace);
 
