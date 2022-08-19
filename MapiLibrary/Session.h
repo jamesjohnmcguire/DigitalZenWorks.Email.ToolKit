@@ -5,6 +5,8 @@
 
 namespace MapiLibrary
 {
+	namespace spd = spdlog;
+
 	class Session
 	{
 		public:
@@ -18,6 +20,8 @@ namespace MapiLibrary
 			ULONG logonFlags = MAPI_ALLOW_OTHERS | MAPI_EXTENDED |
 				MAPI_NO_MAIL | MAPI_USE_DEFAULT | MAPI_UNICODE;
 			LPMAPISESSION mapiSession{};
+
+			std::shared_ptr<spdlog::logger> logger = nullptr;
 			std::vector<std::shared_ptr<Store>> stores;
 	};
 }
