@@ -13,6 +13,11 @@ namespace MapiLibrary
 
 	Session::Session()
 	{
+		logger = spdlog::stdout_logger_st("wchar_logger");
+		logger->set_pattern("%+");
+		logger->set_level(spdlog::level::trace);
+
+		logger->info("Starting Session");
 		HRESULT result = MAPIInitialize(&MAPIINIT);
 
 		if (result == S_OK)
