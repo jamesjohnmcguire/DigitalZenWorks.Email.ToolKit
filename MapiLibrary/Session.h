@@ -5,8 +5,6 @@
 
 namespace MapiLibrary
 {
-	namespace spd = spdlog;
-
 	class Session
 	{
 		public:
