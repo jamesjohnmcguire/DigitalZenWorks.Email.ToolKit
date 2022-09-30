@@ -581,6 +581,13 @@ namespace DigitalZenWorks.Email.ToolKit
 								else
 								{
 									sourceFolder.MoveTo(destinationParent);
+
+									if (!sourceFolder.Name.Equals(
+										destinationName,
+										StringComparison.OrdinalIgnoreCase))
+									{
+										sourceFolder.Name = destinationName;
+									}
 								}
 							}
 						}
