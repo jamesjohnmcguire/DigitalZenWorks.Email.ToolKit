@@ -11,7 +11,7 @@ If you are just interested in using the program, you can download the latest rel
 
 1 Go to the releases tab !["GitHub Release Tab"](GitHub1.png "GitHub Release Tab")  
 2 Then choose the DigitalZenWorks.Email.ToolKit.zip package !["Packages"](GitHub2.png "Packages")  
-3 Unzip the files somewhere accessable on your PATH  
+3 Unzip the files somewhere accessible on your PATH  
 
 Refer to 'Usage' section below.  
 
