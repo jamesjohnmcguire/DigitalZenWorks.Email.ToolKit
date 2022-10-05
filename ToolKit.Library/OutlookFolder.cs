@@ -1117,37 +1117,41 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			MAPIFolder currentFolder = null;
 
-			if (store != null && !string.IsNullOrWhiteSpace(path))
+			if (store != null)
 			{
 				currentFolder = store.GetRootFolder();
 
-				string[] parts = GetPathParts(path);
-
-				int maxParts = parts.Length;
-
-				if (justParent == true)
+				// If no folder path given, start with the root folder.
+				if (!string.IsNullOrWhiteSpace(path))
 				{
-					maxParts = parts.Length - 1;
-				}
+					string[] parts = GetPathParts(path);
 
-				for (int index = 0; index < maxParts; index++)
-				{
-					string part = parts[index];
+					int maxParts = parts.Length;
 
-					if (index == 0)
+					if (justParent == true)
 					{
-						string rootFolderName = currentFolder.Name;
-
-						if (part.Equals(
-							rootFolderName,
-							StringComparison.OrdinalIgnoreCase))
-						{
-							// root, so skip over
-							continue;
-						}
+						maxParts = parts.Length - 1;
 					}
 
-					currentFolder = AddFolder(currentFolder, part);
+					for (int index = 0; index < maxParts; index++)
+					{
+						string part = parts[index];
+
+						if (index == 0)
+						{
+							string rootFolderName = currentFolder.Name;
+
+							if (part.Equals(
+								rootFolderName,
+								StringComparison.OrdinalIgnoreCase))
+							{
+								// root, so skip over
+								continue;
+							}
+						}
+
+						currentFolder = AddFolder(currentFolder, part);
+					}
 				}
 			}
 
