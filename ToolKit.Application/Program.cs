@@ -402,7 +402,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				IList<string> folderNames =
 					outlookStore.ListFolders(pstFile, folderPath, recurse);
 
-				foreach (string folderName in folderNames)
+				IOrderedEnumerable<string> sortedFolderName =
+					folderNames.OrderBy(x => x);
+
+				foreach (string folderName in sortedFolderName)
 				{
 					Console.WriteLine(folderName);
 				}
