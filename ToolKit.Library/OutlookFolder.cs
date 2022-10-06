@@ -1337,6 +1337,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					try
 					{
+						Log.Info("Moving " + source + " to " + newFolderName);
 						folder.Name = newFolderName;
 					}
 					catch (COMException)
