@@ -930,8 +930,14 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
 				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
-				@"(?<=[a-zA-Z0-9&])\s+[0-9a-fA-F]{3}$", @"\s*-\s*Copy$",
-				@"^[A-F]{1}_"
+				@"(?<=[a-zA-Z0-9&,])\s{2,3}[0-9a-fA-F]{2,3}$",
+
+				// Matches Something@ 896
+				@"(?<=[a-zA-Z0-9&,])@\s+[0-9a-fA-F]{2,3}$",
+
+				// Matches Something - 77f
+				@"(?<=[a-zA-Z0-9&,])\s{1}-\s{1}[0-9a-fA-F]{2,3}$",
+				@"\s*-\s*Copy$", @"^[A-F]{1}_"
 			};
 
 			foreach (string pattern in duplicatePatterns)
@@ -1117,37 +1123,41 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			MAPIFolder currentFolder = null;
 
-			if (store != null && !string.IsNullOrWhiteSpace(path))
+			if (store != null)
 			{
 				currentFolder = store.GetRootFolder();
 
-				string[] parts = GetPathParts(path);
-
-				int maxParts = parts.Length;
-
-				if (justParent == true)
+				// If no folder path given, start with the root folder.
+				if (!string.IsNullOrWhiteSpace(path))
 				{
-					maxParts = parts.Length - 1;
-				}
+					string[] parts = GetPathParts(path);
 
-				for (int index = 0; index < maxParts; index++)
-				{
-					string part = parts[index];
+					int maxParts = parts.Length;
 
-					if (index == 0)
+					if (justParent == true)
 					{
-						string rootFolderName = currentFolder.Name;
-
-						if (part.Equals(
-							rootFolderName,
-							StringComparison.OrdinalIgnoreCase))
-						{
-							// root, so skip over
-							continue;
-						}
+						maxParts = parts.Length - 1;
 					}
 
-					currentFolder = AddFolder(currentFolder, part);
+					for (int index = 0; index < maxParts; index++)
+					{
+						string part = parts[index];
+
+						if (index == 0)
+						{
+							string rootFolderName = currentFolder.Name;
+
+							if (part.Equals(
+								rootFolderName,
+								StringComparison.OrdinalIgnoreCase))
+							{
+								// root, so skip over
+								continue;
+							}
+						}
+
+						currentFolder = AddFolder(currentFolder, part);
+					}
 				}
 			}
 
@@ -1333,6 +1343,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					try
 					{
+						Log.Info("Moving " + source + " to " + newFolderName);
 						folder.Name = newFolderName;
 					}
 					catch (COMException)
