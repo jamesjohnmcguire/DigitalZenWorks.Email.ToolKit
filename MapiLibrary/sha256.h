@@ -2,7 +2,7 @@
 #define SHA256_H
 #include <string>
 
-namespace ChainBlocker
+namespace MapiLibrary
 {
 	class SHA256
 	{
