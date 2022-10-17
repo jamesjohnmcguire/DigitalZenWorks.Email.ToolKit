@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 
 #include <unordered_map>
 #include <string>
@@ -20,8 +20,15 @@ namespace MapiLibrary
 
 		LPSPropValue property = nullptr;
 		HRESULT result = HrGetOneProp(mapiFolder, PR_DISPLAY_NAME, &property);
-		LPWSTR name = property->Value.lpszW;
-		std::wcout << "Folder: " << name << std::endl;
+
+		const std::wstring folderName(property->Value.lpszW);
+
+		int size_needed = WideCharToMultiByte(CP_UTF8, 0, &folderName[0],
+			(int)folderName.size(), NULL, 0, NULL, NULL);
+		std::string name(size_needed, 0);
+		WideCharToMultiByte(CP_UTF8, 0, &folderName[0], (int)folderName.size(),
+			&name[0], size_needed, NULL, NULL);
+		std::cout << "Folder: " << name << std::endl;
 
 		std::vector<std::shared_ptr<Folder>> folders = GetChildFolders();
 
