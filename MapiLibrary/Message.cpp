@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "Message.h"
+#include "sha256.h"
 
 namespace MapiLibrary
 {
@@ -38,8 +39,7 @@ namespace MapiLibrary
 
 	std::string Message::GetMessageHash()
 	{
-		std::string base64Hash = "This is a test";
-		std::vector<byte> hash;
+		std::string base64Hash;
 
 		unsigned long values;
 		LPSPropValue messageProperties;
@@ -51,22 +51,31 @@ namespace MapiLibrary
 
 		if (result == S_OK || result == MAPI_W_ERRORS_RETURNED)
 		{
-			SPropValue property = messageProperties[2];
-			LPWSTR test = property.Value.lpszW;
+			SPropValue property = messageProperties[8];
+			const std::wstring subjectWide(property.Value.lpszW);
 
-			const std::wstring ws(L"ブランド株式会社");
-			const std::string s("ブランド株式会社");
+			size_t size = subjectWide.size();
 
-			std::cout << "body: " << s << std::endl;
+			int size_needed = WideCharToMultiByte(CP_UTF8, 0, &subjectWide[0],
+				(int)size, NULL, 0, NULL, NULL);
+			std::string subject(size_needed, 0);
+			WideCharToMultiByte(CP_UTF8, 0, &subjectWide[0],
+				(int)size, &subject[0], size_needed, NULL, NULL);
 
-			unsigned long size = property.Value.bin.cb;
-			byte* bytes = property.Value.bin.lpb;
-			hash.resize(size);
+			std::cout << "subject: " << subject << std::endl;
 
-			byte* end = bytes + size;
+			//std::vector<byte> hash;
+			//size = wcsnlen(property.Value.lpszW, 256) * 2;
 
-//			copy(bytes, end, back_inserter(hash));
-			hash.insert(hash.end(), bytes, end);
+			//byte* bytes = (byte*)property.Value.lpszW;
+			//hash.resize(size);
+
+			//byte* end = bytes + size;
+
+			////copy(bytes, end, back_inserter(hash));
+			//hash.insert(hash.begin(), bytes, end);
+
+			base64Hash = sha256(subject);
 		}
 
 		return base64Hash;
