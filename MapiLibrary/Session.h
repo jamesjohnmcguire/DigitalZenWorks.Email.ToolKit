@@ -9,7 +9,7 @@ namespace MapiLibrary
 	{
 		public:
 			DllExport Session();
-			DllExport Session(std::shared_ptr<spdlog::logger> logger);
+			DllExport Session(std::shared_ptr<Log> logger);
 			DllExport ~Session();
 
 			DllExport void Close();
@@ -20,7 +20,7 @@ namespace MapiLibrary
 				MAPI_NO_MAIL | MAPI_USE_DEFAULT | MAPI_UNICODE;
 			LPMAPISESSION mapiSession{};
 
-			std::shared_ptr<spdlog::logger> logger = nullptr;
+			std::shared_ptr<Log> logger = nullptr;
 			std::vector<std::shared_ptr<Store>> stores;
 	};
 }

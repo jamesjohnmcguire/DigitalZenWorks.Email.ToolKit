@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "Log.h"
 #include "Session.h"
 #include "Store.h"
 
@@ -15,9 +16,8 @@ namespace MapiLibrary
 	{
 		if (logger == nullptr)
 		{
-			logger = spdlog::stdout_color_mt("console");
-			logger->set_pattern("%+");
-			logger->set_level(spdlog::level::trace);
+			Log log = Log();
+			logger = std::make_shared<Log>(log);
 		}
 
 		logger->info("Starting Session");
@@ -35,7 +35,7 @@ namespace MapiLibrary
 		}
 	}
 
-	Session::Session(std::shared_ptr<spdlog::logger> logger) : Session()
+	Session::Session(std::shared_ptr<Log> logger) : Session()
 	{
 		this->logger = logger;
 	}
