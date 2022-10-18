@@ -13,9 +13,12 @@ namespace MapiLibrary
 
 	Session::Session()
 	{
-		logger = spdlog::stdout_color_mt("console");
-		logger->set_pattern("%+");
-		logger->set_level(spdlog::level::trace);
+		if (logger == nullptr)
+		{
+			logger = spdlog::stdout_color_mt("console");
+			logger->set_pattern("%+");
+			logger->set_level(spdlog::level::trace);
+		}
 
 		logger->info("Starting Session");
 		HRESULT result = MAPIInitialize(&MAPIINIT);
@@ -30,6 +33,11 @@ namespace MapiLibrary
 				&mapiSession
 			);
 		}
+	}
+
+	Session::Session(std::shared_ptr<spdlog::logger> logger) : Session()
+	{
+		this->logger = logger;
 	}
 
 	Session::~Session()
