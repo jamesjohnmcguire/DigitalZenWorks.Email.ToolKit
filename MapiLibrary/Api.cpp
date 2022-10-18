@@ -8,11 +8,12 @@ namespace MapiLibrary
 {
 	API void MapiTest()
 	{
-		Log* log = new Log();
+		Log log = Log();
+		std::shared_ptr<Log> logPointer = std::make_shared<Log>(log);
 
-		log->info("MapiTest Starting ");
+		log.info("MapiTest Starting ");
 
-		Session* session = new Session();
+		Session* session = new Session(logPointer);
 
 		std::vector<std::shared_ptr<Store>> stores = session->GetStores();
 
