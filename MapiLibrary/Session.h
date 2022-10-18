@@ -9,6 +9,7 @@ namespace MapiLibrary
 	{
 		public:
 			DllExport Session();
+			DllExport Session(std::shared_ptr<spdlog::logger> logger);
 			DllExport ~Session();
 
 			DllExport void Close();
