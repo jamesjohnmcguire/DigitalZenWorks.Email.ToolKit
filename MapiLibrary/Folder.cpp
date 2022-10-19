@@ -5,13 +5,24 @@
 
 #include "Folder.h"
 #include "Message.h"
+#include "UnicodeText.h"
 
 namespace MapiLibrary
 {
 	Folder::Folder(LPMAPIFOLDER mapiFolderIn)
 		: mapiFolder(mapiFolderIn)
 	{
+		if (logger == nullptr)
+		{
+			Log log = Log();
+			logger = std::make_shared<Log>(log);
+		}
+	}
 
+	Folder::Folder(LPMAPIFOLDER mapiFolderIn, std::shared_ptr<Log> logger)
+		: Folder(mapiFolderIn)
+	{
+		this->logger = logger;
 	}
 
 	int Folder::RemoveDuplicates()
@@ -23,12 +34,8 @@ namespace MapiLibrary
 
 		const std::wstring folderName(property->Value.lpszW);
 
-		int size_needed = WideCharToMultiByte(CP_UTF8, 0, &folderName[0],
-			(int)folderName.size(), NULL, 0, NULL, NULL);
-		std::string name(size_needed, 0);
-		WideCharToMultiByte(CP_UTF8, 0, &folderName[0], (int)folderName.size(),
-			&name[0], size_needed, NULL, NULL);
-		std::cout << "Folder: " << name << std::endl;
+		std::string message = "Folder: " + UnicodeText::GetUtf8Text(folderName);
+		logger->info(message);
 
 		std::vector<std::shared_ptr<Folder>> folders = GetChildFolders();
 
@@ -212,6 +219,7 @@ namespace MapiLibrary
 							0,
 							&messageType,
 							(IUnknown**)&mapiMessage);
+
 						if (result == S_OK)
 						{
 							std::unique_ptr<Message> message =
