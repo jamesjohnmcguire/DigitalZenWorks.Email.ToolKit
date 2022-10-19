@@ -142,7 +142,7 @@
 		<ClCompile Include="Session.cpp" />
 		<ClCompile Include="sha256.cpp" />
 		<ClCompile Include="Store.cpp" />
-		<ClInclude Include="UnicodeText.cpp" />
+		<ClCompile Include="UnicodeText.cpp" />
 	</ItemGroup>
 
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
