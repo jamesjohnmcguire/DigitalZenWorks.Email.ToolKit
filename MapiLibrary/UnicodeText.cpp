@@ -1,62 +1,65 @@
 #include "pch.h"
 #include "UnicodeText.h"
 
-std::string UnicodeText::GetUtf8Text(const std::wstring& wideString)
+namespace MapiLibrary
 {
-	std::string utf8Text;
-
-	if (!wideString.empty())
+	std::string UnicodeText::GetUtf8Text(const std::wstring& wideString)
 	{
-		int sizeNeeded = WideCharToMultiByte(
-			CP_UTF8,
-			WC_ERR_INVALID_CHARS,
-			&wideString[0],
-			(int)wideString.size(),
-			nullptr,
-			0,
-			nullptr,
-			nullptr);
+		std::string utf8Text;
 
-		utf8Text = std::string(sizeNeeded, 0);
+		if (!wideString.empty())
+		{
+			int sizeNeeded = WideCharToMultiByte(
+				CP_UTF8,
+				WC_ERR_INVALID_CHARS,
+				&wideString[0],
+				(int)wideString.size(),
+				nullptr,
+				0,
+				nullptr,
+				nullptr);
 
-		int result = WideCharToMultiByte(
-			CP_UTF8,
-			WC_ERR_INVALID_CHARS,
-			&wideString[0],
-			(int)wideString.size(),
-			&utf8Text[0],
-			sizeNeeded,
-			nullptr,
-			nullptr);
+			utf8Text = std::string(sizeNeeded, 0);
+
+			int result = WideCharToMultiByte(
+				CP_UTF8,
+				WC_ERR_INVALID_CHARS,
+				&wideString[0],
+				(int)wideString.size(),
+				&utf8Text[0],
+				sizeNeeded,
+				nullptr,
+				nullptr);
+		}
+
+		return utf8Text;
 	}
 
-	return utf8Text;
-}
-
-std::wstring UnicodeText::GetWideText(const std::string& utf8Text)
-{
-	std::wstring wideText;
-
-	if (!utf8Text.empty())
+	std::wstring UnicodeText::GetWideText(const std::string& utf8Text)
 	{
-		int sizeNeeded = MultiByteToWideChar(
-			CP_UTF8,
-			MB_ERR_INVALID_CHARS,
-			&utf8Text[0],
-			(int)utf8Text.size(),
-			nullptr,
-			0);
+		std::wstring wideText;
 
-		wideText = std::wstring(sizeNeeded, 0);
+		if (!utf8Text.empty())
+		{
+			int sizeNeeded = MultiByteToWideChar(
+				CP_UTF8,
+				MB_ERR_INVALID_CHARS,
+				&utf8Text[0],
+				(int)utf8Text.size(),
+				nullptr,
+				0);
 
-		int result = MultiByteToWideChar(
-			CP_UTF8,
-			MB_ERR_INVALID_CHARS,
-			&utf8Text[0],
-			(int)utf8Text.size(),
-			&wideText[0],
-			sizeNeeded);
+			wideText = std::wstring(sizeNeeded, 0);
+
+			int result = MultiByteToWideChar(
+				CP_UTF8,
+				MB_ERR_INVALID_CHARS,
+				&utf8Text[0],
+				(int)utf8Text.size(),
+				&wideText[0],
+				sizeNeeded);
+		}
+
+		return wideText;
 	}
-
-	return wideText;
 }

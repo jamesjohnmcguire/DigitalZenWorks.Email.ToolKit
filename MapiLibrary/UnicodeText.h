@@ -1,7 +1,11 @@
 #pragma once
-class UnicodeText
+
+namespace MapiLibrary
 {
-	public:
-		static std::string GetUtf8Text(const std::wstring& wideString);
-		static std::wstring GetWideText(const std::string& utf8Text);
-};
+	class UnicodeText
+	{
+		public:
+			static std::string GetUtf8Text(const std::wstring& wideString);
+			static std::wstring GetWideText(const std::string& utf8Text);
+	};
+}
