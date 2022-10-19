@@ -2,6 +2,7 @@
 
 #include "Message.h"
 #include "sha256.h"
+#include "UnicodeText.h"
 
 namespace MapiLibrary
 {
@@ -34,7 +35,17 @@ namespace MapiLibrary
 	Message::Message(LPMESSAGE messageIn)
 		: message(messageIn)
 	{
+		if (logger == nullptr)
+		{
+			Log log = Log();
+			logger = std::make_shared<Log>(log);
+		}
+	}
 
+	Message::Message(LPMESSAGE messageIn, std::shared_ptr<Log> logger)
+		: Message(messageIn)
+	{
+		this->logger = logger;
 	}
 
 	std::string Message::GetMessageHash()
@@ -54,15 +65,9 @@ namespace MapiLibrary
 			SPropValue property = messageProperties[8];
 			const std::wstring subjectWide(property.Value.lpszW);
 
-			size_t size = subjectWide.size();
-
-			int size_needed = WideCharToMultiByte(CP_UTF8, 0, &subjectWide[0],
-				(int)size, NULL, 0, NULL, NULL);
-			std::string subject(size_needed, 0);
-			WideCharToMultiByte(CP_UTF8, 0, &subjectWide[0],
-				(int)size, &subject[0], size_needed, NULL, NULL);
-
-			std::cout << "subject: " << subject << std::endl;
+			std::string subject = UnicodeText::GetUtf8Text(subjectWide);
+			std::string message = "Subject: " + subject;
+			logger->info(message);
 
 			//std::vector<byte> hash;
 			//size = wcsnlen(property.Value.lpszW, 256) * 2;

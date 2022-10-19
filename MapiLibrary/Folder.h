@@ -1,11 +1,14 @@
 #pragma once
 
+#include "Log.h"
+
 namespace MapiLibrary
 {
 	class Folder
 	{
 		public:
 			Folder(LPMAPIFOLDER folder);
+			Folder(LPMAPIFOLDER folder, std::shared_ptr<Log> logger);
 			int RemoveDuplicates();
 	
 		private:
@@ -15,6 +18,7 @@ namespace MapiLibrary
 				LPMAPITABLE childTable, unsigned long rowCount);
 			int RemoveDuplicatesInThisFolder();
 
+			std::shared_ptr<Log> logger = nullptr;
 			LPMAPIFOLDER mapiFolder;
 	};
 }

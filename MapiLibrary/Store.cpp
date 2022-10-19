@@ -2,16 +2,34 @@
 
 #include "Folder.h"
 #include "Store.h"
+#include "UnicodeText.h"
 
 namespace MapiLibrary
 {
 	Store::Store(
-		LPMAPISESSION mapiSessionIn, ULONG entryIdLengthIn, LPENTRYID entryIdIn)
+		LPMAPISESSION mapiSessionIn,
+		ULONG entryIdLengthIn,
+		LPENTRYID entryIdIn)
 		:
 			mapiSession(mapiSessionIn),
 			entryIdLength(entryIdLengthIn),
 			entryId(entryIdIn)
 	{
+		if (logger == nullptr)
+		{
+			Log log = Log();
+			logger = std::make_shared<Log>(log);
+		}
+	}
+
+	Store::Store(
+		LPMAPISESSION mapiSessionIn,
+		ULONG entryIdLengthIn,
+		LPENTRYID entryIdIn,
+		std::shared_ptr<Log> logger)
+		: Store(mapiSessionIn, entryIdLengthIn, entryIdIn)
+	{
+		this->logger = logger;
 	}
 
 	Store::~Store()
@@ -36,8 +54,11 @@ namespace MapiLibrary
 
 			LPSPropValue property = nullptr;
 			result = HrGetOneProp(mapiDatabase, PR_DISPLAY_NAME, &property);
-			LPWSTR name = property->Value.lpszW;
-			std::wcout << "Store: " << name << std::endl;
+			const std::wstring storeName(property->Value.lpszW);
+
+			std::string message =
+				"Store: " + UnicodeText::GetUtf8Text(storeName);
+			logger->info(message);
 
 			result = mapiDatabase->OpenEntry(
 				0,
