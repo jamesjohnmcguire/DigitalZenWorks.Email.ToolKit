@@ -930,7 +930,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
 				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
-				@"(?<=[a-zA-Z0-9&,])\s{2}[0-9a-fA-F]{2,3}$",
+				@"(?<=[a-zA-Z0-9&,])\s{2,3}[0-9a-fA-F]{2,3}$",
 
 				// Matches Something@ 896
 				@"(?<=[a-zA-Z0-9&,])@\s+[0-9a-fA-F]{2,3}$",
