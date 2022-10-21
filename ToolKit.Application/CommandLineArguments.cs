@@ -25,7 +25,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private readonly IList<Command> commands;
 		private readonly bool validArguments;
 
-		private string command;
+		private Command command;
+		private string commandName;
 		private string errorMessage;
 		private string invalidOption;
 
@@ -224,11 +225,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			bool isValidCommand = false;
 			Command validatedCommand = null;
 
-			command = arguments[0];
+			commandName = arguments[0];
 
 			foreach (Command validCommand in commands)
 			{
-				if (command.Equals(
+				if (commandName.Equals(
 					validCommand.Name, StringComparison.Ordinal))
 				{
 					validatedCommand = validCommand;
