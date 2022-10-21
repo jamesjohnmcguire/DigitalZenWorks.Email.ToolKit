@@ -143,8 +143,24 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					option.ShortName.Equals(
 					validOption.ShortName, StringComparison.Ordinal))
 				{
-					isValid = true;
-					break;
+					if (validOption.RequiresParameter == true)
+					{
+						// Subtract 2, one for 0 based indexes, one for the
+						// needed parameter afterwards.
+						if (option.ArgumentIndex < arguments.Length - 2)
+						{
+							option.Parameter =
+								arguments[option.ArgumentIndex + 1];
+
+							isValid = true;
+							break;
+						}
+					}
+					else
+					{
+						isValid = true;
+						break;
+					}
 				}
 			}
 
@@ -167,8 +183,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		{
 			IList<CommandOption> options = new List<CommandOption>();
 
-			foreach (string argument in arguments)
+			for (int index = 0; index < arguments.Length; index++)
 			{
+				string argument = arguments[index];
+
 				if (argument.StartsWith('-'))
 				{
 					string optionName = argument.TrimStart('-');
@@ -182,6 +200,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					{
 						option.ShortName = optionName;
 					}
+
+					option.ArgumentIndex = index;
 
 					options.Add(option);
 				}

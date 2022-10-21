@@ -63,7 +63,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				help.Description = "Show this information";
 				commands.Add(help);
 
-				CommandOption encoding = new ("e", "encoding");
+				CommandOption encoding = new ("e", "encoding", true);
 				IList<CommandOption> options = new List<CommandOption>();
 				options.Add(encoding);
 
