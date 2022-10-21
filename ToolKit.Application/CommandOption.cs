@@ -5,18 +5,26 @@
 /////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ToolKit.Application
+namespace DigitalZenWorks.Email.ToolKit.Application
 {
 	/// <summary>
 	/// Represents a command line command option.
 	/// </summary>
 	public class CommandOption
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CommandOption"/>
+		/// class.
+		/// </summary>
+		/// <param name="shortName">The command short name.</param>
+		/// <param name="longName">The command long name.</param>
+		public CommandOption(string shortName, string longName)
+		{
+			ShortName = shortName;
+			LongName = longName;
+		}
+
 		/// <summary>
 		/// Gets or sets the long name.
 		/// </summary>
