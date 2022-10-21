@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace ToolKit.Application
+namespace DigitalZenWorks.Email.ToolKit.Application
 {
 	/// <summary>
 	/// Represents a set of command line arguments.
@@ -95,7 +95,7 @@ namespace ToolKit.Application
 				{
 					string optionName = argument.TrimStart('-');
 
-					CommandOption option = new CommandOption();
+					CommandOption option = new ();
 					if (argument.StartsWith("--", StringComparison.Ordinal))
 					{
 						option.LongName = optionName;
@@ -108,6 +108,7 @@ namespace ToolKit.Application
 					options.Add(option);
 				}
 			}
+
 			return options;
 		}
 
