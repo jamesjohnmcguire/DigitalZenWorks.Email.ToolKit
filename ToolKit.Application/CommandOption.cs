@@ -17,6 +17,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		/// Initializes a new instance of the <see cref="CommandOption"/>
 		/// class.
 		/// </summary>
+		public CommandOption()
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CommandOption"/>
+		/// class.
+		/// </summary>
 		/// <param name="shortName">The command short name.</param>
 		/// <param name="longName">The command long name.</param>
 		public CommandOption(string shortName, string longName)
