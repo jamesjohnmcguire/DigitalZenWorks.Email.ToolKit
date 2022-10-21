@@ -57,6 +57,99 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				Log.Info("Starting DigitalZenWorks.Email.ToolKit Version: " +
 					version);
 
+				IList<Command> commands = new List<Command>();
+
+				Command help = new Command("help");
+				help.Description = "Show this information";
+				commands.Add(help);
+
+				CommandOption encoding = new ("e", "encoding");
+				IList<CommandOption> options = new List<CommandOption>();
+				options.Add(encoding);
+
+				Command dbxToPst = new (
+					"dbx-to-pst", options, 1, "Migrate dbx files to pst file");
+				commands.Add(dbxToPst);
+
+				CommandOption adjust = new ("a", "adjust");
+				options = new List<CommandOption>();
+				options.Add(adjust);
+
+				Command emlToPst = new (
+					"eml-to-pst", options, 1, "Migrate eml files to pst file");
+				commands.Add(dbxToPst);
+
+				CommandOption recurse = new ("r", "recurse");
+				options = new List<CommandOption>();
+				options.Add(recurse);
+
+				Command listFolders = new (
+					"list-folders",
+					options,
+					1,
+					"List all sub folders of a given store or folder");
+				commands.Add(listFolders);
+
+				Command listTopSenders = new (
+					"list-top-senders",
+					null,
+					1,
+					"List the top senders of a given store");
+				commands.Add(listTopSenders);
+
+				Command listTotalDuplicates = new (
+					"list-total-duplicates",
+					null,
+					1,
+					"List all duplicates in a given store");
+				commands.Add(listTotalDuplicates);
+
+				CommandOption dryRun = new ("n", "dryrun");
+				options = new List<CommandOption>();
+				options.Add(dryRun);
+
+				Command mergeFolders = new (
+					"merge-folders",
+					options,
+					1,
+					"Merge duplicate Outlook folders");
+				commands.Add(mergeFolders);
+
+				Command mergeStores = new (
+					"merge-stores", null, 2, "Merge one store into another");
+				commands.Add(mergeStores);
+
+				Command moveFolders = new (
+					"move-folders", null, 4, "Move one folder to another");
+				commands.Add(moveFolders);
+
+				CommandOption flush = new ("s", "flush");
+				options = new List<CommandOption>();
+				options.Add(dryRun);
+				options.Add(flush);
+
+				Command removeDuplicates = new (
+					"merge-folders",
+					options,
+					1,
+					"Merge duplicate Outlook folders");
+				commands.Add(removeDuplicates);
+
+				Command removeEmptyFolders = new (
+					"remove-empty-folders", null, 1, "Prune empty folders");
+				commands.Add(removeEmptyFolders);
+
+				CommandLineArguments commandLine = new (commands, arguments);
+
+				if (commandLine.ValidArguments == false)
+				{
+
+				}
+				else
+				{
+
+				}
+
 				bool valid = ValidateArguments(arguments);
 
 				if (arguments != null && valid == true)
