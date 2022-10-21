@@ -4,10 +4,12 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+using Common.Logging;
+using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
+using System.Linq;
 
 namespace DigitalZenWorks.Email.ToolKit.Application
 {
@@ -16,13 +18,16 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 	/// </summary>
 	public class CommandLineArguments
 	{
+		private static readonly ILog Log = LogManager.GetLogger(
+			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		private readonly string[] arguments;
 		private readonly IList<Command> commands;
+		private readonly bool validArguments;
 
 		private string command;
 		private string errorMessage;
 		private string invalidOption;
-		private bool validArguments;
 
 		/// <summary>
 		/// Initializes a new instance of the
@@ -53,12 +58,77 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		public string UsageStatement { get; set; }
 
 		/// <summary>
+		/// Gets or sets a value indicating whether indicates whether to use
+		/// logging functionality.
+		/// </summary>
+		/// <value>A value indicatint whether to use logging functionality.
+		/// </value>
+		public bool UseLog { get; set; }
+
+		/// <summary>
 		/// Gets a value indicating whether a value indicating whether the
 		/// arguments are valid or not.
 		/// </summary>
 		/// <value>A value indicating whether the arguments are valid
 		/// or not.</value>
 		public bool ValidArguments { get { return validArguments; } }
+
+		/// <summary>
+		/// Show help message.
+		/// </summary>
+		public void ShowHelp()
+		{
+			Output("Usage:");
+			Output(UsageStatement);
+			Output(string.Empty);
+
+			Command help = commands.SingleOrDefault(x => x.Name == "help");
+
+			commands.Remove(help);
+
+			IOrderedEnumerable<Command> sortedCommands =
+				commands.OrderBy(x => x.Name);
+
+			foreach (Command command in sortedCommands)
+			{
+				string options = string.Empty;
+				bool first = true;
+
+				foreach (CommandOption option in command.Options)
+				{
+					string optionMessage = string.Format(
+						CultureInfo.InvariantCulture,
+						"-{0}, --{1}",
+						option.ShortName,
+						option.LongName);
+					options += optionMessage;
+
+					if (first == true)
+					{
+						options += Environment.NewLine;
+						first = false;
+					}
+				}
+
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0} {1} {2}",
+					command.Name,
+					command.Description,
+					options);
+				Output(message);
+			}
+
+			if (help != null)
+			{
+				string helpMessage = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0} {1}",
+					help.Name,
+					help.Description);
+				Output(helpMessage);
+			}
+		}
 
 		private bool IsValidOption(
 			Command command, CommandOption option)
@@ -134,6 +204,18 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return parameters;
+		}
+
+		private void Output(string message)
+		{
+			if (UseLog == true)
+			{
+				Log.Info(message);
+			}
+			else
+			{
+				Console.WriteLine(message);
+			}
 		}
 
 		private bool ValidateArguments()

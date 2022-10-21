@@ -59,7 +59,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				IList<Command> commands = new List<Command>();
 
-				Command help = new Command("help");
+				Command help = new ("help");
 				help.Description = "Show this information";
 				commands.Add(help);
 
@@ -147,6 +147,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 					commandLine.UsageStatement =
 						"Det command <options> <path.to.source> <path.to.pst>";
+					commandLine.ShowHelp();
 				}
 				else
 				{
