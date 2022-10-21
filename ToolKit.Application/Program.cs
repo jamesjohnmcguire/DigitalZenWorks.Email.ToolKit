@@ -143,7 +143,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				if (commandLine.ValidArguments == false)
 				{
+					Log.Error(commandLine.ErrorMessage);
 
+					commandLine.UsageStatement =
+						"Det command <options> <path.to.source> <path.to.pst>";
 				}
 				else
 				{

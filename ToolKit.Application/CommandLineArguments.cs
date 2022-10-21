@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security.Cryptography.X509Certificates;
 
 namespace DigitalZenWorks.Email.ToolKit.Application
 {
@@ -44,6 +45,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		/// </summary>
 		/// <value>The error message, if any.</value>
 		public string ErrorMessage { get { return errorMessage; } }
+
+		/// <summary>
+		/// Gets or sets the usage statement.
+		/// </summary>
+		/// <value>The usage statement.</value>
+		public string UsageStatement { get; set; }
 
 		/// <summary>
 		/// Gets a value indicating whether a value indicating whether the
