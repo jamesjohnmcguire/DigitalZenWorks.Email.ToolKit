@@ -47,6 +47,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		}
 
 		/// <summary>
+		/// Gets the active command.
+		/// </summary>
+		/// <value>The active command.</value>
+		public Command Command { get { return command; } }
+
+		/// <summary>
 		/// Gets the error message, if any.
 		/// </summary>
 		/// <value>The error message, if any.</value>
@@ -244,6 +250,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			bool areValid = false;
 			bool isValidCommand = false;
 			Command validatedCommand = null;
+			IList<CommandOption> commandOptions = null;;
+			IList<string> parameters = null;
 
 			commandName = arguments[0];
 
@@ -266,8 +274,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				bool areOptionsValid = true;
 
-				IList<CommandOption> commandOptions =
-					GetOptions(validatedCommand);
+				commandOptions = GetOptions(validatedCommand);
 
 				foreach (CommandOption option in commandOptions)
 				{
@@ -289,7 +296,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				}
 				else
 				{
-					IList<string> parameters = GetParameters(validatedCommand);
+					parameters = GetParameters(validatedCommand);
 
 					if (parameters.Count == validatedCommand.ParameterCount)
 					{
@@ -300,6 +307,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						errorMessage = "Incorrect amount of parameters.";
 					}
 				}
+			}
+
+			if (areValid == true)
+			{
+				command = new (commandName, commandOptions, parameters);
 			}
 
 			return areValid;

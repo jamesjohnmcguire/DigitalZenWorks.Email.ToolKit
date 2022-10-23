@@ -151,7 +151,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				}
 				else
 				{
-
+					Command command = commandLine.Command;
 				}
 
 				bool valid = ValidateArguments(arguments);
