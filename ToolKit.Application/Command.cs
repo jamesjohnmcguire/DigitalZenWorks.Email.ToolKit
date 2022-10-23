@@ -40,6 +40,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		/// </summary>
 		/// <param name="name">The command name.</param>
 		/// <param name="options">The command options.</param>
+		/// <param name="parameters">The command parameters.</param>
+		public Command(
+			string name,
+			IList<CommandOption> options,
+			IList<string> parameters)
+			: this(name)
+		{
+			this.options = options;
+			this.parameters = parameters;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Command"/> class.
+		/// </summary>
+		/// <param name="name">The command name.</param>
+		/// <param name="options">The command options.</param>
 		/// <param name="parameterCount">The command parameter count.</param>
 		/// <param name="description">The command description.</param>
 		public Command(
