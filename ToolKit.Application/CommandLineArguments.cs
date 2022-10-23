@@ -197,7 +197,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				{
 					string optionName = argument.TrimStart('-');
 
-					CommandOption option = new ();
+					CommandOption option = new();
 					if (argument.StartsWith("--", StringComparison.Ordinal))
 					{
 						option.LongName = optionName;
@@ -245,6 +245,27 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 		}
 
+		private bool AreOptionsValid(
+			Command validatedCommand, out IList<CommandOption> commandOptions)
+		{
+			bool areOptionsValid = true;
+
+			commandOptions = GetOptions(validatedCommand);
+
+			foreach (CommandOption option in commandOptions)
+			{
+				bool isValid = IsValidOption(validatedCommand, option);
+
+				if (isValid == false)
+				{
+					areOptionsValid = false;
+					break;
+				}
+			}
+
+			return areOptionsValid;
+		}
+
 		private bool ValidateArguments()
 		{
 			bool areValid = false;
@@ -279,20 +300,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				}
 				else
 				{
-					bool areOptionsValid = true;
-
-					commandOptions = GetOptions(validatedCommand);
-
-					foreach (CommandOption option in commandOptions)
-					{
-						bool isValid = IsValidOption(validatedCommand, option);
-
-						if (isValid == false)
-						{
-							areOptionsValid = false;
-							break;
-						}
-					}
+					bool areOptionsValid = 
+						AreOptionsValid(validatedCommand, out commandOptions);
 
 					if (areOptionsValid == false)
 					{
@@ -305,7 +314,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					{
 						parameters = GetParameters(validatedCommand);
 
-						if (parameters.Count == validatedCommand.ParameterCount)
+						if (parameters.Count ==
+							validatedCommand.ParameterCount)
 						{
 							areValid = true;
 						}
@@ -318,7 +328,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				if (areValid == true)
 				{
-					command = new(commandName, commandOptions, parameters);
+					command = new (commandName, commandOptions, parameters);
 				}
 			}
 
