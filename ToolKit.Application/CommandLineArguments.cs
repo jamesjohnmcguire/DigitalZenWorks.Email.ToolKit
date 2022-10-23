@@ -253,65 +253,73 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			IList<CommandOption> commandOptions = null;;
 			IList<string> parameters = null;
 
-			commandName = arguments[0];
-
-			foreach (Command validCommand in commands)
+			if (arguments == null || arguments.Length < 1)
 			{
-				if (commandName.Equals(
-					validCommand.Name, StringComparison.Ordinal))
-				{
-					validatedCommand = validCommand;
-					isValidCommand = true;
-					break;
-				}
-			}
+				errorMessage = "There are no aguments given.";
 
-			if (isValidCommand == false)
-			{
-				errorMessage = "Uknown command.";
 			}
 			else
 			{
-				bool areOptionsValid = true;
+				commandName = arguments[0];
 
-				commandOptions = GetOptions(validatedCommand);
-
-				foreach (CommandOption option in commandOptions)
+				foreach (Command validCommand in commands)
 				{
-					bool isValid = IsValidOption(validatedCommand, option);
-
-					if (isValid == false)
+					if (commandName.Equals(
+						validCommand.Name, StringComparison.Ordinal))
 					{
-						areOptionsValid = false;
+						validatedCommand = validCommand;
+						isValidCommand = true;
 						break;
 					}
 				}
 
-				if (areOptionsValid == false)
+				if (isValidCommand == false)
 				{
-					errorMessage = string.Format(
-						CultureInfo.InvariantCulture,
-						"Uknown option:{0}.",
-						invalidOption);
+					errorMessage = "Uknown command.";
 				}
 				else
 				{
-					parameters = GetParameters(validatedCommand);
+					bool areOptionsValid = true;
 
-					if (parameters.Count == validatedCommand.ParameterCount)
+					commandOptions = GetOptions(validatedCommand);
+
+					foreach (CommandOption option in commandOptions)
 					{
-						areValid = true;
+						bool isValid = IsValidOption(validatedCommand, option);
+
+						if (isValid == false)
+						{
+							areOptionsValid = false;
+							break;
+						}
+					}
+
+					if (areOptionsValid == false)
+					{
+						errorMessage = string.Format(
+							CultureInfo.InvariantCulture,
+							"Uknown option:{0}.",
+							invalidOption);
 					}
 					else
 					{
-						errorMessage = "Incorrect amount of parameters.";
+						parameters = GetParameters(validatedCommand);
+
+						if (parameters.Count == validatedCommand.ParameterCount)
+						{
+							areValid = true;
+						}
+						else
+						{
+							errorMessage = "Incorrect amount of parameters.";
+						}
 					}
 				}
-			}
 
-			if (areValid == true)
-			{
-				command = new (commandName, commandOptions, parameters);
+				if (areValid == true)
+				{
+					command = new(commandName, commandOptions, parameters);
+				}
 			}
 
 			return areValid;
