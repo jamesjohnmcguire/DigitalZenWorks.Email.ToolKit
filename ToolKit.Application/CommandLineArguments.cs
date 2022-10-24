@@ -144,10 +144,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			foreach (CommandOption validOption in command.Options)
 			{
-				if (option.LongName.Equals(
-					validOption.LongName, StringComparison.Ordinal) ||
-					option.ShortName.Equals(
-					validOption.ShortName, StringComparison.Ordinal))
+				if ((option.LongName != null && option.LongName.Equals(
+						validOption.LongName, StringComparison.Ordinal)) ||
+					(option.ShortName != null && option.ShortName.Equals(
+						validOption.ShortName, StringComparison.Ordinal)))
 				{
 					if (validOption.RequiresParameter == true)
 					{
@@ -195,9 +195,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				if (argument.StartsWith('-'))
 				{
+					CommandOption option = new ();
+
 					string optionName = argument.TrimStart('-');
 
-					CommandOption option = new();
 					if (argument.StartsWith("--", StringComparison.Ordinal))
 					{
 						option.LongName = optionName;
@@ -271,7 +272,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			bool areValid = false;
 			bool isValidCommand = false;
 			Command validatedCommand = null;
-			IList<CommandOption> commandOptions = null;;
+			IList<CommandOption> commandOptions = null;
 			IList<string> parameters = null;
 
 			if (arguments == null || arguments.Length < 1)
@@ -314,7 +315,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					{
 						parameters = GetParameters(validatedCommand);
 
-						if (parameters.Count ==
+						if (parameters.Count >=
 							validatedCommand.ParameterCount)
 						{
 							areValid = true;
