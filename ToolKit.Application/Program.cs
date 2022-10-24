@@ -111,7 +111,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				Command mergeFolders = new (
 					"merge-folders",
 					options,
-					1,
+					0,
 					"Merge duplicate Outlook folders");
 				commands.Add(mergeFolders);
 
@@ -129,9 +129,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				options.Add(flush);
 
 				Command removeDuplicates = new (
-					"merge-folders",
+					"remove-duplicates",
 					options,
-					1,
+					0,
 					"Merge duplicate Outlook folders");
 				commands.Add(removeDuplicates);
 
