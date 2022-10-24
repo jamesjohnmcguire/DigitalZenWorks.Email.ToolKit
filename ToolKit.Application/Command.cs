@@ -97,5 +97,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		/// </summary>
 		/// <value>The command parameter count.</value>
 		public int ParameterCount { get { return parameterCount; } }
+
+		/// <summary>
+		/// Gets the command parameters.
+		/// </summary>
+		/// <value>The command parameters.</value>
+		public IList<string> Parameters { get { return parameters; } }
 	}
 }
