@@ -56,7 +56,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		/// </summary>
 		/// <param name="name">The command name.</param>
 		/// <param name="options">The command options.</param>
-		/// <param name="parameterCount">The command parameter count.</param>
+		/// <param name="parameterCount">The command required parameter
+		/// count.</param>
 		/// <param name="description">The command description.</param>
 		public Command(
 			string name,
