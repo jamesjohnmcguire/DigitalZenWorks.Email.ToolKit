@@ -152,13 +152,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				else
 				{
 					Command command = commandLine.Command;
-				}
 
-				bool valid = ValidateArguments(arguments);
-
-				if (arguments != null && valid == true)
-				{
-					string command = arguments[0];
 					string pstLocation;
 
 					Log.Info("Command is: " + command);
@@ -174,7 +168,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						Log.Info(message);
 					}
 
-					switch (command)
+					switch (command.Name)
 					{
 						case "dbx-to-pst":
 							string dbxLocation = GetDbxLocation(arguments);
@@ -207,7 +201,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = ListTotalDuplicates(arguments);
 							break;
 						case "merge-folders":
-							result = MergeFolders(arguments);
+							result = MergeFolders(command, arguments);
 							break;
 						case "merge-stores":
 							result = MergeStores(arguments);
@@ -225,12 +219,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = ProcessDirect(arguments);
 							break;
 					}
-				}
-				else
-				{
-					Log.Error("Invalid arguments");
-
-					ShowHelp();
 				}
 			}
 			catch (System.Exception exception)
@@ -660,12 +648,17 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				new CommonLogging.Serilog.SerilogFactoryAdapter();
 		}
 
-		private static int MergeFolders(string[] arguments)
+		private static int MergeFolders(Command command, string[] arguments)
 		{
 			bool dryRun = false;
 
-			if (arguments.Contains("-n") ||
-				arguments.Contains("--dryrun"))
+			List<CommandOption> optionsList = command.Options.ToList();
+
+			CommandOption optionFound = optionsList.Find(x =>
+				x.ShortName.Equals("n", StringComparison.Ordinal) ||
+				x.LongName.Equals("dryrun", StringComparison.Ordinal));
+
+			if (optionFound != null)
 			{
 				dryRun = true;
 			}
@@ -673,11 +666,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
 
-			int pstFileIndex = ArgumentsContainPstFile(arguments);
-
-			if (pstFileIndex > 0)
+			if (command.Parameters.Count > 0)
 			{
-				string pstFile = arguments[pstFileIndex];
+				string pstFile = command.Parameters[0];
 
 				outlookStore.MergeFolders(pstFile, dryRun);
 			}
