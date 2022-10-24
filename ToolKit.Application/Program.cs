@@ -654,9 +654,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			List<CommandOption> optionsList = command.Options.ToList();
 
-			CommandOption optionFound = optionsList.Find(x =>
-				x.ShortName.Equals("n", StringComparison.Ordinal) ||
-				x.LongName.Equals("dryrun", StringComparison.Ordinal));
+			CommandOption optionFound = optionsList.Find(option =>
+				(option.ShortName != null &&
+				option.ShortName.Equals("n", StringComparison.Ordinal)) ||
+				(option.LongName != null &&
+				option.LongName.Equals("dryrun", StringComparison.Ordinal)));
 
 			if (optionFound != null)
 			{
