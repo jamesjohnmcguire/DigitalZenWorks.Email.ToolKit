@@ -258,7 +258,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			Command emlToPst = new (
 				"eml-to-pst", options, 1, "Migrate eml files to pst file");
-			commands.Add(dbxToPst);
+			commands.Add(emlToPst);
 
 			CommandOption recurse = new ("r", "recurse");
 			options = new List<CommandOption>();
