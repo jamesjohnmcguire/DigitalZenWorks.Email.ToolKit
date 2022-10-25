@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<AnalysisMode>All</AnalysisMode>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AssemblyName>DigitalZenWorks.CommandLine.Commands</AssemblyName>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<Authors>James John McGuire</Authors>
+		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+		<Company>Digital Zen Works</Company>
+		<Copyright>Copyright © 2022</Copyright>
+		<Description>
+			This client library provides light weight functionality to help process command line options.
+		</Description>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<FileVersion>0.1.1.0</FileVersion>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<LangVersion>Latest</LangVersion>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<NoWarn>NU1701</NoWarn>
+		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
+		<PackageId>DigitalZenWorks.Email.ToolKit</PackageId>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>Digital Zen Works;Command Line;Commands;Options</PackageTags>
+		<Version>0.1.1</Version>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<TargetFramework>net6.0</TargetFramework>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<TargetFrameworks>net461;net5.0;net6.0</TargetFrameworks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Common.Logging" Version="3.4.1" />
+		<PackageReference Include="Common.Logging.Core" Version="3.4.1" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="../stylecop.json" />
+		<CodeAnalysisDictionary Include="../CodeAnalysis.ruleset" />
+		<None Include="../.editorconfig" Link="../.editorconfig" />
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>

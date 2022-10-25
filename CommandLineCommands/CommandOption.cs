@@ -6,7 +6,7 @@
 
 using System;
 
-namespace DigitalZenWorks.Email.ToolKit.Application
+namespace DigitalZenWorks.CommandLine.Commands
 {
 	/// <summary>
 	/// Represents a command line command option.

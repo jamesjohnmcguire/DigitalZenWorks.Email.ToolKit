@@ -7,7 +7,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DigitalZenWorks.Email.ToolKit.Application
+namespace DigitalZenWorks.CommandLine.Commands
 {
 	/// <summary>
 	/// Represents a command line command.

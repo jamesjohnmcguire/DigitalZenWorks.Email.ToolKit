@@ -5,13 +5,14 @@
 /////////////////////////////////////////////////////////////////////////////
 
 using Common.Logging;
-using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace DigitalZenWorks.Email.ToolKit.Application
+[assembly: CLSCompliant(true)]
+
+namespace DigitalZenWorks.CommandLine.Commands
 {
 	/// <summary>
 	/// Represents a set of command line arguments.
@@ -278,7 +279,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (arguments == null || arguments.Length < 1)
 			{
 				errorMessage = "There are no aguments given.";
-
 			}
 			else
 			{
@@ -301,7 +301,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				}
 				else
 				{
-					bool areOptionsValid = 
+					bool areOptionsValid =
 						AreOptionsValid(validatedCommand, out commandOptions);
 
 					if (areOptionsValid == false)

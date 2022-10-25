@@ -46,6 +46,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\CommandLineCommands\CommandLineCommands.csproj" />
 		<ProjectReference Include="..\ToolKit.Library\ToolKit.Library.csproj" />
 	</ItemGroup>
 

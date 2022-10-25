@@ -5,6 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 using Common.Logging;
+using DigitalZenWorks.CommandLine.Commands;
 using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using Serilog;
