@@ -154,7 +154,7 @@ namespace DigitalZenWorks.CommandLine.Commands
 					{
 						// Subtract 2, one for 0 based indexes, one for the
 						// needed parameter afterwards.
-						if (option.ArgumentIndex < arguments.Length - 2)
+						if (option.ArgumentIndex < arguments.Length - 1)
 						{
 							option.Parameter =
 								arguments[option.ArgumentIndex + 1];

@@ -165,6 +165,50 @@ namespace CommandLineCommands.Tests
 		}
 
 		/// <summary>
+		/// Option simple no parameter test.
+		/// </summary>
+		[Test]
+		public void OptionSimpleNoParameterTest()
+		{
+			string[] arguments = { "command-three" };
+
+			CommandLineArguments commandLine = new (commands, arguments);
+
+			Assert.True(commandLine.ValidArguments);
+
+			Command command = commandLine.Command;
+			Assert.NotNull(command);
+
+			Assert.AreEqual("command-three", command.Name);
+
+			IList<CommandOption> options = command.Options;
+
+			Assert.AreEqual(options.Count, 0);
+		}
+
+		/// <summary>
+		/// Option simple no parameter with option test.
+		/// </summary>
+		[Test]
+		public void OptionSimpleNoParameterWithOptionTest()
+		{
+			string[] arguments = { "command-three", "-n" };
+
+			CommandLineArguments commandLine = new (commands, arguments);
+
+			Assert.True(commandLine.ValidArguments);
+
+			Command command = commandLine.Command;
+			Assert.NotNull(command);
+
+			Assert.AreEqual("command-three", command.Name);
+
+			IList<CommandOption> options = command.Options;
+
+			Assert.AreEqual(options.Count, 1);
+		}
+
+		/// <summary>
 		/// Option simple fail no parameter test.
 		/// </summary>
 		[Test]
@@ -231,9 +275,11 @@ namespace CommandLineCommands.Tests
 		public void OptionSimpleLongOptionFirstTest()
 		{
 			string[] arguments =
-				{ "command-one", "--encoding", "%USERPROFILE%" };
+			{
+				"command-one", "--encoding", "%USERPROFILE%"
+			};
 
-			CommandLineArguments commandLine = new(commands, arguments);
+			CommandLineArguments commandLine = new (commands, arguments);
 
 			Assert.True(commandLine.ValidArguments);
 
@@ -254,7 +300,9 @@ namespace CommandLineCommands.Tests
 		public void OptionSimpleLongOptionLastTest()
 		{
 			string[] arguments =
-				{ "command-one", "%USERPROFILE%", "--encoding" };
+			{
+				"command-one", "%USERPROFILE%", "--encoding"
+			};
 
 			CommandLineArguments commandLine = new (commands, arguments);
 
@@ -268,6 +316,66 @@ namespace CommandLineCommands.Tests
 			IList<CommandOption> options = command.Options;
 
 			Assert.Greater(options.Count, 0);
+		}
+
+		/// <summary>
+		/// Option with required parameter first test.
+		/// </summary>
+		[Test]
+		public void OptionWithdRequiredParameterFirstTest()
+		{
+			string[] arguments =
+			{
+				"command-seven", "--encoding", "utf8", "%USERPROFILE%"
+			};
+
+			CommandLineArguments commandLine = new (commands, arguments);
+
+			Assert.True(commandLine.ValidArguments);
+
+			Command command = commandLine.Command;
+			Assert.NotNull(command);
+
+			Assert.AreEqual("command-seven", command.Name);
+
+			IList<CommandOption> options = command.Options;
+
+			Assert.Greater(options.Count, 0);
+
+			CommandOption option = options[0];
+			string parameter = option.Parameter;
+
+			Assert.AreEqual("utf8", parameter);
+		}
+
+		/// <summary>
+		/// Option with required parameter last test.
+		/// </summary>
+		[Test]
+		public void OptionWithdRequiredParameterLastTest()
+		{
+			string[] arguments =
+			{
+				"command-seven", "%USERPROFILE%", "--encoding", "utf8"
+			};
+
+			CommandLineArguments commandLine = new (commands, arguments);
+
+			Assert.True(commandLine.ValidArguments);
+
+			Command command = commandLine.Command;
+			Assert.NotNull(command);
+
+			Assert.AreEqual("command-seven", command.Name);
+
+			IList<CommandOption> options = command.Options;
+
+			Assert.Greater(options.Count, 0);
+
+			CommandOption option = options[0];
+			string parameter = option.Parameter;
+
+			Assert.AreEqual("utf8", parameter);
 		}
 	}
 }
