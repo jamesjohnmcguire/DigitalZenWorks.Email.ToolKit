@@ -152,8 +152,7 @@ namespace DigitalZenWorks.CommandLine.Commands
 				{
 					if (validOption.RequiresParameter == true)
 					{
-						// Subtract 2, one for 0 based indexes, one for the
-						// needed parameter afterwards.
+						// Subtract one for the needed parameter afterwards.
 						if (option.ArgumentIndex < arguments.Length - 1)
 						{
 							option.Parameter =
