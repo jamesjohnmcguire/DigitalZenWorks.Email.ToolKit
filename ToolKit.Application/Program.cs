@@ -18,7 +18,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using CommonLogging = Common.Logging;
 
@@ -33,14 +32,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-		private static readonly string[] Commands =
-		{
-			"dbx-to-pst", "eml-to-pst", "help", "list-folders",
-			"list-top-senders", "list-total-duplicates", "merge-folders",
-			"merge-stores", "move-folder", "remove-duplicates",
-			"remove-empty-folders"
-		};
 
 		/// <summary>
 		/// The program's main entry point.
@@ -916,120 +907,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Log.Info("remove-duplicates      Prune empty folders");
 			Log.Info("remove-empty-folders   Prune empty folders");
 			Log.Info("help                   Show this information");
-		}
-
-		private static bool ValidateArguments(string[] arguments)
-		{
-			bool valid = false;
-
-			if (arguments != null && arguments.Length > 0)
-			{
-				string command = arguments[0];
-
-				if (Commands.Contains(command))
-				{
-					if (command.Equals(
-						"help", StringComparison.OrdinalIgnoreCase) ||
-						command.Equals(
-						"list-folders", StringComparison.OrdinalIgnoreCase) ||
-						command.Equals(
-						"list-top-senders",
-						StringComparison.OrdinalIgnoreCase) ||
-						command.Equals(
-						"list-total-duplicates",
-						StringComparison.OrdinalIgnoreCase) ||
-						command.Equals(
-						"merge-folders", StringComparison.OrdinalIgnoreCase) ||
-						command.Equals(
-						"remove-duplicates",
-						StringComparison.OrdinalIgnoreCase) ||
-						command.Equals(
-						"remove-empty-folders",
-						StringComparison.OrdinalIgnoreCase))
-					{
-						valid = true;
-					}
-					else if (command.Equals(
-						"dbx-to-pst", StringComparison.OrdinalIgnoreCase))
-					{
-						string dbxLocation = GetDbxLocation(arguments);
-
-						if (Directory.Exists(dbxLocation) ||
-							File.Exists(dbxLocation))
-						{
-							valid = true;
-						}
-					}
-					else if (command.Equals(
-						"eml-to-pst", StringComparison.OrdinalIgnoreCase))
-					{
-						string emlLocation = GetEmlLocation(arguments);
-
-						if (Directory.Exists(emlLocation) ||
-							File.Exists(emlLocation))
-						{
-							valid = true;
-						}
-					}
-					else if (command.Equals(
-						"move-folder", StringComparison.OrdinalIgnoreCase))
-					{
-						if (arguments.Length > 4)
-						{
-							valid = true;
-						}
-					}
-					else if (arguments.Length > 1)
-					{
-						if (arguments.Length > 2 || !command.Equals(
-							"merge-stores", StringComparison.OrdinalIgnoreCase))
-						{
-							string location = arguments[1];
-
-							if (Directory.Exists(location) ||
-								File.Exists(location))
-							{
-								valid = true;
-							}
-						}
-					}
-				}
-				else
-				{
-					if (File.Exists(command))
-					{
-						string extension = Path.GetExtension(command);
-
-						// Command inferred from file type.
-						if (extension.Equals(
-							".dbx", StringComparison.OrdinalIgnoreCase) ||
-							extension.Equals(
-								".eml", StringComparison.OrdinalIgnoreCase) ||
-							extension.Equals(
-								".txt", StringComparison.OrdinalIgnoreCase))
-						{
-							valid = true;
-						}
-					}
-					else if (Directory.Exists(command))
-					{
-						string[] dbxFiles =
-							Directory.GetFiles(command, "*.dbx");
-						string[] emlFiles =
-							Directory.GetFiles(command, "*.eml");
-						string[] txtFiles =
-							Directory.GetFiles(command, "*.txt");
-
-						if (dbxFiles.Length > 0 || emlFiles.Length > 0 ||
-							txtFiles.Length > 0)
-						{
-							valid = true;
-						}
-					}
-				}
-			}
-
-			return valid;
 		}
 	}
 }
