@@ -102,19 +102,22 @@ namespace DigitalZenWorks.CommandLine.Commands
 				string options = string.Empty;
 				bool first = true;
 
-				foreach (CommandOption option in command.Options)
+				if (command.Options != null)
 				{
-					string optionMessage = string.Format(
-						CultureInfo.InvariantCulture,
-						"-{0}, --{1}",
-						option.ShortName,
-						option.LongName);
-					options += optionMessage;
-
-					if (first == true)
+					foreach (CommandOption option in command.Options)
 					{
-						options += Environment.NewLine;
-						first = false;
+						string optionMessage = string.Format(
+							CultureInfo.InvariantCulture,
+							"-{0}, --{1}",
+							option.ShortName,
+							option.LongName);
+						options += optionMessage;
+
+						if (first == true)
+						{
+							options += Environment.NewLine;
+							first = false;
+						}
 					}
 				}
 
