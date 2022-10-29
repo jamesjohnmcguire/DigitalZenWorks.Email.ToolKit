@@ -47,9 +47,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				LogInitialization();
 				string version = GetVersion();
 
-				Log.Info("Starting DigitalZenWorks.Email.ToolKit Version: " +
-					version);
-
 				IList<Command> commands = GetCommands(arguments);
 
 				CommandLineArguments commandLine = new (commands, arguments);
@@ -70,17 +67,28 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 					string pstLocation;
 
-					Log.Info("Command is: " + command.Name);
-
-					for (int index = 1; index < arguments.Length; index++)
+					if (!command.Name.Equals(
+						"help", StringComparison.OrdinalIgnoreCase))
 					{
 						string message = string.Format(
 							CultureInfo.InvariantCulture,
-							"Parameter {0}: {1}",
-							index.ToString(CultureInfo.InvariantCulture),
-							arguments[index]);
-
+							"Starting Det ({0}) Version: {1}",
+							"Starting DigitalZenWorks.Email.ToolKit",
+							version);
 						Log.Info(message);
+
+						Log.Info("Command is: " + command.Name);
+
+						for (int index = 1; index < arguments.Length; index++)
+						{
+							message = string.Format(
+								CultureInfo.InvariantCulture,
+								"Parameter {0}: {1}",
+								index.ToString(CultureInfo.InvariantCulture),
+								arguments[index]);
+
+							Log.Info(message);
+						}
 					}
 
 					switch (command.Name)
