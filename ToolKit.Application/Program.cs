@@ -95,12 +95,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					switch (command.Name)
 					{
 						case "dbx-to-pst":
-							string dbxLocation = GetDbxLocation(arguments);
-
-							pstLocation =
-								GetPstLocation(arguments, dbxLocation, 2);
-
-							result = DbxToPst(arguments, dbxLocation, pstLocation);
+							result = DbxToPst(command);
 							break;
 						case "eml-to-pst":
 							string emlLocation = GetEmlLocation(arguments);
@@ -110,11 +105,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 							result =
 								EmlToPst(arguments, emlLocation, pstLocation);
-							break;
-						case "help":
-							string title = GetTitle();
-							commandLine.ShowHelp(title);
-							result = 0;
 							break;
 						case "list-folders":
 							result = ListFolders(arguments);
@@ -141,7 +131,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = RemoveEmptyFolders(arguments);
 							break;
 						default:
-							result = ProcessDirect(arguments);
+						case "help":
+							string title = GetTitle();
+							commandLine.ShowHelp(title);
+							result = 0;
 							break;
 					}
 				}
@@ -177,14 +170,21 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return pstFileIndex;
 		}
 
-		private static int DbxToPst(
-			string[] arguments, string dbxLocation, string pstLocation)
+		private static int DbxToPst(Command command)
 		{
 			int result = -1;
-			Encoding encoding = GetEncoding(arguments);
+			Encoding encoding = GetEncoding(command.Options);
 
-			bool success = Migrate.DbxToPst(
-				dbxLocation, pstLocation, encoding);
+			string dbxLocation = command.Parameters[0];
+			string pstLocation = dbxLocation;
+
+			if (command.Parameters.Count > 1)
+			{
+				pstLocation = command.Parameters[1];
+			}
+
+			bool success =
+				Migrate.DbxToPst(dbxLocation, pstLocation, encoding);
 
 			if (success == true)
 			{
@@ -404,31 +404,25 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return query;
 		}
 
-		private static Encoding GetEncoding(string[] arguments)
+		private static Encoding GetEncoding(IList<CommandOption> options)
 		{
 			Encoding encoding = null;
 
-			if (arguments.Contains("-e") ||
-				arguments.Contains("--encoding"))
+			List<CommandOption> optionsList = options.ToList();
+
+			CommandOption optionFound = optionsList.Find(option =>
+				(option.ShortName != null &&
+				option.ShortName.Equals("e", StringComparison.Ordinal)) ||
+				(option.LongName != null &&
+				option.LongName.Equals("encoding", StringComparison.Ordinal)));
+
+			if (optionFound != null)
 			{
-				for (int index = 1; index < arguments.Length; index++)
-				{
-					string argument = arguments[index];
+				string encodingName = optionFound.Parameter;
 
-					if (argument.Equals(
-						"--encoding", StringComparison.OrdinalIgnoreCase) ||
-						argument.Equals(
-							"-e", StringComparison.OrdinalIgnoreCase))
-					{
-						string encodingName = arguments[index + 1];
-
-						Encoding.RegisterProvider(
-							CodePagesEncodingProvider.Instance);
-						encoding = Encoding.GetEncoding(encodingName);
-
-						break;
-					}
-				}
+				Encoding.RegisterProvider(
+					CodePagesEncodingProvider.Instance);
+				encoding = Encoding.GetEncoding(encodingName);
 			}
 
 			return encoding;
@@ -811,80 +805,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				destinationPath);
 
 			return 0;
-		}
-
-		private static int ProcessDirect(string[] arguments)
-		{
-			int result = -1;
-
-			if (arguments.Length > 0)
-			{
-				string location = arguments[0];
-
-				string pstLocation = GetPstLocation(arguments, location, 1);
-				if (Directory.Exists(location))
-				{
-					result = ProcessDirectDirectory(
-						arguments, location, pstLocation);
-				}
-				else if (File.Exists(location))
-				{
-					result =
-						ProcessDirectFile(arguments, location, pstLocation);
-				}
-				else
-				{
-					string message =
-						"Argument supplied is neither a directory nor a file.";
-					Log.Error(message);
-				}
-			}
-
-			return result;
-		}
-
-		private static int ProcessDirectDirectory(
-			string[] arguments, string location, string pstLocation)
-		{
-			int result = -1;
-
-			string[] files = Directory.GetFiles(location, "*.dbx");
-
-			if (files.Length > 0)
-			{
-				result = DbxToPst(arguments, location, pstLocation);
-			}
-			else
-			{
-				IEnumerable<string> emlFiles = EmlMessages.GetFiles(location);
-
-				if (emlFiles.Any())
-				{
-					result = EmlToPst(arguments, location, pstLocation);
-				}
-			}
-
-			return result;
-		}
-
-		private static int ProcessDirectFile(
-			string[] arguments, string location, string pstLocation)
-		{
-			int result = -1;
-
-			string extension = Path.GetExtension(location);
-
-			if (extension.Equals(".dbx", StringComparison.Ordinal))
-			{
-				result = DbxToPst(arguments, location, pstLocation);
-			}
-			else if (extension.Equals(".eml", StringComparison.Ordinal) ||
-				extension.Equals(".txt", StringComparison.Ordinal))
-			{
-				result = EmlToPst(arguments, location, pstLocation);
-			}
-
-			return result;
 		}
 
 		private static int RemoveDuplicates(string[] arguments)
