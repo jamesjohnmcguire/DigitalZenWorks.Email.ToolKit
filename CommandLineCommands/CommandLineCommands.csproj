@@ -20,7 +20,7 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<NoWarn>NU1701</NoWarn>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
-		<PackageId>DigitalZenWorks.Email.ToolKit</PackageId>
+		<PackageId>DigitalZenWorks.CommandLine.Commands</PackageId>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageTags>Digital Zen Works;Command Line;Commands;Options</PackageTags>
 		<Version>0.1.1</Version>
