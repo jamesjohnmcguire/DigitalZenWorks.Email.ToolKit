@@ -94,6 +94,7 @@ namespace DigitalZenWorks.CommandLine.Commands
 			if (!string.IsNullOrWhiteSpace(title))
 			{
 				Output(title);
+				Output(string.Empty);
 			}
 
 			Output("Usage:");
