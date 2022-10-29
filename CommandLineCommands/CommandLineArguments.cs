@@ -90,6 +90,17 @@ namespace DigitalZenWorks.CommandLine.Commands
 			Output(UsageStatement);
 			Output(string.Empty);
 
+			int commandMaximumLength = 0;
+			int descriptionMaximumLength = 0;
+
+			foreach (Command command in commands)
+			{
+				commandMaximumLength = GetMaximumLength(
+					commandMaximumLength, command.Name);
+				descriptionMaximumLength = GetMaximumLength(
+					descriptionMaximumLength, command.Description);
+			}
+
 			Command help = commands.SingleOrDefault(x => x.Name == "help");
 
 			commands.Remove(help);
@@ -106,26 +117,36 @@ namespace DigitalZenWorks.CommandLine.Commands
 				{
 					foreach (CommandOption option in command.Options)
 					{
+						if (first == true)
+						{
+							first = false;
+						}
+						else
+						{
+							options += Environment.NewLine;
+
+							int paddingAmount = commandMaximumLength +
+									descriptionMaximumLength + 2;
+							string padding = string.Empty;
+							padding = padding.PadRight(paddingAmount, ' ');
+							options += padding;
+						}
+
 						string optionMessage = string.Format(
 							CultureInfo.InvariantCulture,
 							"-{0}, --{1}",
 							option.ShortName,
 							option.LongName);
 						options += optionMessage;
-
-						if (first == true)
-						{
-							options += Environment.NewLine;
-							first = false;
-						}
 					}
 				}
 
 				string message = string.Format(
 					CultureInfo.InvariantCulture,
 					"{0} {1} {2}",
-					command.Name,
-					command.Description,
+					command.Name.PadRight(commandMaximumLength, ' '),
+					command.Description.PadRight(
+						descriptionMaximumLength, ' '),
 					options);
 				Output(message);
 			}
@@ -135,10 +156,19 @@ namespace DigitalZenWorks.CommandLine.Commands
 				string helpMessage = string.Format(
 					CultureInfo.InvariantCulture,
 					"{0} {1}",
-					help.Name,
-					help.Description);
+					help.Name.PadRight(commandMaximumLength, ' '),
+					help.Description.PadRight(
+						descriptionMaximumLength, ' '));
 				Output(helpMessage);
 			}
+		}
+
+		private static int GetMaximumLength(
+			int previousMaximumLength, string text)
+		{
+			int maximumLength = Math.Max(previousMaximumLength, text.Length);
+
+			return maximumLength;
 		}
 
 		private bool IsValidOption(
