@@ -327,29 +327,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return commands;
 		}
 
-		private static string GetDbxLocation(string[] arguments)
-		{
-			string dbxLocation = null;
-
-			for (int index = 1; index < arguments.Length; index++)
-			{
-				string argument = arguments[index];
-
-				if (argument.Equals(
-					"--encoding", StringComparison.OrdinalIgnoreCase) ||
-					argument.Equals(
-						"-e", StringComparison.OrdinalIgnoreCase))
-				{
-					index += 2;
-
-					dbxLocation = arguments[index];
-					break;
-				}
-			}
-
-			return dbxLocation;
-		}
-
 		private static string GetEmlLocation(string[] arguments)
 		{
 			// skip pst path
