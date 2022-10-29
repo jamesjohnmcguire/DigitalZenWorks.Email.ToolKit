@@ -54,12 +54,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				CommandLineArguments commandLine = new (commands, arguments);
 
+				commandLine.UsageStatement =
+					"Det command <options> <path.to.source> <path.to.pst>";
+
 				if (commandLine.ValidArguments == false)
 				{
 					Log.Error(commandLine.ErrorMessage);
 
-					commandLine.UsageStatement =
-						"Det command <options> <path.to.source> <path.to.pst>";
 					commandLine.ShowHelp();
 				}
 				else
@@ -101,7 +102,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 								EmlToPst(arguments, emlLocation, pstLocation);
 							break;
 						case "help":
-							ShowHelp();
+							string title = GetTitle();
+							commandLine.ShowHelp(title);
 							result = 0;
 							break;
 						case "list-folders":
@@ -454,6 +456,28 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return pstLocation;
+		}
+
+		private static string GetTitle()
+		{
+			Assembly assembly = Assembly.GetExecutingAssembly();
+			AssemblyName assemblyName = assembly.GetName();
+			string name = assemblyName.Name;
+
+			FileVersionInfo versionInfo = GetAssemblyInformation();
+			string companyName = versionInfo.CompanyName;
+			string copyright = versionInfo.LegalCopyright;
+			string assemblyVersion = versionInfo.FileVersion;
+
+			string title = string.Format(
+				CultureInfo.CurrentCulture,
+				"{0} {1} {2} {3}",
+				name,
+				assemblyVersion,
+				copyright,
+				companyName);
+
+			return title;
 		}
 
 		private static string GetVersion()
@@ -860,53 +884,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				removedFolders.ToString(CultureInfo.InvariantCulture));
 
 			return 0;
-		}
-
-		private static void ShowHelp(string additionalMessage = null)
-		{
-			Assembly assembly = Assembly.GetExecutingAssembly();
-			AssemblyName assemblyName = assembly.GetName();
-			string name = assemblyName.Name;
-
-			FileVersionInfo versionInfo = GetAssemblyInformation();
-			string companyName = versionInfo.CompanyName;
-			string copyright = versionInfo.LegalCopyright;
-			string assemblyVersion = versionInfo.FileVersion;
-
-			string header = string.Format(
-				CultureInfo.CurrentCulture,
-				"{0} {1} {2} {3}",
-				name,
-				assemblyVersion,
-				copyright,
-				companyName);
-			Log.Info(header);
-
-			if (!string.IsNullOrWhiteSpace(additionalMessage))
-			{
-				Log.Info(additionalMessage);
-			}
-
-			Log.Info("Usage:");
-			Log.Info("DigitalZenWorks.Email.ToolKit & lt; " +
-				"command <options> <path.to.source> <path.to.pst>");
-
-			Log.Info("Commands:");
-			Log.Info("dbx-to-pst             Migrate dbx files to pst file");
-			Log.Info("eml-to-pst             Migrate eml files to pst file");
-			Log.Info("list-folders           " +
-				"List all sub folders of a given folder");
-			Log.Info("list-top-senders       " +
-				"List the top senders of a given store");
-			Log.Info("list-total-duplicates  " +
-				"List all duplicates in all folders in a given store");
-			Log.Info("move-folder            " +
-				"Move folder to a different location");
-			Log.Info("merge-folders          Merge duplicate folders");
-			Log.Info("merge-stores           Merge one store into another");
-			Log.Info("remove-duplicates      Prune empty folders");
-			Log.Info("remove-empty-folders   Prune empty folders");
-			Log.Info("help                   Show this information");
 		}
 	}
 }

@@ -84,8 +84,14 @@ namespace DigitalZenWorks.CommandLine.Commands
 		/// <summary>
 		/// Show help message.
 		/// </summary>
-		public void ShowHelp()
+		/// <param name="title">An optional title to display.</param>
+		public void ShowHelp(string title = null)
 		{
+			if (!string.IsNullOrWhiteSpace(title))
+			{
+				Output(title);
+			}
+
 			Output("Usage:");
 			Output(UsageStatement);
 			Output(string.Empty);
