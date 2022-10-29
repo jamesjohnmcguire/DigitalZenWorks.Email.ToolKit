@@ -70,7 +70,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 					string pstLocation;
 
-					Log.Info("Command is: " + command);
+					Log.Info("Command is: " + command.Name);
 
 					for (int index = 1; index < arguments.Length; index++)
 					{
