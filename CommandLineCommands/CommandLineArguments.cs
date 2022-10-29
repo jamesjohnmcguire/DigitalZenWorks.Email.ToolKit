@@ -30,6 +30,7 @@ namespace DigitalZenWorks.CommandLine.Commands
 		private string commandName;
 		private string errorMessage;
 		private string invalidOption;
+		private bool useLog;
 
 		/// <summary>
 		/// Initializes a new instance of the
@@ -71,7 +72,10 @@ namespace DigitalZenWorks.CommandLine.Commands
 		/// </summary>
 		/// <value>A value indicatint whether to use logging functionality.
 		/// </value>
-		public bool UseLog { get; set; }
+		public bool UseLog
+		{
+			get { return useLog; } set { useLog = value; }
+		}
 
 		/// <summary>
 		/// Gets a value indicating whether a value indicating whether the
@@ -275,7 +279,7 @@ namespace DigitalZenWorks.CommandLine.Commands
 
 		private void Output(string message)
 		{
-			if (UseLog == true)
+			if (useLog == true)
 			{
 				Log.Info(message);
 			}

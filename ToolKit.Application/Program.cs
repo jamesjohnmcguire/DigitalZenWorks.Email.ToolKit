@@ -54,6 +54,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				CommandLineArguments commandLine = new (commands, arguments);
 
+				commandLine.UseLog = true;
 				commandLine.UsageStatement =
 					"Det command <options> <path.to.source> <path.to.pst>";
 
