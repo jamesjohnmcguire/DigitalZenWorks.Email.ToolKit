@@ -631,7 +631,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="path">The path of the folder.</param>
 		/// <param name="folder">The folder to check.</param>
 		/// <param name="condition">A conditional to check.</param>
-		/// <param name="folderAction">The delegate to act uoon.</param>
+		/// <param name="folderAction">The delegate to act upon.</param>
 		/// <returns>A value processed from the delegate.</returns>
 		public static int RecurseFolders(
 			string path,
