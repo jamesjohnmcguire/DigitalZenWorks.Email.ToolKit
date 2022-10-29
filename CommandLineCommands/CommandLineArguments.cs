@@ -15,6 +15,15 @@ using System.Linq;
 namespace DigitalZenWorks.CommandLine.Commands
 {
 	/// <summary>
+	/// Delegate to infer a command.
+	/// </summary>
+	/// <param name="argument">The first argument to check upon.</param>
+	/// <param name="commands">The list of allowed commands.</param>
+	/// <returns>The inferred command, if any.</returns>
+	public delegate Command InferCommand(
+		string argument, IList<Command> commands);
+
+	/// <summary>
 	/// Represents a set of command line arguments.
 	/// </summary>
 	public class CommandLineArguments
@@ -24,6 +33,7 @@ namespace DigitalZenWorks.CommandLine.Commands
 
 		private readonly string[] arguments;
 		private readonly IList<Command> commands;
+		private readonly InferCommand inferCommand;
 		private readonly bool validArguments;
 
 		private Command command;
@@ -42,6 +52,27 @@ namespace DigitalZenWorks.CommandLine.Commands
 		public CommandLineArguments(
 			IList<Command> commands, string[] arguments)
 		{
+			this.commands = commands;
+			this.arguments = arguments;
+
+			validArguments = ValidateArguments();
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the
+		/// <see cref="CommandLineArguments"/> class.
+		/// </summary>
+		/// <param name="commands">A list of valid commands.</param>
+		/// <param name="arguments">The array of command line
+		/// arguments.</param>
+		/// <param name="inferCommand">The infer command delegate.</param>
+		public CommandLineArguments(
+			IList<Command> commands,
+			string[] arguments,
+			InferCommand inferCommand)
+		{
+			this.inferCommand = inferCommand;
+
 			this.commands = commands;
 			this.arguments = arguments;
 
@@ -265,9 +296,15 @@ namespace DigitalZenWorks.CommandLine.Commands
 		{
 			IList<string> parameters = new List<string>();
 
-			for (int index = 1; index < arguments.Length; index++)
+			for (int index = 0; index < arguments.Length; index++)
 			{
 				string argument = arguments[index];
+
+				if (argument.Equals(
+					command.Name, StringComparison.OrdinalIgnoreCase))
+				{
+					continue;
+				}
 
 				if (!argument.StartsWith('-'))
 				{
@@ -338,6 +375,18 @@ namespace DigitalZenWorks.CommandLine.Commands
 					}
 				}
 
+				if (isValidCommand == false && inferCommand != null)
+				{
+					Command inferredCommand =
+						inferCommand(commandName, commands);
+
+					if (inferredCommand != null)
+					{
+						validatedCommand = inferredCommand;
+						isValidCommand = true;
+					}
+				}
+
 				if (isValidCommand == false)
 				{
 					errorMessage = "Uknown command.";
@@ -372,7 +421,8 @@ namespace DigitalZenWorks.CommandLine.Commands
 
 				if (areValid == true)
 				{
-					command = new (commandName, commandOptions, parameters);
+					command = new (
+						validatedCommand.Name, commandOptions, parameters);
 				}
 			}
 

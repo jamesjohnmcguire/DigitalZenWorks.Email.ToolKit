@@ -49,7 +49,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				IList<Command> commands = GetCommands(arguments);
 
-				CommandLineArguments commandLine = new (commands, arguments);
+				CommandLineArguments commandLine =
+					new (commands, arguments, InferCommand);
 
 				commandLine.UseLog = true;
 				commandLine.UsageStatement =
@@ -387,6 +388,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return count;
 		}
 
+		private static IEnumerable<string> GetEmlFiles(string location)
+		{
+			List<string> extensions = new () { ".eml", ".txt" };
+			IEnumerable<string> allFiles =
+				Directory.EnumerateFiles(location, "*.*");
+
+			IEnumerable<string> query =
+				allFiles.Where(file =>
+					file.EndsWith(
+						extensions[0], StringComparison.OrdinalIgnoreCase) ||
+					file.EndsWith(
+						extensions[1], StringComparison.OrdinalIgnoreCase));
+
+			return query;
+		}
+
 		private static Encoding GetEncoding(string[] arguments)
 		{
 			Encoding encoding = null;
@@ -496,6 +513,51 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			string assemblyVersion = fileVersionInfo.FileVersion;
 
 			return assemblyVersion;
+		}
+
+		private static Command InferCommand(
+			string argument, IList<Command> commands)
+		{
+			Command inferredCommand = null;
+
+			if (Directory.Exists(argument))
+			{
+				string[] files = Directory.GetFiles(argument, "*.dbx");
+
+				if (files.Length > 0)
+				{
+					inferredCommand = commands.SingleOrDefault(
+						command => command.Name == "dbx-to-pst");
+				}
+				else
+				{
+					IEnumerable<string> emlFiles = GetEmlFiles(argument);
+
+					if (emlFiles.Any())
+					{
+						inferredCommand = commands.SingleOrDefault(
+							command => command.Name == "eml-to-pst");
+					}
+				}
+			}
+			else if (File.Exists(argument))
+			{
+				string extension = Path.GetExtension(argument);
+
+				if (extension.Equals(".dbx", StringComparison.Ordinal))
+				{
+					inferredCommand = commands.SingleOrDefault(
+						command => command.Name == "dbx-to-pst");
+				}
+				else if (extension.Equals(".eml", StringComparison.Ordinal) ||
+					extension.Equals(".txt", StringComparison.Ordinal))
+				{
+					inferredCommand = commands.SingleOrDefault(
+						command => command.Name == "eml-to-pst");
+				}
+			}
+
+			return inferredCommand;
 		}
 
 		private static int ListFolders(string[] arguments)
