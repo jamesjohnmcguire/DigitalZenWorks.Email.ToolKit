@@ -99,13 +99,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = EmlToPst(command);
 							break;
 						case "list-folders":
-							result = ListFolders(arguments);
+							result = ListFolders(command);
 							break;
 						case "list-top-senders":
-							result = ListTopSenders(arguments);
+							result = ListTopSenders(command);
 							break;
 						case "list-total-duplicates":
-							result = ListTotalDuplicates(arguments);
+							result = ListTotalDuplicates(command);
 							break;
 						case "merge-folders":
 							result = MergeFolders(command, arguments);
@@ -268,9 +268,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				"List all sub folders of a given store or folder");
 			commands.Add(listFolders);
 
+			CommandOption count = new ("c", "count");
+			options = new List<CommandOption>();
+			options.Add(count);
 			Command listTopSenders = new (
 				"list-top-senders",
-				null,
+				options,
 				1,
 				"List the top senders of a given store");
 			commands.Add(listTopSenders);
@@ -320,34 +323,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return commands;
 		}
 
-		private static int GetCount(string[] arguments)
-		{
-			int count = 25;
-
-			if (arguments.Contains("-c") ||
-				arguments.Contains("--count"))
-			{
-				for (int index = 1; index < arguments.Length; index++)
-				{
-					string argument = arguments[index];
-
-					if (argument.Equals(
-						"--count", StringComparison.OrdinalIgnoreCase) ||
-						argument.Equals(
-							"-c", StringComparison.OrdinalIgnoreCase))
-					{
-						string rawCount = arguments[index + 1];
-						count = Convert.ToInt32(
-							rawCount, CultureInfo.InvariantCulture);
-
-						break;
-					}
-				}
-			}
-
-			return count;
-		}
-
 		private static IEnumerable<string> GetEmlFiles(string location)
 		{
 			List<string> extensions = new () { ".eml", ".txt" };
@@ -380,30 +355,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return encoding;
-		}
-
-		private static string GetFolderPath(string[] arguments)
-		{
-			string folderPath = null;
-
-			for (int index = 1; index < arguments.Length; index++)
-			{
-				string argument = arguments[index];
-
-				// if the file exists, it is the PST file argument
-				bool fileExists = File.Exists(argument);
-
-				if (fileExists == false && !argument.Equals(
-					"--recurse", StringComparison.OrdinalIgnoreCase) &&
-					!argument.Equals(
-						"-r", StringComparison.OrdinalIgnoreCase))
-				{
-					folderPath = arguments[index];
-					break;
-				}
-			}
-
-			return folderPath;
 		}
 
 		private static string GetTitle()
@@ -482,87 +433,79 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return inferredCommand;
 		}
 
-		private static int ListFolders(string[] arguments)
+		private static int ListFolders(Command command)
 		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
 
-			bool recurse = false;
+			bool recurse = command.DoesOptionExist("r", "recurse");
 
-			if (arguments.Contains("-r") || arguments.Contains("--recurse"))
+			string pstFilePath = command.Parameters[0];
+			string folderPath = null;
+
+			if (command.Parameters.Count > 1)
 			{
-				recurse = true;
+				folderPath = command.Parameters[1];
 			}
 
-			int pstFileIndex = ArgumentsContainPstFile(arguments);
+			IList<string> folderNames =
+				outlookStore.ListFolders(pstFilePath, folderPath, recurse);
 
-			if (pstFileIndex > 0)
+			IOrderedEnumerable<string> sortedFolderName =
+				folderNames.OrderBy(x => x);
+
+			foreach (string folderName in sortedFolderName)
 			{
-				string pstFile = arguments[pstFileIndex];
-				string folderPath = GetFolderPath(arguments);
-
-				IList<string> folderNames =
-					outlookStore.ListFolders(pstFile, folderPath, recurse);
-
-				IOrderedEnumerable<string> sortedFolderName =
-					folderNames.OrderBy(x => x);
-
-				foreach (string folderName in sortedFolderName)
-				{
-					Console.WriteLine(folderName);
-				}
+				Console.WriteLine(folderName);
 			}
 
 			return 0;
 		}
 
-		private static int ListTopSenders(string[] arguments)
+		private static int ListTopSenders(Command command)
 		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
 
-			int pstFileIndex = ArgumentsContainPstFile(arguments);
+			string pstFilePath = command.Parameters[0];
+			int count = 25;
 
-			if (pstFileIndex > 0)
+			CommandOption optionFound = command.GetOption("c", "count");
+
+			if (optionFound != null)
 			{
-				string pstFile = arguments[pstFileIndex];
+				count = Convert.ToInt32(
+					optionFound.Parameter, CultureInfo.InvariantCulture);
+			}
 
-				int count = GetCount(arguments);
+			IList<KeyValuePair<string, int>> topSenders =
+				outlookStore.ListTopSenders(pstFilePath, count);
 
-				IList<KeyValuePair<string, int>> topSenders =
-					outlookStore.ListTopSenders(pstFile, count);
-
-				foreach (KeyValuePair<string, int> sender in topSenders)
-				{
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"{0}: {1}",
-						sender.Key,
-						sender.Value.ToString(CultureInfo.InvariantCulture));
-					Console.WriteLine(message);
-				}
+			foreach (KeyValuePair<string, int> sender in topSenders)
+			{
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: {1}",
+					sender.Key,
+					sender.Value.ToString(CultureInfo.InvariantCulture));
+				Console.WriteLine(message);
 			}
 
 			return 0;
 		}
 
-		private static int ListTotalDuplicates(string[] arguments)
+		private static int ListTotalDuplicates(Command command)
 		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
 
-			int pstFileIndex = ArgumentsContainPstFile(arguments);
+			string pstFilePath = command.Parameters[0];
 
-			if (pstFileIndex > 0)
-			{
-				string pstFilePath = arguments[pstFileIndex];
+			IDictionary<string, IList<string>> duplicates =
+				outlookStore.GetTotalDuplicates(pstFilePath);
 
-				IDictionary<string, IList<string>> duplicates =
-					outlookStore.GetTotalDuplicates(pstFilePath);
-
-				ListTotalDuplicatesOutput(duplicates, true);
-				ListTotalDuplicatesOutput(duplicates, false);
-			}
+			ListTotalDuplicatesOutput(duplicates, true);
+			ListTotalDuplicatesOutput(duplicates, false);
 
 			return 0;
 		}
