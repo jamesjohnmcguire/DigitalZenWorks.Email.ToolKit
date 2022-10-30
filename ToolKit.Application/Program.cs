@@ -66,8 +66,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				{
 					Command command = commandLine.Command;
 
-					string pstLocation;
-
 					if (!command.Name.Equals(
 						"help", StringComparison.OrdinalIgnoreCase))
 					{
@@ -98,13 +96,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = DbxToPst(command);
 							break;
 						case "eml-to-pst":
-							string emlLocation = GetEmlLocation(arguments);
-							int index = arguments.Length - 1;
-							pstLocation =
-								GetPstLocation(arguments, emlLocation, index);
-
-							result =
-								EmlToPst(arguments, emlLocation, pstLocation);
+							result = EmlToPst(command);
 							break;
 						case "list-folders":
 							result = ListFolders(arguments);
@@ -173,7 +165,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int DbxToPst(Command command)
 		{
 			int result = -1;
-			Encoding encoding = GetEncoding(command.Options);
+			Encoding encoding = GetEncoding(command);
 
 			string dbxLocation = command.Parameters[0];
 			string pstLocation = dbxLocation;
@@ -194,18 +186,19 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return result;
 		}
 
-		private static int EmlToPst(
-			string[] arguments, string emlLocation, string pstLocation)
+		private static int EmlToPst(Command command)
 		{
 			int result = -1;
 
-			bool adjust = false;
+			string emlLocation = command.Parameters[0];
+			string pstLocation = emlLocation;
 
-			if (arguments.Contains("-a") ||
-				arguments.Contains("--adjust"))
+			if (command.Parameters.Count > 1)
 			{
-				adjust = true;
+				pstLocation = command.Parameters[1];
 			}
+
+			bool adjust = command.DoesOptionExist("a", "adjust");
 
 			bool success = Migrate.EmlToPst(emlLocation, pstLocation, adjust);
 
@@ -327,16 +320,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return commands;
 		}
 
-		private static string GetEmlLocation(string[] arguments)
-		{
-			// skip pst path
-			int index = arguments.Length - 2;
-
-			string emlLocation = arguments[index];
-
-			return emlLocation;
-		}
-
 		private static int GetCount(string[] arguments)
 		{
 			int count = 25;
@@ -381,17 +364,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return query;
 		}
 
-		private static Encoding GetEncoding(IList<CommandOption> options)
+		private static Encoding GetEncoding(Command command)
 		{
 			Encoding encoding = null;
 
-			List<CommandOption> optionsList = options.ToList();
-
-			CommandOption optionFound = optionsList.Find(option =>
-				(option.ShortName != null &&
-				option.ShortName.Equals("e", StringComparison.Ordinal)) ||
-				(option.LongName != null &&
-				option.LongName.Equals("encoding", StringComparison.Ordinal)));
+			CommandOption optionFound = command.GetOption("e", "encoding");
 
 			if (optionFound != null)
 			{
@@ -427,32 +404,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return folderPath;
-		}
-
-		private static string GetPstLocation(
-			string[] arguments, string source, int index)
-		{
-			string pstLocation = null;
-
-			if (arguments.Length > index)
-			{
-				pstLocation = arguments[index];
-			}
-
-			if (string.IsNullOrWhiteSpace(pstLocation))
-			{
-				if (Directory.Exists(source))
-				{
-					pstLocation = source + ".pst";
-				}
-				else if (File.Exists(source))
-				{
-					pstLocation =
-						Path.ChangeExtension(source, ".pst");
-				}
-			}
-
-			return pstLocation;
 		}
 
 		private static string GetTitle()
@@ -716,20 +667,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static int MergeFolders(Command command, string[] arguments)
 		{
-			bool dryRun = false;
-
-			List<CommandOption> optionsList = command.Options.ToList();
-
-			CommandOption optionFound = optionsList.Find(option =>
-				(option.ShortName != null &&
-				option.ShortName.Equals("n", StringComparison.Ordinal)) ||
-				(option.LongName != null &&
-				option.LongName.Equals("dryrun", StringComparison.Ordinal)));
-
-			if (optionFound != null)
-			{
-				dryRun = true;
-			}
+			bool dryRun = command.DoesOptionExist("n", "dryrun");
 
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
