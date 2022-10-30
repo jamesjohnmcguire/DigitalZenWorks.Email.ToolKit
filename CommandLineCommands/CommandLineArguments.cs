@@ -101,7 +101,7 @@ namespace DigitalZenWorks.CommandLine.Commands
 		/// Gets or sets a value indicating whether indicates whether to use
 		/// logging functionality.
 		/// </summary>
-		/// <value>A value indicatint whether to use logging functionality.
+		/// <value>A value indicating whether to use logging functionality.
 		/// </value>
 		public bool UseLog
 		{
