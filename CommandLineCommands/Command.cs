@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DigitalZenWorks.CommandLine.Commands
 {
@@ -104,5 +105,47 @@ namespace DigitalZenWorks.CommandLine.Commands
 		/// </summary>
 		/// <value>The command parameters.</value>
 		public IList<string> Parameters { get { return parameters; } }
+
+		/// <summary>
+		/// Does option exist.
+		/// </summary>
+		/// <param name="shortName">The short name to search for.</param>
+		/// <param name="longName">The long name to search for.</param>
+		/// <returns>A value indicating whether the option exists
+		/// or not.</returns>
+		public bool DoesOptionExist(string shortName, string longName)
+		{
+			bool optionExists = false;
+
+			CommandOption optionFound = GetOption(shortName, longName);
+
+			if (optionFound != null)
+			{
+				optionExists = true;
+			}
+
+			return optionExists;
+		}
+
+		/// <summary>
+		/// Get option.
+		/// </summary>
+		/// <param name="shortName">The short name to search for.</param>
+		/// <param name="longName">The long name to search for.</param>
+		/// <returns>The found option, if it exists.</returns>
+		public CommandOption GetOption(string shortName, string longName)
+		{
+			List<CommandOption> optionsList = options.ToList();
+
+			CommandOption option = optionsList.Find(option =>
+				(option.ShortName != null &&
+				option.ShortName.Equals(
+					shortName, StringComparison.Ordinal)) ||
+				(option.LongName != null &&
+				option.LongName.Equals(
+					longName, StringComparison.Ordinal)));
+
+			return option;
+		}
 	}
 }

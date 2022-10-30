@@ -125,6 +125,52 @@ namespace CommandLineCommands.Tests
 		}
 
 		/// <summary>
+		/// Get option fail test.
+		/// </summary>
+		[Test]
+		public void GetOptionFailTest()
+		{
+			CommandOption encoding = new ("e", "encoding", true);
+			encoding.Parameter = "utf8";
+			IList<CommandOption> options = new List<CommandOption>();
+			options.Add(encoding);
+
+			IList<string> parameters = new List<string>();
+			parameters.Add("%USERPROFILE%");
+
+			Command command = new ("some-command", options, parameters);
+
+			CommandOption optionFound = command.GetOption("n", "dryrun");
+
+			Assert.Null(optionFound);
+		}
+
+		/// <summary>
+		/// Get option success test.
+		/// </summary>
+		[Test]
+		public void GetOptionSuccessTest()
+		{
+			CommandOption encoding = new ("e", "encoding", true);
+			encoding.Parameter = "utf8";
+			IList<CommandOption> options = new List<CommandOption>();
+			options.Add(encoding);
+
+			IList<string> parameters = new List<string>();
+			parameters.Add("%USERPROFILE%");
+
+			Command command = new ("some-command", options, parameters);
+
+			CommandOption optionFound = command.GetOption("e", "encoding");
+
+			Assert.NotNull(optionFound);
+
+			string encodingName = optionFound.Parameter;
+
+			Assert.AreEqual("utf8", encodingName);
+		}
+
+		/// <summary>
 		/// Help test.
 		/// </summary>
 		[Test]
