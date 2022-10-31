@@ -47,7 +47,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				LogInitialization();
 				string version = GetVersion();
 
-				IList<Command> commands = GetCommands(arguments);
+				IList<Command> commands = GetCommands();
 
 				CommandLineArguments commandLine =
 					new (commands, arguments, InferCommand);
@@ -222,7 +222,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return fileVersionInfo;
 		}
 
-		private static IList<Command> GetCommands(string[] arguments)
+		private static IList<Command> GetCommands()
 		{
 			IList<Command> commands = new List<Command>();
 
