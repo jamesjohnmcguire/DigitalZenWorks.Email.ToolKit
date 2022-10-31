@@ -66,29 +66,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				{
 					Command command = commandLine.Command;
 
-					if (!command.Name.Equals(
-						"help", StringComparison.OrdinalIgnoreCase))
-					{
-						string message = string.Format(
-							CultureInfo.InvariantCulture,
-							"Starting Det ({0}) Version: {1}",
-							"Starting DigitalZenWorks.Email.ToolKit",
-							version);
-						Log.Info(message);
-
-						Log.Info("Command is: " + command.Name);
-
-						for (int index = 1; index < arguments.Length; index++)
-						{
-							message = string.Format(
-								CultureInfo.InvariantCulture,
-								"Parameter {0}: {1}",
-								index.ToString(CultureInfo.InvariantCulture),
-								arguments[index]);
-
-							Log.Info(message);
-						}
-					}
+#pragma warning disable CA1062
+					DisplayParamters(command, arguments);
+#pragma warning restore CA1062
 
 					switch (command.Name)
 					{
@@ -139,6 +119,36 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return result;
+		}
+
+		private static void DisplayParamters(
+			Command command, string[] arguments)
+		{
+			if (!command.Name.Equals(
+				"help", StringComparison.OrdinalIgnoreCase))
+			{
+				string version = GetVersion();
+
+				string message = string.Format(
+					CultureInfo.InvariantCulture,
+					"Starting Det ({0}) Version: {1}",
+					"Starting DigitalZenWorks.Email.ToolKit",
+					version);
+				Log.Info(message);
+
+				Log.Info("Command is: " + command.Name);
+
+				for (int index = 1; index < arguments.Length; index++)
+				{
+					message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Parameter {0}: {1}",
+						index.ToString(CultureInfo.InvariantCulture),
+						arguments[index]);
+
+					Log.Info(message);
+				}
+			}
 		}
 
 		private static int DbxToPst(Command command)
