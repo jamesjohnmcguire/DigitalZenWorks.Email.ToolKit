@@ -290,7 +290,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			commands.Add(mergeStores);
 
 			Command moveFolders = new (
-				"move-folders", null, 4, "Move one folder to another");
+				"move-folder", null, 4, "Move one folder to another");
 			commands.Add(moveFolders);
 
 			CommandOption flush = new ("s", "flush");
