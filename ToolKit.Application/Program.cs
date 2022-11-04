@@ -67,7 +67,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					Command command = commandLine.Command;
 
 #pragma warning disable CA1062
-					DisplayParamters(command, arguments);
+					DisplayParameters(command, arguments);
 #pragma warning restore CA1062
 
 					switch (command.Name)
@@ -121,7 +121,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return result;
 		}
 
-		private static void DisplayParamters(
+		private static void DisplayParameters(
 			Command command, string[] arguments)
 		{
 			if (!command.Name.Equals(
