@@ -435,6 +435,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (command.Parameters.Count > 1)
 			{
 				folderPath = command.Parameters[1];
+				folderPath = OutlookFolder.NormalizePath(folderPath);
 			}
 
 			IList<string> folderNames =
@@ -635,9 +636,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		{
 			string sourcePst = command.Parameters[0];
 			string sourcePath = command.Parameters[1];
+			sourcePath = OutlookFolder.NormalizePath(sourcePath);
 
 			string destinationPst = command.Parameters[2];
 			string destinationPath = command.Parameters[3];
+			destinationPath = OutlookFolder.NormalizePath(destinationPath);
 
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
