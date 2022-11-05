@@ -131,8 +131,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				string message = string.Format(
 					CultureInfo.InvariantCulture,
-					"Starting Det ({0}) Version: {1}",
-					"Starting DigitalZenWorks.Email.ToolKit",
+					"Starting Det [{0}] Version: {1}",
+					"DigitalZenWorks.Email.ToolKit",
 					version);
 				Log.Info(message);
 
