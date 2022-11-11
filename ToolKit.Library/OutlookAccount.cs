@@ -104,6 +104,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			Store newPst = null;
 
+			path = Path.GetFullPath(path);
+
 			// If the .pst file does not exist, Microsoft Outlook creates it.
 			session.AddStore(path);
 
