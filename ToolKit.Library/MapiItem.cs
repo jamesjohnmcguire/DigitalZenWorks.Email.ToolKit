@@ -122,7 +122,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Gets the item's hash.
 		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
+		/// <param name="path">The path of the current folder.</param>
 		/// <param name="mailItem">The items to compute.</param>
 		/// <returns>The item's hash encoded in base 64.</returns>
 		public static string GetItemHash(string path, MailItem mailItem)
