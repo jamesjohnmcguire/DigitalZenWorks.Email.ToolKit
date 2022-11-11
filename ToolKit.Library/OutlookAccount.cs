@@ -140,6 +140,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 			}
 
+			if (newPst == null)
+			{
+				Log.Warn("Store not found: " + path);
+			}
+
 			return newPst;
 		}
 
