@@ -1207,13 +1207,26 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			Items items = source.Items;
 
+			int ascendingCount = 1;
+
 			// Office uses 1 based indexes from VBA.
 			// Iterate in reverse order as the group may change.
 			for (int index = items.Count; index > 0; index--)
 			{
+				int sectionIndicator = ascendingCount % 100;
+
+				if (ascendingCount == 1 || sectionIndicator == 0)
+				{
+					Log.Info(
+						"Moving Items from: " +
+						ascendingCount.ToString(CultureInfo.InvariantCulture));
+				}
+
 				object item = items[index];
 
 				MapiItem.Moveitem(item, destination);
+
+				ascendingCount++;
 			}
 		}
 
