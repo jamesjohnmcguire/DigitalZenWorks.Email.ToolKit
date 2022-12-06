@@ -12,6 +12,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -135,6 +136,44 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					removedFolders = OutlookFolder.RemoveEmptyFolders(
 						storePath, rootFolder, true);
+
+					Marshal.ReleaseComObject(rootFolder);
+				}
+			}
+
+			Log.Info("Remove empty folder complete - total folders removed: " +
+				removedFolders);
+
+			return removedFolders;
+		}
+
+		/// <summary>
+		/// Remove all empty folders.
+		/// </summary>
+		/// <param name="store">The PST store to process.</param>
+		/// <returns>The count of removed folders.</returns>
+		public static async Task<int> RemoveEmptyFoldersAsync(Store store)
+		{
+			int removedFolders = 0;
+
+			if (store != null)
+			{
+				string path = store.FilePath;
+				string extension = Path.GetExtension(path);
+
+				if (!extension.Equals(
+					".ost", StringComparison.OrdinalIgnoreCase))
+				{
+					string storePath = GetStoreName(store);
+
+					Log.Info("Checking for empty folders in: " +
+						storePath);
+					storePath += "::";
+
+					MAPIFolder rootFolder = store.GetRootFolder();
+
+					removedFolders = await OutlookFolder.RemoveEmptyFoldersAsync(
+						storePath, rootFolder, true).ConfigureAwait(false);
 
 					Marshal.ReleaseComObject(rootFolder);
 				}
@@ -372,6 +411,54 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Merge duplicate folders.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task MergeFoldersAsync(string pstFilePath, bool dryRun)
+		{
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			await MergeFoldersAsync(store, dryRun).ConfigureAwait(false);
+
+			Log.Info("Merge folders complete - total folders checked: " +
+				totalFolders);
+		}
+
+		/// <summary>
+		/// Merge duplicate folders.
+		/// </summary>
+		/// <param name="store">The store to check.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		/// <returns>The total folders checked.</returns>
+		public async Task<uint> MergeFoldersAsync(Store store, bool dryRun)
+		{
+			if (store != null)
+			{
+				string storePath = GetStoreName(store);
+				Log.Info("Merging folders in: " + storePath);
+
+				storePath += "::";
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				OutlookFolder outlookFolder = new (outlookAccount);
+				await outlookFolder.MergeFoldersAsync(
+					storePath, rootFolder, dryRun).ConfigureAwait(false);
+
+				totalFolders++;
+
+				Marshal.ReleaseComObject(rootFolder);
+				Marshal.ReleaseComObject(store);
+			}
+
+			return totalFolders;
+		}
+
+		/// <summary>
 		/// Merge 2 stores together.
 		/// </summary>
 		/// <param name="sourcePstPath">The source PST path.</param>
@@ -432,6 +519,99 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						outlookFolder.MoveFolderContents(
 							subPath, subFolder, destinationSubFolder);
+
+						// Once all the items have been moved,
+						// now remove the folder.
+						bool isReserved =
+							OutlookFolder.IsReservedFolder(subFolder);
+
+						if (isReserved == false)
+						{
+							OutlookFolder.RemoveFolder(
+								subPath, subIndex, subFolder, false);
+						}
+					}
+					else
+					{
+						// Folder doesn't already exist, so just move it.
+						LogFormatMessage.Info(
+							"at: {0} Moving {1} to {2}",
+							subPath,
+							folderName,
+							destinationPath);
+
+						subFolder.MoveTo(destinationRootFolder);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Merge 2 stores together.
+		/// </summary>
+		/// <param name="sourcePstPath">The source PST path.</param>
+		/// <param name="destinationPstPath">The desination PST path.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task MergeStoresAsync(
+			string sourcePstPath, string destinationPstPath)
+		{
+			Store source = outlookAccount.GetStore(sourcePstPath);
+			Store destination = outlookAccount.GetStore(destinationPstPath);
+
+			await MergeStoresAsync(source, destination).ConfigureAwait(false);
+		}
+
+		/// <summary>
+		/// Merge 2 stores together.
+		/// </summary>
+		/// <param name="source">The source store.</param>
+		/// <param name="destination">The desination store.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task MergeStoresAsync(Store source, Store destination)
+		{
+			if (source != null && destination != null)
+			{
+				string sourcePath = GetStoreName(source);
+				string destinationPath = GetStoreName(destination);
+
+				LogFormatMessage.Info(
+					"Moving contents of {0} to {1}",
+					sourcePath,
+					destinationPath);
+
+				MAPIFolder sourceRootFolder = source.GetRootFolder();
+				MAPIFolder destinationRootFolder = destination.GetRootFolder();
+
+				int subFolderCount = sourceRootFolder.Folders.Count;
+
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int subIndex = subFolderCount; subIndex > 0; subIndex--)
+				{
+					MAPIFolder subFolder = sourceRootFolder.Folders[subIndex];
+					string folderName = subFolder.Name;
+
+					string subPath =
+						destinationPath + "/" + folderName;
+
+					bool folderExists = OutlookFolder.DoesFolderExist(
+						destinationRootFolder, folderName);
+
+					if (folderExists == true)
+					{
+						// Folder exists, so if just moving it, it will get
+						// renamed something FolderName (2), so need to merge.
+						MAPIFolder destinationSubFolder =
+							OutlookFolder.GetSubFolder(
+								destinationRootFolder, folderName);
+
+						OutlookFolder outlookFolder = new (outlookAccount);
+
+						await outlookFolder.MoveFolderContentsAsync(
+							subPath, subFolder, destinationSubFolder).
+								ConfigureAwait(false);
 
 						// Once all the items have been moved,
 						// now remove the folder.
@@ -601,6 +781,154 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Move folder.
+		/// </summary>
+		/// <param name="sourcePstPath">The source PST path.</param>
+		/// <param name="sourceFolderPath">The source folder path.</param>
+		/// <param name="destinationPstPath">The desination PST path.</param>
+		/// <param name="destinationFolderPath">The destination folder path.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task MoveFolderAsync(
+			string sourcePstPath,
+			string sourceFolderPath,
+			string destinationPstPath,
+			string destinationFolderPath)
+		{
+			Store source = outlookAccount.GetStore(sourcePstPath);
+			Store destination;
+
+			if (string.IsNullOrWhiteSpace(destinationPstPath) ||
+				destinationPstPath.Equals(
+					sourcePstPath, StringComparison.OrdinalIgnoreCase))
+			{
+				destination = source;
+			}
+			else
+			{
+				destination = outlookAccount.GetStore(destinationPstPath);
+			}
+
+			await MoveFolderAsync(
+				source, sourceFolderPath, destination, destinationFolderPath).
+					ConfigureAwait(false);
+		}
+
+		/// <summary>
+		/// Move folder.
+		/// </summary>
+		/// <param name="source">The source store.</param>
+		/// <param name="sourceFolderPath">The source folder path.</param>
+		/// <param name="destination">The destination store.</param>
+		/// <param name="destinationFolderPath">The destination folder path.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task MoveFolderAsync(
+			Store source,
+			string sourceFolderPath,
+			Store destination,
+			string destinationFolderPath)
+		{
+			if (source != null)
+			{
+				try
+				{
+					bool folderExists = OutlookFolder.DoesFolderExist(
+						source, sourceFolderPath);
+
+					// If source folder doesn't exist, there is nothing to do.
+					if (folderExists == true)
+					{
+						MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
+							source, sourceFolderPath);
+
+						MAPIFolder destinationParent = OutlookFolder.GetPathParent(
+							destination, destinationFolderPath);
+
+						folderExists = OutlookFolder.DoesFolderExist(
+							destination, destinationFolderPath);
+
+						string parentPath =
+							OutlookFolder.GetFolderPath(destinationParent);
+						string folderName = sourceFolder.Name;
+						string destinationName =
+							OutlookFolder.GetBaseFolderName(
+								destinationFolderPath);
+
+						if (folderExists == true)
+						{
+							MAPIFolder destinationFolder =
+								OutlookFolder.CreateFolderPath(
+									destination, destinationFolderPath);
+
+							OutlookFolder outlookFolder = new (outlookAccount);
+
+							LogFormatMessage.Info(
+								"at: {0} Moving contents of {1} to {2}",
+								parentPath,
+								folderName,
+								destinationName);
+
+							await outlookFolder.MoveFolderContentsAsync(
+								destinationFolderPath,
+								sourceFolder,
+								destinationFolder).ConfigureAwait(false);
+
+							// Once all the items have been moved, remove the folder.
+							OutlookFolder.SafeDelete(sourceFolder);
+						}
+						else
+						{
+							// Folder doesn't already exist, so just move it.
+							LogFormatMessage.Info(
+								"at: {0} Moving {1} to {2}",
+								parentPath,
+								folderName,
+								destinationName);
+
+							bool isRootFolder =
+								OutlookFolder.IsRootFolder(sourceFolder);
+
+							if (isRootFolder == true)
+							{
+								sourceFolder.MoveTo(destinationParent);
+							}
+							else
+							{
+								MAPIFolder sourceParent = sourceFolder.Parent;
+								string sourceParentId = sourceParent.EntryID;
+								string destinationParentId =
+									destinationParent.EntryID;
+
+								if (sourceParentId.Equals(
+									destinationParentId,
+									StringComparison.OrdinalIgnoreCase))
+								{
+									sourceFolder.Name = destinationName;
+								}
+								else
+								{
+									sourceFolder.MoveTo(destinationParent);
+
+									if (!sourceFolder.Name.Equals(
+										destinationName,
+										StringComparison.OrdinalIgnoreCase))
+									{
+										sourceFolder.Name = destinationName;
+									}
+								}
+							}
+						}
+					}
+				}
+				catch (COMException exception)
+				{
+					Log.Error(exception.ToString());
+				}
+			}
+		}
+
+		/// <summary>
 		/// Remove duplicates items from the given store.
 		/// </summary>
 		/// <param name="storePath">The path of the PST file to
@@ -668,6 +996,21 @@ namespace DigitalZenWorks.Email.ToolKit
 			Store store = outlookAccount.GetStore(pstFilePath);
 
 			int removedFolders = RemoveEmptyFolders(store);
+
+			return removedFolders;
+		}
+
+		/// <summary>
+		/// Remove all empty folders.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <returns>The count of removed folders.</returns>
+		public async Task<int> RemoveEmptyFoldersAsync(string pstFilePath)
+		{
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			int removedFolders =
+				await RemoveEmptyFoldersAsync(store).ConfigureAwait(false);
 
 			return removedFolders;
 		}

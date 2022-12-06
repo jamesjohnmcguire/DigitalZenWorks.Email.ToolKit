@@ -9,6 +9,7 @@ using Microsoft.Office.Interop.Outlook;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -173,6 +174,31 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Merge duplicate folders.
+		/// </summary>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task MergeFoldersAsync(bool dryRun)
+		{
+			OutlookStore outlookStorage = new (this);
+			uint totalFolders = 0;
+			int totalStores = session.Stores.Count;
+
+			for (int index = 1; index <= totalStores; index++)
+			{
+				Store store = session.Stores[index];
+
+				totalFolders += await outlookStorage.MergeFoldersAsync(
+					store, dryRun).ConfigureAwait(false);
+			}
+
+			Log.Info("Remove empty folder complete - total folders checked: " +
+				totalFolders);
+		}
+
+		/// <summary>
 		/// Remove duplicates items from default account.
 		/// </summary>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
@@ -206,6 +232,26 @@ namespace DigitalZenWorks.Email.ToolKit
 				Store store = session.Stores[index];
 
 				removedFolders += OutlookStore.RemoveEmptyFolders(store);
+			}
+
+			return removedFolders;
+		}
+
+		/// <summary>
+		/// Remove all empty folders.
+		/// </summary>
+		/// <returns>The count of removed folders.</returns>
+		public async Task<int> RemoveEmptyFoldersAsync()
+		{
+			int total = session.Stores.Count;
+			int removedFolders = 0;
+
+			for (int index = 1; index <= total; index++)
+			{
+				Store store = session.Stores[index];
+
+				removedFolders += await OutlookStore.RemoveEmptyFoldersAsync(
+					store).ConfigureAwait(false);
 			}
 
 			return removedFolders;

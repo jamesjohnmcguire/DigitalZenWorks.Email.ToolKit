@@ -15,6 +15,8 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -248,6 +250,145 @@ namespace DigitalZenWorks.Email.ToolKit
 			catch (COMException exception)
 			{
 				Log.Error(exception.ToString());
+			}
+		}
+
+		/// <summary>
+		/// Move item to destination folder.
+		/// </summary>
+		/// <param name="item">The item to move.</param>
+		/// <param name="destination">The destination folder.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public static async Task MoveitemAsync(
+			object item, MAPIFolder destination)
+		{
+			CancellationTokenSource source = new CancellationTokenSource();
+
+			try
+			{
+				source.CancelAfter(TimeSpan.FromSeconds(5));
+
+				switch (item)
+				{
+					case AppointmentItem appointmentItem:
+						await Task.Run(() =>
+							appointmentItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(appointmentItem);
+						break;
+					case ContactItem contactItem:
+						await Task.Run(() =>
+							contactItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(contactItem);
+						break;
+					case DistListItem distListItem:
+						await Task.Run(() =>
+							distListItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(distListItem);
+						break;
+					case DocumentItem documentItem:
+						await Task.Run(() =>
+							documentItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(documentItem);
+						break;
+					case JournalItem journalItem:
+						await Task.Run(() =>
+							journalItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(journalItem);
+						break;
+					case MailItem mailItem:
+						await Task.Run(() =>
+							mailItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(mailItem);
+						break;
+					case MeetingItem meetingItem:
+						await Task.Run(() =>
+							meetingItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(meetingItem);
+						break;
+					case NoteItem noteItem:
+						await Task.Run(() =>
+							noteItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(noteItem);
+						break;
+					case PostItem postItem:
+						await Task.Run(() =>
+							postItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(postItem);
+						break;
+					case RemoteItem remoteItem:
+						await Task.Run(() =>
+							remoteItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(remoteItem);
+						break;
+					case ReportItem reportItem:
+						await Task.Run(() =>
+							reportItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(reportItem);
+						break;
+					case TaskItem taskItem:
+						await Task.Run(() =>
+							taskItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskItem);
+						break;
+					case TaskRequestAcceptItem taskRequestAcceptItem:
+						await Task.Run(() =>
+							taskRequestAcceptItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestAcceptItem);
+						break;
+					case TaskRequestDeclineItem taskRequestDeclineItem:
+						await Task.Run(() =>
+							taskRequestDeclineItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestDeclineItem);
+						break;
+					case TaskRequestItem taskRequestItem:
+						await Task.Run(() =>
+							taskRequestItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestItem);
+						break;
+					case TaskRequestUpdateItem taskRequestUpdateItem:
+						await Task.Run(() =>
+							taskRequestUpdateItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestUpdateItem);
+						break;
+					default:
+						string message = "Folder item of unknown type";
+						if (item != null)
+						{
+							message += ": " + item.ToString();
+						}
+
+						Log.Warn(message);
+						break;
+				}
+
+				Marshal.ReleaseComObject(item);
+			}
+			catch (System.Exception exception) when
+				(exception is COMException ||
+				exception is OperationCanceledException)
+			{
+				Log.Error(exception.ToString());
+			}
+			finally
+			{
+				source.Dispose();
 			}
 		}
 

@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -32,6 +33,17 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// the delegate.</param>
 	/// <returns>A value processed from the delegate.</returns>
 	public delegate int FolderActionConditional(
+		string path, MAPIFolder folder, bool conditional);
+
+	/// <summary>
+	/// Delegate for a folder.
+	/// </summary>
+	/// <param name="path">The path of the folder.</param>
+	/// <param name="folder">The folder to act upon.</param>
+	/// <param name="conditional">A conditional clause to use within
+	/// the delegate.</param>
+	/// <returns>A value processed from the delegate.</returns>
+	public delegate Task<int> FolderActionConditionalAsync(
 		string path, MAPIFolder folder, bool conditional);
 
 	/// <summary>
@@ -700,6 +712,84 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Recurse folders.
+		/// </summary>
+		/// <param name="path">The path of the folder.</param>
+		/// <param name="folder">The folder to check.</param>
+		/// <param name="condition">A conditional to check.</param>
+		/// <param name="folderAction">The delegate to act upon.</param>
+		/// <returns>A value processed from the delegate.</returns>
+		public static async Task<int> RecurseFoldersAsync(
+			string path,
+			MAPIFolder folder,
+			bool condition,
+			FolderActionConditionalAsync folderAction)
+		{
+			int processed = 0;
+
+			if (folder != null && folderAction != null)
+			{
+				try
+				{
+					bool isDeletedFolder = IsDeletedFolder(folder);
+
+					// Skip processing of system deleted items folder.
+					if (isDeletedFolder == false)
+					{
+						int folderCount = folder.Folders.Count;
+
+						// Office uses 1 based indexes from VBA.
+						// Iterate in reverse order as the group may change.
+						for (int index = folderCount; index > 0; index--)
+						{
+							try
+							{
+								MAPIFolder subFolder = folder.Folders[index];
+
+								string name = subFolder.Name;
+								string subPath = path + "/" + name;
+
+								processed += await RecurseFoldersAsync(
+									subPath,
+									subFolder,
+									condition,
+									folderAction).ConfigureAwait(false);
+
+								Marshal.ReleaseComObject(subFolder);
+							}
+							catch (COMException exception)
+							{
+								string message = string.Format(
+									CultureInfo.InvariantCulture,
+									"Exception at: {0} index: {1}",
+									path,
+									index.ToString(CultureInfo.InvariantCulture));
+
+								Log.Error(message);
+								Log.Error(exception.ToString());
+							}
+						}
+
+						await folderAction(path, folder, condition).
+							ConfigureAwait(false);
+					}
+				}
+				catch (COMException exception)
+				{
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Exception at: {0}",
+						path);
+
+					Log.Error(message);
+					Log.Error(exception.ToString());
+				}
+			}
+
+			return processed;
+		}
+
+		/// <summary>
 		/// Remove all empty folders.
 		/// </summary>
 		/// <param name="path">The path of the curent folder.</param>
@@ -716,6 +806,30 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				removedFolders =
 					RecurseFolders(path, folder, condition, RemoveEmptyFolder);
+			}
+
+			return removedFolders;
+		}
+
+		/// <summary>
+		/// Remove all empty folders.
+		/// </summary>
+		/// <param name="path">The path of the curent folder.</param>
+		/// <param name="folder">The current folder.</param>
+		/// <param name="condition">A condition to check for. Currently
+		/// unused. Set here to match delegate signature.</param>
+		/// <returns>The count of removed folders.</returns>
+		public static async Task<int> RemoveEmptyFoldersAsync(
+			string path, MAPIFolder folder, bool condition)
+		{
+			int removedFolders = 0;
+
+			if (folder != null)
+			{
+				removedFolders = await
+					RecurseFoldersAsync(
+						path, folder, condition, RemoveEmptyFolderAsync).
+						ConfigureAwait(false);
 			}
 
 			return removedFolders;
@@ -850,6 +964,26 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Merge folders.
+		/// </summary>
+		/// <param name="path">The path of the curent folder.</param>
+		/// <param name="folder">The current folder.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task MergeFoldersAsync(
+			string path, MAPIFolder folder, bool dryRun)
+		{
+			if (folder != null)
+			{
+				await RecurseFoldersAsync(
+					path, folder, dryRun, MergeThisFolderAsync).
+					ConfigureAwait(false);
+			}
+		}
+
+		/// <summary>
 		/// Move the folder contents.
 		/// </summary>
 		/// <param name="path">Path of parent folder.</param>
@@ -871,6 +1005,35 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MoveFolderItems(source, destination);
 				MoveSubFolders(path, source, destination);
+			}
+		}
+
+		/// <summary>
+		/// Move the folder contents.
+		/// </summary>
+		/// <param name="path">Path of parent folder.</param>
+		/// <param name="source">The source folder.</param>
+		/// <param name="destination">The destination folder.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task MoveFolderContentsAsync(
+			string path, MAPIFolder source, MAPIFolder destination)
+		{
+			if (source != null && destination != null)
+			{
+				string sourceName = source.Name;
+				string destinationName = destination.Name;
+
+				LogFormatMessage.Info(
+					"{0}: Merging {1} into {2}",
+					path,
+					sourceName,
+					destinationName);
+
+				await
+					MoveFolderItemsAsync(source, destination).ConfigureAwait(false);
+				await MoveSubFoldersAsync(path, source, destination).
+					ConfigureAwait(false);
 			}
 		}
 
@@ -935,7 +1098,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				@"(?<=[a-zA-Z0-9&,])\s{2,3}[0-9a-fA-F]{2,3}$",
 
 				// Matches Something ab2 (at least 1 space and 3 hex numbers)
-				@"(?<=[a-zA-Z0-9&,])\s+[0-9a-fA-F]{3}$",
+				@"(?<=[a-zA-Z0-9&-,])\s+[0-9a-fA-F]{3}$",
 
 				// Matches Something@ 896
 				// (at least 1 space and 2 or 3 hex numbers)
@@ -1236,6 +1399,35 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		private static async Task MoveFolderItemsAsync(
+			MAPIFolder source, MAPIFolder destination)
+		{
+			Items items = source.Items;
+
+			int ascendingCount = 1;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int index = items.Count; index > 0; index--)
+			{
+				int sectionIndicator = ascendingCount % 100;
+
+				if (ascendingCount == 1 || sectionIndicator == 0)
+				{
+					Log.Info(
+						"Moving Items from: " +
+						ascendingCount.ToString(CultureInfo.InvariantCulture));
+				}
+
+				object item = items[index];
+
+				await MapiItem.MoveitemAsync(item, destination).
+					ConfigureAwait(false);
+
+				ascendingCount++;
+			}
+		}
+
 		private static int RemoveEmptyFolder(
 			string path, MAPIFolder folder, bool condition)
 		{
@@ -1248,6 +1440,20 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return count;
+		}
+
+		private static Task<int> RemoveEmptyFolderAsync(
+			string path, MAPIFolder folder, bool condition)
+		{
+			int count = 0;
+			bool isDeleted = SafeDelete(folder);
+
+			if (isDeleted == true)
+			{
+				count = 1;
+			}
+
+			return Task.FromResult(count);
 		}
 
 		private static string RemoveStoreFromPath(string path)
@@ -1273,8 +1479,22 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (!string.IsNullOrWhiteSpace(duplicatePattern))
 			{
-				MergeDuplicateFolder(
-					path, folder, duplicatePattern, dryRun);
+				MergeDuplicateFolder(path, folder, duplicatePattern, dryRun);
+			}
+		}
+
+		private async Task CheckForDuplicateFoldersAsync(
+			string path, MAPIFolder folder, bool dryRun)
+		{
+			string folderName = folder.Name;
+
+			string duplicatePattern = CheckFolderNameNormalization(folderName);
+
+			if (!string.IsNullOrWhiteSpace(duplicatePattern))
+			{
+				await MergeDuplicateFolderAsync(
+					path, folder, duplicatePattern, dryRun).
+						ConfigureAwait(false);
 			}
 		}
 
@@ -1378,6 +1598,67 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		private async Task MergeDuplicateFolderAsync(
+			string path,
+			MAPIFolder folder,
+			string duplicatePattern,
+			bool dryRun)
+		{
+			string newFolderName =
+				GetNormalizedFolderName(folder.Name, duplicatePattern);
+
+			bool folderExists = DoesSiblingFolderExist(folder, newFolderName);
+
+			string source = folder.Name;
+
+			if (folderExists == true)
+			{
+				if (dryRun == true)
+				{
+					Log.Info(
+						"WOULD merge " + source + " into " + newFolderName);
+				}
+				else
+				{
+					MAPIFolder parentFolder = folder.Parent;
+
+					// Move items
+					MAPIFolder destination =
+						parentFolder.Folders[newFolderName];
+
+					await MoveFolderContentsAsync(path, folder, destination).
+						ConfigureAwait(false);
+
+					// Once all the items have been moved, remove the folder.
+					SafeDelete(folder);
+				}
+			}
+			else
+			{
+				if (dryRun == true)
+				{
+					Log.Info("WOULD move " + source + " to " + newFolderName);
+				}
+				else
+				{
+					try
+					{
+						Log.Info("Moving " + source + " to " + newFolderName);
+						folder.Name = newFolderName;
+					}
+					catch (COMException)
+					{
+						string message = string.Format(
+							CultureInfo.InvariantCulture,
+							"Failed renaming {0} to {1} with COMException",
+							folder.Name,
+							newFolderName);
+						Log.Error(message);
+					}
+				}
+			}
+		}
+
 		private void MergeFolderWithParent(
 			string path, MAPIFolder folder, bool dryRun)
 		{
@@ -1394,6 +1675,30 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				path = GetFolderPath(parent);
 				MoveFolderContents(path, folder, parent);
+
+				// Once all the items have been moved,
+				// now remove the folder.
+				SafeDelete(folder);
+			}
+		}
+
+		private async Task MergeFolderWithParentAsync(
+			string path, MAPIFolder folder, bool dryRun)
+		{
+			string name = folder.Name;
+			MAPIFolder parent = folder.Parent;
+
+			if (dryRun == true)
+			{
+				Log.Info("At: " + path + " WOULD Move into parent: " + name);
+			}
+			else
+			{
+				Log.Info("At: " + path + " Moving into parent: " + name);
+
+				path = GetFolderPath(parent);
+				await MoveFolderContentsAsync(path, folder, parent).
+					ConfigureAwait(false);
 
 				// Once all the items have been moved,
 				// now remove the folder.
@@ -1435,6 +1740,42 @@ namespace DigitalZenWorks.Email.ToolKit
 			return processed;
 		}
 
+		private async Task<int> MergeThisFolderAsync(
+			string path, MAPIFolder folder, bool dryRun)
+		{
+			int processed = 0;
+			await CheckForDuplicateFoldersAsync(path, folder, dryRun).
+				ConfigureAwait(false);
+
+			bool removed = MergeDeletedItemsFolder(folder);
+
+			if (removed == false)
+			{
+				bool topLevel = IsTopLevelFolder(folder);
+
+				if (topLevel == false)
+				{
+					string name = folder.Name;
+					MAPIFolder parent = folder.Parent;
+					string parentName = parent.Name;
+
+					if (parentName.Equals(
+						name, StringComparison.OrdinalIgnoreCase))
+					{
+						await MergeFolderWithParentAsync(path, folder, dryRun).
+							ConfigureAwait(false);
+						processed = 1;
+					}
+				}
+			}
+			else
+			{
+				processed = 1;
+			}
+
+			return processed;
+		}
+
 		private void MoveSubFolders(
 			string path, MAPIFolder source, MAPIFolder destination)
 		{
@@ -1445,6 +1786,20 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder subFolder = source.Folders[index];
 
 				MoveFolder(path, subFolder, destination, index);
+			}
+		}
+
+		private async Task MoveSubFoldersAsync(
+			string path, MAPIFolder source, MAPIFolder destination)
+		{
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int index = source.Folders.Count; index > 0; index--)
+			{
+				MAPIFolder subFolder = source.Folders[index];
+
+				await MoveFolderAsync(path, subFolder, destination, index).
+					ConfigureAwait(false);
 			}
 		}
 
@@ -1493,6 +1848,59 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MoveFolderContents(
 					subPath, source, destinationSubFolder);
+
+				// Once all the items have been moved,
+				// now remove the folder.
+				RemoveFolder(subPath, index, source, false);
+			}
+		}
+
+		private async Task MoveFolderAsync(
+			string path, MAPIFolder source, MAPIFolder destination, int index)
+		{
+			string destinationName = destination.Name;
+
+			string name = source.Name;
+			MAPIFolder destinationSubFolder = GetSubFolder(destination, name);
+
+			if (destinationSubFolder == null)
+			{
+				// Folder doesn't already exist, so just move it.
+				LogFormatMessage.Info(
+					"at: {0} Moving {1} to {2}",
+					path,
+					name,
+					destinationName);
+
+				try
+				{
+					// In some rare occasions, the folder is actually already
+					// deleted, but isn't acknowledged in time, but by the
+					// time the process gets to here, it seems deleted. Thus,
+					// trying to move the folder is going to cause an
+					// exception.  Just catch it and move on.
+					source.MoveTo(destination);
+				}
+				catch (COMException exception)
+				{
+					Log.Warn(exception.ToString());
+				}
+			}
+			else
+			{
+				// Folder exists, so if just moving it, it will get
+				// renamed something FolderName (2), so need to merge.
+				string subPath = path + "/" + source.Name;
+
+				LogFormatMessage.Info(
+					"at: {0} Merging {1} to {2}",
+					subPath,
+					name,
+					destinationName);
+
+				await MoveFolderContentsAsync(
+					subPath, source, destinationSubFolder).
+						ConfigureAwait(false);
 
 				// Once all the items have been moved,
 				// now remove the folder.

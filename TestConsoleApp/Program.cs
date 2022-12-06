@@ -255,7 +255,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, true);
+			outlookFolder.MergeFoldersAsync(path, rootFolder, true);
 
 			// Clean up
 			Marshal.ReleaseComObject(subFolder);

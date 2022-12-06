@@ -19,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using CommonLogging = Common.Logging;
 
 [assembly: CLSCompliant(true)]
@@ -91,10 +92,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = MergeFolders(command);
 							break;
 						case "merge-stores":
-							result = MergeStores(command);
+							result = MergeStores(command).Result;
 							break;
 						case "move-folder":
-							MoveFolder(command);
+							MoveFolder(command).Start();
 							break;
 						case "remove-duplicates":
 							result = RemoveDuplicates(command);
@@ -609,17 +610,17 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string pstFile = command.Parameters[0];
 
-				outlookStore.MergeFolders(pstFile, dryRun);
+				outlookStore.MergeFoldersAsync(pstFile, dryRun).Start();
 			}
 			else
 			{
-				outlookAccount.MergeFolders(dryRun);
+				outlookAccount.MergeFoldersAsync(dryRun).Start();
 			}
 
 			return 0;
 		}
 
-		private static int MergeStores(Command command)
+		private static async Task<int> MergeStores(Command command)
 		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
@@ -627,12 +628,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			string sourcePst = command.Parameters[0];
 			string destinationPst = command.Parameters[1];
 
-			outlookStore.MergeStores(sourcePst, destinationPst);
+			await outlookStore.MergeStoresAsync(sourcePst, destinationPst).
+				ConfigureAwait(false);
 
 			return 0;
 		}
 
-		private static int MoveFolder(Command command)
+		private static async Task<int> MoveFolder(Command command)
 		{
 			string sourcePst = command.Parameters[0];
 			string sourcePath = command.Parameters[1];
@@ -645,11 +647,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookStore outlookStore = new (outlookAccount);
 
-			outlookStore.MoveFolder(
+			await outlookStore.MoveFolderAsync(
 				sourcePst,
 				sourcePath,
 				destinationPst,
-				destinationPath);
+				destinationPath).ConfigureAwait(false);
 
 			return 0;
 		}
@@ -694,11 +696,12 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				OutlookStore outlookStore = new (outlookAccount);
 				string pstFilePath = command.Parameters[0];
 
-				removedFolders = outlookStore.RemoveEmptyFolders(pstFilePath);
+				removedFolders =
+					outlookStore.RemoveEmptyFoldersAsync(pstFilePath).Result;
 			}
 			else
 			{
-				removedFolders = outlookAccount.RemoveEmptyFolders();
+				removedFolders = outlookAccount.RemoveEmptyFoldersAsync().Result;
 			}
 
 			Console.WriteLine("Folder removed: " +
