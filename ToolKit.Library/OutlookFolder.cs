@@ -288,32 +288,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Get the item's synopses.
-		/// </summary>
-		/// <param name="mailItem">The MailItem to check.</param>
-		/// <returns>The synoses of the item.</returns>
-		public static string GetMailItemSynopses(MailItem mailItem)
-		{
-			string synopses = null;
-
-			if (mailItem != null)
-			{
-				string sentOn = mailItem.SentOn.ToString(
-					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-				synopses = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0}: From: {1}: {2} Subject: {3}",
-					sentOn,
-					mailItem.SenderName,
-					mailItem.SenderEmailAddress,
-					mailItem.Subject);
-			}
-
-			return synopses;
-		}
-
-		/// <summary>
 		/// Get the parent folder of the given path.
 		/// </summary>
 		/// <param name="store">The PST file store to use.</param>
@@ -1137,7 +1111,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string baseSynopses, MailItem mailItem)
 		{
 			bool valid = true;
-			string duplicateSynopses = GetMailItemSynopses(mailItem);
+			string duplicateSynopses = MapiItem.GetItemSynopses(mailItem);
 
 			if (!duplicateSynopses.Equals(
 				baseSynopses, StringComparison.Ordinal))
@@ -1508,7 +1482,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			NameSpace session = outlookAccount.Session;
 
 			MailItem mailItem = session.GetItemFromID(keeper);
-			string keeperSynopses = GetMailItemSynopses(mailItem);
+			string keeperSynopses = MapiItem.GetItemSynopses(mailItem);
 
 			string message = string.Format(
 				CultureInfo.InvariantCulture,

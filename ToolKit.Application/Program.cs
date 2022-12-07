@@ -523,7 +523,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						outlookStore.GetMailItemFromEntryId(entryId1);
 
 					string synopses =
-						OutlookFolder.GetMailItemSynopses(mailItem);
+						MapiItem.GetItemSynopses(mailItem);
 
 					string message = string.Format(
 						CultureInfo.InvariantCulture,

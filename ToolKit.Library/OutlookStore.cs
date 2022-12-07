@@ -250,7 +250,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			NameSpace session = outlookAccount.Session;
 			MailItem mailItem = session.GetItemFromID(entryId);
-			string synopses = OutlookFolder.GetMailItemSynopses(mailItem);
+			string synopses = MapiItem.GetItemSynopses(mailItem);
 
 			return synopses;
 		}
