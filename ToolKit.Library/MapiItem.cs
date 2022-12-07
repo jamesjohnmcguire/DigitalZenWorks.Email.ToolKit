@@ -29,6 +29,45 @@ namespace DigitalZenWorks.Email.ToolKit
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		/// <summary>
+		/// Delete duplicate item.
+		/// </summary>
+		/// <param name="session">The Outlook session.</param>
+		/// <param name="duplicateId">The duplicate id.</param>
+		/// <param name="keeperSynopses">The keeper synopses.</param>
+		/// <param name="dryRun">Indicates if this is a dry run or not.</param>
+		public static void DeleteDuplicate(
+			NameSpace session,
+			string duplicateId,
+			string keeperSynopses,
+			bool dryRun)
+		{
+			if (session != null)
+			{
+				try
+				{
+					MailItem mailItem = session.GetItemFromID(duplicateId);
+
+					if (mailItem != null)
+					{
+						bool isValidDuplicate =
+							DoubleCheckDuplicate(keeperSynopses, mailItem);
+
+						if (isValidDuplicate == true && dryRun == false)
+						{
+							mailItem.Delete();
+						}
+
+						Marshal.ReleaseComObject(mailItem);
+					}
+				}
+				catch (COMException exception)
+				{
+					Log.Error(exception.ToString());
+				}
+			}
+		}
+
+		/// <summary>
 		/// Deletes the given item.
 		/// </summary>
 		/// <param name="item">The item to delete.</param>
@@ -432,6 +471,24 @@ namespace DigitalZenWorks.Email.ToolKit
 				header, pattern, string.Empty, RegexOptions.ExplicitCapture);
 
 			return header;
+		}
+
+		private static bool DoubleCheckDuplicate(
+			string baseSynopses, MailItem mailItem)
+		{
+			bool valid = true;
+			string duplicateSynopses = MapiItem.GetItemSynopses(mailItem);
+
+			if (!duplicateSynopses.Equals(
+				baseSynopses, StringComparison.Ordinal))
+			{
+				Log.Error("Warning! Duplicate Items Don't Seem to Match");
+				Log.Error("Not Matching Item: " + duplicateSynopses);
+
+				valid = false;
+			}
+
+			return valid;
 		}
 
 		private static byte[] GetActions(MailItem mailItem)

@@ -1107,24 +1107,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return folderExists;
 		}
 
-		private static bool DoubleCheckDuplicate(
-			string baseSynopses, MailItem mailItem)
-		{
-			bool valid = true;
-			string duplicateSynopses = MapiItem.GetItemSynopses(mailItem);
-
-			if (!duplicateSynopses.Equals(
-				baseSynopses, StringComparison.Ordinal))
-			{
-				Log.Error("Warning! Duplicate Items Don't Seem to Match");
-				Log.Error("Not Matching Item: " + duplicateSynopses);
-
-				valid = false;
-			}
-
-			return valid;
-		}
-
 		private static IDictionary<string, IList<string>> GetFolderHashTable(
 			string path, MAPIFolder folder)
 		{
@@ -1493,20 +1475,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			foreach (string duplicateId in duplicateSet)
 			{
-				mailItem = session.GetItemFromID(duplicateId);
-
-				if (mailItem != null)
-				{
-					bool isValidDuplicate =
-						DoubleCheckDuplicate(keeperSynopses, mailItem);
-
-					if (isValidDuplicate == true && dryRun == false)
-					{
-						mailItem.Delete();
-					}
-
-					Marshal.ReleaseComObject(mailItem);
-				}
+				MapiItem.DeleteDuplicate(
+					session, duplicateId, keeperSynopses, dryRun);
 			}
 
 			return totalDuplicates;
