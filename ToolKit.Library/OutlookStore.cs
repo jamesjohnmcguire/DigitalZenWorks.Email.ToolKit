@@ -8,6 +8,7 @@ using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -711,23 +712,11 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (folderExists == true)
 						{
-							MAPIFolder destinationFolder =
-								OutlookFolder.CreateFolderPath(
-									destination, destinationFolderPath);
-
-							OutlookFolder outlookFolder = new (outlookAccount);
-
-							LogFormatMessage.Info(
-								"at: {0} Moving contents of {1} to {2}",
-								parentPath,
-								folderName,
-								destinationName);
-
-							outlookFolder.MoveFolderContents(
-								destinationFolderPath, sourceFolder, destinationFolder);
-
-							// Once all the items have been moved, remove the folder.
-							OutlookFolder.SafeDelete(sourceFolder);
+							MoveExistingFolder(
+								source,
+								sourceFolderPath,
+								destination,
+								destinationFolderPath);
 						}
 						else
 						{
@@ -1059,6 +1048,43 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MapiItem.DeleteItem(item);
 			}
+		}
+
+		private void MoveExistingFolder(
+			Store source,
+			string sourceFolderPath,
+			Store destination,
+			string destinationFolderPath)
+		{
+			MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
+				source, sourceFolderPath);
+
+			MAPIFolder destinationFolder =
+				OutlookFolder.CreateFolderPath(
+					destination, destinationFolderPath);
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+
+			MAPIFolder destinationParent = OutlookFolder.GetPathParent(
+				destination, destinationFolderPath);
+			string parentPath =
+				OutlookFolder.GetFolderPath(destinationParent);
+			string folderName = sourceFolder.Name;
+			string destinationName =
+				OutlookFolder.GetBaseFolderName(
+					destinationFolderPath);
+
+			LogFormatMessage.Info(
+				"at: {0} Moving contents of {1} to {2}",
+				parentPath,
+				folderName,
+				destinationName);
+
+			outlookFolder.MoveFolderContents(
+				destinationFolderPath, sourceFolder, destinationFolder);
+
+			// Once all the items have been moved, remove the folder.
+			OutlookFolder.SafeDelete(sourceFolder);
 		}
 	}
 }
