@@ -39,7 +39,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		/// </summary>
 		/// <param name="arguments">The arguments given to the program.</param>
 		/// <returns>A value indicating success or not.</returns>
-		public static int Main(string[] arguments)
+		public static async Task<int> Main(string[] arguments)
 		{
 			int result = -1;
 
@@ -89,19 +89,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							result = ListTotalDuplicates(command);
 							break;
 						case "merge-folders":
-							result = MergeFolders(command);
+							result = await
+								MergeFolders(command).ConfigureAwait(false);
 							break;
 						case "merge-stores":
-							result = MergeStores(command).Result;
+							result = await
+								MergeStores(command).ConfigureAwait(false);
 							break;
 						case "move-folder":
-							MoveFolder(command).Start();
+							await MoveFolder(command).ConfigureAwait(false);
 							break;
 						case "remove-duplicates":
 							result = RemoveDuplicates(command);
 							break;
 						case "remove-empty-folders":
-							result = RemoveEmptyFolders(command);
+							result = await RemoveEmptyFolders(command).
+								ConfigureAwait(false);
 							break;
 						default:
 						case "help":
@@ -599,7 +602,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				new CommonLogging.Serilog.SerilogFactoryAdapter();
 		}
 
-		private static int MergeFolders(Command command)
+		private static async Task<int> MergeFolders(Command command)
 		{
 			bool dryRun = command.DoesOptionExist("n", "dryrun");
 
@@ -610,11 +613,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string pstFile = command.Parameters[0];
 
-				outlookStore.MergeFoldersAsync(pstFile, dryRun).Start();
+				await outlookStore.MergeFoldersAsync(pstFile, dryRun).
+					ConfigureAwait(false);
 			}
 			else
 			{
-				outlookAccount.MergeFoldersAsync(dryRun).Start();
+				await outlookAccount.MergeFoldersAsync(dryRun).
+					ConfigureAwait(false);
 			}
 
 			return 0;
@@ -685,7 +690,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return 0;
 		}
 
-		private static int RemoveEmptyFolders(Command command)
+		private static async Task<int> RemoveEmptyFolders(Command command)
 		{
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 
@@ -696,12 +701,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				OutlookStore outlookStore = new (outlookAccount);
 				string pstFilePath = command.Parameters[0];
 
-				removedFolders =
-					outlookStore.RemoveEmptyFoldersAsync(pstFilePath).Result;
+				removedFolders = await outlookStore.RemoveEmptyFoldersAsync(
+					pstFilePath).ConfigureAwait(false);
 			}
 			else
 			{
-				removedFolders = outlookAccount.RemoveEmptyFoldersAsync().Result;
+				removedFolders = await
+					outlookAccount.RemoveEmptyFoldersAsync().
+						ConfigureAwait(false);
 			}
 
 			Console.WriteLine("Folder removed: " +
