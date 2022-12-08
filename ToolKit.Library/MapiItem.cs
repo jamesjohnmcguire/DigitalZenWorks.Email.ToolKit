@@ -8,6 +8,7 @@ using Common.Logging;
 using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -169,12 +170,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static string GetItemHash(string path, MailItem mailItem)
 		{
 			string hashBase64 = null;
+			byte[] finalBuffer = null;
 
 			try
 			{
 				if (mailItem != null)
 				{
-					byte[] finalBuffer = GetItemBytes(path, mailItem);
+					finalBuffer = GetItemBytes(path, mailItem);
 
 					using SHA256 hasher = SHA256.Create();
 
@@ -193,6 +195,10 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				LogException(path, string.Empty, mailItem);
 				Log.Error(exception.ToString());
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(finalBuffer);
 			}
 
 			return hashBase64;
@@ -1014,7 +1020,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						strings,
 						userProperties);
 
-					finalBuffer = new byte[bufferSize];
+					finalBuffer = ArrayPool<byte>.Shared.Rent((int)bufferSize);
 
 					// combine the parts
 					long currentIndex = BitBytes.ArrayCopyConditional(
