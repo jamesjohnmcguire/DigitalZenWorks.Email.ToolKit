@@ -718,7 +718,7 @@ namespace DigitalZenWorks.Email.ToolKit
 									destination, destinationFolderPath);
 
 							MoveExistingFolder(
-								sourceFolder, destinationFolder);
+								sourceFolder, destinationFolder, destinationName);
 						}
 						else
 						{
@@ -853,8 +853,9 @@ namespace DigitalZenWorks.Email.ToolKit
 									destination, destinationFolderPath);
 
 							await MoveExistingFolderAsync(
-								sourceFolder, destinationFolder).
-								ConfigureAwait(false);
+								sourceFolder,
+								destinationFolder,
+								destinationName).ConfigureAwait(false);
 						}
 						else
 						{
@@ -1042,27 +1043,71 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private void MoveExistingFolder(
 			MAPIFolder sourceFolder,
-			MAPIFolder destinationFolder)
+			MAPIFolder destinationFolder,
+			string destinationName)
 		{
-			OutlookFolder outlookFolder = new (outlookAccount);
+			if (sourceFolder.EntryID.Equals(
+				destinationFolder.EntryID, StringComparison.OrdinalIgnoreCase))
+			{
+				// Special case: If the names have different case-sensitivity,
+				// rename to requested.
+				if (sourceFolder.Name.Equals(
+					destinationName,
+					StringComparison.OrdinalIgnoreCase))
+				{
+					sourceFolder.Name = destinationName;
+				}
+				else
+				{
+					Log.Warn("Not moving folder to itself");
+				}
+			}
+			else
+			{
+				OutlookFolder outlookFolder = new (outlookAccount);
 
-			outlookFolder.MoveFolderContents(sourceFolder, destinationFolder);
+				outlookFolder.MoveFolderContents(
+					sourceFolder, destinationFolder);
 
-			// Once all the items have been moved, remove the folder.
-			OutlookFolder.SafeDelete(sourceFolder);
+				// Once all the items have been moved, remove the folder.
+				OutlookFolder.SafeDelete(sourceFolder);
+			}
 		}
 
 		private async Task MoveExistingFolderAsync(
 			MAPIFolder sourceFolder,
-			MAPIFolder destinationFolder)
+			MAPIFolder destinationFolder,
+			string destinationName)
 		{
-			OutlookFolder outlookFolder = new (outlookAccount);
+			if (sourceFolder.EntryID.Equals(
+				destinationFolder.EntryID, StringComparison.OrdinalIgnoreCase))
+			{
+				// Special case: If the names have different case-sensitivity,
+				// rename to requested.
+				if (sourceFolder.Name.Equals(
+						destinationName,
+						StringComparison.OrdinalIgnoreCase) &&
+					!sourceFolder.Name.Equals(
+					destinationName,
+					StringComparison.Ordinal))
+				{
+					sourceFolder.Name = destinationName;
+				}
+				else
+				{
+					Log.Warn("Not moving folder to itself");
+				}
+			}
+			else
+			{
+				OutlookFolder outlookFolder = new (outlookAccount);
 
-			await outlookFolder.MoveFolderContentsAsync(
-				sourceFolder, destinationFolder).ConfigureAwait(false);
+				await outlookFolder.MoveFolderContentsAsync(
+					sourceFolder, destinationFolder).ConfigureAwait(false);
 
-			// Once all the items have been moved, remove the folder.
-			OutlookFolder.SafeDelete(sourceFolder);
+				// Once all the items have been moved, remove the folder.
+				OutlookFolder.SafeDelete(sourceFolder);
+			}
 		}
 	}
 }
