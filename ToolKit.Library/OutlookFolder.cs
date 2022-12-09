@@ -8,6 +8,7 @@ using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -999,6 +1000,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				string sourceName = source.Name;
 				string destinationName = destination.Name;
 
+				string destinationPath = GetFolderPath(destination);
+				string destinationParentPath = GetFolderPath(destination);
+
 				LogFormatMessage.Info(
 					"{0}: Merging {1} into {2}",
 					destinationPath,
@@ -1668,7 +1672,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				Log.Info("At: " + path + " Moving into parent: " + name);
 
-				path = GetFolderPath(parent);
 				await MoveFolderContentsAsync(folder, parent).
 					ConfigureAwait(false);
 
@@ -1875,7 +1878,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					destinationName);
 
 				await MoveFolderContentsAsync(source, destinationSubFolder).
-						ConfigureAwait(false);
+					ConfigureAwait(false);
 
 				// Once all the items have been moved,
 				// now remove the folder.
