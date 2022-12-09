@@ -219,7 +219,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				path += "/" + subFolder.Name;
 
-				OutlookFolder.RemoveFolder(path, index, subFolder, force);
+				OutlookFolder.RemoveFolder(subFolder, index, force);
 			}
 		}
 
@@ -529,7 +529,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						if (isReserved == false)
 						{
 							OutlookFolder.RemoveFolder(
-								subPath, subIndex, subFolder, false);
+								subFolder, subIndex, false);
 						}
 					}
 					else
@@ -622,7 +622,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						if (isReserved == false)
 						{
 							OutlookFolder.RemoveFolder(
-								subPath, subIndex, subFolder, false);
+								subFolder, subIndex, false);
 						}
 					}
 					else

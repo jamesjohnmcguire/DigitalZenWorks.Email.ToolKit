@@ -830,38 +830,47 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Remove folder from PST store.
 		/// </summary>
-		/// <param name="path">The path of current folder.</param>
+		/// <param name="folder">The folder to remove.</param>
 		/// <param name="subFolderIndex">The index of the sub-folder.</param>
-		/// <param name="subFolder">The sub-folder.</param>
 		/// <param name="force">Whether to force the removal.</param>
 		public static void RemoveFolder(
-			string path,
+			MAPIFolder folder,
 			int subFolderIndex,
-			MAPIFolder subFolder,
 			bool force)
 		{
-			if (subFolder != null)
+			if (folder != null)
 			{
-				// Perhaps because interaction through COM interop, the count
-				// values sometimes seem a bit behind, so pause a little bit
-				// before moving on.
-				System.Threading.Thread.Sleep(400);
+				string path = GetFolderPath(folder);
 
-				if (subFolder.Folders.Count > 0 || subFolder.Items.Count > 0)
+				bool isReserved = IsReservedFolder(folder);
+
+				if (isReserved == false)
 				{
-					Log.Warn("Attempting to remove non empty folder: " + path);
-				}
+					// Perhaps because interaction through COM interop, the count
+					// values sometimes seem a bit behind, so pause a little bit
+					// before moving on.
+					System.Threading.Thread.Sleep(400);
 
-				if (force == true || (subFolder.Folders.Count == 0 &&
-					subFolder.Items.Count == 0))
-				{
-					Log.Info("Removing empty folder: " + path);
+					bool empty = true;
+					string message = "Removing empty folder: " + path;
 
-					bool isReserved = IsReservedFolder(subFolder);
-
-					if (isReserved == false)
+					if (folder.Folders.Count > 0 || folder.Items.Count > 0)
 					{
-						MAPIFolder parentFolder = subFolder.Parent;
+						Log.Warn(
+							"Attempting to remove non empty folder: " + path);
+						empty = false;
+					}
+
+					if (force == true)
+					{
+						message = "Forcing removal of folder: " + path;
+					}
+
+					if (force == true || empty == true)
+					{
+						Log.Info(message);
+
+						MAPIFolder parentFolder = GetParent(folder);
 
 						parentFolder.Folders.Remove(subFolderIndex);
 					}
@@ -1813,7 +1822,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				// Once all the items have been moved,
 				// now remove the folder.
-				RemoveFolder(subPath, index, source, false);
+				RemoveFolder(source, index, false);
 			}
 		}
 
@@ -1866,7 +1875,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				// Once all the items have been moved,
 				// now remove the folder.
-				RemoveFolder(subPath, index, source, false);
+				RemoveFolder(source, index, false);
 			}
 		}
 
