@@ -288,6 +288,24 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the current folder's parent.
+		/// </summary>
+		/// <param name="folder">The current folder.</param>
+		/// <returns>The parent folder.</returns>
+		public static MAPIFolder GetParent(MAPIFolder folder)
+		{
+			MAPIFolder parent = null;
+
+			if (folder != null && folder.Parent is not null &&
+				folder.Parent is MAPIFolder)
+			{
+				parent = folder.Parent;
+			}
+
+			return parent;
+		}
+
+		/// <summary>
 		/// Get the parent folder of the given path.
 		/// </summary>
 		/// <param name="store">The PST file store to use.</param>
