@@ -185,7 +185,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						}
 					}
 
-					currentFolder = GetSubFolder(currentFolder, part, true);
+					currentFolder = GetSubFolder(currentFolder, part, false);
 
 					if (currentFolder == null)
 					{
