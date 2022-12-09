@@ -1756,7 +1756,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				MAPIFolder subFolder = source.Folders[index];
 
-				MoveFolder(path, subFolder, destination, index);
+				MoveFolder(subFolder, destination, index);
 			}
 		}
 
@@ -1769,25 +1769,28 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				MAPIFolder subFolder = source.Folders[index];
 
-				await MoveFolderAsync(path, subFolder, destination, index).
+				await MoveFolderAsync(subFolder, destination, index).
 					ConfigureAwait(false);
 			}
 		}
 
 		private void MoveFolder(
-			string path, MAPIFolder source, MAPIFolder destination, int index)
+			MAPIFolder source, MAPIFolder destinationParent, int index)
 		{
-			string destinationName = destination.Name;
+			string destinationParentPath = GetFolderPath(destinationParent);
+
+			string destinationName = destinationParent.Name;
 
 			string name = source.Name;
-			MAPIFolder destinationSubFolder = GetSubFolder(destination, name);
+			MAPIFolder destinationSubFolder =
+				GetSubFolder(destinationParent, name);
 
 			if (destinationSubFolder == null)
 			{
 				// Folder doesn't already exist, so just move it.
 				LogFormatMessage.Info(
 					"at: {0} Moving {1} to {2}",
-					path,
+					destinationParentPath,
 					name,
 					destinationName);
 
@@ -1798,7 +1801,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					// time the process gets to here, it seems deleted. Thus,
 					// trying to move the folder is going to cause an
 					// exception.  Just catch it and move on.
-					source.MoveTo(destination);
+					source.MoveTo(destinationParent);
 				}
 				catch (COMException exception)
 				{
@@ -1809,7 +1812,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				// Folder exists, so if just moving it, it will get
 				// renamed something FolderName (2), so need to merge.
-				string subPath = path + "/" + source.Name;
+				string subPath = destinationParentPath + "/" + source.Name;
 
 				LogFormatMessage.Info(
 					"at: {0} Merging {1} to {2}",
@@ -1827,19 +1830,22 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private async Task MoveFolderAsync(
-			string path, MAPIFolder source, MAPIFolder destination, int index)
+			MAPIFolder source, MAPIFolder destinationParent, int index)
 		{
-			string destinationName = destination.Name;
+			string destinationParentPath = GetFolderPath(destinationParent);
+
+			string destinationName = destinationParent.Name;
 
 			string name = source.Name;
-			MAPIFolder destinationSubFolder = GetSubFolder(destination, name);
+			MAPIFolder destinationSubFolder =
+				GetSubFolder(destinationParent, name);
 
 			if (destinationSubFolder == null)
 			{
 				// Folder doesn't already exist, so just move it.
 				LogFormatMessage.Info(
 					"at: {0} Moving {1} to {2}",
-					path,
+					destinationParentPath,
 					name,
 					destinationName);
 
@@ -1850,7 +1856,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					// time the process gets to here, it seems deleted. Thus,
 					// trying to move the folder is going to cause an
 					// exception.  Just catch it and move on.
-					source.MoveTo(destination);
+					source.MoveTo(destinationParent);
 				}
 				catch (COMException exception)
 				{
@@ -1861,7 +1867,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				// Folder exists, so if just moving it, it will get
 				// renamed something FolderName (2), so need to merge.
-				string subPath = path + "/" + source.Name;
+				string subPath = destinationParentPath + "/" + source.Name;
 
 				LogFormatMessage.Info(
 					"at: {0} Merging {1} to {2}",
