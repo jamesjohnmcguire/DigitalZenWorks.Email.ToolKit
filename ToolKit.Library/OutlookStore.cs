@@ -519,7 +519,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						OutlookFolder outlookFolder = new (outlookAccount);
 
 						outlookFolder.MoveFolderContents(
-							subPath, subFolder, destinationSubFolder);
+							subFolder, destinationSubFolder);
 
 						// Once all the items have been moved,
 						// now remove the folder.
@@ -611,7 +611,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						OutlookFolder outlookFolder = new (outlookAccount);
 
 						await outlookFolder.MoveFolderContentsAsync(
-							subPath, subFolder, destinationSubFolder).
+							subFolder, destinationSubFolder).
 								ConfigureAwait(false);
 
 						// Once all the items have been moved,
@@ -859,7 +859,6 @@ namespace DigitalZenWorks.Email.ToolKit
 								destinationName);
 
 							await outlookFolder.MoveFolderContentsAsync(
-								destinationFolderPath,
 								sourceFolder,
 								destinationFolder).ConfigureAwait(false);
 
@@ -1080,8 +1079,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				folderName,
 				destinationName);
 
-			outlookFolder.MoveFolderContents(
-				destinationFolderPath, sourceFolder, destinationFolder);
+			outlookFolder.MoveFolderContents(sourceFolder, destinationFolder);
 
 			// Once all the items have been moved, remove the folder.
 			OutlookFolder.SafeDelete(sourceFolder);

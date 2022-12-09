@@ -987,53 +987,55 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Move the folder contents.
 		/// </summary>
-		/// <param name="path">Path of parent folder.</param>
 		/// <param name="source">The source folder.</param>
 		/// <param name="destination">The destination folder.</param>
 		public void MoveFolderContents(
-			string path, MAPIFolder source, MAPIFolder destination)
+			MAPIFolder source, MAPIFolder destination)
 		{
 			if (source != null && destination != null)
 			{
+				string destinationPath = GetFolderPath(destination);
+
 				string sourceName = source.Name;
 				string destinationName = destination.Name;
 
 				LogFormatMessage.Info(
 					"{0}: Merging {1} into {2}",
-					path,
+					destinationPath,
 					sourceName,
 					destinationName);
 
 				MoveFolderItems(source, destination);
-				MoveSubFolders(path, source, destination);
+				MoveSubFolders(source, destination);
 			}
 		}
 
 		/// <summary>
 		/// Move the folder contents.
 		/// </summary>
-		/// <param name="path">Path of parent folder.</param>
 		/// <param name="source">The source folder.</param>
 		/// <param name="destination">The destination folder.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous
 		/// operation.</returns>
 		public async Task MoveFolderContentsAsync(
-			string path, MAPIFolder source, MAPIFolder destination)
+			MAPIFolder source, MAPIFolder destination)
 		{
 			if (source != null && destination != null)
 			{
+				string destinationPath = GetFolderPath(destination);
+
 				string sourceName = source.Name;
 				string destinationName = destination.Name;
 
 				LogFormatMessage.Info(
 					"{0}: Merging {1} into {2}",
-					path,
+					destinationPath,
 					sourceName,
 					destinationName);
 
-				await
-					MoveFolderItemsAsync(source, destination).ConfigureAwait(false);
-				await MoveSubFoldersAsync(path, source, destination).
+				await MoveFolderItemsAsync(source, destination).
+					ConfigureAwait(false);
+				await MoveSubFoldersAsync(source, destination).
 					ConfigureAwait(false);
 			}
 		}
@@ -1537,7 +1539,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					MAPIFolder destination =
 						parentFolder.Folders[newFolderName];
 
-					MoveFolderContents(path, folder, destination);
+					MoveFolderContents(folder, destination);
 
 					// Once all the items have been moved, remove the folder.
 					SafeDelete(folder);
@@ -1597,7 +1599,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					MAPIFolder destination =
 						parentFolder.Folders[newFolderName];
 
-					await MoveFolderContentsAsync(path, folder, destination).
+					await MoveFolderContentsAsync(folder, destination).
 						ConfigureAwait(false);
 
 					// Once all the items have been moved, remove the folder.
@@ -1644,8 +1646,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				Log.Info("At: " + path + " Moving into parent: " + name);
 
-				path = GetFolderPath(parent);
-				MoveFolderContents(path, folder, parent);
+				MoveFolderContents(folder, parent);
 
 				// Once all the items have been moved,
 				// now remove the folder.
@@ -1668,7 +1669,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				Log.Info("At: " + path + " Moving into parent: " + name);
 
 				path = GetFolderPath(parent);
-				await MoveFolderContentsAsync(path, folder, parent).
+				await MoveFolderContentsAsync(folder, parent).
 					ConfigureAwait(false);
 
 				// Once all the items have been moved,
@@ -1747,8 +1748,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return processed;
 		}
 
-		private void MoveSubFolders(
-			string path, MAPIFolder source, MAPIFolder destination)
+		private void MoveSubFolders(MAPIFolder source, MAPIFolder destination)
 		{
 			// Office uses 1 based indexes from VBA.
 			// Iterate in reverse order as the group may change.
@@ -1761,7 +1761,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private async Task MoveSubFoldersAsync(
-			string path, MAPIFolder source, MAPIFolder destination)
+			MAPIFolder source, MAPIFolder destination)
 		{
 			// Office uses 1 based indexes from VBA.
 			// Iterate in reverse order as the group may change.
@@ -1820,8 +1820,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					name,
 					destinationName);
 
-				MoveFolderContents(
-					subPath, source, destinationSubFolder);
+				MoveFolderContents(source, destinationSubFolder);
 
 				// Once all the items have been moved,
 				// now remove the folder.
@@ -1875,8 +1874,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					name,
 					destinationName);
 
-				await MoveFolderContentsAsync(
-					subPath, source, destinationSubFolder).
+				await MoveFolderContentsAsync(source, destinationSubFolder).
 						ConfigureAwait(false);
 
 				// Once all the items have been moved,
