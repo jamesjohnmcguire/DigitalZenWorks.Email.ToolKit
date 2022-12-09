@@ -6,6 +6,7 @@
 
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
+using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -712,11 +713,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (folderExists == true)
 						{
+							MAPIFolder destinationFolder =
+								OutlookFolder.CreateFolderPath(
+									destination, destinationFolderPath);
+
 							MoveExistingFolder(
-								source,
-								sourceFolderPath,
-								destination,
-								destinationFolderPath);
+								sourceFolder, destinationFolder);
 						}
 						else
 						{
@@ -846,11 +848,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (folderExists == true)
 						{
+							MAPIFolder destinationFolder =
+								OutlookFolder.CreateFolderPath(
+									destination, destinationFolderPath);
+
 							await MoveExistingFolderAsync(
-								source,
-								sourceFolderPath,
-								destination,
-								destinationFolderPath).ConfigureAwait(false);
+								sourceFolder, destinationFolder).
+								ConfigureAwait(false);
 						}
 						else
 						{
@@ -1037,34 +1041,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private void MoveExistingFolder(
-			Store source,
-			string sourceFolderPath,
-			Store destination,
-			string destinationFolderPath)
+			MAPIFolder sourceFolder,
+			MAPIFolder destinationFolder)
 		{
-			MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
-				source, sourceFolderPath);
-
-			MAPIFolder destinationFolder =
-				OutlookFolder.CreateFolderPath(
-					destination, destinationFolderPath);
-
 			OutlookFolder outlookFolder = new (outlookAccount);
-
-			MAPIFolder destinationParent = OutlookFolder.GetPathParent(
-				destination, destinationFolderPath);
-			string parentPath =
-				OutlookFolder.GetFolderPath(destinationParent);
-			string folderName = sourceFolder.Name;
-			string destinationName =
-				OutlookFolder.GetBaseFolderName(
-					destinationFolderPath);
-
-			LogFormatMessage.Info(
-				"at: {0} Moving contents of {1} to {2}",
-				parentPath,
-				folderName,
-				destinationName);
 
 			outlookFolder.MoveFolderContents(sourceFolder, destinationFolder);
 
@@ -1073,28 +1053,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private async Task MoveExistingFolderAsync(
-			Store source,
-			string sourceFolderPath,
-			Store destination,
-			string destinationFolderPath)
+			MAPIFolder sourceFolder,
+			MAPIFolder destinationFolder)
 		{
-			MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
-				source, sourceFolderPath);
-
-			MAPIFolder destinationFolder =
-				OutlookFolder.CreateFolderPath(
-					destination, destinationFolderPath);
-
 			OutlookFolder outlookFolder = new (outlookAccount);
-
-			MAPIFolder destinationParent = OutlookFolder.GetPathParent(
-				destination, destinationFolderPath);
-			string parentPath =
-				OutlookFolder.GetFolderPath(destinationParent);
-			string folderName = sourceFolder.Name;
-			string destinationName =
-				OutlookFolder.GetBaseFolderName(
-					destinationFolderPath);
 
 			await outlookFolder.MoveFolderContentsAsync(
 				sourceFolder, destinationFolder).ConfigureAwait(false);
