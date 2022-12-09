@@ -1000,9 +1000,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				string sourceName = source.Name;
 				string destinationName = destination.Name;
 
-				string destinationPath = GetFolderPath(destination);
-				string destinationParentPath = GetFolderPath(destination);
-
 				LogFormatMessage.Info(
 					"{0}: Merging {1} into {2}",
 					destinationPath,
