@@ -909,6 +909,24 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Remove folder from PST store.
+		/// </summary>
+		/// <param name="path">The path of current folder.</param>
+		/// <param name="subFolderIndex">The index of the sub-folder.</param>
+		/// <param name="subFolder">The sub-folder.</param>
+		/// <param name="force">Whether to force the removal.</param>
+		[Obsolete("RemoveFolder(string, int, MAPIFolder, bool) is deprecated," +
+			" please use RemoveFolder(MAPIFolder, int, bool) instead.")]
+		public static void RemoveFolder(
+			string path,
+			int subFolderIndex,
+			MAPIFolder subFolder,
+			bool force)
+		{
+			RemoveFolder(subFolder, subFolderIndex, force);
+		}
+
+		/// <summary>
 		/// Safely delete the folder.
 		/// </summary>
 		/// <param name="folder">The folder to delete.</param>
@@ -1038,6 +1056,21 @@ namespace DigitalZenWorks.Email.ToolKit
 				MoveFolderItems(source, destination);
 				MoveSubFolders(source, destination);
 			}
+		}
+
+		/// <summary>
+		/// Move the folder contents.
+		/// </summary>
+		/// <param name="path">Path of parent folder.</param>
+		/// <param name="source">The source folder.</param>
+		/// <param name="destination">The destination folder.</param>
+		[Obsolete("MoveFolderContents(string, MAPIFolder, MAPIFolder) " +
+			"is deprecated, please use " +
+			"MoveFolderContents(MAPIFolder, MAPIFolder) instead.")]
+		public void MoveFolderContents(
+			string path, MAPIFolder source, MAPIFolder destination)
+		{
+			MoveFolderContents(source, destination);
 		}
 
 		/// <summary>
