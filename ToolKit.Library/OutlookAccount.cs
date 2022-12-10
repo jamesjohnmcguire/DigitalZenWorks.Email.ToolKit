@@ -8,7 +8,6 @@ using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace DigitalZenWorks.Email.ToolKit

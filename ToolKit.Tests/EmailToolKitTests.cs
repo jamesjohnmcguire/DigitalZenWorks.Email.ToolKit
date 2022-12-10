@@ -4,11 +4,9 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;

@@ -6,10 +6,8 @@
 
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
-using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
