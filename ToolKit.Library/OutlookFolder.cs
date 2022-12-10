@@ -292,6 +292,21 @@ namespace DigitalZenWorks.Email.ToolKit
 			return hashTable;
 		}
 
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="mailItem">The MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		[Obsolete("GetMailItemSynopses is deprecated, " +
+			"please use MapiItem.GetItemSynopses instead.")]
+		public static string GetMailItemSynopses(MailItem mailItem)
+		{
+			string synopses = MapiItem.GetItemSynopses(mailItem);
+
+			return synopses;
+		}
+
 		/// <summary>
 		/// Get the current folder's parent.
 		/// </summary>
