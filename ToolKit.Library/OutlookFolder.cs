@@ -228,17 +228,21 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (folder != null)
 			{
+				string storeName = OutlookStore.GetStoreName(folder.Store);
 				path = folder.Name;
 
-				while (folder.Parent is not null &&
-					folder.Parent is MAPIFolder)
+				do
 				{
-					folder = folder.Parent;
-					string name = folder.Name;
-					path = name + "/" + path;
-				}
+					folder = GetParent(folder);
 
-				string storeName = OutlookStore.GetStoreName(folder.Store);
+					if (folder != null)
+					{
+						string name = folder.Name;
+						path = name + "/" + path;
+					}
+				}
+				while (folder != null);
+
 				path = storeName + "::" + path;
 			}
 
@@ -429,14 +433,14 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (DeletedFolders.Contains(name))
 				{
 					// Only top level folders are reserved
-					if (folder.Parent is not null &&
-						folder.Parent is MAPIFolder)
-					{
-						MAPIFolder parent = folder.Parent;
+					MAPIFolder parent = GetParent(folder);
 
+					if (parent != null)
+					{
 						// Check if root folder
-						if (parent.Parent is null ||
-							parent.Parent is not MAPIFolder)
+						bool isRoot = IsRootFolder(parent);
+
+						if (isRoot == true)
 						{
 							isDeletedFolder = true;
 						}
@@ -466,11 +470,10 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (ReservedFolders.Contains(name))
 				{
 					// Only top level folders are reserved
-					if (folder.Parent is not null &&
-						folder.Parent is MAPIFolder)
-					{
-						MAPIFolder parent = folder.Parent;
+					MAPIFolder parent = GetParent(folder);
 
+					if (parent != null)
+					{
 						bool isRoot = IsRootFolder(parent);
 
 						if (isRoot == true)
@@ -481,11 +484,14 @@ namespace DigitalZenWorks.Email.ToolKit
 						Marshal.ReleaseComObject(parent);
 					}
 				}
-				else if (folder.Parent is null ||
-					folder.Parent is not MAPIFolder)
+				else
 				{
-					// root folder
-					reserved = true;
+					bool isRoot = IsRootFolder(folder);
+
+					if (isRoot == true)
+					{
+						reserved = true;
+					}
 				}
 			}
 
@@ -525,13 +531,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (folder != null)
 			{
-				if (folder.Parent is not null &&
-					folder.Parent is MAPIFolder)
-				{
-					MAPIFolder parent = folder.Parent;
-					bool isRootFolder = IsRootFolder(parent);
+				MAPIFolder parent = GetParent(folder);
 
-					if (isRootFolder == true)
+				if (parent != null)
+				{
+					bool isRoot = IsRootFolder(parent);
+
+					if (isRoot == true)
 					{
 						topLevel = true;
 					}
@@ -540,8 +546,13 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
-					// Also, include the root
-					topLevel = true;
+					bool isRoot = IsRootFolder(folder);
+
+					if (isRoot == true)
+					{
+						// Also, include the root
+						topLevel = true;
+					}
 				}
 			}
 
@@ -873,7 +884,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						MAPIFolder parentFolder = GetParent(folder);
 
-						parentFolder.Folders.Remove(subFolderIndex);
+						if (parentFolder != null)
+						{
+							parentFolder.Folders.Remove(subFolderIndex);
+						}
 					}
 				}
 			}
@@ -1128,11 +1142,15 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static bool DoesSiblingFolderExist(
 			MAPIFolder folder, string folderName)
 		{
-			MAPIFolder parentFolder = folder.Parent;
+			bool folderExists = false;
+			MAPIFolder parentFolder = GetParent(folder);
 
-			bool folderExists = DoesFolderExist(parentFolder, folderName);
+			if (parentFolder != null)
+			{
+				folderExists = DoesFolderExist(parentFolder, folderName);
 
-			Marshal.ReleaseComObject(parentFolder);
+				Marshal.ReleaseComObject(parentFolder);
+			}
 
 			return folderExists;
 		}
@@ -1534,16 +1552,20 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
-					MAPIFolder parentFolder = folder.Parent;
+					MAPIFolder parentFolder = GetParent(folder);
 
-					// Move items
-					MAPIFolder destination =
-						parentFolder.Folders[newFolderName];
+					if (parentFolder != null)
+					{
+						// Move items
+						MAPIFolder destination =
+							parentFolder.Folders[newFolderName];
 
-					MoveFolderContents(folder, destination);
+						MoveFolderContents(folder, destination);
 
-					// Once all the items have been moved, remove the folder.
-					SafeDelete(folder);
+						// Once all the items have been moved,
+						// remove the folder.
+						SafeDelete(folder);
+					}
 				}
 			}
 			else
@@ -1594,17 +1616,21 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
-					MAPIFolder parentFolder = folder.Parent;
+					MAPIFolder parentFolder = GetParent(folder);
 
-					// Move items
-					MAPIFolder destination =
-						parentFolder.Folders[newFolderName];
+					if (parentFolder != null)
+					{
+						// Move items
+						MAPIFolder destination =
+							parentFolder.Folders[newFolderName];
 
-					await MoveFolderContentsAsync(folder, destination).
-						ConfigureAwait(false);
+						await MoveFolderContentsAsync(folder, destination).
+							ConfigureAwait(false);
 
-					// Once all the items have been moved, remove the folder.
-					SafeDelete(folder);
+						// Once all the items have been moved,
+						// remove the folder.
+						SafeDelete(folder);
+					}
 				}
 			}
 			else
@@ -1637,21 +1663,25 @@ namespace DigitalZenWorks.Email.ToolKit
 			string path, MAPIFolder folder, bool dryRun)
 		{
 			string name = folder.Name;
-			MAPIFolder parent = folder.Parent;
+			MAPIFolder parent = GetParent(folder);
 
-			if (dryRun == true)
+			if (parent != null)
 			{
-				Log.Info("At: " + path + " WOULD Move into parent: " + name);
-			}
-			else
-			{
-				Log.Info("At: " + path + " Moving into parent: " + name);
+				if (dryRun == true)
+				{
+					Log.Info(
+						"At: " + path + " WOULD Move into parent: " + name);
+				}
+				else
+				{
+					Log.Info("At: " + path + " Moving into parent: " + name);
 
-				MoveFolderContents(folder, parent);
+					MoveFolderContents(folder, parent);
 
-				// Once all the items have been moved,
-				// now remove the folder.
-				SafeDelete(folder);
+					// Once all the items have been moved,
+					// now remove the folder.
+					SafeDelete(folder);
+				}
 			}
 		}
 
@@ -1659,22 +1689,26 @@ namespace DigitalZenWorks.Email.ToolKit
 			string path, MAPIFolder folder, bool dryRun)
 		{
 			string name = folder.Name;
-			MAPIFolder parent = folder.Parent;
+			MAPIFolder parent = GetParent(folder);
 
-			if (dryRun == true)
+			if (parent != null)
 			{
-				Log.Info("At: " + path + " WOULD Move into parent: " + name);
-			}
-			else
-			{
-				Log.Info("At: " + path + " Moving into parent: " + name);
+				if (dryRun == true)
+				{
+					Log.Info(
+						"At: " + path + " WOULD Move into parent: " + name);
+				}
+				else
+				{
+					Log.Info("At: " + path + " Moving into parent: " + name);
 
-				await MoveFolderContentsAsync(folder, parent).
-					ConfigureAwait(false);
+					await MoveFolderContentsAsync(folder, parent).
+						ConfigureAwait(false);
 
-				// Once all the items have been moved,
-				// now remove the folder.
-				SafeDelete(folder);
+					// Once all the items have been moved,
+					// now remove the folder.
+					SafeDelete(folder);
+				}
 			}
 		}
 
@@ -1693,14 +1727,18 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (topLevel == false)
 				{
 					string name = folder.Name;
-					MAPIFolder parent = folder.Parent;
-					string parentName = parent.Name;
+					MAPIFolder parent = GetParent(folder);
 
-					if (parentName.Equals(
-						name, StringComparison.OrdinalIgnoreCase))
+					if (parent != null)
 					{
-						MergeFolderWithParent(path, folder, dryRun);
-						processed = 1;
+						string parentName = parent.Name;
+
+						if (parentName.Equals(
+							name, StringComparison.OrdinalIgnoreCase))
+						{
+							MergeFolderWithParent(path, folder, dryRun);
+							processed = 1;
+						}
 					}
 				}
 			}
@@ -1728,15 +1766,19 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (topLevel == false)
 				{
 					string name = folder.Name;
-					MAPIFolder parent = folder.Parent;
-					string parentName = parent.Name;
+					MAPIFolder parent = GetParent(folder);
 
-					if (parentName.Equals(
-						name, StringComparison.OrdinalIgnoreCase))
+					if (parent != null)
 					{
-						await MergeFolderWithParentAsync(path, folder, dryRun).
-							ConfigureAwait(false);
-						processed = 1;
+						string parentName = parent.Name;
+
+						if (parentName.Equals(
+							name, StringComparison.OrdinalIgnoreCase))
+						{
+							await MergeFolderWithParentAsync(
+								path, folder, dryRun).ConfigureAwait(false);
+							processed = 1;
+						}
 					}
 				}
 			}

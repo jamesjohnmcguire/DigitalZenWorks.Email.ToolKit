@@ -201,26 +201,27 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (subFolder != null)
 			{
 				string subFolderName = subFolder.Name;
-				MAPIFolder parentFolder = subFolder.Parent;
+				MAPIFolder parentFolder = OutlookFolder.GetParent(subFolder);
 
-				int count = parentFolder.Folders.Count;
-				int index;
-				for (index = 1; index <= count; index++)
+				if (parentFolder != null)
 				{
-					MAPIFolder folder = parentFolder.Folders[index];
-
-					string name = folder.Name;
-
-					if (name.Equals(
-						subFolderName, StringComparison.OrdinalIgnoreCase))
+					int count = parentFolder.Folders.Count;
+					int index;
+					for (index = 1; index <= count; index++)
 					{
-						break;
+						MAPIFolder folder = parentFolder.Folders[index];
+
+						string name = folder.Name;
+
+						if (name.Equals(
+							subFolderName, StringComparison.OrdinalIgnoreCase))
+						{
+							break;
+						}
 					}
+
+					OutlookFolder.RemoveFolder(subFolder, index, force);
 				}
-
-				path += "/" + subFolder.Name;
-
-				OutlookFolder.RemoveFolder(subFolder, index, force);
 			}
 		}
 
@@ -738,26 +739,33 @@ namespace DigitalZenWorks.Email.ToolKit
 							}
 							else
 							{
-								MAPIFolder sourceParent = sourceFolder.Parent;
-								string sourceParentId = sourceParent.EntryID;
 								string destinationParentId =
 									destinationParent.EntryID;
 
-								if (sourceParentId.Equals(
-									destinationParentId,
-									StringComparison.OrdinalIgnoreCase))
-								{
-									sourceFolder.Name = destinationName;
-								}
-								else
-								{
-									sourceFolder.MoveTo(destinationParent);
+								MAPIFolder sourceParent = OutlookFolder.GetParent(sourceFolder);
 
-									if (!sourceFolder.Name.Equals(
-										destinationName,
+								if (sourceParent != null)
+								{
+									string sourceParentId =
+										sourceParent.EntryID;
+
+									if (sourceParentId.Equals(
+										destinationParentId,
 										StringComparison.OrdinalIgnoreCase))
 									{
 										sourceFolder.Name = destinationName;
+									}
+									else
+									{
+										sourceFolder.MoveTo(destinationParent);
+
+										if (!sourceFolder.Name.Equals(
+											destinationName,
+											StringComparison.OrdinalIgnoreCase))
+										{
+											sourceFolder.Name =
+												destinationName;
+										}
 									}
 								}
 							}
@@ -830,11 +838,13 @@ namespace DigitalZenWorks.Email.ToolKit
 					// If source folder doesn't exist, there is nothing to do.
 					if (folderExists == true)
 					{
-						MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
-							source, sourceFolderPath);
+						MAPIFolder sourceFolder =
+							OutlookFolder.CreateFolderPath(
+								source, sourceFolderPath);
 
-						MAPIFolder destinationParent = OutlookFolder.GetPathParent(
-							destination, destinationFolderPath);
+						MAPIFolder destinationParent =
+							OutlookFolder.GetPathParent(
+								destination, destinationFolderPath);
 
 						folderExists = OutlookFolder.DoesFolderExist(
 							destination, destinationFolderPath);
@@ -875,26 +885,34 @@ namespace DigitalZenWorks.Email.ToolKit
 							}
 							else
 							{
-								MAPIFolder sourceParent = sourceFolder.Parent;
-								string sourceParentId = sourceParent.EntryID;
 								string destinationParentId =
 									destinationParent.EntryID;
 
-								if (sourceParentId.Equals(
-									destinationParentId,
-									StringComparison.OrdinalIgnoreCase))
-								{
-									sourceFolder.Name = destinationName;
-								}
-								else
-								{
-									sourceFolder.MoveTo(destinationParent);
+								MAPIFolder sourceParent =
+									OutlookFolder.GetParent(sourceFolder);
 
-									if (!sourceFolder.Name.Equals(
-										destinationName,
+								if (sourceParent != null)
+								{
+									string sourceParentId =
+										sourceParent.EntryID;
+
+									if (sourceParentId.Equals(
+										destinationParentId,
 										StringComparison.OrdinalIgnoreCase))
 									{
 										sourceFolder.Name = destinationName;
+									}
+									else
+									{
+										sourceFolder.MoveTo(destinationParent);
+
+										if (!sourceFolder.Name.Equals(
+											destinationName,
+											StringComparison.OrdinalIgnoreCase))
+										{
+											sourceFolder.Name =
+												destinationName;
+										}
 									}
 								}
 							}
