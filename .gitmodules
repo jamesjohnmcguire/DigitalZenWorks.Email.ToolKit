@@ -7,3 +7,6 @@
 [submodule "UtilitiesNet"]
 	path = UtilitiesNet
 	url = https://github.com/jamesjohnmcguire/UtilitiesNet
+[submodule "CommandLineCommands"]
+	path = CommandLineCommands
+	url = https://github.com/jamesjohnmcguire/CommandLineCommands.git
