@@ -12,12 +12,14 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using static Common.Logging.Configuration.ArgUtils;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -510,38 +512,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					Microsoft.Office.Interop.Outlook.Action action =
 						mailItem.Actions[index];
 
-					Encoding encoding = Encoding.UTF8;
-
-					int copyLikeEnum = (int)action.CopyLike;
-					bool enabledBool = action.Enabled;
-					int enabledInt = Convert.ToInt32(enabledBool);
-					int replyStyleEnum = (int)action.ReplyStyle;
-					int responseStyleEnum = (int)action.ResponseStyle;
-					int showOnEnum = (int)action.ShowOn;
-
-					string copyLike =
-						copyLikeEnum.ToString(CultureInfo.InvariantCulture);
-					string enabled =
-						enabledInt.ToString(CultureInfo.InvariantCulture);
-					string replyStyle =
-						replyStyleEnum.ToString(CultureInfo.InvariantCulture);
-					string responseStyle = responseStyleEnum.ToString(
-						CultureInfo.InvariantCulture);
-					string showOn =
-						showOnEnum.ToString(CultureInfo.InvariantCulture);
-
-					string metaData = string.Format(
-						CultureInfo.InvariantCulture,
-						"{0}{1}{2}{3}{4}{5}{6}",
-						copyLike,
-						enabled,
-						action.Name,
-						action.Prefix,
-						replyStyle,
-						responseStyle,
-						showOn);
-
-					byte[] metaDataBytes = encoding.GetBytes(metaData);
+					byte[] metaDataBytes = GetActionData(action);
 
 					if (actions == null)
 					{
@@ -549,7 +520,12 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						actions = BitBytes.MergeByteArrays(actions, metaDataBytes);
+						byte[] previousActions = actions;
+
+						actions = BitBytes.MergeByteArraysPooled(
+							previousActions, metaDataBytes);
+
+						ArrayPool<byte>.Shared.Return(previousActions);
 					}
 
 					Marshal.ReleaseComObject(action);
@@ -570,6 +546,45 @@ namespace DigitalZenWorks.Email.ToolKit
 			return actions;
 		}
 
+		private static byte[] GetActionData(
+			Microsoft.Office.Interop.Outlook.Action action)
+		{
+			Encoding encoding = Encoding.UTF8;
+
+			int copyLikeEnum = (int)action.CopyLike;
+			bool enabledBool = action.Enabled;
+			int enabledInt = Convert.ToInt32(enabledBool);
+			int replyStyleEnum = (int)action.ReplyStyle;
+			int responseStyleEnum = (int)action.ResponseStyle;
+			int showOnEnum = (int)action.ShowOn;
+
+			string copyLike =
+				copyLikeEnum.ToString(CultureInfo.InvariantCulture);
+			string enabled =
+				enabledInt.ToString(CultureInfo.InvariantCulture);
+			string replyStyle =
+				replyStyleEnum.ToString(CultureInfo.InvariantCulture);
+			string responseStyle = responseStyleEnum.ToString(
+				CultureInfo.InvariantCulture);
+			string showOn =
+				showOnEnum.ToString(CultureInfo.InvariantCulture);
+
+			string metaData = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}{5}{6}",
+				copyLike,
+				enabled,
+				action.Name,
+				action.Prefix,
+				replyStyle,
+				responseStyle,
+				showOn);
+
+			byte[] metaDataBytes = encoding.GetBytes(metaData);
+
+			return metaDataBytes;
+		}
+
 		private static byte[] GetAttachments(MailItem mailItem)
 		{
 			byte[] attachments = null;
@@ -585,56 +600,22 @@ namespace DigitalZenWorks.Email.ToolKit
 					Attachment attachment =
 						mailItem.Attachments[index];
 
-					Encoding encoding = Encoding.UTF8;
-
-					int attachmentIndex = attachment.Index;
-					string indexValue = attachmentIndex.ToString(
-						CultureInfo.InvariantCulture);
-
-					int positionValue = attachment.Position;
-					string position = positionValue.ToString(
-						CultureInfo.InvariantCulture);
-
-					int intType = (int)attachment.Type;
-					string attachmentType =
-						intType.ToString(CultureInfo.InvariantCulture);
-
-					string metaData = string.Format(
-						CultureInfo.InvariantCulture,
-						"{0}{1}{2}{3}{4}",
-						attachment.DisplayName,
-						attachment.FileName,
-						indexValue,
-						position,
-						attachmentType);
-
-					try
-					{
-						metaData += attachment.PathName;
-					}
-					catch (COMException)
-					{
-					}
-
-					byte[] metaDataBytes = encoding.GetBytes(metaData);
+					byte[] attachementData = GetAttachmentData(attachment);
 
 					if (attachments == null)
 					{
-						attachments = metaDataBytes;
+						attachments = attachementData;
 					}
 					else
 					{
-						attachments = BitBytes.MergeByteArrays(
-							attachments, metaDataBytes);
+						byte[] previousAttachments = attachments;
+
+						attachments = BitBytes.MergeByteArraysPooled(
+							previousAttachments, attachementData);
+
+						ArrayPool<byte>.Shared.Return(attachementData);
+						ArrayPool<byte>.Shared.Return(previousAttachments);
 					}
-
-					string filePath = basePath + attachment.FileName;
-					attachment.SaveAsFile(filePath);
-
-					byte[] fileBytes = File.ReadAllBytes(filePath);
-
-					attachments =
-						BitBytes.MergeByteArrays(attachments, fileBytes);
 
 					Marshal.ReleaseComObject(attachment);
 				}
@@ -654,6 +635,54 @@ namespace DigitalZenWorks.Email.ToolKit
 			return attachments;
 		}
 
+		private static byte[] GetAttachmentData(Attachment attachment)
+		{
+			string basePath = Path.GetTempPath();
+
+			Encoding encoding = Encoding.UTF8;
+
+			int attachmentIndex = attachment.Index;
+			string indexValue = attachmentIndex.ToString(
+				CultureInfo.InvariantCulture);
+
+			int positionValue = attachment.Position;
+			string position = positionValue.ToString(
+				CultureInfo.InvariantCulture);
+
+			int intType = (int)attachment.Type;
+			string attachmentType =
+				intType.ToString(CultureInfo.InvariantCulture);
+
+			string metaData = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}",
+				attachment.DisplayName,
+				attachment.FileName,
+				indexValue,
+				position,
+				attachmentType);
+
+			try
+			{
+				metaData += attachment.PathName;
+			}
+			catch (COMException)
+			{
+			}
+
+			byte[] metaDataBytes = encoding.GetBytes(metaData);
+
+			string filePath = basePath + attachment.FileName;
+			attachment.SaveAsFile(filePath);
+
+			byte[] fileBytes = File.ReadAllBytes(filePath);
+
+			byte[] attachmentData =
+				BitBytes.MergeByteArraysPooled(metaDataBytes, fileBytes);
+
+			return attachmentData;
+		}
+
 		private static byte[] GetBody(MailItem mailItem)
 		{
 			byte[] allBody = null;
@@ -669,8 +698,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				byte[] htmlBodyBytes = encoding.GetBytes(htmlBody);
 				byte[] rtfBody = mailItem.RTFBody as byte[];
 
-				allBody = BitBytes.MergeByteArrays(bodyBytes, htmlBodyBytes);
-				allBody = BitBytes.MergeByteArrays(allBody, rtfBody);
+				byte[] tempBody =
+					BitBytes.MergeByteArraysPooled(bodyBytes, htmlBodyBytes);
+				allBody = BitBytes.MergeByteArraysPooled(allBody, rtfBody);
+
+				ArrayPool<byte>.Shared.Return(tempBody);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -1041,6 +1073,21 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					finalBuffer = BitBytes.CopyUshortToByteArray(
 						finalBuffer, currentIndex, booleans);
+
+					if (actions != null)
+					{
+						ArrayPool<byte>.Shared.Return(actions);
+					}
+
+					if (attachments != null)
+					{
+						ArrayPool<byte>.Shared.Return(attachments);
+					}
+
+					if (userProperties != null)
+					{
+						ArrayPool<byte>.Shared.Return(userProperties);
+					}
 				}
 			}
 			catch (System.Exception exception) when
@@ -1257,36 +1304,21 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					UserProperty property = mailItem.UserProperties[index];
 
-					Encoding encoding = Encoding.UTF8;
-
-					int typeEnum = (int)property.Type;
-					var propertyValue = property.Value;
-
-					string typeValue =
-						typeEnum.ToString(CultureInfo.InvariantCulture);
-					string value =
-						propertyValue.ToString(CultureInfo.InvariantCulture);
-
-					string metaData = string.Format(
-						CultureInfo.InvariantCulture,
-						"{0}{1}{2}{3}{4}{5}",
-						property.Formula,
-						property.Name,
-						typeValue,
-						property.ValidationFormula,
-						property.ValidationText,
-						value);
-
-					byte[] metaDataBytes = encoding.GetBytes(metaData);
+					byte[] userPropertyData = GetUserPropertyData(property);
 
 					if (properties == null)
 					{
-						properties = metaDataBytes;
+						properties = userPropertyData;
 					}
 					else
 					{
+						byte[] previousProperties = properties;
+
 						properties = BitBytes.MergeByteArrays(
-							properties, metaDataBytes);
+							previousProperties, userPropertyData);
+
+						ArrayPool<byte>.Shared.Return(userPropertyData);
+						ArrayPool<byte>.Shared.Return(previousProperties);
 					}
 
 					Marshal.ReleaseComObject(property);
@@ -1305,6 +1337,33 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return properties;
+		}
+
+		private static byte[] GetUserPropertyData(UserProperty property)
+		{
+			Encoding encoding = Encoding.UTF8;
+
+			int typeEnum = (int)property.Type;
+			var propertyValue = property.Value;
+
+			string typeValue =
+				typeEnum.ToString(CultureInfo.InvariantCulture);
+			string value =
+				propertyValue.ToString(CultureInfo.InvariantCulture);
+
+			string metaData = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}{5}",
+				property.Formula,
+				property.Name,
+				typeValue,
+				property.ValidationFormula,
+				property.ValidationText,
+				value);
+
+			byte[] metaDataBytes = encoding.GetBytes(metaData);
+
+			return metaDataBytes;
 		}
 
 		private static void LogException(
