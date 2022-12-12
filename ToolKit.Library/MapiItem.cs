@@ -516,7 +516,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (actions == null)
 					{
-						actions = metaDataBytes;
+						actions =
+							ArrayPool<byte>.Shared.Rent(metaDataBytes.Length);
+						Array.Copy(
+							metaDataBytes, actions, metaDataBytes.Length);
 					}
 					else
 					{
@@ -604,7 +607,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (attachments == null)
 					{
-						attachments = attachementData;
+						attachments = ArrayPool<byte>.Shared.Rent(
+							attachementData.Length);
+						Array.Copy(
+							attachementData,
+							attachments,
+							attachementData.Length);
 					}
 					else
 					{
@@ -1308,7 +1316,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (properties == null)
 					{
-						properties = userPropertyData;
+						properties = ArrayPool<byte>.Shared.Rent(
+							userPropertyData.Length);
+						Array.Copy(
+							userPropertyData,
+							properties,
+							userPropertyData.Length);
 					}
 					else
 					{
