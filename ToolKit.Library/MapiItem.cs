@@ -399,7 +399,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static async Task MoveitemAsync(
 			object item, MAPIFolder destination)
 		{
-			CancellationTokenSource source = new CancellationTokenSource();
+			CancellationTokenSource source = new ();
 
 			try
 			{
