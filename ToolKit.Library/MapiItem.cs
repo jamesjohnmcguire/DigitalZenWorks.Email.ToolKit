@@ -195,7 +195,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is OutOfMemoryException ||
 				exception is RankException)
 			{
-				LogException(path, string.Empty, mailItem);
+				LogException(mailItem);
 				Log.Error(exception.ToString());
 			}
 			finally
@@ -239,7 +239,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is OutOfMemoryException ||
 				exception is RankException)
 			{
-				LogException(path, string.Empty, mailItem);
+				LogException(mailItem);
 				Log.Error(exception.ToString());
 			}
 			finally
@@ -1442,14 +1442,14 @@ namespace DigitalZenWorks.Email.ToolKit
 			return metaDataBytes;
 		}
 
-		private static void LogException(
-			string path, string extraInformation, MailItem mailItem)
+		private static void LogException(MailItem mailItem)
 		{
 			string sentOn = mailItem.SentOn.ToString(
 				"yyyy-MM-dd HH:mm:ss",
 				CultureInfo.InvariantCulture);
 
-			Log.Error("Exception " + extraInformation + "at: " + path);
+			string path = GetPath(mailItem);
+			Log.Error("Exception at: " + path);
 
 			LogFormatMessage.Error(
 				"Item: {0}: From: {1}: {2} Subject: {3}",
