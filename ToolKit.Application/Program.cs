@@ -100,7 +100,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							await MoveFolder(command).ConfigureAwait(false);
 							break;
 						case "remove-duplicates":
-							result = RemoveDuplicates(command);
+							result = await RemoveDuplicates(command).
+								ConfigureAwait(false);
 							break;
 						case "remove-empty-folders":
 							result = await RemoveEmptyFolders(command).
@@ -661,7 +662,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return 0;
 		}
 
-		private static int RemoveDuplicates(Command command)
+		private static async Task<int> RemoveDuplicates(Command command)
 		{
 			bool dryRun = command.DoesOptionExist("n", "dryrun");
 			bool flush = command.DoesOptionExist("s", "flush");
@@ -680,11 +681,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string pstFilePath = command.Parameters[0];
 
-				outlookStore.RemoveDuplicates(pstFilePath, dryRun, flush);
+				await outlookStore.RemoveDuplicatesAsync(
+					pstFilePath, dryRun, flush).ConfigureAwait(false);
 			}
 			else
 			{
-				outlookAccount.RemoveDuplicates(dryRun, flush);
+				await outlookAccount.RemoveDuplicatesAsync(dryRun, flush).
+					ConfigureAwait(false);
 			}
 
 			return 0;

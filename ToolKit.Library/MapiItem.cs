@@ -207,6 +207,50 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Gets the item's hash.
+		/// </summary>
+		/// <param name="path">The path of the current folder.</param>
+		/// <param name="mailItem">The items to compute.</param>
+		/// <returns>The item's hash encoded in base 64.</returns>
+		public static async Task<string> GetItemHashAsync(string path, MailItem mailItem)
+		{
+			string hashBase64 = null;
+			byte[] finalBuffer = null;
+
+			try
+			{
+				if (mailItem != null)
+				{
+					finalBuffer = await Task.Run(() =>
+						GetItemBytes(path, mailItem)).ConfigureAwait(false);
+
+					using SHA256 hasher = SHA256.Create();
+
+					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+					hashBase64 = Convert.ToBase64String(hashValue);
+				}
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is InvalidCastException ||
+				exception is OutOfMemoryException ||
+				exception is RankException)
+			{
+				LogException(path, string.Empty, mailItem);
+				Log.Error(exception.ToString());
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(finalBuffer);
+			}
+
+			return hashBase64;
+		}
+
+		/// <summary>
 		/// Get the item's synopses.
 		/// </summary>
 		/// <param name="mailItem">The MailItem to check.</param>

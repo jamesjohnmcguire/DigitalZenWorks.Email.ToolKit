@@ -983,6 +983,72 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Remove duplicates items from the given store.
+		/// </summary>
+		/// <param name="storePath">The path of the PST file to
+		/// process.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		/// <param name="flush">Indicates whether to empty the deleted items
+		/// folder.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task RemoveDuplicatesAsync(
+			string storePath, bool dryRun, bool flush)
+		{
+			Store store = outlookAccount.GetStore(storePath);
+
+			if (store != null)
+			{
+				await RemoveDuplicatesAsync(store, dryRun, flush).
+					ConfigureAwait(false);
+				Marshal.ReleaseComObject(store);
+			}
+		}
+
+		/// <summary>
+		/// Remove duplicates items from the given store.
+		/// </summary>
+		/// <param name="store">The PST store to process.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		/// <param name="flush">Indicates whether to empty the deleted items
+		/// folder.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task RemoveDuplicatesAsync(
+			Store store, bool dryRun, bool flush)
+		{
+			if (store != null)
+			{
+				string storePath = GetStoreName(store);
+				Log.Info("Checking for duplicates in: " + storePath);
+
+				MAPIFolder rootFolder = store.GetRootFolder();
+
+				OutlookFolder outlookFolder = new (outlookAccount);
+				int[] duplicateCounts = await
+					outlookFolder.RemoveDuplicatesAsync(
+						storePath, rootFolder, dryRun).ConfigureAwait(false);
+
+				if (flush == true)
+				{
+					EmptyDeletedItemsFolder(store);
+				}
+
+				int removedDuplicates =
+					duplicateCounts[1] - duplicateCounts[0];
+				LogFormatMessage.Info(
+					"Duplicates Removed in: {0}: {1}",
+					storePath,
+					removedDuplicates.ToString(CultureInfo.InvariantCulture));
+
+				totalFolders++;
+				Marshal.ReleaseComObject(rootFolder);
+			}
+		}
+
+		/// <summary>
 		/// Remove all empty folders.
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>

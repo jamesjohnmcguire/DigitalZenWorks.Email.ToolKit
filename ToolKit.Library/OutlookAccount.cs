@@ -218,6 +218,29 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Remove duplicates items from default account.
+		/// </summary>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		/// <param name="flush">Indicates whether to empty the deleted items
+		/// folder.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task RemoveDuplicatesAsync(bool dryRun, bool flush)
+		{
+			OutlookStore outlookStorage = new (this);
+			int total = session.Stores.Count;
+
+			for (int index = 1; index <= total; index++)
+			{
+				Store store = session.Stores[index];
+
+				await outlookStorage.RemoveDuplicatesAsync(
+					store, dryRun, flush).ConfigureAwait(false);
+			}
+		}
+
+		/// <summary>
 		/// Remove all empty folders.
 		/// </summary>
 		/// <returns>The count of removed folders.</returns>

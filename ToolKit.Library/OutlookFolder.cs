@@ -291,7 +291,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return hashTable;
 		}
 
-
 		/// <summary>
 		/// Get the item's synopses.
 		/// </summary>
@@ -1151,6 +1150,116 @@ namespace DigitalZenWorks.Email.ToolKit
 			return duplicateCounts;
 		}
 
+		/// <summary>
+		/// Remove duplicates items from the given folder.
+		/// </summary>
+		/// <param name="path">The path of the curent folder.</param>
+		/// <param name="folder">The MAPI folder to process.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		/// <returns>An array of duplicate sets and total duplicate items
+		/// count.</returns>
+		public async Task<int[]> RemoveDuplicatesAsync(
+			string path, MAPIFolder folder, bool dryRun)
+		{
+			int[] duplicateCounts = new int[2];
+
+			if (folder != null)
+			{
+				bool isDeletedFolder = IsDeletedFolder(folder);
+
+				// Skip processing of system deleted items folder.
+				if (isDeletedFolder == false)
+				{
+					int folderCount = folder.Folders.Count;
+
+					// Office uses 1 based indexes from VBA.
+					// Iterate in reverse order as the group may change.
+					for (int index = folderCount; index > 0; index--)
+					{
+						MAPIFolder subFolder = folder.Folders[index];
+
+						int[] subFolderduplicateCounts = await
+							RemoveDuplicatesAsync(path, subFolder, dryRun).
+								ConfigureAwait(false);
+
+						duplicateCounts[0] += subFolderduplicateCounts[0];
+						duplicateCounts[1] += subFolderduplicateCounts[1];
+
+						Marshal.ReleaseComObject(subFolder);
+					}
+
+					int[] duplicateCountsThisFolder = await
+						RemoveDuplicatesFromThisFolderAsync(folder, dryRun).
+							ConfigureAwait(false);
+
+					duplicateCounts[0] += duplicateCountsThisFolder[0];
+					duplicateCounts[1] += duplicateCountsThisFolder[1];
+				}
+			}
+
+			return duplicateCounts;
+		}
+
+		private static IDictionary<string, IList<string>> AddHashToTable(
+			IDictionary<string, IList<string>> hashTable,
+			string hash,
+			string entryId)
+		{
+			if (!string.IsNullOrEmpty(hash))
+			{
+				bool keyExists = hashTable.ContainsKey(hash);
+
+				if (keyExists == true)
+				{
+					IList<string> bucket = hashTable[hash];
+					bucket.Add(entryId);
+				}
+				else
+				{
+					IList<string> bucket = new List<string>();
+					bucket.Add(entryId);
+
+					hashTable.Add(hash, bucket);
+				}
+			}
+
+			return hashTable;
+		}
+
+		private static IDictionary<string, IList<string>> AddItemHashToTable(
+			IDictionary<string, IList<string>> hashTable,
+			string path,
+			MailItem mailItem)
+		{
+			string hash =
+				MapiItem.GetItemHash(path, mailItem);
+
+			hashTable = AddHashToTable(
+				hashTable,
+				hash,
+				mailItem.EntryID);
+
+			return hashTable;
+		}
+
+		private static async Task<IDictionary<string, IList<string>>>
+			AddItemHashToTableAsync(
+				IDictionary<string, IList<string>> hashTable,
+				string path,
+				MailItem mailItem)
+		{
+			string hash = await MapiItem.GetItemHashAsync(
+				path, mailItem).ConfigureAwait(false);
+
+			hashTable = AddHashToTable(
+				hashTable,
+				hash,
+				mailItem.EntryID);
+
+			return hashTable;
+		}
+
 		private static string CheckFolderNameNormalization(string folderName)
 		{
 			string duplicatePattern = null;
@@ -1240,26 +1349,67 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						// Initially, just focus on MailItems
 						case MailItem mailItem:
-							string hash =
-								MapiItem.GetItemHash(path, mailItem);
+							hashTable = AddItemHashToTable(
+								hashTable, path, mailItem);
 
-							if (!string.IsNullOrEmpty(hash))
-							{
-								bool keyExists = hashTable.ContainsKey(hash);
+							Marshal.ReleaseComObject(mailItem);
+							break;
+						default:
+							Log.Info("Ignoring item of non-MailItem type: ");
+							break;
+					}
 
-								if (keyExists == true)
-								{
-									IList<string> bucket = hashTable[hash];
-									bucket.Add(mailItem.EntryID);
-								}
-								else
-								{
-									IList<string> bucket = new List<string>();
-									bucket.Add(mailItem.EntryID);
+					Marshal.ReleaseComObject(item);
+				}
+			}
 
-									hashTable.Add(hash, bucket);
-								}
-							}
+			return hashTable;
+		}
+
+		private static async Task<IDictionary<string, IList<string>>>
+			GetFolderHashTableAsync(
+				string path, MAPIFolder folder)
+		{
+			IDictionary<string, IList<string>> hashTable = null;
+
+			if (folder != null)
+			{
+				hashTable = new Dictionary<string, IList<string>>();
+
+				hashTable = await GetFolderHashTableAsync(
+					path, folder, hashTable).ConfigureAwait(false);
+			}
+
+			return hashTable;
+		}
+
+		private static async Task<IDictionary<string, IList<string>>>
+			GetFolderHashTableAsync(
+				string path,
+				MAPIFolder folder,
+				IDictionary<string, IList<string>> hashTable)
+		{
+			if (folder != null)
+			{
+				Items items = folder.Items;
+				int total = items.Count;
+
+				Log.Info("Checking for duplicates at: " + path +
+					" Total items: " + total);
+
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group will change.
+				for (int index = total; index > 0; index--)
+				{
+					object item = items[index];
+
+					switch (item)
+					{
+						// Initially, just focus on MailItems
+						case MailItem mailItem:
+							hashTable = await AddItemHashToTableAsync(
+								hashTable, path, mailItem).
+								ConfigureAwait(false);
 
 							Marshal.ReleaseComObject(mailItem);
 							break;
@@ -1981,6 +2131,37 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			IDictionary<string, IList<string>> hashTable =
 				GetFolderHashTable(path, folder);
+
+			var duplicates = hashTable.Where(p => p.Value.Count > 1);
+			duplicateCounts[0] = duplicates.Count();
+
+			if (duplicateCounts[0] > 0)
+			{
+				Log.Info("Duplicates found at: " + path);
+			}
+
+			foreach (KeyValuePair<string, IList<string>> duplicateSet in
+				duplicates)
+			{
+				duplicateCounts[1] +=
+					DeleteDuplicates(duplicateSet.Value, dryRun);
+			}
+
+			Marshal.ReleaseComObject(folder);
+
+			return duplicateCounts;
+		}
+
+		private async Task<int[]> RemoveDuplicatesFromThisFolderAsync(
+			MAPIFolder folder, bool dryRun)
+		{
+			int[] duplicateCounts = new int[2];
+
+			string path = GetFolderPath(folder);
+
+			IDictionary<string, IList<string>> hashTable =
+				await GetFolderHashTableAsync(path, folder).
+				ConfigureAwait(false);
 
 			var duplicates = hashTable.Where(p => p.Value.Count > 1);
 			duplicateCounts[0] = duplicates.Count();
