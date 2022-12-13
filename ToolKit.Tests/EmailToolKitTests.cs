@@ -774,11 +774,10 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			string storePath = OutlookStore.GetStoreName(store);
 
 			OutlookFolder outlookFolder = new (outlookAccount);
-			int[] counts =
+			int removedDuplicates =
 				outlookFolder.RemoveDuplicates(storePath, mainFolder, false);
 
-			Assert.AreEqual(counts[0], 1);
-			Assert.AreEqual(counts[1], 2);
+			Assert.AreEqual(removedDuplicates, 1);
 
 			// Clean up
 			mailItem.Delete();

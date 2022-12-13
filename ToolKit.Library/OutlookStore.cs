@@ -962,7 +962,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				int[] duplicateCounts = outlookFolder.RemoveDuplicates(
+				int removedDuplicates = outlookFolder.RemoveDuplicates(
 						storePath, rootFolder, dryRun);
 
 				if (flush == true)
@@ -970,8 +970,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					EmptyDeletedItemsFolder(store);
 				}
 
-				int removedDuplicates =
-					duplicateCounts[1] - duplicateCounts[0];
 				LogFormatMessage.Info(
 					"Duplicates Removed in: {0}: {1}",
 					storePath,
@@ -1027,7 +1025,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				int[] duplicateCounts = await
+
+				int removedDuplicates = await
 					outlookFolder.RemoveDuplicatesAsync(
 						storePath, rootFolder, dryRun).ConfigureAwait(false);
 
@@ -1036,8 +1035,6 @@ namespace DigitalZenWorks.Email.ToolKit
 					EmptyDeletedItemsFolder(store);
 				}
 
-				int removedDuplicates =
-					duplicateCounts[1] - duplicateCounts[0];
 				LogFormatMessage.Info(
 					"Duplicates Removed in: {0}: {1}",
 					storePath,
