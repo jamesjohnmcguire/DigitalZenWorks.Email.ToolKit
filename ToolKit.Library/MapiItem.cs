@@ -277,6 +277,25 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the current item's folder path.
+		/// </summary>
+		/// <param name="mailItem">The mailItem to check.</param>
+		/// <returns>The current item's folder path.</returns>
+		public static string GetPath(MailItem mailItem)
+		{
+			string path = null;
+
+			if (mailItem != null)
+			{
+				MAPIFolder parent = mailItem.Parent;
+
+				path = OutlookFolder.GetFolderPath(parent);
+			}
+
+			return path;
+		}
+
+		/// <summary>
 		/// Move item to destination folder.
 		/// </summary>
 		/// <param name="item">The item to move.</param>
