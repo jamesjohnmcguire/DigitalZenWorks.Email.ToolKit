@@ -166,10 +166,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Gets the item's hash.
 		/// </summary>
-		/// <param name="path">The path of the current folder.</param>
 		/// <param name="mailItem">The items to compute.</param>
 		/// <returns>The item's hash encoded in base 64.</returns>
-		public static string GetItemHash(string path, MailItem mailItem)
+		public static string GetItemHash(MailItem mailItem)
 		{
 			string hashBase64 = null;
 			byte[] finalBuffer = null;
@@ -178,7 +177,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				if (mailItem != null)
 				{
-					finalBuffer = GetItemBytes(path, mailItem);
+					finalBuffer = GetItemBytes(mailItem);
 
 					using SHA256 hasher = SHA256.Create();
 
@@ -209,10 +208,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Gets the item's hash.
 		/// </summary>
-		/// <param name="path">The path of the current folder.</param>
 		/// <param name="mailItem">The items to compute.</param>
 		/// <returns>The item's hash encoded in base 64.</returns>
-		public static async Task<string> GetItemHashAsync(string path, MailItem mailItem)
+		public static async Task<string> GetItemHashAsync(
+			MailItem mailItem)
 		{
 			string hashBase64 = null;
 			byte[] finalBuffer = null;
@@ -222,7 +221,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (mailItem != null)
 				{
 					finalBuffer = await Task.Run(() =>
-						GetItemBytes(path, mailItem)).ConfigureAwait(false);
+						GetItemBytes(mailItem)).ConfigureAwait(false);
 
 					using SHA256 hasher = SHA256.Create();
 
@@ -984,7 +983,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return data;
 		}
 
-		private static byte[] GetEnums(string path, MailItem mailItem)
+		private static byte[] GetEnums(MailItem mailItem)
 		{
 			byte[] buffer = null;
 
@@ -1052,25 +1051,14 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				string sentOn = mailItem.SentOn.ToString(
-					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-				Log.Error("Exception at: " + path);
-
-				LogFormatMessage.Error(
-					"Item: {0}: From: {1}: {2} Subject: {3}",
-					sentOn,
-					mailItem.SenderName,
-					mailItem.SenderEmailAddress,
-					mailItem.Subject);
-
+				LogException(mailItem);
 				Log.Error(exception.ToString());
 			}
 
 			return buffer;
 		}
 
-		private static byte[] GetItemBytes(string path, MailItem mailItem)
+		private static byte[] GetItemBytes(MailItem mailItem)
 		{
 			byte[] finalBuffer = null;
 
@@ -1083,7 +1071,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					byte[] actions = GetActions(mailItem);
 					byte[] attachments = GetAttachments(mailItem);
 					byte[] dateTimes = GetDateTimes(mailItem);
-					byte[] enums = GetEnums(path, mailItem);
+					byte[] enums = GetEnums(mailItem);
 					byte[] rtfBody = null;
 
 					try
@@ -1092,12 +1080,13 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					catch (System.Runtime.InteropServices.COMException)
 					{
-						string sentOn = mailItem.SentOn.ToString(
-							"yyyy-MM-dd HH:mm:ss",
-							CultureInfo.InvariantCulture);
+						string path = GetPath(mailItem);
 
 						Log.Warn("Exception on RTFBody at: " + path);
 
+						string sentOn = mailItem.SentOn.ToString(
+							"yyyy-MM-dd HH:mm:ss",
+							CultureInfo.InvariantCulture);
 						LogFormatMessage.Warn(
 							"Item: {0}: From: {1}: {2} Subject: {3}",
 							sentOn,
@@ -1444,12 +1433,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static void LogException(MailItem mailItem)
 		{
+			string path = GetPath(mailItem);
+			Log.Error("Exception at: " + path);
+
 			string sentOn = mailItem.SentOn.ToString(
 				"yyyy-MM-dd HH:mm:ss",
 				CultureInfo.InvariantCulture);
-
-			string path = GetPath(mailItem);
-			Log.Error("Exception at: " + path);
 
 			LogFormatMessage.Error(
 				"Item: {0}: From: {1}: {2} Subject: {3}",

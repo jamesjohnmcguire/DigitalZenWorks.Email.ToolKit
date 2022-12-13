@@ -1232,8 +1232,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string path,
 			MailItem mailItem)
 		{
-			string hash =
-				MapiItem.GetItemHash(path, mailItem);
+			string hash = MapiItem.GetItemHash(mailItem);
 
 			hashTable = AddHashToTable(
 				hashTable,
@@ -1250,7 +1249,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				MailItem mailItem)
 		{
 			string hash = await MapiItem.GetItemHashAsync(
-				path, mailItem).ConfigureAwait(false);
+				mailItem).ConfigureAwait(false);
 
 			hashTable = AddHashToTable(
 				hashTable,
