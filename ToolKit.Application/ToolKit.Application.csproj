@@ -57,4 +57,10 @@
 		<None Include="../.editorconfig" Link="../.editorconfig" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="Stackify.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>
