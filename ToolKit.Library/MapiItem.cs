@@ -8,18 +8,15 @@ using Common.Logging;
 using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using static Common.Logging.Configuration.ArgUtils;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -197,10 +194,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				LogException(mailItem);
 				Log.Error(exception.ToString());
 			}
-			finally
-			{
-				ArrayPool<byte>.Shared.Return(finalBuffer);
-			}
 
 			return hashBase64;
 		}
@@ -240,10 +233,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				LogException(mailItem);
 				Log.Error(exception.ToString());
-			}
-			finally
-			{
-				ArrayPool<byte>.Shared.Return(finalBuffer);
 			}
 
 			return hashBase64;
@@ -578,19 +567,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (actions == null)
 					{
-						actions =
-							ArrayPool<byte>.Shared.Rent(metaDataBytes.Length);
-						Array.Copy(
-							metaDataBytes, actions, metaDataBytes.Length);
+						actions = metaDataBytes;
 					}
 					else
 					{
-						byte[] previousActions = actions;
-
-						actions = BitBytes.MergeByteArraysPooled(
-							previousActions, metaDataBytes);
-
-						ArrayPool<byte>.Shared.Return(previousActions);
+						actions =
+							BitBytes.MergeByteArrays(actions, metaDataBytes);
 					}
 
 					Marshal.ReleaseComObject(action);
@@ -669,22 +651,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (attachments == null)
 					{
-						attachments = ArrayPool<byte>.Shared.Rent(
-							attachementData.Length);
-						Array.Copy(
-							attachementData,
-							attachments,
-							attachementData.Length);
+						attachments = attachementData;
 					}
 					else
 					{
-						byte[] previousAttachments = attachments;
-
-						attachments = BitBytes.MergeByteArraysPooled(
-							previousAttachments, attachementData);
-
-						ArrayPool<byte>.Shared.Return(attachementData);
-						ArrayPool<byte>.Shared.Return(previousAttachments);
+						attachments = BitBytes.MergeByteArrays(
+							attachments, attachementData);
 					}
 
 					Marshal.ReleaseComObject(attachment);
@@ -748,7 +720,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			byte[] fileBytes = File.ReadAllBytes(filePath);
 
 			byte[] attachmentData =
-				BitBytes.MergeByteArraysPooled(metaDataBytes, fileBytes);
+				BitBytes.MergeByteArrays(metaDataBytes, fileBytes);
 
 			return attachmentData;
 		}
@@ -769,10 +741,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				byte[] rtfBody = mailItem.RTFBody as byte[];
 
 				byte[] tempBody =
-					BitBytes.MergeByteArraysPooled(bodyBytes, htmlBodyBytes);
-				allBody = BitBytes.MergeByteArraysPooled(allBody, rtfBody);
-
-				ArrayPool<byte>.Shared.Return(tempBody);
+					BitBytes.MergeByteArrays(bodyBytes, htmlBodyBytes);
+				allBody = BitBytes.MergeByteArrays(allBody, rtfBody);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -1112,7 +1082,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						strings,
 						userProperties);
 
-					finalBuffer = ArrayPool<byte>.Shared.Rent((int)bufferSize);
+					finalBuffer = new byte[bufferSize];
 
 					// combine the parts
 					long currentIndex = BitBytes.ArrayCopyConditional(
@@ -1133,21 +1103,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					finalBuffer = BitBytes.CopyUshortToByteArray(
 						finalBuffer, currentIndex, booleans);
-
-					if (actions != null)
-					{
-						ArrayPool<byte>.Shared.Return(actions);
-					}
-
-					if (attachments != null)
-					{
-						ArrayPool<byte>.Shared.Return(attachments);
-					}
-
-					if (userProperties != null)
-					{
-						ArrayPool<byte>.Shared.Return(userProperties);
-					}
 				}
 			}
 			catch (System.Exception exception) when
@@ -1368,22 +1323,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (properties == null)
 					{
-						properties = ArrayPool<byte>.Shared.Rent(
-							userPropertyData.Length);
-						Array.Copy(
-							userPropertyData,
-							properties,
-							userPropertyData.Length);
+						properties = userPropertyData;
 					}
 					else
 					{
-						byte[] previousProperties = properties;
-
 						properties = BitBytes.MergeByteArrays(
-							previousProperties, userPropertyData);
-
-						ArrayPool<byte>.Shared.Return(userPropertyData);
-						ArrayPool<byte>.Shared.Return(previousProperties);
+							properties, userPropertyData);
 					}
 
 					Marshal.ReleaseComObject(property);
