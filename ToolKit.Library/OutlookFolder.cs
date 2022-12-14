@@ -288,7 +288,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						Marshal.ReleaseComObject(subFolder);
 					}
 
-					hashTable = GetFolderHashTable(path, folder, hashTable);
+					hashTable = GetFolderHashTable(folder, hashTable);
 				}
 			}
 
@@ -1183,7 +1183,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static IDictionary<string, IList<string>> AddItemHashToTable(
 			IDictionary<string, IList<string>> hashTable,
-			string path,
 			MailItem mailItem)
 		{
 			string hash = MapiItem.GetItemHash(mailItem);
@@ -1199,7 +1198,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static async Task<IDictionary<string, IList<string>>>
 			AddItemHashToTableAsync(
 				IDictionary<string, IList<string>> hashTable,
-				string path,
 				MailItem mailItem)
 		{
 			string hash = await MapiItem.GetItemHashAsync(
@@ -1265,7 +1263,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static IDictionary<string, IList<string>> GetFolderHashTable(
-			string path, MAPIFolder folder)
+			MAPIFolder folder)
 		{
 			IDictionary<string, IList<string>> hashTable = null;
 
@@ -1273,19 +1271,20 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				hashTable = new Dictionary<string, IList<string>>();
 
-				hashTable = GetFolderHashTable(path, folder, hashTable);
+				hashTable = GetFolderHashTable(folder, hashTable);
 			}
 
 			return hashTable;
 		}
 
 		private static IDictionary<string, IList<string>> GetFolderHashTable(
-			string path,
 			MAPIFolder folder,
 			IDictionary<string, IList<string>> hashTable)
 		{
 			if (folder != null)
 			{
+				string path = GetFolderPath(folder);
+
 				Items items = folder.Items;
 				int total = items.Count;
 
@@ -1302,8 +1301,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						// Initially, just focus on MailItems
 						case MailItem mailItem:
-							hashTable = AddItemHashToTable(
-								hashTable, path, mailItem);
+							hashTable =
+								AddItemHashToTable(hashTable, mailItem);
 
 							Marshal.ReleaseComObject(mailItem);
 							break;
@@ -1320,8 +1319,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static async Task<IDictionary<string, IList<string>>>
-			GetFolderHashTableAsync(
-				string path, MAPIFolder folder)
+			GetFolderHashTableAsync(MAPIFolder folder)
 		{
 			IDictionary<string, IList<string>> hashTable = null;
 
@@ -1330,7 +1328,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				hashTable = new Dictionary<string, IList<string>>();
 
 				hashTable = await GetFolderHashTableAsync(
-					path, folder, hashTable).ConfigureAwait(false);
+					folder, hashTable).ConfigureAwait(false);
 			}
 
 			return hashTable;
@@ -1338,12 +1336,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static async Task<IDictionary<string, IList<string>>>
 			GetFolderHashTableAsync(
-				string path,
 				MAPIFolder folder,
 				IDictionary<string, IList<string>> hashTable)
 		{
 			if (folder != null)
 			{
+				string path = GetFolderPath(folder);
+
 				Items items = folder.Items;
 				int total = items.Count;
 
@@ -1361,7 +1360,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						// Initially, just focus on MailItems
 						case MailItem mailItem:
 							hashTable = await AddItemHashToTableAsync(
-								hashTable, path, mailItem).
+								hashTable, mailItem).
 								ConfigureAwait(false);
 
 							Marshal.ReleaseComObject(mailItem);
@@ -2080,7 +2079,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string path = GetFolderPath(folder);
 
 			IDictionary<string, IList<string>> hashTable =
-				GetFolderHashTable(path, folder);
+				GetFolderHashTable(folder);
 
 			var duplicates = hashTable.Where(p => p.Value.Count > 1);
 			int duplicateCount = duplicates.Count();
@@ -2108,8 +2107,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string path = GetFolderPath(folder);
 
 			IDictionary<string, IList<string>> hashTable =
-				await GetFolderHashTableAsync(path, folder).
-				ConfigureAwait(false);
+				await GetFolderHashTableAsync(folder).ConfigureAwait(false);
 
 			var duplicates = hashTable.Where(p => p.Value.Count > 1);
 			int duplicateCount = duplicates.Count();
