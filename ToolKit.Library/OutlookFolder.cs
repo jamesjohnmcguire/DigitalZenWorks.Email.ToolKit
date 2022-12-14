@@ -22,17 +22,10 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// </summary>
 	/// <param name="path">The path of the folder.</param>
 	/// <param name="folder">The folder to act upon.</param>
-	public delegate void FolderAction(string path, MAPIFolder folder);
-
-	/// <summary>
-	/// Delegate for a folder.
-	/// </summary>
-	/// <param name="path">The path of the folder.</param>
-	/// <param name="folder">The folder to act upon.</param>
 	/// <param name="conditional">A conditional clause to use within
 	/// the delegate.</param>
 	/// <returns>A value processed from the delegate.</returns>
-	public delegate int FolderActionConditional(
+	public delegate int FolderAction(
 		string path, MAPIFolder folder, bool conditional);
 
 	/// <summary>
@@ -43,7 +36,7 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <param name="conditional">A conditional clause to use within
 	/// the delegate.</param>
 	/// <returns>A value processed from the delegate.</returns>
-	public delegate Task<int> FolderActionConditionalAsync(
+	public delegate Task<int> FolderActionAsync(
 		string path, MAPIFolder folder, bool conditional);
 
 	/// <summary>
@@ -680,7 +673,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string path,
 			MAPIFolder folder,
 			bool condition,
-			FolderActionConditional folderAction)
+			FolderAction folderAction)
 		{
 			int processed = 0;
 
@@ -724,7 +717,7 @@ namespace DigitalZenWorks.Email.ToolKit
 							}
 						}
 
-						folderAction(path, folder, condition);
+						processed += folderAction(path, folder, condition);
 					}
 				}
 				catch (COMException exception)
@@ -754,7 +747,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string path,
 			MAPIFolder folder,
 			bool condition,
-			FolderActionConditionalAsync folderAction)
+			FolderActionAsync folderAction)
 		{
 			int processed = 0;
 
