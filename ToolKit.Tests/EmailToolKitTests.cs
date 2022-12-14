@@ -771,11 +771,9 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem3.Move(mainFolder);
 
-			string storePath = OutlookStore.GetStoreName(store);
-
 			OutlookFolder outlookFolder = new (outlookAccount);
 			int removedDuplicates =
-				outlookFolder.RemoveDuplicates(storePath, mainFolder, false);
+				outlookFolder.RemoveDuplicates(mainFolder, false);
 
 			Assert.AreEqual(removedDuplicates, 1);
 

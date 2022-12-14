@@ -962,8 +962,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				int removedDuplicates = outlookFolder.RemoveDuplicates(
-						storePath, rootFolder, dryRun);
+				int removedDuplicates =
+					outlookFolder.RemoveDuplicates(rootFolder, dryRun);
 
 				if (flush == true)
 				{
@@ -1028,7 +1028,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				int removedDuplicates = await
 					outlookFolder.RemoveDuplicatesAsync(
-						storePath, rootFolder, dryRun).ConfigureAwait(false);
+						rootFolder, dryRun).ConfigureAwait(false);
 
 				if (flush == true)
 				{

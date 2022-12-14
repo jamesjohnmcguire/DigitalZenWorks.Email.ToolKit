@@ -1104,13 +1104,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Remove duplicates items from the given folder.
 		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The MAPI folder to process.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
 		/// <returns>The total count of duplicates removed.</returns>
-		public int RemoveDuplicates(
-			string path, MAPIFolder folder, bool dryRun)
+		public int RemoveDuplicates(MAPIFolder folder, bool dryRun)
 		{
 			if (folder != null)
 			{
@@ -1128,7 +1126,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						MAPIFolder subFolder = folder.Folders[index];
 
 						RemovedDuplicates +=
-							RemoveDuplicates(path, subFolder, dryRun);
+							RemoveDuplicates(subFolder, dryRun);
 
 						Marshal.ReleaseComObject(subFolder);
 					}
@@ -1149,8 +1147,23 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
 		/// <returns>The total count of duplicates removed.</returns>
-		public async Task<int> RemoveDuplicatesAsync(
+		[Obsolete("RemoveDuplicates(string, MAPIFolder, bool) is deprecated," +
+			" please use RemoveDuplicates(MAPIFolder, bool) instead.")]
+		public int RemoveDuplicates(
 			string path, MAPIFolder folder, bool dryRun)
+		{
+			return RemoveDuplicates(folder, dryRun);
+		}
+
+		/// <summary>
+		/// Remove duplicates items from the given folder.
+		/// </summary>
+		/// <param name="folder">The MAPI folder to process.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
+		/// <returns>The total count of duplicates removed.</returns>
+		public async Task<int> RemoveDuplicatesAsync(
+			MAPIFolder folder, bool dryRun)
 		{
 			if (folder != null)
 			{
@@ -1168,7 +1181,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						MAPIFolder subFolder = folder.Folders[index];
 
 						RemovedDuplicates += await
-							RemoveDuplicatesAsync(path, subFolder, dryRun).
+							RemoveDuplicatesAsync(subFolder, dryRun).
 								ConfigureAwait(false);
 
 						Marshal.ReleaseComObject(subFolder);
