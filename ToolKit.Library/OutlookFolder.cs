@@ -1112,28 +1112,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
-				bool isDeletedFolder = IsDeletedFolder(folder);
-
-				// Skip processing of system deleted items folder.
-				if (isDeletedFolder == false)
-				{
-					int folderCount = folder.Folders.Count;
-
-					// Office uses 1 based indexes from VBA.
-					// Iterate in reverse order as the group may change.
-					for (int index = folderCount; index > 0; index--)
-					{
-						MAPIFolder subFolder = folder.Folders[index];
-
-						RemovedDuplicates +=
-							RemoveDuplicates(subFolder, dryRun);
-
-						Marshal.ReleaseComObject(subFolder);
-					}
-
-					RemovedDuplicates +=
-						RemoveDuplicatesFromThisFolder(folder, dryRun);
-				}
+				RemovedDuplicates = RecurseFolders(
+					folder, dryRun, RemoveDuplicatesFromThisFolder);
 			}
 
 			return RemovedDuplicates;
@@ -1167,30 +1147,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
-				bool isDeletedFolder = IsDeletedFolder(folder);
-
-				// Skip processing of system deleted items folder.
-				if (isDeletedFolder == false)
-				{
-					int folderCount = folder.Folders.Count;
-
-					// Office uses 1 based indexes from VBA.
-					// Iterate in reverse order as the group may change.
-					for (int index = folderCount; index > 0; index--)
-					{
-						MAPIFolder subFolder = folder.Folders[index];
-
-						RemovedDuplicates += await
-							RemoveDuplicatesAsync(subFolder, dryRun).
-								ConfigureAwait(false);
-
-						Marshal.ReleaseComObject(subFolder);
-					}
-
-					RemovedDuplicates += await
-						RemoveDuplicatesFromThisFolderAsync(folder, dryRun).
-							ConfigureAwait(false);
-				}
+				RemovedDuplicates = await RecurseFoldersAsync(
+					folder, dryRun, RemoveDuplicatesFromThisFolderAsync).
+						ConfigureAwait(false);
 			}
 
 			return RemovedDuplicates;
