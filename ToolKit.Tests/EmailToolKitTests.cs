@@ -832,7 +832,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
-			OutlookFolder.RemoveEmptyFolders(path, rootFolder, true);
+			OutlookFolder.RemoveEmptyFolders(rootFolder, true);
 
 			subFolder = OutlookFolder.GetSubFolder(
 				rootFolder, "Temporary Test Folder");
@@ -864,7 +864,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
-			await OutlookFolder.RemoveEmptyFoldersAsync(path, rootFolder, true).
+			await OutlookFolder.RemoveEmptyFoldersAsync(rootFolder, true).
 				ConfigureAwait(false);
 
 			subFolder = OutlookFolder.GetSubFolder(

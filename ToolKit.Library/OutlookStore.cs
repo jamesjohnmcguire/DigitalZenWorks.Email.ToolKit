@@ -135,7 +135,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					MAPIFolder rootFolder = store.GetRootFolder();
 
 					removedFolders = OutlookFolder.RemoveEmptyFolders(
-						storePath, rootFolder, true);
+						rootFolder, true);
 
 					Marshal.ReleaseComObject(rootFolder);
 				}
@@ -168,12 +168,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					Log.Info("Checking for empty folders in: " +
 						storePath);
-					storePath += "::";
 
 					MAPIFolder rootFolder = store.GetRootFolder();
 
-					removedFolders = await OutlookFolder.RemoveEmptyFoldersAsync(
-						storePath, rootFolder, true).ConfigureAwait(false);
+					removedFolders = await
+						OutlookFolder.RemoveEmptyFoldersAsync(
+							rootFolder, true).ConfigureAwait(false);
 
 					Marshal.ReleaseComObject(rootFolder);
 				}
