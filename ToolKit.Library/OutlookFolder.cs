@@ -2076,7 +2076,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			MAPIFolder folder, bool dryRun)
 		{
 			int removedDuplicates = 0;
-			string path = GetFolderPath(folder);
 
 			IDictionary<string, IList<string>> hashTable =
 				GetFolderHashTable(folder);
@@ -2086,6 +2085,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (duplicateCount > 0)
 			{
+				string path = GetFolderPath(folder);
 				Log.Info("Duplicates found at: " + path);
 			}
 
