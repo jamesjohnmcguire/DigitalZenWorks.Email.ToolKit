@@ -536,7 +536,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string baseSynopses, MailItem mailItem)
 		{
 			bool valid = true;
-			string duplicateSynopses = MapiItem.GetItemSynopses(mailItem);
+			string duplicateSynopses = GetItemSynopses(mailItem);
 
 			if (!duplicateSynopses.Equals(
 				baseSynopses, StringComparison.Ordinal))
@@ -1172,20 +1172,24 @@ namespace DigitalZenWorks.Email.ToolKit
 			ccList.Sort();
 			bccList.Sort();
 
+			StringBuilder builder = new ();
+
 			foreach (string formattedRecipient in toList)
 			{
-				recipients += formattedRecipient;
+				builder.Append(formattedRecipient);
 			}
 
 			foreach (string formattedRecipient in ccList)
 			{
-				recipients += formattedRecipient;
+				builder.Append(formattedRecipient);
 			}
 
 			foreach (string formattedRecipient in bccList)
 			{
-				recipients += formattedRecipient;
+				builder.Append(formattedRecipient);
 			}
+
+			recipients = builder.ToString();
 
 			return recipients;
 		}
