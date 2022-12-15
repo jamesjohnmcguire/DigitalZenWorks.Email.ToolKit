@@ -37,6 +37,22 @@ namespace DigitalZenWorks.Email.ToolKit
 		MAPIFolder folder, bool conditional);
 
 	/// <summary>
+	/// Item action Delegate.
+	/// </summary>
+	/// <param name="folder">The folder to use.</param>
+	/// <param name="item">The item to use.</param>
+	public delegate void ItemAction(
+		MAPIFolder folder, object item);
+
+	/// <summary>
+	/// Item action Delegate.
+	/// </summary>
+	/// <param name="folder">The folder to use.</param>
+	/// <param name="item">The item to use.</param>
+	public delegate Task ItemActionAsync(
+		MAPIFolder folder, object item);
+
+	/// <summary>
 	/// Represents an Outlook Folder.
 	/// </summary>
 	public class OutlookFolder
@@ -1497,6 +1513,70 @@ namespace DigitalZenWorks.Email.ToolKit
 			return parts;
 		}
 
+		private static void ItemsIterator(
+			MAPIFolder source,
+			MAPIFolder destination,
+			ItemAction itemAction,
+			string messageTemplate)
+		{
+			Items items = source.Items;
+
+			int ascendingCount = 1;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int index = items.Count; index > 0; index--)
+			{
+				object item = items[index];
+
+				int sectionIndicator = ascendingCount % 100;
+
+				if (ascendingCount == 1 || sectionIndicator == 0)
+				{
+					Log.Info(
+						messageTemplate +
+						ascendingCount.ToString(CultureInfo.InvariantCulture));
+				}
+
+				itemAction(destination, item);
+
+				MapiItem.Moveitem(item, destination);
+
+				ascendingCount++;
+			}
+		}
+
+		private static async Task ItemsIteratorAsync(
+			MAPIFolder source,
+			MAPIFolder destination,
+			ItemActionAsync itemAction,
+			string messageTemplate)
+		{
+			Items items = source.Items;
+
+			int ascendingCount = 1;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int index = items.Count; index > 0; index--)
+			{
+				object item = items[index];
+
+				int sectionIndicator = ascendingCount % 100;
+
+				if (ascendingCount == 1 || sectionIndicator == 0)
+				{
+					Log.Info(
+						messageTemplate +
+						ascendingCount.ToString(CultureInfo.InvariantCulture));
+				}
+
+				await itemAction(destination, item).ConfigureAwait(false);
+
+				ascendingCount++;
+			}
+		}
+
 		private static void ListItem(MailItem mailItem, string prefixMessage)
 		{
 			string sentOn = mailItem.SentOn.ToString(
@@ -1524,61 +1604,31 @@ namespace DigitalZenWorks.Email.ToolKit
 			return removed;
 		}
 
+		private static void MoveItem(MAPIFolder destination, object item)
+		{
+			MapiItem.Moveitem(item, destination);
+		}
+
+		private static async Task MoveItemAsync(
+			MAPIFolder destination, object item)
+		{
+			await MapiItem.MoveitemAsync(item, destination).
+				ConfigureAwait(false);
+		}
+
 		private static void MoveFolderItems(
 			MAPIFolder source, MAPIFolder destination)
 		{
-			Items items = source.Items;
-
-			int ascendingCount = 1;
-
-			// Office uses 1 based indexes from VBA.
-			// Iterate in reverse order as the group may change.
-			for (int index = items.Count; index > 0; index--)
-			{
-				int sectionIndicator = ascendingCount % 100;
-
-				if (ascendingCount == 1 || sectionIndicator == 0)
-				{
-					Log.Info(
-						"Moving Items from: " +
-						ascendingCount.ToString(CultureInfo.InvariantCulture));
-				}
-
-				object item = items[index];
-
-				MapiItem.Moveitem(item, destination);
-
-				ascendingCount++;
-			}
+			ItemsIterator(
+				source, destination, MoveItem, "Moving Items from: ");
 		}
 
 		private static async Task MoveFolderItemsAsync(
 			MAPIFolder source, MAPIFolder destination)
 		{
-			Items items = source.Items;
-
-			int ascendingCount = 1;
-
-			// Office uses 1 based indexes from VBA.
-			// Iterate in reverse order as the group may change.
-			for (int index = items.Count; index > 0; index--)
-			{
-				int sectionIndicator = ascendingCount % 100;
-
-				if (ascendingCount == 1 || sectionIndicator == 0)
-				{
-					Log.Info(
-						"Moving Items from: " +
-						ascendingCount.ToString(CultureInfo.InvariantCulture));
-				}
-
-				object item = items[index];
-
-				await MapiItem.MoveitemAsync(item, destination).
-					ConfigureAwait(false);
-
-				ascendingCount++;
-			}
+			await ItemsIteratorAsync(
+				source, destination, MoveItemAsync, "Moving Items from: ").
+				ConfigureAwait(false);
 		}
 
 		private static int RemoveEmptyFolder(MAPIFolder folder, bool condition)
