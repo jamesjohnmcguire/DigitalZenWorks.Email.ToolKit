@@ -4,13 +4,12 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 [assembly: CLSCompliant(true)]
 
@@ -293,9 +292,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem2.Move(mainFolder);
 
-			string path = OutlookFolder.GetFolderPath(mainFolder);
-			string hash = MapiItem.GetItemHash(path, mailItem);
-			string hash2 = MapiItem.GetItemHash(path, mailItem2);
+			string hash = MapiItem.GetItemHash(mailItem);
+			string hash2 = MapiItem.GetItemHash(mailItem2);
 
 			Assert.AreNotEqual(hash, hash2);
 
@@ -330,9 +328,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem2.Move(mainFolder);
 
-			string path = OutlookFolder.GetFolderPath(mainFolder);
-			string hash = MapiItem.GetItemHash(path, mailItem);
-			string hash2 = MapiItem.GetItemHash(path, mailItem2);
+			string hash = MapiItem.GetItemHash(mailItem);
+			string hash2 = MapiItem.GetItemHash(mailItem2);
 
 			Assert.AreEqual(hash, hash2);
 
@@ -362,9 +359,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem.Move(mainFolder);
 
-			string path = OutlookFolder.GetFolderPath(mainFolder);
-			string hash = MapiItem.GetItemHash(path, mailItem);
-			string hash2 = MapiItem.GetItemHash(path, mailItem);
+			string hash = MapiItem.GetItemHash(mailItem);
+			string hash2 = MapiItem.GetItemHash(mailItem);
 
 			Assert.AreEqual(hash, hash2);
 
@@ -403,6 +399,51 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			OutlookFolder outlookFolder = new (outlookAccount);
 			outlookFolder.MergeFolders(path, rootFolder, false);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "Testing (1)");
+
+			Assert.IsNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// unit test.</returns>
+		[Test]
+		public async Task TestMergeFoldersAsync()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"Testing (1)",
+				"This is the subject");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			await outlookFolder.MergeFoldersAsync(path, rootFolder, false).
+				ConfigureAwait(false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
@@ -474,6 +515,63 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		/// <summary>
 		/// Test for removing empty folders.
 		/// </summary>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// unit test.</returns>
+		[Test]
+		public async Task TestMergeFoldersAggresiveAsync()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"Testing_5",
+				"This is the subject 1");
+
+			MailItem mailItem2 = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"_Testing",
+				"This is the subject 3");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			await outlookFolder.MergeFoldersAsync(path, rootFolder, false).
+				ConfigureAwait(false);
+
+			System.Threading.Thread.Sleep(200);
+
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "Testing_5");
+			Assert.IsNull(subFolder);
+
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "_Testing");
+			Assert.IsNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			mailItem2.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mailItem2);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
 		[Test]
 		public void TestMergeFoldersAllNumbersFolder()
 		{
@@ -499,6 +597,51 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			OutlookFolder outlookFolder = new (outlookAccount);
 			outlookFolder.MergeFolders(path, rootFolder, false);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "2022");
+
+			Assert.IsNotNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// unit test.</returns>
+		[Test]
+		public async Task TestMergeFoldersAllNumbersFolderAsync()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Testing");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"2022",
+				"This is the subject");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			await outlookFolder.MergeFoldersAsync(path, rootFolder, false).
+				ConfigureAwait(false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
@@ -556,6 +699,51 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test for removing empty folders.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// unit test.</returns>
+		[Test]
+		public async Task TestMergeFolderWithParentAsync()
+		{
+			// Create top level folders
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			// Create sub folders
+			MAPIFolder subFolder =
+				OutlookFolder.AddFolder(mainFolder, "Main Test Folder");
+			Marshal.ReleaseComObject(subFolder);
+
+			MailItem mailItem = AddFolderAndMessage(
+				outlookAccount,
+				mainFolder,
+				"Main Test Folder",
+				"This is the subject");
+
+			// Review
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			OutlookFolder outlookFolder = new (outlookAccount);
+			await outlookFolder.MergeFoldersAsync(path, rootFolder, false).
+				ConfigureAwait(false);
+
+			System.Threading.Thread.Sleep(200);
+			subFolder =
+				OutlookFolder.GetSubFolder(mainFolder, "Main Test Folder");
+
+			Assert.IsNull(subFolder);
+
+			// Clean up
+			mailItem.Delete();
+			Marshal.ReleaseComObject(mailItem);
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
 		/// Test for removing empty folder.
 		/// </summary>
 		[Test]
@@ -583,14 +771,11 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem3.Move(mainFolder);
 
-			string storePath = OutlookStore.GetStoreName(store);
-
 			OutlookFolder outlookFolder = new (outlookAccount);
-			int[] counts =
-				outlookFolder.RemoveDuplicates(storePath, mainFolder, false);
+			int removedDuplicates =
+				outlookFolder.RemoveDuplicates(mainFolder, false);
 
-			Assert.AreEqual(counts[0], 1);
-			Assert.AreEqual(counts[1], 2);
+			Assert.AreEqual(removedDuplicates, 1);
 
 			// Clean up
 			mailItem.Delete();
@@ -645,7 +830,40 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			storePath = OutlookStore.GetStoreName(store) + "::";
 			string path = storePath + rootFolder.Name;
 
-			OutlookFolder.RemoveEmptyFolders(path, rootFolder, true);
+			OutlookFolder.RemoveEmptyFolders(rootFolder, true);
+
+			subFolder = OutlookFolder.GetSubFolder(
+				rootFolder, "Temporary Test Folder");
+
+			Assert.IsNull(subFolder);
+
+			if (subFolder != null)
+			{
+				Marshal.ReleaseComObject(subFolder);
+			}
+
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// Test for removing empty folder.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// unit test.</returns>
+		[Test]
+		public async Task TestRemoveEmptyFoldersAsync()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			MAPIFolder subFolder = OutlookFolder.AddFolder(
+				rootFolder, "Temporary Test Folder");
+			Marshal.ReleaseComObject(subFolder);
+
+			storePath = OutlookStore.GetStoreName(store) + "::";
+			string path = storePath + rootFolder.Name;
+
+			await OutlookFolder.RemoveEmptyFoldersAsync(rootFolder, true).
+				ConfigureAwait(false);
 
 			subFolder = OutlookFolder.GetSubFolder(
 				rootFolder, "Temporary Test Folder");

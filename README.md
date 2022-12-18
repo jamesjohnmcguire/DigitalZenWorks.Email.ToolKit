@@ -38,7 +38,7 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 | dbx-to-pst             | Migrate dbx files to pst file           | -e, --encoding |
 | eml-to-pst             | Migrate eml files to pst file           | -a, --adjust   |
 | list-folders           | List all sub folders of a given folder  | -r, --recurse  |
-| list-top-senders       | List the top senders of a given store   |                |
+| list-top-senders       | List the top senders of a given store   | -cm --count    |
 | list-total-duplicates  | List all duplicates in a given store    |                |
 | merge-folders          | Merge duplicate Outlook folders         | -n, --dryrun   |
 | merge-stores           | Merge one store into another            |                |

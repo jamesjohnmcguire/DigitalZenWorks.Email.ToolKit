@@ -14,7 +14,7 @@
 			Additional notes - https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
 		</Description>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<FileVersion>1.6.31.0</FileVersion>
+		<FileVersion>1.6.41.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>Latest</LangVersion>
@@ -25,7 +25,7 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>Digital Zen Works;Email;Dbx;Eml;Outlook;Duplicates</PackageTags>
-		<Version>1.6.31</Version>
+		<Version>1.6.41</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -50,12 +50,12 @@
 	<ItemGroup>
 		<PackageReference Include="Common.Logging" Version="3.4.1" />
 		<PackageReference Include="Common.Logging.Core" Version="3.4.1" />
-		<PackageReference Include="DigitalZenWorks.Common.Utilities" Version="1.1.60" />
+		<PackageReference Include="DigitalZenWorks.Common.Utilities" Version="1.2.61" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Debug'">

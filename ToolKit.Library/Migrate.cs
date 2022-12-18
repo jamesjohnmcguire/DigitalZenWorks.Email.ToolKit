@@ -187,6 +187,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="path">the path of the eml directory or file.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <returns>A value indicating success or not.</returns>
+		public static bool EmlToPst(string path, string pstPath)
+		{
+			bool result = EmlToPst(path, pstPath, true);
+
+			return result;
+		}
+
+		/// <summary>
+		/// Dbx to pst.
+		/// </summary>
+		/// <param name="path">the path of the eml directory or file.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
 		/// <param name="adjust">Indicates whether to exclude interim
 		/// folders.</param>
 		/// <returns>A value indicating success or not.</returns>

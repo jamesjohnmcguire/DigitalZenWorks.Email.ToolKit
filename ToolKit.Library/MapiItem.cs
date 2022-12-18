@@ -15,6 +15,8 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -25,6 +27,45 @@ namespace DigitalZenWorks.Email.ToolKit
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+		/// <summary>
+		/// Delete duplicate item.
+		/// </summary>
+		/// <param name="session">The Outlook session.</param>
+		/// <param name="duplicateId">The duplicate id.</param>
+		/// <param name="keeperSynopses">The keeper synopses.</param>
+		/// <param name="dryRun">Indicates if this is a dry run or not.</param>
+		public static void DeleteDuplicate(
+			NameSpace session,
+			string duplicateId,
+			string keeperSynopses,
+			bool dryRun)
+		{
+			if (session != null)
+			{
+				try
+				{
+					MailItem mailItem = session.GetItemFromID(duplicateId);
+
+					if (mailItem != null)
+					{
+						bool isValidDuplicate =
+							DoubleCheckDuplicate(keeperSynopses, mailItem);
+
+						if (isValidDuplicate == true && dryRun == false)
+						{
+							mailItem.Delete();
+						}
+
+						Marshal.ReleaseComObject(mailItem);
+					}
+				}
+				catch (COMException exception)
+				{
+					Log.Error(exception.ToString());
+				}
+			}
+		}
 
 		/// <summary>
 		/// Deletes the given item.
@@ -122,18 +163,18 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Gets the item's hash.
 		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="mailItem">The items to compute.</param>
 		/// <returns>The item's hash encoded in base 64.</returns>
-		public static string GetItemHash(string path, MailItem mailItem)
+		public static string GetItemHash(MailItem mailItem)
 		{
 			string hashBase64 = null;
+			byte[] finalBuffer = null;
 
 			try
 			{
 				if (mailItem != null)
 				{
-					byte[] finalBuffer = GetItemBytes(path, mailItem);
+					finalBuffer = GetItemBytes(mailItem);
 
 					using SHA256 hasher = SHA256.Create();
 
@@ -150,11 +191,96 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is OutOfMemoryException ||
 				exception is RankException)
 			{
-				LogException(path, string.Empty, mailItem);
+				LogException(mailItem);
 				Log.Error(exception.ToString());
 			}
 
 			return hashBase64;
+		}
+
+		/// <summary>
+		/// Gets the item's hash.
+		/// </summary>
+		/// <param name="mailItem">The items to compute.</param>
+		/// <returns>The item's hash encoded in base 64.</returns>
+		public static async Task<string> GetItemHashAsync(
+			MailItem mailItem)
+		{
+			string hashBase64 = null;
+			byte[] finalBuffer = null;
+
+			try
+			{
+				if (mailItem != null)
+				{
+					finalBuffer = await Task.Run(() =>
+						GetItemBytes(mailItem)).ConfigureAwait(false);
+
+					using SHA256 hasher = SHA256.Create();
+
+					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+					hashBase64 = Convert.ToBase64String(hashValue);
+				}
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is InvalidCastException ||
+				exception is OutOfMemoryException ||
+				exception is RankException)
+			{
+				LogException(mailItem);
+				Log.Error(exception.ToString());
+			}
+
+			return hashBase64;
+		}
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="mailItem">The MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		public static string GetItemSynopses(MailItem mailItem)
+		{
+			string synopses = null;
+
+			if (mailItem != null)
+			{
+				string sentOn = mailItem.SentOn.ToString(
+					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+				synopses = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: From: {1}: {2} Subject: {3}",
+					sentOn,
+					mailItem.SenderName,
+					mailItem.SenderEmailAddress,
+					mailItem.Subject);
+			}
+
+			return synopses;
+		}
+
+		/// <summary>
+		/// Get the current item's folder path.
+		/// </summary>
+		/// <param name="mailItem">The mailItem to check.</param>
+		/// <returns>The current item's folder path.</returns>
+		public static string GetPath(MailItem mailItem)
+		{
+			string path = null;
+
+			if (mailItem != null)
+			{
+				MAPIFolder parent = mailItem.Parent;
+
+				path = OutlookFolder.GetFolderPath(parent);
+			}
+
+			return path;
 		}
 
 		/// <summary>
@@ -252,6 +378,145 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Move item to destination folder.
+		/// </summary>
+		/// <param name="item">The item to move.</param>
+		/// <param name="destination">The destination folder.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public static async Task MoveitemAsync(
+			object item, MAPIFolder destination)
+		{
+			CancellationTokenSource source = new ();
+
+			try
+			{
+				source.CancelAfter(TimeSpan.FromSeconds(5));
+
+				switch (item)
+				{
+					case AppointmentItem appointmentItem:
+						await Task.Run(() =>
+							appointmentItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(appointmentItem);
+						break;
+					case ContactItem contactItem:
+						await Task.Run(() =>
+							contactItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(contactItem);
+						break;
+					case DistListItem distListItem:
+						await Task.Run(() =>
+							distListItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(distListItem);
+						break;
+					case DocumentItem documentItem:
+						await Task.Run(() =>
+							documentItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(documentItem);
+						break;
+					case JournalItem journalItem:
+						await Task.Run(() =>
+							journalItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(journalItem);
+						break;
+					case MailItem mailItem:
+						await Task.Run(() =>
+							mailItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(mailItem);
+						break;
+					case MeetingItem meetingItem:
+						await Task.Run(() =>
+							meetingItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(meetingItem);
+						break;
+					case NoteItem noteItem:
+						await Task.Run(() =>
+							noteItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(noteItem);
+						break;
+					case PostItem postItem:
+						await Task.Run(() =>
+							postItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(postItem);
+						break;
+					case RemoteItem remoteItem:
+						await Task.Run(() =>
+							remoteItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(remoteItem);
+						break;
+					case ReportItem reportItem:
+						await Task.Run(() =>
+							reportItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(reportItem);
+						break;
+					case TaskItem taskItem:
+						await Task.Run(() =>
+							taskItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskItem);
+						break;
+					case TaskRequestAcceptItem taskRequestAcceptItem:
+						await Task.Run(() =>
+							taskRequestAcceptItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestAcceptItem);
+						break;
+					case TaskRequestDeclineItem taskRequestDeclineItem:
+						await Task.Run(() =>
+							taskRequestDeclineItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestDeclineItem);
+						break;
+					case TaskRequestItem taskRequestItem:
+						await Task.Run(() =>
+							taskRequestItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestItem);
+						break;
+					case TaskRequestUpdateItem taskRequestUpdateItem:
+						await Task.Run(() =>
+							taskRequestUpdateItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestUpdateItem);
+						break;
+					default:
+						string message = "Folder item of unknown type";
+						if (item != null)
+						{
+							message += ": " + item.ToString();
+						}
+
+						Log.Warn(message);
+						break;
+				}
+
+				Marshal.ReleaseComObject(item);
+			}
+			catch (System.Exception exception) when
+				(exception is COMException ||
+				exception is OperationCanceledException)
+			{
+				Log.Error(exception.ToString());
+			}
+			finally
+			{
+				source.Dispose();
+			}
+		}
+
+		/// <summary>
 		/// Removes the MimeOLE version number.
 		/// </summary>
 		/// <param name="header">The header to check.</param>
@@ -267,6 +532,24 @@ namespace DigitalZenWorks.Email.ToolKit
 			return header;
 		}
 
+		private static bool DoubleCheckDuplicate(
+			string baseSynopses, MailItem mailItem)
+		{
+			bool valid = true;
+			string duplicateSynopses = GetItemSynopses(mailItem);
+
+			if (!duplicateSynopses.Equals(
+				baseSynopses, StringComparison.Ordinal))
+			{
+				Log.Error("Warning! Duplicate Items Don't Seem to Match");
+				Log.Error("Not Matching Item: " + duplicateSynopses);
+
+				valid = false;
+			}
+
+			return valid;
+		}
+
 		private static byte[] GetActions(MailItem mailItem)
 		{
 			byte[] actions = null;
@@ -280,38 +563,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					Microsoft.Office.Interop.Outlook.Action action =
 						mailItem.Actions[index];
 
-					Encoding encoding = Encoding.UTF8;
-
-					int copyLikeEnum = (int)action.CopyLike;
-					bool enabledBool = action.Enabled;
-					int enabledInt = Convert.ToInt32(enabledBool);
-					int replyStyleEnum = (int)action.ReplyStyle;
-					int responseStyleEnum = (int)action.ResponseStyle;
-					int showOnEnum = (int)action.ShowOn;
-
-					string copyLike =
-						copyLikeEnum.ToString(CultureInfo.InvariantCulture);
-					string enabled =
-						enabledInt.ToString(CultureInfo.InvariantCulture);
-					string replyStyle =
-						replyStyleEnum.ToString(CultureInfo.InvariantCulture);
-					string responseStyle = responseStyleEnum.ToString(
-						CultureInfo.InvariantCulture);
-					string showOn =
-						showOnEnum.ToString(CultureInfo.InvariantCulture);
-
-					string metaData = string.Format(
-						CultureInfo.InvariantCulture,
-						"{0}{1}{2}{3}{4}{5}{6}",
-						copyLike,
-						enabled,
-						action.Name,
-						action.Prefix,
-						replyStyle,
-						responseStyle,
-						showOn);
-
-					byte[] metaDataBytes = encoding.GetBytes(metaData);
+					byte[] metaDataBytes = GetActionData(action);
 
 					if (actions == null)
 					{
@@ -319,7 +571,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					else
 					{
-						actions = BitBytes.MergeByteArrays(actions, metaDataBytes);
+						actions =
+							BitBytes.MergeByteArrays(actions, metaDataBytes);
 					}
 
 					Marshal.ReleaseComObject(action);
@@ -340,6 +593,45 @@ namespace DigitalZenWorks.Email.ToolKit
 			return actions;
 		}
 
+		private static byte[] GetActionData(
+			Microsoft.Office.Interop.Outlook.Action action)
+		{
+			Encoding encoding = Encoding.UTF8;
+
+			int copyLikeEnum = (int)action.CopyLike;
+			bool enabledBool = action.Enabled;
+			int enabledInt = Convert.ToInt32(enabledBool);
+			int replyStyleEnum = (int)action.ReplyStyle;
+			int responseStyleEnum = (int)action.ResponseStyle;
+			int showOnEnum = (int)action.ShowOn;
+
+			string copyLike =
+				copyLikeEnum.ToString(CultureInfo.InvariantCulture);
+			string enabled =
+				enabledInt.ToString(CultureInfo.InvariantCulture);
+			string replyStyle =
+				replyStyleEnum.ToString(CultureInfo.InvariantCulture);
+			string responseStyle = responseStyleEnum.ToString(
+				CultureInfo.InvariantCulture);
+			string showOn =
+				showOnEnum.ToString(CultureInfo.InvariantCulture);
+
+			string metaData = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}{5}{6}",
+				copyLike,
+				enabled,
+				action.Name,
+				action.Prefix,
+				replyStyle,
+				responseStyle,
+				showOn);
+
+			byte[] metaDataBytes = encoding.GetBytes(metaData);
+
+			return metaDataBytes;
+		}
+
 		private static byte[] GetAttachments(MailItem mailItem)
 		{
 			byte[] attachments = null;
@@ -355,56 +647,17 @@ namespace DigitalZenWorks.Email.ToolKit
 					Attachment attachment =
 						mailItem.Attachments[index];
 
-					Encoding encoding = Encoding.UTF8;
-
-					int attachmentIndex = attachment.Index;
-					string indexValue = attachmentIndex.ToString(
-						CultureInfo.InvariantCulture);
-
-					int positionValue = attachment.Position;
-					string position = positionValue.ToString(
-						CultureInfo.InvariantCulture);
-
-					int intType = (int)attachment.Type;
-					string attachmentType =
-						intType.ToString(CultureInfo.InvariantCulture);
-
-					string metaData = string.Format(
-						CultureInfo.InvariantCulture,
-						"{0}{1}{2}{3}{4}",
-						attachment.DisplayName,
-						attachment.FileName,
-						indexValue,
-						position,
-						attachmentType);
-
-					try
-					{
-						metaData += attachment.PathName;
-					}
-					catch (COMException)
-					{
-					}
-
-					byte[] metaDataBytes = encoding.GetBytes(metaData);
+					byte[] attachementData = GetAttachmentData(attachment);
 
 					if (attachments == null)
 					{
-						attachments = metaDataBytes;
+						attachments = attachementData;
 					}
 					else
 					{
 						attachments = BitBytes.MergeByteArrays(
-							attachments, metaDataBytes);
+							attachments, attachementData);
 					}
-
-					string filePath = basePath + attachment.FileName;
-					attachment.SaveAsFile(filePath);
-
-					byte[] fileBytes = File.ReadAllBytes(filePath);
-
-					attachments =
-						BitBytes.MergeByteArrays(attachments, fileBytes);
 
 					Marshal.ReleaseComObject(attachment);
 				}
@@ -424,6 +677,54 @@ namespace DigitalZenWorks.Email.ToolKit
 			return attachments;
 		}
 
+		private static byte[] GetAttachmentData(Attachment attachment)
+		{
+			string basePath = Path.GetTempPath();
+
+			Encoding encoding = Encoding.UTF8;
+
+			int attachmentIndex = attachment.Index;
+			string indexValue = attachmentIndex.ToString(
+				CultureInfo.InvariantCulture);
+
+			int positionValue = attachment.Position;
+			string position = positionValue.ToString(
+				CultureInfo.InvariantCulture);
+
+			int intType = (int)attachment.Type;
+			string attachmentType =
+				intType.ToString(CultureInfo.InvariantCulture);
+
+			string metaData = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}",
+				attachment.DisplayName,
+				attachment.FileName,
+				indexValue,
+				position,
+				attachmentType);
+
+			try
+			{
+				metaData += attachment.PathName;
+			}
+			catch (COMException)
+			{
+			}
+
+			byte[] metaDataBytes = encoding.GetBytes(metaData);
+
+			string filePath = basePath + attachment.FileName;
+			attachment.SaveAsFile(filePath);
+
+			byte[] fileBytes = File.ReadAllBytes(filePath);
+
+			byte[] attachmentData =
+				BitBytes.MergeByteArrays(metaDataBytes, fileBytes);
+
+			return attachmentData;
+		}
+
 		private static byte[] GetBody(MailItem mailItem)
 		{
 			byte[] allBody = null;
@@ -439,7 +740,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				byte[] htmlBodyBytes = encoding.GetBytes(htmlBody);
 				byte[] rtfBody = mailItem.RTFBody as byte[];
 
-				allBody = BitBytes.MergeByteArrays(bodyBytes, htmlBodyBytes);
+				byte[] tempBody =
+					BitBytes.MergeByteArrays(bodyBytes, htmlBodyBytes);
 				allBody = BitBytes.MergeByteArrays(allBody, rtfBody);
 			}
 			catch (System.Exception exception) when
@@ -651,7 +953,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return data;
 		}
 
-		private static byte[] GetEnums(string path, MailItem mailItem)
+		private static byte[] GetEnums(MailItem mailItem)
 		{
 			byte[] buffer = null;
 
@@ -719,25 +1021,14 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is InvalidCastException ||
 				exception is RankException)
 			{
-				string sentOn = mailItem.SentOn.ToString(
-					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-				Log.Error("Exception at: " + path);
-
-				LogFormatMessage.Error(
-					"Item: {0}: From: {1}: {2} Subject: {3}",
-					sentOn,
-					mailItem.SenderName,
-					mailItem.SenderEmailAddress,
-					mailItem.Subject);
-
+				LogException(mailItem);
 				Log.Error(exception.ToString());
 			}
 
 			return buffer;
 		}
 
-		private static byte[] GetItemBytes(string path, MailItem mailItem)
+		private static byte[] GetItemBytes(MailItem mailItem)
 		{
 			byte[] finalBuffer = null;
 
@@ -750,7 +1041,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					byte[] actions = GetActions(mailItem);
 					byte[] attachments = GetAttachments(mailItem);
 					byte[] dateTimes = GetDateTimes(mailItem);
-					byte[] enums = GetEnums(path, mailItem);
+					byte[] enums = GetEnums(mailItem);
 					byte[] rtfBody = null;
 
 					try
@@ -759,12 +1050,13 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 					catch (System.Runtime.InteropServices.COMException)
 					{
-						string sentOn = mailItem.SentOn.ToString(
-							"yyyy-MM-dd HH:mm:ss",
-							CultureInfo.InvariantCulture);
+						string path = GetPath(mailItem);
 
 						Log.Warn("Exception on RTFBody at: " + path);
 
+						string sentOn = mailItem.SentOn.ToString(
+							"yyyy-MM-dd HH:mm:ss",
+							CultureInfo.InvariantCulture);
 						LogFormatMessage.Warn(
 							"Item: {0}: From: {1}: {2} Subject: {3}",
 							sentOn,
@@ -880,20 +1172,24 @@ namespace DigitalZenWorks.Email.ToolKit
 			ccList.Sort();
 			bccList.Sort();
 
+			StringBuilder builder = new ();
+
 			foreach (string formattedRecipient in toList)
 			{
-				recipients += formattedRecipient;
+				builder.Append(formattedRecipient);
 			}
 
 			foreach (string formattedRecipient in ccList)
 			{
-				recipients += formattedRecipient;
+				builder.Append(formattedRecipient);
 			}
 
 			foreach (string formattedRecipient in bccList)
 			{
-				recipients += formattedRecipient;
+				builder.Append(formattedRecipient);
 			}
+
+			recipients = builder.ToString();
 
 			return recipients;
 		}
@@ -1027,36 +1323,16 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					UserProperty property = mailItem.UserProperties[index];
 
-					Encoding encoding = Encoding.UTF8;
-
-					int typeEnum = (int)property.Type;
-					var propertyValue = property.Value;
-
-					string typeValue =
-						typeEnum.ToString(CultureInfo.InvariantCulture);
-					string value =
-						propertyValue.ToString(CultureInfo.InvariantCulture);
-
-					string metaData = string.Format(
-						CultureInfo.InvariantCulture,
-						"{0}{1}{2}{3}{4}{5}",
-						property.Formula,
-						property.Name,
-						typeValue,
-						property.ValidationFormula,
-						property.ValidationText,
-						value);
-
-					byte[] metaDataBytes = encoding.GetBytes(metaData);
+					byte[] userPropertyData = GetUserPropertyData(property);
 
 					if (properties == null)
 					{
-						properties = metaDataBytes;
+						properties = userPropertyData;
 					}
 					else
 					{
 						properties = BitBytes.MergeByteArrays(
-							properties, metaDataBytes);
+							properties, userPropertyData);
 					}
 
 					Marshal.ReleaseComObject(property);
@@ -1077,14 +1353,41 @@ namespace DigitalZenWorks.Email.ToolKit
 			return properties;
 		}
 
-		private static void LogException(
-			string path, string extraInformation, MailItem mailItem)
+		private static byte[] GetUserPropertyData(UserProperty property)
 		{
+			Encoding encoding = Encoding.UTF8;
+
+			int typeEnum = (int)property.Type;
+			var propertyValue = property.Value;
+
+			string typeValue =
+				typeEnum.ToString(CultureInfo.InvariantCulture);
+			string value =
+				propertyValue.ToString(CultureInfo.InvariantCulture);
+
+			string metaData = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}{5}",
+				property.Formula,
+				property.Name,
+				typeValue,
+				property.ValidationFormula,
+				property.ValidationText,
+				value);
+
+			byte[] metaDataBytes = encoding.GetBytes(metaData);
+
+			return metaDataBytes;
+		}
+
+		private static void LogException(MailItem mailItem)
+		{
+			string path = GetPath(mailItem);
+			Log.Error("Exception at: " + path);
+
 			string sentOn = mailItem.SentOn.ToString(
 				"yyyy-MM-dd HH:mm:ss",
 				CultureInfo.InvariantCulture);
-
-			Log.Error("Exception " + extraInformation + "at: " + path);
 
 			LogFormatMessage.Error(
 				"Item: {0}: From: {1}: {2} Subject: {3}",
