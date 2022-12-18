@@ -75,6 +75,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private readonly OutlookAccount outlookAccount;
 
+		private IDictionary<string, IList<string>> storeHashTable =
+			new Dictionary<string, IList<string>>();
+
 		/// <summary>
 		/// Initializes a new instance of the
 		/// <see cref="OutlookFolder"/> class.
@@ -266,44 +269,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return path;
-		}
-
-		/// <summary>
-		/// Get a list of item hashes from the given folder.
-		/// </summary>
-		/// <param name="folder">The MAPI folder to process.</param>
-		/// <param name="hashTable">A list of item hashes.</param>
-		/// <returns>A list of item hashes from the given folder.</returns>
-		public static IDictionary<string, IList<string>> GetItemHashes(
-			MAPIFolder folder,
-			IDictionary<string, IList<string>> hashTable)
-		{
-			if (folder != null && hashTable != null)
-			{
-				bool isDeletedFolder = IsDeletedFolder(folder);
-
-				// Skip processing of system deleted items folder.
-				if (isDeletedFolder == false)
-				{
-					int folderCount = folder.Folders.Count;
-
-					// Office uses 1 based indexes from VBA.
-					// Iterate in reverse order as the group may change.
-					for (int index = folderCount; index > 0; index--)
-					{
-						MAPIFolder subFolder = folder.Folders[index];
-
-						hashTable =
-							GetItemHashes(subFolder, hashTable);
-
-						Marshal.ReleaseComObject(subFolder);
-					}
-
-					hashTable = GetFolderHashTable(folder, hashTable);
-				}
-			}
-
-			return hashTable;
 		}
 
 		/// <summary>
@@ -1004,6 +969,41 @@ namespace DigitalZenWorks.Email.ToolKit
 					Log.Warn("File doesn't exist: " + filePath);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Get a list of item hashes from the given folder.
+		/// </summary>
+		/// <param name="folder">The MAPI folder to process.</param>
+		/// <returns>A list of item hashes from the given folder.</returns>
+		public IDictionary<string, IList<string>> GetItemHashes(
+			MAPIFolder folder)
+		{
+			if (folder != null)
+			{
+				bool isDeletedFolder = IsDeletedFolder(folder);
+
+				// Skip processing of system deleted items folder.
+				if (isDeletedFolder == false)
+				{
+					int folderCount = folder.Folders.Count;
+
+					// Office uses 1 based indexes from VBA.
+					// Iterate in reverse order as the group may change.
+					for (int index = folderCount; index > 0; index--)
+					{
+						MAPIFolder subFolder = folder.Folders[index];
+
+						storeHashTable = GetItemHashes(subFolder);
+
+						Marshal.ReleaseComObject(subFolder);
+					}
+
+					storeHashTable = GetFolderHashTable(folder, storeHashTable);
+				}
+			}
+
+			return storeHashTable;
 		}
 
 		/// <summary>

@@ -285,8 +285,9 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (store != null)
 			{
 				MAPIFolder rootFolder = store.GetRootFolder();
+				OutlookFolder outlookFolder = new (outlookAccount);
 
-				hashTable = OutlookFolder.GetItemHashes(rootFolder, hashTable);
+				hashTable = outlookFolder.GetItemHashes(rootFolder);
 			}
 
 			return hashTable;
