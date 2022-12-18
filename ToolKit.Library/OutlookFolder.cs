@@ -271,12 +271,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Get a list of item hashes from the given folder.
 		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The MAPI folder to process.</param>
 		/// <param name="hashTable">A list of item hashes.</param>
 		/// <returns>A list of item hashes from the given folder.</returns>
 		public static IDictionary<string, IList<string>> GetItemHashes(
-			string path,
 			MAPIFolder folder,
 			IDictionary<string, IList<string>> hashTable)
 		{
@@ -295,11 +293,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						MAPIFolder subFolder = folder.Folders[index];
 
-						string name = subFolder.Name;
-						string subPath = path + "/" + name;
-
 						hashTable =
-							GetItemHashes(subPath, subFolder, hashTable);
+							GetItemHashes(subFolder, hashTable);
 
 						Marshal.ReleaseComObject(subFolder);
 					}
