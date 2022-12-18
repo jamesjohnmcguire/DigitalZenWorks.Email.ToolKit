@@ -1535,8 +1535,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				itemAction(destination, item);
 
-				MapiItem.Moveitem(item, destination);
-
 				ascendingCount++;
 			}
 		}
