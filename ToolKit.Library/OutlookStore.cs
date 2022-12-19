@@ -393,11 +393,10 @@ namespace DigitalZenWorks.Email.ToolKit
 				string storePath = GetStoreName(store);
 				Log.Info("Merging folders in: " + storePath);
 
-				storePath += "::";
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				outlookFolder.MergeFolders(storePath, rootFolder, dryRun);
+				outlookFolder.MergeFolders(rootFolder, dryRun);
 
 				totalFolders++;
 
@@ -445,7 +444,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				OutlookFolder outlookFolder = new (outlookAccount);
 				await outlookFolder.MergeFoldersAsync(
-					storePath, rootFolder, dryRun).ConfigureAwait(false);
+					rootFolder, dryRun).ConfigureAwait(false);
 
 				totalFolders++;
 

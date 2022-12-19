@@ -1009,11 +1009,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Merge folders.
 		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The current folder.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		public void MergeFolders(string path, MAPIFolder folder, bool dryRun)
+		public void MergeFolders(MAPIFolder folder, bool dryRun)
 		{
 			if (folder != null)
 			{
@@ -1028,10 +1027,25 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="folder">The current folder.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
+		[Obsolete("MergeFolders(string, MAPIFolder, bool) is deprecated, " +
+			"please use MergeFolders(MAPIFolder, bool) instead.")]
+		public void MergeFolders(string path, MAPIFolder folder, bool dryRun)
+		{
+			if (folder != null)
+			{
+				RecurseFolders(folder, dryRun, MergeThisFolder);
+			}
+		}
+
+		/// <summary>
+		/// Merge folders.
+		/// </summary>
+		/// <param name="folder">The current folder.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous
 		/// operation.</returns>
-		public async Task MergeFoldersAsync(
-			string path, MAPIFolder folder, bool dryRun)
+		public async Task MergeFoldersAsync(MAPIFolder folder, bool dryRun)
 		{
 			if (folder != null)
 			{
