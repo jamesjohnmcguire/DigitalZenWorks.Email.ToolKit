@@ -49,6 +49,8 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// </summary>
 	/// <param name="folder">The folder to use.</param>
 	/// <param name="item">The item to use.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
 	public delegate Task ItemActionAsync(
 		MAPIFolder folder, object item);
 
