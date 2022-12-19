@@ -999,7 +999,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						Marshal.ReleaseComObject(subFolder);
 					}
 
-					storeHashTable = GetFolderHashTable(folder, storeHashTable);
+					storeHashTable = GetFolderHashTable(folder);
 				}
 			}
 
@@ -1192,36 +1192,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return hashTable;
 		}
 
-		private static IDictionary<string, IList<string>> AddItemHashToTable(
-			IDictionary<string, IList<string>> hashTable,
-			MailItem mailItem)
-		{
-			string hash = MapiItem.GetItemHash(mailItem);
-
-			hashTable = AddHashToTable(
-				hashTable,
-				hash,
-				mailItem.EntryID);
-
-			return hashTable;
-		}
-
-		private static async Task<IDictionary<string, IList<string>>>
-			AddItemHashToTableAsync(
-				IDictionary<string, IList<string>> hashTable,
-				MailItem mailItem)
-		{
-			string hash = await MapiItem.GetItemHashAsync(
-				mailItem).ConfigureAwait(false);
-
-			hashTable = AddHashToTable(
-				hashTable,
-				hash,
-				mailItem.EntryID);
-
-			return hashTable;
-		}
-
 		private static string CheckFolderNameNormalization(string folderName)
 		{
 			string duplicatePattern = null;
@@ -1271,121 +1241,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folderExists;
-		}
-
-		private static IDictionary<string, IList<string>> GetFolderHashTable(
-			MAPIFolder folder)
-		{
-			IDictionary<string, IList<string>> hashTable = null;
-
-			if (folder != null)
-			{
-				hashTable = new Dictionary<string, IList<string>>();
-
-				hashTable = GetFolderHashTable(folder, hashTable);
-			}
-
-			return hashTable;
-		}
-
-		private static IDictionary<string, IList<string>> GetFolderHashTable(
-			MAPIFolder folder,
-			IDictionary<string, IList<string>> hashTable)
-		{
-			if (folder != null)
-			{
-				string path = GetFolderPath(folder);
-
-				Items items = folder.Items;
-				int total = items.Count;
-
-				Log.Info("Checking for duplicates at: " + path +
-					" Total items: " + total);
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group will change.
-				for (int index = total; index > 0; index--)
-				{
-					object item = items[index];
-
-					switch (item)
-					{
-						// Initially, just focus on MailItems
-						case MailItem mailItem:
-							hashTable =
-								AddItemHashToTable(hashTable, mailItem);
-
-							Marshal.ReleaseComObject(mailItem);
-							break;
-						default:
-							Log.Info("Ignoring item of non-MailItem type: ");
-							break;
-					}
-
-					Marshal.ReleaseComObject(item);
-				}
-			}
-
-			return hashTable;
-		}
-
-		private static async Task<IDictionary<string, IList<string>>>
-			GetFolderHashTableAsync(MAPIFolder folder)
-		{
-			IDictionary<string, IList<string>> hashTable = null;
-
-			if (folder != null)
-			{
-				hashTable = new Dictionary<string, IList<string>>();
-
-				hashTable = await GetFolderHashTableAsync(
-					folder, hashTable).ConfigureAwait(false);
-			}
-
-			return hashTable;
-		}
-
-		private static async Task<IDictionary<string, IList<string>>>
-			GetFolderHashTableAsync(
-				MAPIFolder folder,
-				IDictionary<string, IList<string>> hashTable)
-		{
-			if (folder != null)
-			{
-				string path = GetFolderPath(folder);
-
-				Items items = folder.Items;
-				int total = items.Count;
-
-				Log.Info("Checking for duplicates at: " + path +
-					" Total items: " + total);
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group will change.
-				for (int index = total; index > 0; index--)
-				{
-					object item = items[index];
-
-					switch (item)
-					{
-						// Initially, just focus on MailItems
-						case MailItem mailItem:
-							hashTable = await AddItemHashToTableAsync(
-								hashTable, mailItem).
-								ConfigureAwait(false);
-
-							Marshal.ReleaseComObject(mailItem);
-							break;
-						default:
-							Log.Info("Ignoring item of non-MailItem type: ");
-							break;
-					}
-
-					Marshal.ReleaseComObject(item);
-				}
-			}
-
-			return hashTable;
 		}
 
 		private static IDictionary<string, int> GetFolderSendersCount(
@@ -1665,6 +1520,48 @@ namespace DigitalZenWorks.Email.ToolKit
 			return path;
 		}
 
+		private void AddItemHashToTable(MAPIFolder folder, object item)
+		{
+			switch (item)
+			{
+				// Initially, just focus on MailItems
+				case MailItem mailItem:
+					string entryId = mailItem.EntryID;
+					string hash = MapiItem.GetItemHash(mailItem);
+
+					storeHashTable =
+						AddHashToTable(storeHashTable, hash, entryId);
+
+					Marshal.ReleaseComObject(mailItem);
+					break;
+				default:
+					Log.Info("Ignoring item of non-MailItem type: ");
+					break;
+			}
+		}
+
+		private async Task AddItemHashToTableAsync(
+			MAPIFolder folder, object item)
+		{
+			switch (item)
+			{
+				// Initially, just focus on MailItems
+				case MailItem mailItem:
+					string entryId = mailItem.EntryID;
+					string hash = await MapiItem.GetItemHashAsync(mailItem).
+						ConfigureAwait(false);
+
+					storeHashTable =
+						AddHashToTable(storeHashTable, hash, entryId);
+
+					Marshal.ReleaseComObject(mailItem);
+					break;
+				default:
+					Log.Info("Ignoring item of non-MailItem type: ");
+					break;
+			}
+		}
+
 		private void CheckForDuplicateFolders(MAPIFolder folder, bool dryRun)
 		{
 			string folderName = folder.Name;
@@ -1718,6 +1615,44 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return removeDuplicates;
+		}
+
+		private IDictionary<string, IList<string>> GetFolderHashTable(
+			MAPIFolder folder)
+		{
+			IDictionary<string, IList<string>> hashTable = null;
+
+			if (folder != null)
+			{
+				hashTable = new Dictionary<string, IList<string>>();
+
+				ItemsIterator(
+					folder,
+					folder,
+					AddItemHashToTable,
+					"Getting Item Hashes from: ");
+			}
+
+			return storeHashTable;
+		}
+
+		private async Task<IDictionary<string, IList<string>>>
+			GetFolderHashTableAsync(MAPIFolder folder)
+		{
+			IDictionary<string, IList<string>> hashTable = null;
+
+			if (folder != null)
+			{
+				hashTable = new Dictionary<string, IList<string>>();
+
+				await ItemsIteratorAsync(
+					folder,
+					folder,
+					AddItemHashToTableAsync,
+					"Getting Item Hashes from: ").ConfigureAwait(false);
+			}
+
+			return storeHashTable;
 		}
 
 		private void MergeDuplicateFolder(
