@@ -341,14 +341,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			string storePath = GetStoreName(store);
-			storePath += "::";
+			OutlookFolder outlookFolder = new (outlookAccount);
 
 			IDictionary<string, int> sendersCounts =
-				new Dictionary<string, int>();
-
-			sendersCounts = OutlookFolder.GetSendersCount(
-				storePath, rootFolder, sendersCounts);
+				outlookFolder.GetSendersCount(rootFolder);
 
 			Marshal.ReleaseComObject(rootFolder);
 			Marshal.ReleaseComObject(store);

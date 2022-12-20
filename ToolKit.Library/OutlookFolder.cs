@@ -77,6 +77,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private readonly OutlookAccount outlookAccount;
 
+		private IDictionary<string, int> sendersCounts =
+			new Dictionary<string, int>();
+
 		private IDictionary<string, IList<string>> storeHashTable =
 			new Dictionary<string, IList<string>>();
 
@@ -325,6 +328,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="folder">The folder to check.</param>
 		/// <param name="sendersCounts">The current counts of senders.</param>
 		/// <returns>The count of each sender.</returns>
+		[Obsolete("GetSendersCount(string, int, MAPIFolder, " +
+			"IDictionary<string, int>) is deprecated, " +
+			"please use GetSendersCount(MAPIFolder) instead.")]
 		public static IDictionary<string, int> GetSendersCount(
 			string path,
 			MAPIFolder folder,
@@ -332,30 +338,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null && sendersCounts != null)
 			{
-				Folders folders = folder.Folders;
-				int count = folders.Count;
+				OutlookAccount outlookAccount = OutlookAccount.Instance;
+				OutlookFolder outlookFolder = new (outlookAccount);
 
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int index = count; index > 0; index--)
-				{
-					MAPIFolder subFolder = folder.Folders[index];
-					string name = subFolder.Name;
-
-					string subPath = path + "/" + name;
-
-					sendersCounts =
-						GetSendersCount(subPath, subFolder, sendersCounts);
-
-					Marshal.ReleaseComObject(subFolder);
-				}
-
-				Items items = folder.Items;
-				int total = items.Count;
-				string totals = total.ToString(CultureInfo.InvariantCulture);
-				Log.Info("Checking senders in: " + path + ": " + totals);
-
-				sendersCounts = GetFolderSendersCount(folder, sendersCounts);
+				sendersCounts = outlookFolder.GetSendersCount(folder);
 			}
 
 			return sendersCounts;
@@ -1009,6 +995,43 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get senders counts.
+		/// </summary>
+		/// <param name="folder">The folder to check.</param>
+		/// <returns>The count of each sender.</returns>
+		public IDictionary<string, int> GetSendersCount(
+			MAPIFolder folder)
+		{
+			if (folder != null && sendersCounts != null)
+			{
+				Folders folders = folder.Folders;
+				int count = folders.Count;
+
+				// Office uses 1 based indexes from VBA.
+				// Iterate in reverse order as the group may change.
+				for (int index = count; index > 0; index--)
+				{
+					MAPIFolder subFolder = folder.Folders[index];
+
+					sendersCounts = GetSendersCount(subFolder);
+
+					Marshal.ReleaseComObject(subFolder);
+				}
+
+				string path = GetFolderPath(folder);
+
+				Items items = folder.Items;
+				int total = items.Count;
+				string totals = total.ToString(CultureInfo.InvariantCulture);
+				Log.Info("Checking senders in: " + path + ": " + totals);
+
+				sendersCounts = GetFolderSendersCount(folder);
+			}
+
+			return sendersCounts;
+		}
+
+		/// <summary>
 		/// Merge folders.
 		/// </summary>
 		/// <param name="folder">The current folder.</param>
@@ -1257,57 +1280,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folderExists;
-		}
-
-		private static IDictionary<string, int> GetFolderSendersCount(
-			MAPIFolder folder, IDictionary<string, int> sendersCounts)
-		{
-			if (folder != null && sendersCounts != null)
-			{
-				Items items = folder.Items;
-				int total = items.Count;
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group will change.
-				for (int index = total; index > 0; index--)
-				{
-					object item = items[index];
-
-					switch (item)
-					{
-						case MailItem mailItem:
-							string sender = mailItem.SenderEmailAddress;
-
-							if (!string.IsNullOrWhiteSpace(sender))
-							{
-								if (sendersCounts.ContainsKey(sender))
-								{
-									sendersCounts[sender]++;
-								}
-								else
-								{
-									sendersCounts.Add(sender, 1);
-								}
-							}
-							else
-							{
-								string subject = mailItem.Subject;
-								Log.Warn(
-									"Item has no sender - subject:" + subject);
-							}
-
-							Marshal.ReleaseComObject(mailItem);
-							break;
-						default:
-							Log.Info("Ignoring item of non-MailItem type: ");
-							break;
-					}
-
-					Marshal.ReleaseComObject(item);
-				}
-			}
-
-			return sendersCounts;
 		}
 
 		private static string GetNormalizedFolderName(
@@ -1578,6 +1550,39 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
+		private void AddSenderCount(MAPIFolder folder, object item)
+		{
+			switch (item)
+			{
+				case MailItem mailItem:
+					string sender = mailItem.SenderEmailAddress;
+
+					if (!string.IsNullOrWhiteSpace(sender))
+					{
+						if (sendersCounts.ContainsKey(sender))
+						{
+							sendersCounts[sender]++;
+						}
+						else
+						{
+							sendersCounts.Add(sender, 1);
+						}
+					}
+					else
+					{
+						string subject = mailItem.Subject;
+						Log.Warn(
+							"Item has no sender - subject:" + subject);
+					}
+
+					Marshal.ReleaseComObject(mailItem);
+					break;
+				default:
+					Log.Info("Ignoring item of non-MailItem type: ");
+					break;
+			}
+		}
+
 		private void CheckForDuplicateFolders(MAPIFolder folder, bool dryRun)
 		{
 			string folderName = folder.Name;
@@ -1669,6 +1674,21 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return storeHashTable;
+		}
+
+		private IDictionary<string, int> GetFolderSendersCount(
+			MAPIFolder folder)
+		{
+			if (folder != null)
+			{
+				ItemsIterator(
+					folder,
+					folder,
+					AddSenderCount,
+					"Getting Item Senders Count from: ");
+			}
+
+			return sendersCounts;
 		}
 
 		private void MergeDuplicateFolder(
