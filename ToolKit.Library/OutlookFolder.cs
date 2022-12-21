@@ -1641,12 +1641,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		private IDictionary<string, IList<string>> GetFolderHashTable(
 			MAPIFolder folder)
 		{
-			IDictionary<string, IList<string>> hashTable = null;
-
 			if (folder != null)
 			{
-				hashTable = new Dictionary<string, IList<string>>();
-
 				ItemsIterator(
 					folder,
 					folder,
@@ -1660,12 +1656,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		private async Task<IDictionary<string, IList<string>>>
 			GetFolderHashTableAsync(MAPIFolder folder)
 		{
-			IDictionary<string, IList<string>> hashTable = null;
-
 			if (folder != null)
 			{
-				hashTable = new Dictionary<string, IList<string>>();
-
 				await ItemsIteratorAsync(
 					folder,
 					folder,
