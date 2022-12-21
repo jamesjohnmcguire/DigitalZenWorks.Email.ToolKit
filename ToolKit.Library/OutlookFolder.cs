@@ -1002,30 +1002,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		public IDictionary<string, int> GetSendersCount(
 			MAPIFolder folder)
 		{
-			if (folder != null && sendersCounts != null)
+			if (folder != null)
 			{
-				Folders folders = folder.Folders;
-				int count = folders.Count;
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int index = count; index > 0; index--)
-				{
-					MAPIFolder subFolder = folder.Folders[index];
-
-					sendersCounts = GetSendersCount(subFolder);
-
-					Marshal.ReleaseComObject(subFolder);
-				}
-
-				string path = GetFolderPath(folder);
-
-				Items items = folder.Items;
-				int total = items.Count;
-				string totals = total.ToString(CultureInfo.InvariantCulture);
-				Log.Info("Checking senders in: " + path + ": " + totals);
-
-				sendersCounts = GetFolderSendersCount(folder);
+				RecurseFolders(folder, false, GetFolderSendersCount);
 			}
 
 			return sendersCounts;
@@ -1668,8 +1647,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			return storeHashTable;
 		}
 
-		private IDictionary<string, int> GetFolderSendersCount(
-			MAPIFolder folder)
+		private int GetFolderSendersCount(
+			MAPIFolder folder, bool condition = false)
 		{
 			if (folder != null)
 			{
@@ -1680,7 +1659,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					"Getting Item Senders Count from: ");
 			}
 
-			return sendersCounts;
+			return sendersCounts.Count;
 		}
 
 		private void MergeDuplicateFolder(
