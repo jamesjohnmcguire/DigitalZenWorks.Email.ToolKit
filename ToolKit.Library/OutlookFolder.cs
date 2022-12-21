@@ -969,26 +969,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
-				bool isDeletedFolder = IsDeletedFolder(folder);
-
-				// Skip processing of system deleted items folder.
-				if (isDeletedFolder == false)
-				{
-					int folderCount = folder.Folders.Count;
-
-					// Office uses 1 based indexes from VBA.
-					// Iterate in reverse order as the group may change.
-					for (int index = folderCount; index > 0; index--)
-					{
-						MAPIFolder subFolder = folder.Folders[index];
-
-						storeHashTable = GetItemHashes(subFolder);
-
-						Marshal.ReleaseComObject(subFolder);
-					}
-
-					storeHashTable = GetFolderHashTable(folder);
-				}
+				RecurseFolders(folder, false, GetFolderHashTable);
 			}
 
 			return storeHashTable;
@@ -1617,8 +1598,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			return removeDuplicates;
 		}
 
-		private IDictionary<string, IList<string>> GetFolderHashTable(
-			MAPIFolder folder)
+		private int GetFolderHashTable(
+			MAPIFolder folder, bool condition = false)
 		{
 			if (folder != null)
 			{
@@ -1629,7 +1610,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					"Getting Item Hashes from: ");
 			}
 
-			return storeHashTable;
+			return storeHashTable.Count;
 		}
 
 		private async Task<IDictionary<string, IList<string>>>
@@ -2065,10 +2046,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int removedDuplicates = 0;
 
-			IDictionary<string, IList<string>> hashTable =
-				GetFolderHashTable(folder);
+			GetFolderHashTable(folder);
 
-			var duplicates = hashTable.Where(p => p.Value.Count > 1);
+			var duplicates = storeHashTable.Where(p => p.Value.Count > 1);
 			int duplicateCount = duplicates.Count();
 
 			if (duplicateCount > 0)
