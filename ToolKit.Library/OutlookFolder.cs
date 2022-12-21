@@ -1637,6 +1637,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
+				// Reset for each folder.
+				storeHashTable = new Dictionary<string, IList<string>>();
+
 				await ItemsIteratorAsync(
 					folder,
 					folder,
