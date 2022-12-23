@@ -29,13 +29,19 @@ namespace DigitalZenWorks.Email.ToolKit
 				@"\r{0,1}\n<\/HTML>$)";
 
 			htmlBody = Regex.Replace(
-				htmlBody, pattern, string.Empty, RegexOptions.ExplicitCapture);
+				htmlBody,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
 			pattern = @"(<BR>\r{0,1}\n)+(?=<BR>\r{0,1}\n<\/FONT>\r{0,1}\n" +
 				@"<\/P>\r{0,1}\n<\/BODY>\r{0,1}\n<\/HTML>$)";
 
 			htmlBody = Regex.Replace(
-				htmlBody, pattern, string.Empty, RegexOptions.ExplicitCapture);
+				htmlBody,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
 			return htmlBody;
 		}
