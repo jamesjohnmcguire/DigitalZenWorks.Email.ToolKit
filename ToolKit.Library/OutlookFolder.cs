@@ -75,9 +75,32 @@ namespace DigitalZenWorks.Email.ToolKit
 			"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
 		};
 
+#pragma warning disable SA1311 // StaticReadonlyFieldsMustBeginWithUpperCaseLetter
+		private static readonly IList<string> duplicatePatterns =
+			new List<string>()
+		{
+			@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
+			@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
+
+			// Matches Something  ab2 (2 spaces and 2 or 3 hex numbers)
+			@"(?<=[a-zA-Z0-9&,])\s{2,3}[0-9a-fA-F]{2,3}$",
+
+			// Matches Something ab2 (at least 1 space and 3 hex numbers)
+			@"(?<=[a-zA-Z0-9&-,])\s+[0-9a-fA-F]{3}$",
+
+			// Matches Something@ 896
+			// (at least 1 space and 2 or 3 hex numbers)
+			@"(?<=[a-zA-Z0-9&,])@\s+[0-9a-fA-F]{2,3}$",
+
+			// Matches Something - 77f (1 space and 2 or3 hex numbers)
+			@"(?<=[a-zA-Z0-9&,])\s{1}-\s{1}[0-9a-fA-F]{2,3}$",
+			@"\s*-\s*Copy$", @"^[A-F]{1}_"
+		};
+#pragma warning restore SA1311
+
 		private readonly OutlookAccount outlookAccount;
 
-		private IDictionary<string, int> sendersCounts =
+		private readonly IDictionary<string, int> sendersCounts =
 			new Dictionary<string, int>();
 
 		private IDictionary<string, IList<string>> storeHashTable =
@@ -91,6 +114,15 @@ namespace DigitalZenWorks.Email.ToolKit
 		public OutlookFolder(OutlookAccount outlookAccount)
 		{
 			this.outlookAccount = outlookAccount;
+		}
+
+		/// <summary>
+		/// Gets duplicate patterns list.
+		/// </summary>
+		/// <value>Duplicate patterns list.</value>
+		public static IList<string> DuplicatePatterns
+		{
+			get { return duplicatePatterns; }
 		}
 
 		/// <summary>
@@ -596,12 +628,20 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// the given parameter.</remarks>
 		public static string NormalizeFolderName(string folderName)
 		{
-			string duplicatePattern = CheckFolderNameNormalization(folderName);
-
-			if (!string.IsNullOrWhiteSpace(duplicatePattern))
+			if (folderName != null)
 			{
-				folderName =
-					GetNormalizedFolderName(folderName, duplicatePattern);
+				foreach (string pattern in duplicatePatterns)
+				{
+					if (Regex.IsMatch(folderName, pattern))
+					{
+						folderName = Regex.Replace(
+							folderName,
+							pattern,
+							string.Empty,
+							RegexOptions.ExplicitCapture);
+						break;
+					}
+				}
 			}
 
 			return folderName;
@@ -1191,41 +1231,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return hashTable;
 		}
 
-		private static string CheckFolderNameNormalization(string folderName)
-		{
-			string duplicatePattern = null;
-			string[] duplicatePatterns =
-			{
-				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
-				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
-
-				// Matches Something  ab2 (2 spaces and 2 or 3 hex numbers)
-				@"(?<=[a-zA-Z0-9&,])\s{2,3}[0-9a-fA-F]{2,3}$",
-
-				// Matches Something ab2 (at least 1 space and 3 hex numbers)
-				@"(?<=[a-zA-Z0-9&-,])\s+[0-9a-fA-F]{3}$",
-
-				// Matches Something@ 896
-				// (at least 1 space and 2 or 3 hex numbers)
-				@"(?<=[a-zA-Z0-9&,])@\s+[0-9a-fA-F]{2,3}$",
-
-				// Matches Something - 77f (1 space and 2 or3 hex numbers)
-				@"(?<=[a-zA-Z0-9&,])\s{1}-\s{1}[0-9a-fA-F]{2,3}$",
-				@"\s*-\s*Copy$", @"^[A-F]{1}_"
-			};
-
-			foreach (string pattern in duplicatePatterns)
-			{
-				if (Regex.IsMatch(folderName, pattern))
-				{
-					duplicatePattern = pattern;
-					break;
-				}
-			}
-
-			return duplicatePattern;
-		}
-
 		private static bool DoesSiblingFolderExist(
 			MAPIFolder folder, string folderName)
 		{
@@ -1240,18 +1245,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folderExists;
-		}
-
-		private static string GetNormalizedFolderName(
-			string folderName, string pattern)
-		{
-			string newFolderName = Regex.Replace(
-				folderName,
-				pattern,
-				string.Empty,
-				RegexOptions.ExplicitCapture);
-
-			return newFolderName;
 		}
 
 		private static MAPIFolder GetPathFolder(
@@ -1547,11 +1540,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string folderName = folder.Name;
 
-			string duplicatePattern = CheckFolderNameNormalization(folderName);
+			string newFolderName = NormalizeFolderName(folderName);
 
-			if (!string.IsNullOrWhiteSpace(duplicatePattern))
+			if (!folderName.Equals(
+				newFolderName, StringComparison.OrdinalIgnoreCase))
 			{
-				MergeDuplicateFolder(folder, duplicatePattern, dryRun);
+				MergeDuplicateFolder(folder, newFolderName, dryRun);
 			}
 		}
 
@@ -1560,12 +1554,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string folderName = folder.Name;
 
-			string duplicatePattern = CheckFolderNameNormalization(folderName);
+			string newFolderName = NormalizeFolderName(folderName);
 
-			if (!string.IsNullOrWhiteSpace(duplicatePattern))
+			if (!folderName.Equals(
+				newFolderName, StringComparison.OrdinalIgnoreCase))
 			{
 				await MergeDuplicateFolderAsync(
-					folder, duplicatePattern, dryRun).ConfigureAwait(false);
+					folder, newFolderName, dryRun).ConfigureAwait(false);
 			}
 		}
 
@@ -1648,12 +1643,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private void MergeDuplicateFolder(
 			MAPIFolder folder,
-			string duplicatePattern,
+			string newFolderName,
 			bool dryRun)
 		{
-			string newFolderName =
-				GetNormalizedFolderName(folder.Name, duplicatePattern);
-
 			bool folderExists = DoesSiblingFolderExist(folder, newFolderName);
 
 			string source = folder.Name;
@@ -1711,12 +1703,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private async Task MergeDuplicateFolderAsync(
 			MAPIFolder folder,
-			string duplicatePattern,
+			string newFolderName,
 			bool dryRun)
 		{
-			string newFolderName =
-				GetNormalizedFolderName(folder.Name, duplicatePattern);
-
 			bool folderExists = DoesSiblingFolderExist(folder, newFolderName);
 
 			string source = folder.Name;
