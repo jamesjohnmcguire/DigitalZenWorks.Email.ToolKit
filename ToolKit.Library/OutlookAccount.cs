@@ -106,6 +106,14 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			path = Path.GetFullPath(path);
 
+			string extension = Path.GetExtension(path);
+
+			if (!extension.Equals(".pst", StringComparison.OrdinalIgnoreCase))
+			{
+				// Attempt to fix mistaken or missing file extension.
+				path += ".pst";
+			}
+
 			// If the .pst file does not exist, Microsoft Outlook creates it.
 			session.AddStore(path);
 
