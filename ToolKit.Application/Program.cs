@@ -18,6 +18,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using CommonLogging = Common.Logging;
@@ -70,6 +71,27 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 #pragma warning disable CA1062
 					DisplayParameters(command, arguments);
 #pragma warning restore CA1062
+
+					try
+					{
+						OutlookAccount outlookAccount =
+							OutlookAccount.Instance;
+					}
+					catch (COMException exception)
+					{
+						string message = "Unable to Connect to Outlook. " +
+							"Is Outlook Installed?";
+						Log.Error(message);
+
+						message = "Note: This may also happen if this " +
+							"application and Outlook are running at " +
+							"different privilege levels (Such as one of " +
+							"them running as Administrator";
+						Log.Error(message);
+						Log.Error(exception.ToString());
+
+						throw;
+					}
 
 					switch (command.Name)
 					{
