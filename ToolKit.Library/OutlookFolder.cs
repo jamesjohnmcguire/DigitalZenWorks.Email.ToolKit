@@ -1598,6 +1598,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
+				string path = GetFolderPath(folder);
+
+				Items items = folder.Items;
+				int total = items.Count;
+
+				Log.Info("Checking for duplicates at: " + path +
+					" Total items: " + total);
+
 				ItemsIterator(
 					folder,
 					folder,
@@ -1613,6 +1621,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
+				string path = GetFolderPath(folder);
+
+				Items items = folder.Items;
+				int total = items.Count;
+
+				Log.Info("Checking for duplicates at: " + path +
+					" Total items: " + total);
+
 				// Reset for each folder.
 				storeHashTable = new Dictionary<string, IList<string>>();
 
