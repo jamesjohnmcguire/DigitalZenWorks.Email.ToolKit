@@ -1606,6 +1606,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				Log.Info("Checking for duplicates at: " + path +
 					" Total items: " + total);
 
+				// Reset for each folder.
+				storeHashTable = new Dictionary<string, IList<string>>();
+
 				ItemsIterator(
 					folder,
 					folder,
