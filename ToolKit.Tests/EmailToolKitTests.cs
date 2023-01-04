@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="EmailToolKitTests.cs" company="James John McGuire">
-// Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2023 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -594,7 +594,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MailItem mailItem = AddFolderAndMessage(
 				outlookAccount,
 				mainFolder,
-				"2022",
+				"2023",
 				"This is the subject");
 
 			OutlookFolder outlookFolder = new (outlookAccount);
@@ -602,7 +602,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
-				OutlookFolder.GetSubFolder(mainFolder, "2022");
+				OutlookFolder.GetSubFolder(mainFolder, "2023");
 
 			Assert.IsNotNull(subFolder);
 
@@ -634,7 +634,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MailItem mailItem = AddFolderAndMessage(
 				outlookAccount,
 				mainFolder,
-				"2022",
+				"2023",
 				"This is the subject");
 
 			OutlookFolder outlookFolder = new (outlookAccount);
@@ -643,7 +643,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
-				OutlookFolder.GetSubFolder(mainFolder, "2022");
+				OutlookFolder.GetSubFolder(mainFolder, "2023");
 
 			Assert.IsNotNull(subFolder);
 
