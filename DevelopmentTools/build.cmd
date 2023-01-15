@@ -15,6 +15,9 @@ GOTO end
 
 :publish
 
+if "%~2"=="" GOTO error1
+if "%~3"=="" GOTO error2
+
 msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library;TargetFramework=net6.0-windows -restore -target:rebuild ToolKit.Library
 msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -restore -target:pack ToolKit.Library
 cd ToolKit.Library\Bin\Release\Library
@@ -30,4 +33,12 @@ CD ToolKit.Application\Bin\publish
 gh release create v%2 --notes "%2" DigitalZenWorks.Email.ToolKit.zip
 
 CD ..\..\..
+
+:error1
+ECHO No version tag specified
+GOTO end
+
+:error2
+ECHO No API key specified
+
 :end
