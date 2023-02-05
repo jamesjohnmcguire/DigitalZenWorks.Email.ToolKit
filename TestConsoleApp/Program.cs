@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="Program.cs" company="James John McGuire">
-// Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2023 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -249,12 +249,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			OutlookFolder.AddFolder(subFolder, "Testing2");
 			OutlookFolder.AddFolder(subFolder, "Testing2 (1)");
 
-			// Review
-			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
-
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, true);
+			outlookFolder.MergeFolders(rootFolder, true);
 
 			// Clean up
 			Marshal.ReleaseComObject(subFolder);

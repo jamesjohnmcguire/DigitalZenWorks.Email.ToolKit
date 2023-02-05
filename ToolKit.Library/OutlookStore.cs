@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookStore.cs" company="James John McGuire">
-// Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2023 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -341,14 +341,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			string storePath = GetStoreName(store);
-			storePath += "::";
+			OutlookFolder outlookFolder = new (outlookAccount);
 
 			IDictionary<string, int> sendersCounts =
-				new Dictionary<string, int>();
-
-			sendersCounts = OutlookFolder.GetSendersCount(
-				storePath, rootFolder, sendersCounts);
+				outlookFolder.GetSendersCount(rootFolder);
 
 			Marshal.ReleaseComObject(rootFolder);
 			Marshal.ReleaseComObject(store);
@@ -393,11 +389,10 @@ namespace DigitalZenWorks.Email.ToolKit
 				string storePath = GetStoreName(store);
 				Log.Info("Merging folders in: " + storePath);
 
-				storePath += "::";
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
-				outlookFolder.MergeFolders(storePath, rootFolder, dryRun);
+				outlookFolder.MergeFolders(rootFolder, dryRun);
 
 				totalFolders++;
 
@@ -445,7 +440,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				OutlookFolder outlookFolder = new (outlookAccount);
 				await outlookFolder.MergeFoldersAsync(
-					storePath, rootFolder, dryRun).ConfigureAwait(false);
+					rootFolder, dryRun).ConfigureAwait(false);
 
 				totalFolders++;
 

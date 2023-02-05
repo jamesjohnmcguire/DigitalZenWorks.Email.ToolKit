@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookAccount.cs" company="James John McGuire">
-// Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2023 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -105,6 +105,14 @@ namespace DigitalZenWorks.Email.ToolKit
 			Store newPst = null;
 
 			path = Path.GetFullPath(path);
+
+			string extension = Path.GetExtension(path);
+
+			if (!extension.Equals(".pst", StringComparison.OrdinalIgnoreCase))
+			{
+				// Attempt to fix mistaken or missing file extension.
+				path += ".pst";
+			}
 
 			// If the .pst file does not exist, Microsoft Outlook creates it.
 			session.AddStore(path);

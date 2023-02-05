@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="EmailToolKitTests.cs" company="James John McGuire">
-// Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2023 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -274,6 +274,22 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		/// Test for comparing two different MailItems by content.
 		/// </summary>
 		[Test]
+		public void TestHtmlBodyTrimLineEndingsNoChange()
+		{
+			string htmlBody = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+				"&nbsp;&nbsp;&nbsp;" +
+				"<BR>\r\n</FONT>\r\n</P>\r\n</BODY>\r\n</HTML>";
+			string afterHtmlBody = htmlBody;
+
+			htmlBody = HtmlEmail.Trim(htmlBody);
+
+			Assert.AreEqual(afterHtmlBody, htmlBody);
+		}
+
+		/// <summary>
+		/// Test for comparing two different MailItems by content.
+		/// </summary>
+		[Test]
 		public void TestMailItemsAreNotSameByContent()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
@@ -393,12 +409,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Testing (1)",
 				"This is the subject");
 
-			// Review
-			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
-
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, false);
+			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
@@ -439,10 +451,9 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			// Review
 			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new (outlookAccount);
-			await outlookFolder.MergeFoldersAsync(path, rootFolder, false).
+			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
 			System.Threading.Thread.Sleep(200);
@@ -488,10 +499,9 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			// Review
 			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
 
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, false);
+			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
 
@@ -542,12 +552,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"_Testing",
 				"This is the subject 3");
 
-			// Review
-			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
-
 			OutlookFolder outlookFolder = new (outlookAccount);
-			await outlookFolder.MergeFoldersAsync(path, rootFolder, false).
+			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
 			System.Threading.Thread.Sleep(200);
@@ -588,19 +594,15 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MailItem mailItem = AddFolderAndMessage(
 				outlookAccount,
 				mainFolder,
-				"2022",
+				"2023",
 				"This is the subject");
 
-			// Review
-			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
-
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, false);
+			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
-				OutlookFolder.GetSubFolder(mainFolder, "2022");
+				OutlookFolder.GetSubFolder(mainFolder, "2023");
 
 			Assert.IsNotNull(subFolder);
 
@@ -632,20 +634,16 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MailItem mailItem = AddFolderAndMessage(
 				outlookAccount,
 				mainFolder,
-				"2022",
+				"2023",
 				"This is the subject");
 
-			// Review
-			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
-
 			OutlookFolder outlookFolder = new (outlookAccount);
-			await outlookFolder.MergeFoldersAsync(path, rootFolder, false).
+			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
-				OutlookFolder.GetSubFolder(mainFolder, "2022");
+				OutlookFolder.GetSubFolder(mainFolder, "2023");
 
 			Assert.IsNotNull(subFolder);
 
@@ -678,12 +676,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Main Test Folder",
 				"This is the subject");
 
-			// Review
-			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
-
 			OutlookFolder outlookFolder = new (outlookAccount);
-			outlookFolder.MergeFolders(path, rootFolder, false);
+			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
 			subFolder =
@@ -722,12 +716,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Main Test Folder",
 				"This is the subject");
 
-			// Review
-			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
-
 			OutlookFolder outlookFolder = new (outlookAccount);
-			await outlookFolder.MergeFoldersAsync(path, rootFolder, false).
+			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
 			System.Threading.Thread.Sleep(200);
@@ -827,9 +817,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				rootFolder, "Temporary Test Folder");
 			Marshal.ReleaseComObject(subFolder);
 
-			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
-
 			OutlookFolder.RemoveEmptyFolders(rootFolder, true);
 
 			subFolder = OutlookFolder.GetSubFolder(
@@ -858,9 +845,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder subFolder = OutlookFolder.AddFolder(
 				rootFolder, "Temporary Test Folder");
 			Marshal.ReleaseComObject(subFolder);
-
-			storePath = OutlookStore.GetStoreName(store) + "::";
-			string path = storePath + rootFolder.Name;
 
 			await OutlookFolder.RemoveEmptyFoldersAsync(rootFolder, true).
 				ConfigureAwait(false);

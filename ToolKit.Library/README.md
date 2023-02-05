@@ -14,7 +14,7 @@ OutlookAccount outlookAccont = new ();
 outlookAccont.MergeFolders();  
 outlookAccont.RemoveDuplicates();  
 
-For a more in-depth example and additional documentation, please refer to the application part of the project at [DigitalZenWorks.Email.ToolKit Project](https://github.com/jamesjohnmcguire/.Email.ToolKit)  
+For a more in-depth example and additional documentation, please refer to the application part of the project at [DigitalZenWorks.Email.ToolKit Project](https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)  
 
 ## Contributing
 

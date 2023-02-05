@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookFolder.cs" company="James John McGuire">
-// Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2023 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -49,6 +49,8 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// </summary>
 	/// <param name="folder">The folder to use.</param>
 	/// <param name="item">The item to use.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
 	public delegate Task ItemActionAsync(
 		MAPIFolder folder, object item);
 
@@ -73,7 +75,33 @@ namespace DigitalZenWorks.Email.ToolKit
 			"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
 		};
 
+#pragma warning disable SA1311 // StaticReadonlyFieldsMustBeginWithUpperCaseLetter
+		private static readonly IList<string> duplicatePatterns =
+			new List<string>()
+		{
+			@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
+			@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
+
+			// Matches Something  ab2 (2 spaces and 2 or 3 hex numbers)
+			@"(?<=[a-zA-Z0-9&,])\s{2,3}[0-9a-fA-F]{2,3}$",
+
+			// Matches Something ab2 (at least 1 space and 3 hex numbers)
+			@"(?<=[a-zA-Z0-9&-,])\s+[0-9a-fA-F]{3}$",
+
+			// Matches Something@ 896
+			// (at least 1 space and 2 or 3 hex numbers)
+			@"(?<=[a-zA-Z0-9&,])@\s+[0-9a-fA-F]{2,3}$",
+
+			// Matches Something - 77f (1 space and 2 or3 hex numbers)
+			@"(?<=[a-zA-Z0-9&,])\s{1}-\s{1}[0-9a-fA-F]{2,3}$",
+			@"\s*-\s*Copy$", @"^[A-F]{1}_"
+		};
+#pragma warning restore SA1311
+
 		private readonly OutlookAccount outlookAccount;
+
+		private readonly IDictionary<string, int> sendersCounts =
+			new Dictionary<string, int>();
 
 		private IDictionary<string, IList<string>> storeHashTable =
 			new Dictionary<string, IList<string>>();
@@ -86,6 +114,15 @@ namespace DigitalZenWorks.Email.ToolKit
 		public OutlookFolder(OutlookAccount outlookAccount)
 		{
 			this.outlookAccount = outlookAccount;
+		}
+
+		/// <summary>
+		/// Gets duplicate patterns list.
+		/// </summary>
+		/// <value>Duplicate patterns list.</value>
+		public static IList<string> DuplicatePatterns
+		{
+			get { return duplicatePatterns; }
 		}
 
 		/// <summary>
@@ -323,6 +360,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="folder">The folder to check.</param>
 		/// <param name="sendersCounts">The current counts of senders.</param>
 		/// <returns>The count of each sender.</returns>
+		[Obsolete("GetSendersCount(string, int, MAPIFolder, " +
+			"IDictionary<string, int>) is deprecated, " +
+			"please use GetSendersCount(MAPIFolder) instead.")]
 		public static IDictionary<string, int> GetSendersCount(
 			string path,
 			MAPIFolder folder,
@@ -330,30 +370,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null && sendersCounts != null)
 			{
-				Folders folders = folder.Folders;
-				int count = folders.Count;
+				OutlookAccount outlookAccount = OutlookAccount.Instance;
+				OutlookFolder outlookFolder = new (outlookAccount);
 
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int index = count; index > 0; index--)
-				{
-					MAPIFolder subFolder = folder.Folders[index];
-					string name = subFolder.Name;
-
-					string subPath = path + "/" + name;
-
-					sendersCounts =
-						GetSendersCount(subPath, subFolder, sendersCounts);
-
-					Marshal.ReleaseComObject(subFolder);
-				}
-
-				Items items = folder.Items;
-				int total = items.Count;
-				string totals = total.ToString(CultureInfo.InvariantCulture);
-				Log.Info("Checking senders in: " + path + ": " + totals);
-
-				sendersCounts = GetFolderSendersCount(folder, sendersCounts);
+				sendersCounts = outlookFolder.GetSendersCount(folder);
 			}
 
 			return sendersCounts;
@@ -608,12 +628,20 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// the given parameter.</remarks>
 		public static string NormalizeFolderName(string folderName)
 		{
-			string duplicatePattern = CheckFolderNameNormalization(folderName);
-
-			if (!string.IsNullOrWhiteSpace(duplicatePattern))
+			if (folderName != null)
 			{
-				folderName =
-					GetNormalizedFolderName(folderName, duplicatePattern);
+				foreach (string pattern in duplicatePatterns)
+				{
+					if (Regex.IsMatch(folderName, pattern))
+					{
+						folderName = Regex.Replace(
+							folderName,
+							pattern,
+							string.Empty,
+							RegexOptions.ExplicitCapture);
+						break;
+					}
+				}
 			}
 
 			return folderName;
@@ -981,39 +1009,35 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
-				bool isDeletedFolder = IsDeletedFolder(folder);
-
-				// Skip processing of system deleted items folder.
-				if (isDeletedFolder == false)
-				{
-					int folderCount = folder.Folders.Count;
-
-					// Office uses 1 based indexes from VBA.
-					// Iterate in reverse order as the group may change.
-					for (int index = folderCount; index > 0; index--)
-					{
-						MAPIFolder subFolder = folder.Folders[index];
-
-						storeHashTable = GetItemHashes(subFolder);
-
-						Marshal.ReleaseComObject(subFolder);
-					}
-
-					storeHashTable = GetFolderHashTable(folder, storeHashTable);
-				}
+				RecurseFolders(folder, false, GetFolderHashTable);
 			}
 
 			return storeHashTable;
 		}
 
 		/// <summary>
+		/// Get senders counts.
+		/// </summary>
+		/// <param name="folder">The folder to check.</param>
+		/// <returns>The count of each sender.</returns>
+		public IDictionary<string, int> GetSendersCount(
+			MAPIFolder folder)
+		{
+			if (folder != null)
+			{
+				RecurseFolders(folder, false, GetFolderSendersCount);
+			}
+
+			return sendersCounts;
+		}
+
+		/// <summary>
 		/// Merge folders.
 		/// </summary>
-		/// <param name="path">The path of the curent folder.</param>
 		/// <param name="folder">The current folder.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
-		public void MergeFolders(string path, MAPIFolder folder, bool dryRun)
+		public void MergeFolders(MAPIFolder folder, bool dryRun)
 		{
 			if (folder != null)
 			{
@@ -1028,10 +1052,25 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="folder">The current folder.</param>
 		/// <param name="dryRun">Indicates whether this is a 'dry run'
 		/// or not.</param>
+		[Obsolete("MergeFolders(string, MAPIFolder, bool) is deprecated, " +
+			"please use MergeFolders(MAPIFolder, bool) instead.")]
+		public void MergeFolders(string path, MAPIFolder folder, bool dryRun)
+		{
+			if (folder != null)
+			{
+				RecurseFolders(folder, dryRun, MergeThisFolder);
+			}
+		}
+
+		/// <summary>
+		/// Merge folders.
+		/// </summary>
+		/// <param name="folder">The current folder.</param>
+		/// <param name="dryRun">Indicates whether this is a 'dry run'
+		/// or not.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous
 		/// operation.</returns>
-		public async Task MergeFoldersAsync(
-			string path, MAPIFolder folder, bool dryRun)
+		public async Task MergeFoldersAsync(MAPIFolder folder, bool dryRun)
 		{
 			if (folder != null)
 			{
@@ -1192,71 +1231,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return hashTable;
 		}
 
-		private static IDictionary<string, IList<string>> AddItemHashToTable(
-			IDictionary<string, IList<string>> hashTable,
-			MailItem mailItem)
-		{
-			string hash = MapiItem.GetItemHash(mailItem);
-
-			hashTable = AddHashToTable(
-				hashTable,
-				hash,
-				mailItem.EntryID);
-
-			return hashTable;
-		}
-
-		private static async Task<IDictionary<string, IList<string>>>
-			AddItemHashToTableAsync(
-				IDictionary<string, IList<string>> hashTable,
-				MailItem mailItem)
-		{
-			string hash = await MapiItem.GetItemHashAsync(
-				mailItem).ConfigureAwait(false);
-
-			hashTable = AddHashToTable(
-				hashTable,
-				hash,
-				mailItem.EntryID);
-
-			return hashTable;
-		}
-
-		private static string CheckFolderNameNormalization(string folderName)
-		{
-			string duplicatePattern = null;
-			string[] duplicatePatterns =
-			{
-				@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
-				@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
-
-				// Matches Something  ab2 (2 spaces and 2 or 3 hex numbers)
-				@"(?<=[a-zA-Z0-9&,])\s{2,3}[0-9a-fA-F]{2,3}$",
-
-				// Matches Something ab2 (at least 1 space and 3 hex numbers)
-				@"(?<=[a-zA-Z0-9&-,])\s+[0-9a-fA-F]{3}$",
-
-				// Matches Something@ 896
-				// (at least 1 space and 2 or 3 hex numbers)
-				@"(?<=[a-zA-Z0-9&,])@\s+[0-9a-fA-F]{2,3}$",
-
-				// Matches Something - 77f (1 space and 2 or3 hex numbers)
-				@"(?<=[a-zA-Z0-9&,])\s{1}-\s{1}[0-9a-fA-F]{2,3}$",
-				@"\s*-\s*Copy$", @"^[A-F]{1}_"
-			};
-
-			foreach (string pattern in duplicatePatterns)
-			{
-				if (Regex.IsMatch(folderName, pattern))
-				{
-					duplicatePattern = pattern;
-					break;
-				}
-			}
-
-			return duplicatePattern;
-		}
-
 		private static bool DoesSiblingFolderExist(
 			MAPIFolder folder, string folderName)
 		{
@@ -1271,184 +1245,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folderExists;
-		}
-
-		private static IDictionary<string, IList<string>> GetFolderHashTable(
-			MAPIFolder folder)
-		{
-			IDictionary<string, IList<string>> hashTable = null;
-
-			if (folder != null)
-			{
-				hashTable = new Dictionary<string, IList<string>>();
-
-				hashTable = GetFolderHashTable(folder, hashTable);
-			}
-
-			return hashTable;
-		}
-
-		private static IDictionary<string, IList<string>> GetFolderHashTable(
-			MAPIFolder folder,
-			IDictionary<string, IList<string>> hashTable)
-		{
-			if (folder != null)
-			{
-				string path = GetFolderPath(folder);
-
-				Items items = folder.Items;
-				int total = items.Count;
-
-				Log.Info("Checking for duplicates at: " + path +
-					" Total items: " + total);
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group will change.
-				for (int index = total; index > 0; index--)
-				{
-					object item = items[index];
-
-					switch (item)
-					{
-						// Initially, just focus on MailItems
-						case MailItem mailItem:
-							hashTable =
-								AddItemHashToTable(hashTable, mailItem);
-
-							Marshal.ReleaseComObject(mailItem);
-							break;
-						default:
-							Log.Info("Ignoring item of non-MailItem type: ");
-							break;
-					}
-
-					Marshal.ReleaseComObject(item);
-				}
-			}
-
-			return hashTable;
-		}
-
-		private static async Task<IDictionary<string, IList<string>>>
-			GetFolderHashTableAsync(MAPIFolder folder)
-		{
-			IDictionary<string, IList<string>> hashTable = null;
-
-			if (folder != null)
-			{
-				hashTable = new Dictionary<string, IList<string>>();
-
-				hashTable = await GetFolderHashTableAsync(
-					folder, hashTable).ConfigureAwait(false);
-			}
-
-			return hashTable;
-		}
-
-		private static async Task<IDictionary<string, IList<string>>>
-			GetFolderHashTableAsync(
-				MAPIFolder folder,
-				IDictionary<string, IList<string>> hashTable)
-		{
-			if (folder != null)
-			{
-				string path = GetFolderPath(folder);
-
-				Items items = folder.Items;
-				int total = items.Count;
-
-				Log.Info("Checking for duplicates at: " + path +
-					" Total items: " + total);
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group will change.
-				for (int index = total; index > 0; index--)
-				{
-					object item = items[index];
-
-					switch (item)
-					{
-						// Initially, just focus on MailItems
-						case MailItem mailItem:
-							hashTable = await AddItemHashToTableAsync(
-								hashTable, mailItem).
-								ConfigureAwait(false);
-
-							Marshal.ReleaseComObject(mailItem);
-							break;
-						default:
-							Log.Info("Ignoring item of non-MailItem type: ");
-							break;
-					}
-
-					Marshal.ReleaseComObject(item);
-				}
-			}
-
-			return hashTable;
-		}
-
-		private static IDictionary<string, int> GetFolderSendersCount(
-			MAPIFolder folder, IDictionary<string, int> sendersCounts)
-		{
-			if (folder != null && sendersCounts != null)
-			{
-				Items items = folder.Items;
-				int total = items.Count;
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group will change.
-				for (int index = total; index > 0; index--)
-				{
-					object item = items[index];
-
-					switch (item)
-					{
-						case MailItem mailItem:
-							string sender = mailItem.SenderEmailAddress;
-
-							if (!string.IsNullOrWhiteSpace(sender))
-							{
-								if (sendersCounts.ContainsKey(sender))
-								{
-									sendersCounts[sender]++;
-								}
-								else
-								{
-									sendersCounts.Add(sender, 1);
-								}
-							}
-							else
-							{
-								string subject = mailItem.Subject;
-								Log.Warn(
-									"Item has no sender - subject:" + subject);
-							}
-
-							Marshal.ReleaseComObject(mailItem);
-							break;
-						default:
-							Log.Info("Ignoring item of non-MailItem type: ");
-							break;
-					}
-
-					Marshal.ReleaseComObject(item);
-				}
-			}
-
-			return sendersCounts;
-		}
-
-		private static string GetNormalizedFolderName(
-			string folderName, string pattern)
-		{
-			string newFolderName = Regex.Replace(
-				folderName,
-				pattern,
-				string.Empty,
-				RegexOptions.ExplicitCapture);
-
-			return newFolderName;
 		}
 
 		private static MAPIFolder GetPathFolder(
@@ -1665,15 +1461,91 @@ namespace DigitalZenWorks.Email.ToolKit
 			return path;
 		}
 
+		private void AddItemHashToTable(MAPIFolder folder, object item)
+		{
+			switch (item)
+			{
+				// Initially, just focus on MailItems
+				case MailItem mailItem:
+					string entryId = mailItem.EntryID;
+					string hash = MapiItem.GetItemHash(mailItem);
+
+					storeHashTable =
+						AddHashToTable(storeHashTable, hash, entryId);
+
+					Marshal.ReleaseComObject(mailItem);
+					break;
+				default:
+					Log.Info("Ignoring item of non-MailItem type: ");
+					break;
+			}
+		}
+
+		private async Task AddItemHashToTableAsync(
+			MAPIFolder folder, object item)
+		{
+			switch (item)
+			{
+				// Initially, just focus on MailItems
+				case MailItem mailItem:
+					string entryId = mailItem.EntryID;
+					string hash = await MapiItem.GetItemHashAsync(mailItem).
+						ConfigureAwait(false);
+
+					storeHashTable =
+						AddHashToTable(storeHashTable, hash, entryId);
+
+					Marshal.ReleaseComObject(mailItem);
+					break;
+				default:
+					Log.Info("Ignoring item of non-MailItem type: ");
+					break;
+			}
+		}
+
+		private void AddSenderCount(MAPIFolder folder, object item)
+		{
+			switch (item)
+			{
+				case MailItem mailItem:
+					string sender = mailItem.SenderEmailAddress;
+
+					if (!string.IsNullOrWhiteSpace(sender))
+					{
+						if (sendersCounts.ContainsKey(sender))
+						{
+							sendersCounts[sender]++;
+						}
+						else
+						{
+							sendersCounts.Add(sender, 1);
+						}
+					}
+					else
+					{
+						string subject = mailItem.Subject;
+						Log.Warn(
+							"Item has no sender - subject:" + subject);
+					}
+
+					Marshal.ReleaseComObject(mailItem);
+					break;
+				default:
+					Log.Info("Ignoring item of non-MailItem type: ");
+					break;
+			}
+		}
+
 		private void CheckForDuplicateFolders(MAPIFolder folder, bool dryRun)
 		{
 			string folderName = folder.Name;
 
-			string duplicatePattern = CheckFolderNameNormalization(folderName);
+			string newFolderName = NormalizeFolderName(folderName);
 
-			if (!string.IsNullOrWhiteSpace(duplicatePattern))
+			if (!folderName.Equals(
+				newFolderName, StringComparison.OrdinalIgnoreCase))
 			{
-				MergeDuplicateFolder(folder, duplicatePattern, dryRun);
+				MergeDuplicateFolder(folder, newFolderName, dryRun);
 			}
 		}
 
@@ -1682,12 +1554,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string folderName = folder.Name;
 
-			string duplicatePattern = CheckFolderNameNormalization(folderName);
+			string newFolderName = NormalizeFolderName(folderName);
 
-			if (!string.IsNullOrWhiteSpace(duplicatePattern))
+			if (!folderName.Equals(
+				newFolderName, StringComparison.OrdinalIgnoreCase))
 			{
 				await MergeDuplicateFolderAsync(
-					folder, duplicatePattern, dryRun).ConfigureAwait(false);
+					folder, newFolderName, dryRun).ConfigureAwait(false);
 			}
 		}
 
@@ -1720,14 +1593,78 @@ namespace DigitalZenWorks.Email.ToolKit
 			return removeDuplicates;
 		}
 
+		private int GetFolderHashTable(
+			MAPIFolder folder, bool condition = false)
+		{
+			if (folder != null)
+			{
+				string path = GetFolderPath(folder);
+
+				Items items = folder.Items;
+				int total = items.Count;
+
+				Log.Info("Checking for duplicates at: " + path +
+					" Total items: " + total);
+
+				// Reset for each folder.
+				storeHashTable = new Dictionary<string, IList<string>>();
+
+				ItemsIterator(
+					folder,
+					folder,
+					AddItemHashToTable,
+					"Getting Item Hashes from: ");
+			}
+
+			return storeHashTable.Count;
+		}
+
+		private async Task<IDictionary<string, IList<string>>>
+			GetFolderHashTableAsync(MAPIFolder folder)
+		{
+			if (folder != null)
+			{
+				string path = GetFolderPath(folder);
+
+				Items items = folder.Items;
+				int total = items.Count;
+
+				Log.Info("Checking for duplicates at: " + path +
+					" Total items: " + total);
+
+				// Reset for each folder.
+				storeHashTable = new Dictionary<string, IList<string>>();
+
+				await ItemsIteratorAsync(
+					folder,
+					folder,
+					AddItemHashToTableAsync,
+					"Getting Item Hashes from: ").ConfigureAwait(false);
+			}
+
+			return storeHashTable;
+		}
+
+		private int GetFolderSendersCount(
+			MAPIFolder folder, bool condition = false)
+		{
+			if (folder != null)
+			{
+				ItemsIterator(
+					folder,
+					folder,
+					AddSenderCount,
+					"Getting Item Senders Count from: ");
+			}
+
+			return sendersCounts.Count;
+		}
+
 		private void MergeDuplicateFolder(
 			MAPIFolder folder,
-			string duplicatePattern,
+			string newFolderName,
 			bool dryRun)
 		{
-			string newFolderName =
-				GetNormalizedFolderName(folder.Name, duplicatePattern);
-
 			bool folderExists = DoesSiblingFolderExist(folder, newFolderName);
 
 			string source = folder.Name;
@@ -1785,12 +1722,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private async Task MergeDuplicateFolderAsync(
 			MAPIFolder folder,
-			string duplicatePattern,
+			string newFolderName,
 			bool dryRun)
 		{
-			string newFolderName =
-				GetNormalizedFolderName(folder.Name, duplicatePattern);
-
 			bool folderExists = DoesSiblingFolderExist(folder, newFolderName);
 
 			string source = folder.Name;
@@ -2120,10 +2054,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int removedDuplicates = 0;
 
-			IDictionary<string, IList<string>> hashTable =
-				GetFolderHashTable(folder);
+			GetFolderHashTable(folder);
 
-			var duplicates = hashTable.Where(p => p.Value.Count > 1);
+			var duplicates = storeHashTable.Where(p => p.Value.Count > 1);
 			int duplicateCount = duplicates.Count();
 
 			if (duplicateCount > 0)

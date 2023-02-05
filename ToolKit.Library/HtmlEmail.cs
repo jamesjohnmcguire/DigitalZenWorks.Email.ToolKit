@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="HtmlEmail.cs" company="James John McGuire">
-// Copyright © 2021 - 2022 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2023 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -25,16 +25,23 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The trimmed HTML body.</returns>
 		public static string Trim(string htmlBody)
 		{
-			string pattern = @"(\r\n)+(?=\r\n<\/BODY>\r\n<\/HTML>$)";
+			string pattern = @"(\r{0,1}\n)+(?=\r{0,1}\n<\/BODY>" +
+				@"\r{0,1}\n<\/HTML>$)";
 
 			htmlBody = Regex.Replace(
-				htmlBody, pattern, string.Empty, RegexOptions.ExplicitCapture);
+				htmlBody,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
-			pattern = @"(<BR>\r\n)+(?=<BR>\r\n<\/FONT>\r\n" +
-				@"<\/P>\r\n<\/BODY>\r\n<\/HTML>$)";
+			pattern = @"(<BR>\r{0,1}\n)+(?=<BR>\r{0,1}\n<\/FONT>\r{0,1}\n" +
+				@"<\/P>\r{0,1}\n<\/BODY>\r{0,1}\n<\/HTML>$)";
 
 			htmlBody = Regex.Replace(
-				htmlBody, pattern, string.Empty, RegexOptions.ExplicitCapture);
+				htmlBody,
+				pattern,
+				string.Empty,
+				RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
 			return htmlBody;
 		}
