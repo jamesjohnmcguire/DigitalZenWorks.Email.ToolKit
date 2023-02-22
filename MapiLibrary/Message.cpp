@@ -69,8 +69,8 @@ namespace MapiLibrary
 			std::string message = "Subject: " + subject;
 			logger->info(message);
 
-			//std::vector<byte> hash;
-			//size = wcsnlen(property.Value.lpszW, 256) * 2;
+			std::vector<byte> hash;
+			size_t size = wcsnlen(property.Value.lpszW, 256) * 2;
 
 			//byte* bytes = (byte*)property.Value.lpszW;
 			//hash.resize(size);
