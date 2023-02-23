@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "UnicodeText.h"
 
 namespace MapiLibrary
@@ -27,6 +27,39 @@ namespace MapiLibrary
 				&wideString[0],
 				(int)wideString.size(),
 				&utf8Text[0],
+				sizeNeeded,
+				nullptr,
+				nullptr);
+		}
+
+		return utf8Text;
+	}
+
+	char* UnicodeText::GetUtf8Text(const wchar_t* wideString)
+	{
+		char* utf8Text = nullptr;
+
+		if (wideString != nullptr)
+		{
+//			int length = wcsnlen(wideString);
+			int sizeNeeded = WideCharToMultiByte(
+				CP_UTF8,
+				WC_ERR_INVALID_CHARS,
+				wideString,
+				-1,
+				nullptr,
+				0,
+				nullptr,
+				nullptr);
+
+			utf8Text = (char*)malloc(sizeNeeded);
+
+			int result = WideCharToMultiByte(
+				CP_UTF8,
+				WC_ERR_INVALID_CHARS,
+				wideString,
+				-1,
+				utf8Text,
 				sizeNeeded,
 				nullptr,
 				nullptr);
