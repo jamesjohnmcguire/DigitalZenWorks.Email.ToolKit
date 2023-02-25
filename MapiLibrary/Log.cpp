@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <memory>
 #include "Log.h"
 
 namespace MapiLibrary
@@ -20,6 +21,30 @@ namespace MapiLibrary
 
 		spdlog::set_pattern("%+");
 
-		spdlog::register_logger(logger);
+		// spdlog::register_logger(logger);
+	}
+
+	std::shared_ptr<spdlog::logger> Log::Setup(
+		std::string loggerName,
+		std::vector<spdlog::sink_ptr> sinks)
+	{
+		auto logger = spdlog::get(loggerName);
+
+		if (not logger)
+		{
+			if (sinks.size() > 0)
+			{
+				logger = std::make_shared<spdlog::logger>(loggerName,
+					std::begin(sinks),
+					std::end(sinks));
+				spdlog::register_logger(logger);
+			}
+			else
+			{
+				logger = spdlog::stdout_color_mt(loggerName);
+			}
+		}
+
+		return logger;
 	}
 }

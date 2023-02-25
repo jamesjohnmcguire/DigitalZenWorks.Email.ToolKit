@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -6,12 +7,17 @@
 #include "spdlog/sinks/stdout_sinks.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
+#include "MapiLibrary.h"
+
 namespace MapiLibrary
 {
 	class Log
 	{
 		public:
 			Log();
+			DllExport static std::shared_ptr<spdlog::logger> Setup(
+				std::string loggerName,
+				std::vector<spdlog::sink_ptr> sinks);
 
 			template<typename T> void debug(const char*& message)
 			{
