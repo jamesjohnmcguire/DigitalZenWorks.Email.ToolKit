@@ -6,7 +6,9 @@
 
 namespace MapiLibrary
 {
-	API void MapiTest()
+	static const std::string logger_name = "NC";
+
+	API(void) MapiTest()
 	{
 		Log log = Log();
 		std::shared_ptr<Log> logPointer = std::make_shared<Log>(log);
@@ -29,5 +31,14 @@ namespace MapiLibrary
 
 		session->Close();
 		session = nullptr;
+	}
+
+	API(void) test(std::string message)
+	{
+		auto logger = spdlog::get(logger_name);
+		if (logger)
+		{
+			logger->debug("{}::{}", __FUNCTION__, message);
+		}
 	}
 }
