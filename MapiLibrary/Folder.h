@@ -8,7 +8,7 @@ namespace MapiLibrary
 	{
 		public:
 			Folder(LPMAPIFOLDER folder);
-			Folder(LPMAPIFOLDER folder, std::shared_ptr<Log> logger);
+			Folder(LPMAPIFOLDER folder, std::string applicationName);
 			int RemoveDuplicates();
 	
 		private:
@@ -18,7 +18,8 @@ namespace MapiLibrary
 				LPMAPITABLE childTable, unsigned long rowCount);
 			int RemoveDuplicatesInThisFolder();
 
-			std::shared_ptr<Log> logger = nullptr;
+			std::string applicationName;
+			std::shared_ptr<spdlog::logger> logger = nullptr;
 			LPMAPIFOLDER mapiFolder;
 	};
 }

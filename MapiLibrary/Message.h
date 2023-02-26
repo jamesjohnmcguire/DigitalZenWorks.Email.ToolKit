@@ -9,11 +9,12 @@ namespace MapiLibrary
 	{
 		public:
 			Message(LPMESSAGE messageIn);
-			Message(LPMESSAGE messageIn, std::shared_ptr<Log> logger);
+			Message(LPMESSAGE messageIn, std::string applicationName);
 			std::string GetMessageHash();
 
 		private:
-			std::shared_ptr<Log> logger = nullptr;
+			std::string applicationName;
+			std::shared_ptr<spdlog::logger> logger = nullptr;
 			LPMESSAGE message;
 	};
 }

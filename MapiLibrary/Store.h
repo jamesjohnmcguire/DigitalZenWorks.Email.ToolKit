@@ -13,14 +13,15 @@ namespace MapiLibrary
 				LPMAPISESSION mapiSession,
 				ULONG entryIdLength,
 				LPENTRYID entryId,
-				std::shared_ptr<Log> logger);
+				std::string applicationName);
 			DllExport ~Store();
 			DllExport int RemoveDuplicates();
 
 		private:
+			std::string applicationName;
 			LPENTRYID entryId;
 			ULONG entryIdLength;
-			std::shared_ptr<Log> logger = nullptr;
+			std::shared_ptr<spdlog::logger> logger = nullptr;
 			LPMDB mapiDatabase{};
 			LPMAPISESSION mapiSession;
 			LPMAPIFOLDER rootFolder{};

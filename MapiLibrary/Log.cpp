@@ -4,45 +4,33 @@
 
 namespace MapiLibrary
 {
-	Log::Log()
+	Log::Log(std::string loggerName, std::string logFilePath)
 	{
-		std::vector<spdlog::sink_ptr> sinks;
-
-		std::shared_ptr<spdlog::sinks::stdout_sink_st> console_log =
-			std::make_shared<spdlog::sinks::stdout_sink_st>();
-		sinks.push_back(console_log);
-
-		std::shared_ptr<spdlog::sinks::basic_file_sink_st> file_log =
-			std::make_shared<spdlog::sinks::basic_file_sink_st>("logfile");
-		sinks.push_back(file_log);
-
-		logger = std::make_shared<spdlog::logger>(
-			"log", begin(sinks), end(sinks));
-
-		spdlog::set_pattern("%+");
-
-		// spdlog::register_logger(logger);
+		logger = Setup(loggerName, logFilePath);
 	}
 
 	std::shared_ptr<spdlog::logger> Log::Setup(
-		std::string loggerName,
-		std::vector<spdlog::sink_ptr> sinks)
+		std::string loggerName, std::string logFilePath)
 	{
-		auto logger = spdlog::get(loggerName);
+		std::shared_ptr<spdlog::logger> logger = spdlog::get(loggerName);
 
 		if (not logger)
 		{
-			if (sinks.size() > 0)
-			{
-				logger = std::make_shared<spdlog::logger>(loggerName,
-					std::begin(sinks),
-					std::end(sinks));
-				spdlog::register_logger(logger);
-			}
-			else
-			{
-				logger = spdlog::stdout_color_mt(loggerName);
-			}
+			std::vector<spdlog::sink_ptr> sinks;
+
+			std::shared_ptr<spdlog::sinks::stdout_sink_st> consoleLog =
+				std::make_shared<spdlog::sinks::stdout_sink_st>();
+			sinks.push_back(consoleLog);
+
+			std::shared_ptr<spdlog::sinks::daily_file_sink_st> fileLog =
+				std::make_shared<spdlog::sinks::daily_file_sink_st>(
+					logFilePath, 23, 59);
+			sinks.push_back(fileLog);
+
+			logger = std::make_shared<spdlog::logger>(loggerName,
+				std::begin(sinks),
+				std::end(sinks));
+			spdlog::register_logger(logger);
 		}
 
 		return logger;

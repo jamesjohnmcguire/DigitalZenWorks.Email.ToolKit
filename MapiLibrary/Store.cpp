@@ -15,21 +15,18 @@ namespace MapiLibrary
 			entryIdLength(entryIdLengthIn),
 			entryId(entryIdIn)
 	{
-		if (logger == nullptr)
-		{
-			Log log = Log();
-			logger = std::make_shared<Log>(log);
-		}
 	}
 
 	Store::Store(
 		LPMAPISESSION mapiSessionIn,
 		ULONG entryIdLengthIn,
 		LPENTRYID entryIdIn,
-		std::shared_ptr<Log> logger)
+		std::string applicationName)
 		: Store(mapiSessionIn, entryIdLengthIn, entryIdIn)
 	{
-		this->logger = logger;
+		this->applicationName = applicationName;
+
+		logger = spdlog::get(applicationName);
 	}
 
 	Store::~Store()
@@ -71,7 +68,7 @@ namespace MapiLibrary
 			if (result == S_OK && rootFolder != nullptr)
 			{
 				std::unique_ptr<Folder> folder =
-					std::make_unique<Folder>(rootFolder);
+					std::make_unique<Folder>(rootFolder, applicationName);
 
 				duplicatesRemoved += folder->RemoveDuplicates();
 			}

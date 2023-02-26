@@ -14,10 +14,9 @@ namespace MapiLibrary
 	class Log
 	{
 		public:
-			Log();
+			Log(std::string loggerName, std::string logFilePath);
 			DllExport static std::shared_ptr<spdlog::logger> Setup(
-				std::string loggerName,
-				std::vector<spdlog::sink_ptr> sinks);
+				std::string loggerName, std::string logFilePath);
 
 			template<typename T> void debug(const char*& message)
 			{
