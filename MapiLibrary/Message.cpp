@@ -60,24 +60,31 @@ namespace MapiLibrary
 		if (result == S_OK || result == MAPI_W_ERRORS_RETURNED)
 		{
 			SPropValue property = messageProperties[8];
-			const std::wstring subjectWide(property.Value.lpszW);
+			if (PT_ERROR == PROP_TYPE(property.ulPropTag))
+			{
+				logger->warn("PT_ERROR for subject");
+			}
+			else
+			{
+				const std::wstring subjectWide(property.Value.lpszW);
 
-			std::string subject = UnicodeText::GetUtf8Text(subjectWide);
-			std::string message = "Subject: " + subject;
-			logger->info(message);
+				std::string subject = UnicodeText::GetUtf8Text(subjectWide);
+				std::string message = "Subject: " + subject;
+				logger->info(message);
 
-			std::vector<byte> hash;
-			size_t size = wcsnlen(property.Value.lpszW, 256) * 2;
+				std::vector<byte> hash;
+				size_t size = wcsnlen(property.Value.lpszW, 256) * 2;
 
-			//byte* bytes = (byte*)property.Value.lpszW;
-			//hash.resize(size);
+				//byte* bytes = (byte*)property.Value.lpszW;
+				//hash.resize(size);
 
-			//byte* end = bytes + size;
+				//byte* end = bytes + size;
 
-			////copy(bytes, end, back_inserter(hash));
-			//hash.insert(hash.begin(), bytes, end);
+				////copy(bytes, end, back_inserter(hash));
+				//hash.insert(hash.begin(), bytes, end);
 
-			base64Hash = sha256(subject);
+				base64Hash = sha256(subject);
+			}
 		}
 
 		return base64Hash;
