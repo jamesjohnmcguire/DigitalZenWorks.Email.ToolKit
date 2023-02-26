@@ -1,5 +1,7 @@
 #pragma once
 
+#include "MapiLibrary.h"
+
 namespace MapiLibrary
 {
 	class UnicodeText
@@ -9,5 +11,6 @@ namespace MapiLibrary
 			static std::wstring GetWideText(const std::string& utf8Text);
 
 			static char* GetUtf8Text(const wchar_t* wideString);
+			DllExport static void SetConsole();
 	};
 }

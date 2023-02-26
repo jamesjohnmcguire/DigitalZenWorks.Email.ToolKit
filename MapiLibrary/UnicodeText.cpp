@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "UnicodeText.h"
 
 namespace MapiLibrary
@@ -94,5 +94,23 @@ namespace MapiLibrary
 		}
 
 		return wideText;
+	}
+
+	void UnicodeText::SetConsole()
+	{
+		CONSOLE_FONT_INFOEX cfi;
+		cfi.cbSize = sizeof cfi;
+		cfi.nFont = 0;
+		cfi.dwFontSize.X = 10;
+		cfi.dwFontSize.Y = 20;
+		cfi.FontFamily = FF_DONTCARE;
+		cfi.FontWeight = FW_NORMAL;
+
+		wcscpy_s(cfi.FaceName, 20, L"MS Mincho");
+
+		HANDLE standardHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+		SetCurrentConsoleFontEx(standardHandle, FALSE, &cfi);
+
+		SetConsoleOutputCP(CP_UTF8);
 	}
 }
