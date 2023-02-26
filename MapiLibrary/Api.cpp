@@ -6,16 +6,13 @@
 
 namespace MapiLibrary
 {
-	static const std::string logger_name = "NC";
-
-	API(void) MapiTest()
+	API(void) MapiTest(const char* applicationName)
 	{
-		Log log = Log();
-		std::shared_ptr<Log> logPointer = std::make_shared<Log>(log);
+		std::shared_ptr<spdlog::logger> logger = spdlog::get(applicationName);
 
-		log.info("MapiTest Starting ");
+		logger->info("MapiTest Starting ");
 
-		Session* session = new Session(logPointer);
+		Session* session = new Session(applicationName);
 
 		std::vector<std::shared_ptr<Store>> stores = session->GetStores();
 
@@ -31,14 +28,5 @@ namespace MapiLibrary
 
 		session->Close();
 		session = nullptr;
-	}
-
-	API(void) test(std::string message)
-	{
-		auto logger = spdlog::get(logger_name);
-		if (logger)
-		{
-			logger->debug("{}::{}", __FUNCTION__, message);
-		}
 	}
 }

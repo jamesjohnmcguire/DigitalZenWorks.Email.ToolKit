@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 
 #include <unordered_map>
 #include <string>
@@ -12,17 +12,14 @@ namespace MapiLibrary
 	Folder::Folder(LPMAPIFOLDER mapiFolderIn)
 		: mapiFolder(mapiFolderIn)
 	{
-		if (logger == nullptr)
-		{
-			Log log = Log();
-			logger = std::make_shared<Log>(log);
-		}
 	}
 
-	Folder::Folder(LPMAPIFOLDER mapiFolderIn, std::shared_ptr<Log> logger)
+	Folder::Folder(LPMAPIFOLDER mapiFolderIn, std::string applicationName)
 		: Folder(mapiFolderIn)
 	{
-		this->logger = logger;
+		this->applicationName = applicationName;
+
+		logger = spdlog::get(applicationName);
 	}
 
 	int Folder::RemoveDuplicates()
@@ -34,7 +31,8 @@ namespace MapiLibrary
 
 		const std::wstring folderName(property->Value.lpszW);
 
-		std::string message = "Folder: " + UnicodeText::GetUtf8Text(folderName);
+		std::string message =
+			"Folder: " + UnicodeText::GetUtf8Text(folderName);
 		logger->info(message);
 
 		std::vector<std::shared_ptr<Folder>> folders = GetChildFolders();
@@ -126,7 +124,7 @@ namespace MapiLibrary
 
 			if (result == S_OK)
 			{
-				folder = std::make_shared<Folder>(childFolder);
+				folder = std::make_shared<Folder>(childFolder, applicationName);
 			}
 		}
 
@@ -223,7 +221,8 @@ namespace MapiLibrary
 						if (result == S_OK)
 						{
 							std::unique_ptr<Message> message =
-								std::make_unique<Message>(mapiMessage);
+								std::make_unique<Message>(
+									mapiMessage, applicationName);
 
 							Message* rawMessage = message.get();
 

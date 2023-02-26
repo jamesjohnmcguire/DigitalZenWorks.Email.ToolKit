@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 
 #include "Message.h"
 #include "sha256.h"
@@ -35,17 +35,14 @@ namespace MapiLibrary
 	Message::Message(LPMESSAGE messageIn)
 		: message(messageIn)
 	{
-		if (logger == nullptr)
-		{
-			Log log = Log();
-			logger = std::make_shared<Log>(log);
-		}
 	}
 
-	Message::Message(LPMESSAGE messageIn, std::shared_ptr<Log> logger)
+	Message::Message(LPMESSAGE messageIn, std::string applicationName)
 		: Message(messageIn)
 	{
-		this->logger = logger;
+		this->applicationName = applicationName;
+
+		logger = spdlog::get(applicationName);
 	}
 
 	std::string Message::GetMessageHash()

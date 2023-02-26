@@ -12,13 +12,11 @@ namespace MapiLibrary
 		MAPI_MULTITHREAD_NOTIFICATIONS
 	};
 
-	Session::Session()
+	Session::Session(std::string applicationName)
 	{
-		if (logger == nullptr)
-		{
-			Log log = Log();
-			logger = std::make_shared<Log>(log);
-		}
+		this->applicationName = applicationName;
+
+		logger = spdlog::get(applicationName);
 
 		logger->info("Starting Session");
 		HRESULT result = MAPIInitialize(&MAPIINIT);
@@ -33,11 +31,6 @@ namespace MapiLibrary
 				&mapiSession
 			);
 		}
-	}
-
-	Session::Session(std::shared_ptr<Log> logger) : Session()
-	{
-		this->logger = logger;
 	}
 
 	Session::~Session()
@@ -93,7 +86,7 @@ namespace MapiLibrary
 					entryId = (LPENTRYID)value->Value.bin.lpb;
 
 					std::shared_ptr<Store> store = std::make_shared<Store>(
-						mapiSession, entryIdLength, entryId);
+						mapiSession, entryIdLength, entryId, applicationName);
 
 					stores.push_back(store);
 				}

@@ -3,5 +3,5 @@
 
 namespace MapiLibrary
 {
-	API(void) MapiTest();
+	API(void) MapiTest(const char* applicationName);
 }
