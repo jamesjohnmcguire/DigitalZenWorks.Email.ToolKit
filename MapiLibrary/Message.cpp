@@ -53,40 +53,61 @@ namespace MapiLibrary
 		LPSPropValue messageProperties;
 		HRESULT result = message->GetProps(
 			(LPSPropTagArray)&messageTags,
-			0,
+			MAPI_UNICODE,
 			&values,
 			&messageProperties);
 
 		if (result == S_OK || result == MAPI_W_ERRORS_RETURNED)
 		{
-			SPropValue property = messageProperties[8];
-			if (PT_ERROR == PROP_TYPE(property.ulPropTag))
-			{
-				logger->warn("PT_ERROR for subject");
-			}
-			else
-			{
-				const std::wstring subjectWide(property.Value.lpszW);
+			SPropValue property = messageProperties[7];
 
-				std::string subject = UnicodeText::GetUtf8Text(subjectWide);
-				std::string message = "Subject: " + subject;
-				logger->info(message);
+			std::string subject = GetStringProperty(property);
+			std::string message = "Subject: " + subject;
+			logger->info(message);
 
-				std::vector<byte> hash;
-				size_t size = wcsnlen(property.Value.lpszW, 256) * 2;
+			std::vector<byte> bytes = GetBytes(subject);
 
-				//byte* bytes = (byte*)property.Value.lpszW;
-				//hash.resize(size);
-
-				//byte* end = bytes + size;
-
-				////copy(bytes, end, back_inserter(hash));
-				//hash.insert(hash.begin(), bytes, end);
-
-				base64Hash = sha256(subject);
-			}
+			base64Hash = sha256(bytes);
 		}
 
 		return base64Hash;
+	}
+
+	std::vector<byte> Message::GetBytes(std::string text)
+	{
+		std::vector<byte> bytes;
+		size_t size = text.length() * 2;
+
+		byte* rawBytes = (byte*)text.c_str();
+		byte* end = rawBytes + size;
+
+		auto begin = bytes.begin();
+		bytes.insert(begin, rawBytes, end);
+
+		return bytes;
+	}
+
+	std::string Message::GetStringProperty(SPropValue property)
+	{
+		std::string text;
+
+		unsigned long propType = PROP_TYPE(property.ulPropTag);
+
+		if (propType == PT_ERROR)
+		{
+			logger->warn("PT_ERROR for property");
+		}
+		else if (propType == PT_STRING8)
+		{
+			text = property.Value.lpszA;
+		}
+		else if (propType == PT_UNICODE)
+		{
+			const std::wstring wideText(property.Value.lpszW);
+
+			text = UnicodeText::GetUtf8Text(wideText);
+		}
+
+		return text;
 	}
 }
