@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
@@ -43,6 +43,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\ToolKit.Library\ToolKit.Library.csproj" />
+		<ProjectReference Include="..\MsgKit\MsgKit\MsgKit.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
