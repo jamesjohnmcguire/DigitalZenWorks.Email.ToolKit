@@ -41,7 +41,6 @@ namespace MapiLibrary
 
 		if (wideString != nullptr)
 		{
-//			int length = wcsnlen(wideString);
 			int sizeNeeded = WideCharToMultiByte(
 				CP_UTF8,
 				WC_ERR_INVALID_CHARS,
