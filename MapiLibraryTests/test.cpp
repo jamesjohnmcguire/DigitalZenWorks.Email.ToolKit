@@ -17,7 +17,7 @@ TEST(TestSanityCheck, SanityCheck)
 
 TEST(TestGetMessage, GetMessage)
 {
-	Session* session = new Session();
+	Session* session = new Session("MapiLibrary.Tests");
 
 	std::vector<std::shared_ptr<Store>> stores = session->GetStores();
 
