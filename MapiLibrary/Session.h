@@ -9,7 +9,6 @@ namespace MapiLibrary
 	class Session
 	{
 		public:
-			DllExport Session();
 			DllExport Session(std::string applicationName);
 			DllExport ~Session();
 
