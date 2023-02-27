@@ -43,6 +43,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\ToolKit.Library\ToolKit.Library.csproj" />
+		<ProjectReference Include="..\MsgKit\MsgKit\MsgKit.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
