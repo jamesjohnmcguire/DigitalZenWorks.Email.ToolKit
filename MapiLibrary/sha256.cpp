@@ -120,6 +120,37 @@ namespace MapiLibrary
 		}
 	}
 
+	std::string sha256(std::vector<byte> input)
+	{
+		unsigned int size = 2 * SHA256::DIGEST_SIZE + 1;
+
+		unsigned char digest[SHA256::DIGEST_SIZE];
+		memset(digest, 0, SHA256::DIGEST_SIZE);
+
+		SHA256 ctx = SHA256();
+		ctx.init();
+		ctx.update((unsigned char*)input.data(), (unsigned int)input.size());
+		ctx.final(digest);
+
+		char buf[2 * SHA256::DIGEST_SIZE + 1];
+		for (int i = 0; i < SHA256::DIGEST_SIZE; i++)
+		{
+			int double_index = i * 2;
+			char* buffer = buf + double_index;
+			unsigned char item = digest[i];
+#ifdef WIN32
+			sprintf_s(buffer, size, "%02x", item);
+#else
+			sprintf(buffer, "%02x", item);
+#endif
+			size -= 2;
+		}
+
+		std::string sha = std::string(buf);
+
+		return sha;
+	}
+
 	std::string sha256(std::string input)
 	{
 		unsigned int size = 2 * SHA256::DIGEST_SIZE + 1;
