@@ -60,12 +60,26 @@ namespace MapiLibrary
 		if (result == S_OK || result == MAPI_W_ERRORS_RETURNED)
 		{
 			SPropValue property = messageProperties[7];
+			std::vector<byte> bytes;
 
-			std::string subject = GetStringProperty(property);
-			std::string message = "Subject: " + subject;
-			logger->info(message);
+			switch (property.ulPropTag)
+			{
+				case PT_ERROR:
+					logger->warn("PT_ERROR for property");
+					break;
+				case PT_STRING8:
+				case PT_UNICODE:
+				{
+					std::string text = GetStringProperty(property);
+					std::vector<byte> newBytes = GetBytes(text);
 
-			std::vector<byte> bytes = GetBytes(subject);
+					bytes.insert(
+						bytes.end(), newBytes.begin(), newBytes.end());
+					break;
+				}
+				default:
+					break;
+			}
 
 			base64Hash = sha256(bytes);
 		}
