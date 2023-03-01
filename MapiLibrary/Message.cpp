@@ -59,26 +59,37 @@ namespace MapiLibrary
 
 		if (result == S_OK || result == MAPI_W_ERRORS_RETURNED)
 		{
-			SPropValue property = messageProperties[7];
 			std::vector<byte> bytes;
 
-			switch (property.ulPropTag)
+			for (ULONG index = 0; index < messageTags.cValues; index++)
 			{
-				case PT_ERROR:
-					logger->warn("PT_ERROR for property");
-					break;
-				case PT_STRING8:
-				case PT_UNICODE:
-				{
-					std::string text = GetStringProperty(property);
-					std::vector<byte> newBytes = GetBytes(text);
+				SPropValue property = messageProperties[index];
+				unsigned long propertyType = PROP_TYPE(property.ulPropTag);
+				std::string message;
 
-					bytes.insert(
-						bytes.end(), newBytes.begin(), newBytes.end());
-					break;
+				switch (propertyType)
+				{
+					case PT_ERROR:
+						message = "PT_ERROR for property: " +
+							std::to_string(propertyType);
+						logger->warn(message);
+						break;
+					case PT_STRING8:
+					case PT_UNICODE:
+					{
+						std::string text = GetStringProperty(property);
+						std::vector<byte> newBytes = GetBytes(text);
+
+						bytes.insert(
+							bytes.end(), newBytes.begin(), newBytes.end());
+						break;
+					}
+					default:
+						message = "Unknown property type: " +
+							std::to_string(propertyType);
+						logger->warn(message);
+						break;
 				}
-				default:
-					break;
 			}
 
 			base64Hash = sha256(bytes);
