@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookStore.cs" company="James John McGuire">
 // Copyright © 2021 - 2023 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -1123,8 +1123,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				// Special case: If the names have different case-sensitivity,
 				// rename to requested.
 				if (sourceFolder.Name.Equals(
-					destinationName,
-					StringComparison.OrdinalIgnoreCase))
+						destinationName,
+						StringComparison.OrdinalIgnoreCase) &&
+					!sourceFolder.Name.Equals(
+						destinationName,
+						StringComparison.Ordinal))
 				{
 					sourceFolder.Name = destinationName;
 				}
