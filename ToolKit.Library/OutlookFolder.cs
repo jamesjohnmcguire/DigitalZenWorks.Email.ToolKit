@@ -983,7 +983,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						item.UnRead = false;
 						item.Save();
 
-						item.Move(pstFolder);
+						item = item.Move(pstFolder);
 
 						Marshal.ReleaseComObject(item);
 					}

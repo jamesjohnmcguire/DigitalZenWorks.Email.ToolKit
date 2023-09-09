@@ -300,13 +300,13 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem.Move(mainFolder);
+			mailItem = mailItem.Move(mainFolder);
 
 			MailItem mailItem2 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is aka subject",
 				"This is the message.");
-			mailItem2.Move(mainFolder);
+			mailItem2 = mailItem2.Move(mainFolder);
 
 			string hash = MapiItem.GetItemHash(mailItem);
 			string hash2 = MapiItem.GetItemHash(mailItem2);
@@ -336,13 +336,13 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem.Move(mainFolder);
+			mailItem = mailItem.Move(mainFolder);
 
 			MailItem mailItem2 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem2.Move(mainFolder);
+			mailItem2 = mailItem2.Move(mainFolder);
 
 			string hash = MapiItem.GetItemHash(mailItem);
 			string hash2 = MapiItem.GetItemHash(mailItem2);
@@ -373,7 +373,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem.Move(mainFolder);
+			mailItem = mailItem.Move(mainFolder);
 
 			string hash = MapiItem.GetItemHash(mailItem);
 			string hash2 = MapiItem.GetItemHash(mailItem);
@@ -747,19 +747,19 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem.Move(mainFolder);
+			mailItem = mailItem.Move(mainFolder);
 
 			MailItem mailItem2 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is aka subject",
 				"This is the message.");
-			mailItem2.Move(mainFolder);
+			mailItem2 = mailItem2.Move(mainFolder);
 
 			MailItem mailItem3 = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem3.Move(mainFolder);
+			mailItem3 = mailItem3.Move(mainFolder);
 
 			OutlookFolder outlookFolder = new (outlookAccount);
 			int removedDuplicates =
@@ -933,7 +933,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			mailItem.UnRead = false;
 			mailItem.Save();
 
-			mailItem.Move(subFolder);
+			mailItem = mailItem.Move(subFolder);
 
 			Marshal.ReleaseComObject(subFolder);
 
