@@ -155,13 +155,13 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem.Move(mainFolder);
+			mailItem = mailItem.Move(mainFolder);
 
 			MailItem mailItem2 = outlookAccount.CreateMailItem(
 				"someoneelse@example.com",
 				"This is another subject",
 				"This is the message.");
-			mailItem.Move(mainFolder);
+			mailItem2 = mailItem2.Move(mainFolder);
 
 			mailItem.Save();
 			mailItem2.Save();
