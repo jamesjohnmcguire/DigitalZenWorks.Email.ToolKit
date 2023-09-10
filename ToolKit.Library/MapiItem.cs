@@ -1194,7 +1194,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			return recipients;
 		}
 
-		private static byte[] GetStringProperties(MailItem mailItem)
+		private static byte[] GetStringProperties(
+			MailItem mailItem, bool ignoreConversation = true)
 		{
 			byte[] data = null;
 
@@ -1221,7 +1222,13 @@ namespace DigitalZenWorks.Email.ToolKit
 				string categories = mailItem.Categories;
 				string cc = mailItem.CC;
 				string companies = mailItem.Companies;
-				string conversationID = mailItem.ConversationID;
+				string conversationID = null;
+
+				if (ignoreConversation == false)
+				{
+					conversationID = mailItem.ConversationID;
+				}
+
 				string conversationTopic = mailItem.ConversationTopic;
 				string flagRequest = mailItem.FlagRequest;
 				string header = mailItem.PropertyAccessor.GetProperty(

@@ -344,6 +344,9 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem2 = mailItem2.Move(mainFolder);
 
+			mailItem.Save();
+			mailItem2.Save();
+
 			string hash = MapiItem.GetItemHash(mailItem);
 			string hash2 = MapiItem.GetItemHash(mailItem2);
 
@@ -765,7 +768,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			int removedDuplicates =
 				outlookFolder.RemoveDuplicates(mainFolder, false);
 
-			Assert.AreEqual(removedDuplicates, 1);
+			Assert.AreEqual(1, removedDuplicates);
 
 			// Clean up
 			mailItem.Delete();
