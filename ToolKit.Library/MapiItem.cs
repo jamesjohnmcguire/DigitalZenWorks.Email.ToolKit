@@ -315,7 +315,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						Marshal.ReleaseComObject(journalItem);
 						break;
 					case MailItem mailItem:
-						mailItem.Move(destination);
+						mailItem = mailItem.Move(destination);
 						Marshal.ReleaseComObject(mailItem);
 						break;
 					case MeetingItem meetingItem:
@@ -427,7 +427,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						break;
 					case MailItem mailItem:
 						await Task.Run(() =>
-							mailItem.Move(destination)).
+							mailItem = mailItem.Move(destination)).
 								ConfigureAwait(false);
 						Marshal.ReleaseComObject(mailItem);
 						break;
