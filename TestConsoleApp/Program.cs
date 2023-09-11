@@ -148,7 +148,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem.Move(mainFolder);
+			mailItem = mailItem.Move(mainFolder);
 
 			string hash = MapiItem.GetItemHash(mailItem);
 			string hash2 = MapiItem.GetItemHash(mailItem);
@@ -166,7 +166,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem2.Move(mainFolder);
+			mailItem2 = mailItem2.Move(mainFolder);
 
 			hash2 = MapiItem.GetItemHash(mailItem2);
 
@@ -183,7 +183,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"someone@example.com",
 				"This is aka subject",
 				"This is the message.");
-			mailItem3.Move(mainFolder);
+			mailItem3 = mailItem3.Move(mainFolder);
 
 			hash2 = MapiItem.GetItemHash(mailItem3);
 
@@ -242,7 +242,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem.Move(subFolder);
+			mailItem = mailItem.Move(subFolder);
 
 			subFolder = OutlookFolder.AddFolder(
 				mainFolder, "Testing (1)");
@@ -276,7 +276,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem.Move(mainFolder);
+			mailItem = mailItem.Move(mainFolder);
 
 			string msgPath = basePath + "test.msg";
 			mailItem.SaveAs(msgPath);
