@@ -7,6 +7,7 @@
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1009,7 +1010,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
-				RecurseFolders(folder, false, GetFolderHashTable);
+				RecurseFolders(folder, false, GetFolderHashTableCount);
 			}
 
 			return storeHashTable;
@@ -1593,8 +1594,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			return removeDuplicates;
 		}
 
-		private int GetFolderHashTable(
-			MAPIFolder folder, bool condition = false)
+		private IDictionary<string, IList<string>> GetFolderHashTable(
+			MAPIFolder folder)
 		{
 			if (folder != null)
 			{
@@ -1616,7 +1617,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					"Getting Item Hashes from: ");
 			}
 
-			return storeHashTable.Count;
+			return storeHashTable;
 		}
 
 		private async Task<IDictionary<string, IList<string>>>
@@ -1643,6 +1644,22 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return storeHashTable;
+		}
+
+		private int GetFolderHashTableCount(
+			MAPIFolder folder, bool condition = false)
+		{
+			int hashTableCount = 0;
+
+			IDictionary<string, IList<string>> hashTable =
+				GetFolderHashTable(folder);
+
+			if (hashTable != null)
+			{
+				hashTableCount = hashTable.Count;
+			}
+
+			return hashTableCount;
 		}
 
 		private int GetFolderSendersCount(
@@ -2054,12 +2071,16 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int removedDuplicates = 0;
 
-			GetFolderHashTable(folder);
+			IDictionary<string, IList<string>> hashTable =
+				GetFolderHashTable(folder);
 
-			var duplicates = storeHashTable.Where(p => p.Value.Count > 1);
-			int duplicateCount = duplicates.Count();
+			IEnumerable<KeyValuePair<string, IList<string>>> duplicatesRaw =
+				storeHashTable.Where(p => p.Value.Count > 1);
 
-			if (duplicateCount > 0)
+			IReadOnlyCollection<KeyValuePair<string, IList<string>>> duplicates =
+				duplicatesRaw.ToList().AsReadOnly();
+
+			if (duplicates.Count > 0)
 			{
 				string path = GetFolderPath(folder);
 				Log.Info("Duplicates found at: " + path);
@@ -2082,17 +2103,18 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int duplicateCount = 0;
 
-			string path = GetFolderPath(folder);
-
 			IDictionary<string, IList<string>> hashTable =
 				await GetFolderHashTableAsync(folder).ConfigureAwait(false);
 
-			IEnumerable<KeyValuePair<string, IList<string>>> duplicates =
+			IEnumerable<KeyValuePair<string, IList<string>>> duplicatesRaw =
 				hashTable.Where(p => p.Value.Count > 1);
-			int duplicateSetCount = duplicates.Count();
 
-			if (duplicateSetCount > 0)
+			IReadOnlyCollection<KeyValuePair<string, IList<string>>> duplicates =
+				duplicatesRaw.ToList().AsReadOnly();
+
+			if (duplicates.Count > 0)
 			{
+				string path = GetFolderPath(folder);
 				Log.Info("Duplicates found at: " + path);
 			}
 
