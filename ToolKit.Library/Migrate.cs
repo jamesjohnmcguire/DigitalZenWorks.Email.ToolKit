@@ -307,7 +307,14 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				foreach (string file in emlFiles)
 				{
-					CopyEmlToPst(pstFolder, file);
+					try
+					{
+						CopyEmlToPst(pstFolder, file);
+					}
+					catch (IOException exception)
+					{
+						Log.Error(exception.ToString());
+					}
 				}
 			}
 		}
@@ -542,9 +549,19 @@ namespace DigitalZenWorks.Email.ToolKit
 			MAPIFolder pstFolder =
 				OutlookStore.GetTopLevelFolder(pstStore, baseName);
 
-			CopyEmlToPst(pstFolder, filePath);
+			if (pstFolder != null)
+			{
+				try
+				{
+					CopyEmlToPst(pstFolder, filePath);
+				}
+				catch (IOException exception)
+				{
+					Log.Error(exception.ToString());
+				}
 
-			Marshal.ReleaseComObject(pstFolder);
+				Marshal.ReleaseComObject(pstFolder);
+			}
 		}
 
 		private static bool CheckIfInterimFolder(
