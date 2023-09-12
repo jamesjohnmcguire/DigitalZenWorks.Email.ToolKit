@@ -168,17 +168,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static string GetItemHash(MailItem mailItem)
 		{
 			string hashBase64 = null;
-			byte[] finalBuffer = null;
 
 			try
 			{
 				if (mailItem != null)
 				{
-					finalBuffer = GetItemBytes(mailItem);
+					byte[] finalBuffer = GetItemBytes(mailItem);
 
-					using SHA256 hasher = SHA256.Create();
-
-					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+					byte[] hashValue = SHA256.HashData(finalBuffer);
 					hashBase64 = Convert.ToBase64String(hashValue);
 				}
 			}
@@ -191,7 +188,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is OutOfMemoryException ||
 				exception is RankException)
 			{
-				LogException(mailItem);
+				if (mailItem != null)
+				{
+					LogException(mailItem);
+				}
+
 				Log.Error(exception.ToString());
 			}
 
@@ -216,9 +217,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					finalBuffer = await Task.Run(() =>
 						GetItemBytes(mailItem)).ConfigureAwait(false);
 
-					using SHA256 hasher = SHA256.Create();
-
-					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+					byte[] hashValue = SHA256.HashData(finalBuffer);
 					hashBase64 = Convert.ToBase64String(hashValue);
 				}
 			}
@@ -231,7 +230,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is OutOfMemoryException ||
 				exception is RankException)
 			{
-				LogException(mailItem);
+				if (mailItem != null)
+				{
+					LogException(mailItem);
+				}
+
 				Log.Error(exception.ToString());
 			}
 
@@ -1125,7 +1128,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			Justification = "It isn't hungarian notation.")]
 		private static string GetRecipients(MailItem mailItem)
 		{
-			string recipients = string.Empty;
+			string recipients;
 			List<string> toList = new ();
 			List<string> ccList = new ();
 			List<string> bccList = new ();
