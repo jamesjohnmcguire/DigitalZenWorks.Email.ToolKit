@@ -36,5 +36,19 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			return query;
 		}
+
+		/// <summary>
+		/// Get all eml or text files.
+		/// </summary>
+		/// <param name="location">The path location to check.</param>
+		/// <returns>a list of eml and text files.</returns>
+		public static IReadOnlyCollection<string> GetFilesCollection(string location)
+		{
+			IEnumerable<string> query = GetFiles(location);
+
+			IReadOnlyCollection<string> emlFiles = query.ToList().AsReadOnly();
+
+			return emlFiles;
+		}
 	}
 }
