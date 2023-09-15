@@ -9,7 +9,7 @@ IF "%1"=="publish" GOTO publish
 IF "%1"=="release" GOTO release
 
 :default
-msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;OutputPath=Bin\Release\;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true;TargetFramework=net6.0-windows -restore -target:publish;rebuild ToolKit.Application
+msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;OutputPath=Bin\Release\;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true;TargetFramework=net7.0-windows -restore -target:publish;rebuild ToolKit.Application
 
 GOTO end
 
