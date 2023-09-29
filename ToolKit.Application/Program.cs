@@ -93,6 +93,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						throw;
 					}
 
+					Encoding.RegisterProvider(
+						CodePagesEncodingProvider.Instance);
+
 					switch (command.Name)
 					{
 						case "dbx-to-pst":
@@ -365,8 +368,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			{
 				string encodingName = optionFound.Parameter;
 
-				Encoding.RegisterProvider(
-					CodePagesEncodingProvider.Instance);
 				encoding = Encoding.GetEncoding(encodingName);
 			}
 
