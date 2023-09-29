@@ -906,10 +906,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						MAPIFolder parentFolder = GetParent(folder);
 
-						if (parentFolder != null)
-						{
-							parentFolder.Folders.Remove(subFolderIndex);
-						}
+						parentFolder?.Folders.Remove(subFolderIndex);
 					}
 				}
 			}
