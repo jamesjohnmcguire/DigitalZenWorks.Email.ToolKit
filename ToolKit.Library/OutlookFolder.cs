@@ -1525,9 +1525,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (!string.IsNullOrWhiteSpace(sender))
 					{
-						if (sendersCounts.ContainsKey(sender))
+						if (sendersCounts.TryGetValue(sender, out int counts))
 						{
-							sendersCounts[sender]++;
+							counts++;
+							sendersCounts[sender] = counts;
 						}
 						else
 						{
