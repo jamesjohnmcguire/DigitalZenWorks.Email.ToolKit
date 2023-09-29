@@ -18,6 +18,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,6 +35,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+		private static readonly ResourceManager StringTable =
+			new ("DigitalZenWorks.Email.ToolKit.Application.Resources",
+				Assembly.GetExecutingAssembly());
 
 		/// <summary>
 		/// The program's main entry point.
@@ -590,7 +595,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			if (duplicatesFound == false)
 			{
-				string message = "No duplicates found";
+				string message = StringTable.GetString(
+					"NO_DUPLICATES_FOUND",
+					CultureInfo.InvariantCulture);
 
 				if (useLog == true)
 				{
