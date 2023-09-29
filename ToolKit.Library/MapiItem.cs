@@ -175,7 +175,12 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					byte[] finalBuffer = GetItemBytes(mailItem);
 
+#if NET5_0_OR_GREATER
 					byte[] hashValue = SHA256.HashData(finalBuffer);
+#else
+					using SHA256 hasher = SHA256.Create();
+					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+#endif
 					hashBase64 = Convert.ToBase64String(hashValue);
 				}
 			}
@@ -217,7 +222,12 @@ namespace DigitalZenWorks.Email.ToolKit
 					finalBuffer = await Task.Run(() =>
 						GetItemBytes(mailItem)).ConfigureAwait(false);
 
+#if NET5_0_OR_GREATER
 					byte[] hashValue = SHA256.HashData(finalBuffer);
+#else
+					using SHA256 hasher = SHA256.Create();
+					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+#endif
 					hashBase64 = Convert.ToBase64String(hashValue);
 				}
 			}

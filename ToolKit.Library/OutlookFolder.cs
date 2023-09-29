@@ -271,7 +271,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (!string.IsNullOrEmpty(folderPath))
 			{
 				string[] parts = GetPathParts(folderPath);
+#if NET5_0_OR_GREATER
 				folderName = parts[^1];
+#else
+				folderName = parts[parts.Length - 1];
+#endif
 			}
 
 			return folderName;
@@ -1450,13 +1454,21 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static string RemoveStoreFromPath(string path)
 		{
+#if NET5_0_OR_GREATER
 			if (path.Contains("::", StringComparison.OrdinalIgnoreCase))
+#else
+			if (path.Contains("::"))
+#endif
 			{
 				int position = path.IndexOf(
 					"::", StringComparison.OrdinalIgnoreCase);
 				position += 2;
 
+#if NET5_0_OR_GREATER
 				path = path[position..];
+#else
+				path = path.Substring(position);
+#endif
 			}
 
 			return path;
