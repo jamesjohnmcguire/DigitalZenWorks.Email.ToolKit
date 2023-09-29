@@ -303,7 +303,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static void CopyEmlFilesToPst(
 			MAPIFolder pstFolder, IReadOnlyCollection<string> emlFiles)
 		{
-			if (emlFiles.Count < 0)
+			if (emlFiles.Count > 0)
 			{
 				foreach (string file in emlFiles)
 				{
@@ -488,7 +488,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			IReadOnlyCollection<string> emlFiles =
 				EmlMessages.GetFilesCollection(emlFolderFilePath);
 
-			if (directories.Length > 0 || emlFiles.Count < 0)
+			if (directories.Length > 0 || emlFiles.Count > 0)
 			{
 				DirectoryInfo directoryInfo = new (emlFolderFilePath);
 				string directoryName = directoryInfo.Name;
