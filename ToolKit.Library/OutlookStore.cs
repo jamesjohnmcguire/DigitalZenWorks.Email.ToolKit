@@ -459,10 +459,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		public void MergeStores(
 			string sourcePstPath, string destinationPstPath)
 		{
-			Store source = outlookAccount.GetStore(sourcePstPath);
-			Store destination = outlookAccount.GetStore(destinationPstPath);
+			bool exists = File.Exists(sourcePstPath);
 
-			MergeStores(source, destination);
+			if (exists == false)
+			{
+				Log.Error("The source PST path does not exist: " + sourcePstPath);
+			}
+			else
+			{
+				Store source = outlookAccount.GetStore(sourcePstPath);
+				Store destination = outlookAccount.GetStore(destinationPstPath);
+
+				MergeStores(source, destination);
+			}
 		}
 
 		/// <summary>
@@ -549,10 +558,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		public async Task MergeStoresAsync(
 			string sourcePstPath, string destinationPstPath)
 		{
-			Store source = outlookAccount.GetStore(sourcePstPath);
-			Store destination = outlookAccount.GetStore(destinationPstPath);
+			bool exists = File.Exists(sourcePstPath);
 
-			await MergeStoresAsync(source, destination).ConfigureAwait(false);
+			if (exists == false)
+			{
+				Log.Error("The source PST path does not exist: " + sourcePstPath);
+			}
+			else
+			{
+				Store source = outlookAccount.GetStore(sourcePstPath);
+				Store destination = outlookAccount.GetStore(destinationPstPath);
+
+				await MergeStoresAsync(source, destination).ConfigureAwait(false);
+			}
 		}
 
 		/// <summary>
