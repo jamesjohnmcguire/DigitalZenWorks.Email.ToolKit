@@ -6,7 +6,6 @@ CD %~dp0
 CD ..
 
 IF "%1"=="publish" GOTO publish
-IF "%1"=="release" GOTO release
 
 :default
 CD MsgKit
@@ -19,6 +18,8 @@ CD MsgKit
 git checkout dzw-complete
 CD ..
 
+IF "%1"=="release" GOTO release
+
 GOTO end
 
 :publish
@@ -26,15 +27,21 @@ GOTO end
 if "%~2"=="" GOTO error1
 if "%~3"=="" GOTO error2
 
+CD MsgKit
+git checkout for-exe
+CD ..
+
 msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -restore -target:rebuild;pack ToolKit.Library
 
+CD MsgKit
+git checkout dzw-complete
+CD ..
+PAUSE
 CD ToolKit.Library\Bin\Release\Library
 nuget push DigitalZenWorks.Email.ToolKit.%2.nupkg %3 -Source https://api.nuget.org/v3/index.json
 GOTO end
 
 :release
-
-msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;OutputPath=Bin\;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true;TargetFramework=net7.0-windows -restore -target:publish;rebuild ToolKit.Application
 
 CD ToolKit.Application\Bin\publish
 7z u DigitalZenWorks.Email.ToolKit.zip
