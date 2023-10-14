@@ -1250,6 +1250,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (header != null)
 				{
 					header = RemoveMimeOleVersion(header);
+					header = header.Replace("Errors-to:", "Errors-To:", StringComparison.Ordinal);
 				}
 
 				string htmlBody = mailItem.HTMLBody;
