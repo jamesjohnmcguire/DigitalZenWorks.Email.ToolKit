@@ -5,3 +5,10 @@ dotnet_style_object_initializer = false:suggestion
 
 # IDE0028: Use collection initializers
 dotnet_style_collection_initializer = false:suggestion
+
+[*]
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+indent_style = tab
+indent_size = 4
