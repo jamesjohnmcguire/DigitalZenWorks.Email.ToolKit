@@ -1256,6 +1256,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						"Errors-to:",
 						"Errors-To:",
 						StringComparison.Ordinal);
+
+					header = NormalizeHeaders(header);
 				}
 
 				string htmlBody = mailItem.HTMLBody;
@@ -1421,6 +1423,19 @@ namespace DigitalZenWorks.Email.ToolKit
 				mailItem.SenderName,
 				mailItem.SenderEmailAddress,
 				mailItem.Subject);
+		}
+
+		private static string NormalizeHeaders(string headers)
+		{
+			string[] parts = headers.Split("\r\n");
+
+			List<string> list = new List<string>(parts);
+
+			list.Sort();
+
+			headers = string.Join("\r\n", list);
+
+			return headers;
 		}
 	}
 }
