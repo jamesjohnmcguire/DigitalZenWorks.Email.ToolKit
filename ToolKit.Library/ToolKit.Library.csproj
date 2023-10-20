@@ -61,12 +61,11 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Debug'">
-		<ProjectReference Include="..\DbxOutlookExpress\DbxOutlookExpressLibrary\DbxOutlookExpressLibrary.csproj" />
+		<PackageReference Include="DigitalZenWorks.Email.DbxOutlookExpress" Version="1.3.22" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
-		<!--PackageReference Include="DigitalZenWorks.Email.DbxOutlookExpress" Version="1.3.20" /-->
-		<ProjectReference Include="..\DbxOutlookExpress\DbxOutlookExpressLibrary\DbxOutlookExpressLibrary.csproj" />
+		<PackageReference Include="DigitalZenWorks.Email.DbxOutlookExpress" Version="1.3.22" />
 	</ItemGroup>
 
 	<ItemGroup>
