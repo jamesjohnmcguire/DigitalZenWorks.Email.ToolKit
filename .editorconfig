@@ -1,4 +1,12 @@
-﻿[*.{cs,vb}]
+﻿[*]
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+indent_style = tab
+indent_size = 4
+
+[*.{cs,vb}]
+charset = utf-8 bom
 
 # IDE0017: Simplify object initialization
 dotnet_style_object_initializer = false:suggestion

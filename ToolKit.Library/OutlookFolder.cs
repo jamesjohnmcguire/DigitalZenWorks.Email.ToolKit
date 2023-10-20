@@ -7,6 +7,7 @@
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -270,7 +271,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (!string.IsNullOrEmpty(folderPath))
 			{
 				string[] parts = GetPathParts(folderPath);
+#if NET5_0_OR_GREATER
 				folderName = parts[^1];
+#else
+				folderName = parts[parts.Length - 1];
+#endif
 			}
 
 			return folderName;
@@ -901,10 +906,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						MAPIFolder parentFolder = GetParent(folder);
 
-						if (parentFolder != null)
-						{
-							parentFolder.Folders.Remove(subFolderIndex);
-						}
+						parentFolder?.Folders.Remove(subFolderIndex);
 					}
 				}
 			}
@@ -983,7 +985,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						item.UnRead = false;
 						item.Save();
 
-						item.Move(pstFolder);
+						item = item.Move(pstFolder);
 
 						Marshal.ReleaseComObject(item);
 					}
@@ -1009,7 +1011,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null)
 			{
-				RecurseFolders(folder, false, GetFolderHashTable);
+				RecurseFolders(folder, false, GetFolderHashTableCount);
 			}
 
 			return storeHashTable;
@@ -1449,13 +1451,21 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static string RemoveStoreFromPath(string path)
 		{
+#if NET5_0_OR_GREATER
 			if (path.Contains("::", StringComparison.OrdinalIgnoreCase))
+#else
+			if (path.Contains("::"))
+#endif
 			{
 				int position = path.IndexOf(
 					"::", StringComparison.OrdinalIgnoreCase);
 				position += 2;
 
+#if NET5_0_OR_GREATER
 				path = path[position..];
+#else
+				path = path.Substring(position);
+#endif
 			}
 
 			return path;
@@ -1512,9 +1522,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (!string.IsNullOrWhiteSpace(sender))
 					{
-						if (sendersCounts.ContainsKey(sender))
+						if (sendersCounts.TryGetValue(sender, out int counts))
 						{
-							sendersCounts[sender]++;
+							counts++;
+							sendersCounts[sender] = counts;
 						}
 						else
 						{
@@ -1593,8 +1604,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			return removeDuplicates;
 		}
 
-		private int GetFolderHashTable(
-			MAPIFolder folder, bool condition = false)
+		private IDictionary<string, IList<string>> GetFolderHashTable(
+			MAPIFolder folder)
 		{
 			if (folder != null)
 			{
@@ -1616,7 +1627,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					"Getting Item Hashes from: ");
 			}
 
-			return storeHashTable.Count;
+			return storeHashTable;
 		}
 
 		private async Task<IDictionary<string, IList<string>>>
@@ -1643,6 +1654,22 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return storeHashTable;
+		}
+
+		private int GetFolderHashTableCount(
+			MAPIFolder folder, bool condition = false)
+		{
+			int hashTableCount = 0;
+
+			IDictionary<string, IList<string>> hashTable =
+				GetFolderHashTable(folder);
+
+			if (hashTable != null)
+			{
+				hashTableCount = hashTable.Count;
+			}
+
+			return hashTableCount;
 		}
 
 		private int GetFolderSendersCount(
@@ -2054,12 +2081,16 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int removedDuplicates = 0;
 
-			GetFolderHashTable(folder);
+			IDictionary<string, IList<string>> hashTable =
+				GetFolderHashTable(folder);
 
-			var duplicates = storeHashTable.Where(p => p.Value.Count > 1);
-			int duplicateCount = duplicates.Count();
+			IEnumerable<KeyValuePair<string, IList<string>>> duplicatesRaw =
+				storeHashTable.Where(p => p.Value.Count > 1);
 
-			if (duplicateCount > 0)
+			IReadOnlyCollection<KeyValuePair<string, IList<string>>> duplicates =
+				duplicatesRaw.ToList().AsReadOnly();
+
+			if (duplicates.Count > 0)
 			{
 				string path = GetFolderPath(folder);
 				Log.Info("Duplicates found at: " + path);
@@ -2082,17 +2113,18 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			int duplicateCount = 0;
 
-			string path = GetFolderPath(folder);
-
 			IDictionary<string, IList<string>> hashTable =
 				await GetFolderHashTableAsync(folder).ConfigureAwait(false);
 
-			IEnumerable<KeyValuePair<string, IList<string>>> duplicates =
+			IEnumerable<KeyValuePair<string, IList<string>>> duplicatesRaw =
 				hashTable.Where(p => p.Value.Count > 1);
-			int duplicateSetCount = duplicates.Count();
 
-			if (duplicateSetCount > 0)
+			IReadOnlyCollection<KeyValuePair<string, IList<string>>> duplicates =
+				duplicatesRaw.ToList().AsReadOnly();
+
+			if (duplicates.Count > 0)
 			{
+				string path = GetFolderPath(folder);
 				Log.Info("Duplicates found at: " + path);
 			}
 

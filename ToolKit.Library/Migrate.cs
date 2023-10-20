@@ -300,6 +300,25 @@ namespace DigitalZenWorks.Email.ToolKit
 			return pstFolder;
 		}
 
+		private static void CopyEmlFilesToPst(
+			MAPIFolder pstFolder, IReadOnlyCollection<string> emlFiles)
+		{
+			if (emlFiles.Count > 0)
+			{
+				foreach (string file in emlFiles)
+				{
+					try
+					{
+						CopyEmlToPst(pstFolder, file);
+					}
+					catch (IOException exception)
+					{
+						Log.Error(exception.ToString());
+					}
+				}
+			}
+		}
+
 		private static void CopyEmlToPst(MAPIFolder mapiFolder, string emlFile)
 		{
 			if (!string.IsNullOrWhiteSpace(emlFile) && File.Exists(emlFile))
@@ -466,10 +485,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			string[] directories = Directory.GetDirectories(emlFolderFilePath);
 
-			IEnumerable<string> emlFiles =
-				EmlMessages.GetFiles(emlFolderFilePath);
+			IReadOnlyCollection<string> emlFiles =
+				EmlMessages.GetFilesCollection(emlFolderFilePath);
 
-			if (directories.Length > 0 || emlFiles.Any())
+			if (directories.Length > 0 || emlFiles.Count > 0)
 			{
 				DirectoryInfo directoryInfo = new (emlFolderFilePath);
 				string directoryName = directoryInfo.Name;
@@ -501,13 +520,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						}
 					}
 
-					if (emlFiles.Any())
-					{
-						foreach (string file in emlFiles)
-						{
-							CopyEmlToPst(thisFolder, file);
-						}
-					}
+					CopyEmlFilesToPst(thisFolder, emlFiles);
 
 					if (adjust == false || isInterimFolder == false)
 					{
@@ -536,9 +549,19 @@ namespace DigitalZenWorks.Email.ToolKit
 			MAPIFolder pstFolder =
 				OutlookStore.GetTopLevelFolder(pstStore, baseName);
 
-			CopyEmlToPst(pstFolder, filePath);
+			if (pstFolder != null)
+			{
+				try
+				{
+					CopyEmlToPst(pstFolder, filePath);
+				}
+				catch (IOException exception)
+				{
+					Log.Error(exception.ToString());
+				}
 
-			Marshal.ReleaseComObject(pstFolder);
+				Marshal.ReleaseComObject(pstFolder);
+			}
 		}
 
 		private static bool CheckIfInterimFolder(

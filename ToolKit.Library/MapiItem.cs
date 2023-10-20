@@ -168,17 +168,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static string GetItemHash(MailItem mailItem)
 		{
 			string hashBase64 = null;
-			byte[] finalBuffer = null;
 
 			try
 			{
 				if (mailItem != null)
 				{
-					finalBuffer = GetItemBytes(mailItem);
+					byte[] finalBuffer = GetItemBytes(mailItem);
 
+#if NET5_0_OR_GREATER
+					byte[] hashValue = SHA256.HashData(finalBuffer);
+#else
 					using SHA256 hasher = SHA256.Create();
-
 					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+#endif
 					hashBase64 = Convert.ToBase64String(hashValue);
 				}
 			}
@@ -191,7 +193,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is OutOfMemoryException ||
 				exception is RankException)
 			{
-				LogException(mailItem);
+				if (mailItem != null)
+				{
+					LogException(mailItem);
+				}
+
 				Log.Error(exception.ToString());
 			}
 
@@ -216,9 +222,12 @@ namespace DigitalZenWorks.Email.ToolKit
 					finalBuffer = await Task.Run(() =>
 						GetItemBytes(mailItem)).ConfigureAwait(false);
 
+#if NET5_0_OR_GREATER
+					byte[] hashValue = SHA256.HashData(finalBuffer);
+#else
 					using SHA256 hasher = SHA256.Create();
-
 					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+#endif
 					hashBase64 = Convert.ToBase64String(hashValue);
 				}
 			}
@@ -231,7 +240,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				exception is OutOfMemoryException ||
 				exception is RankException)
 			{
-				LogException(mailItem);
+				if (mailItem != null)
+				{
+					LogException(mailItem);
+				}
+
 				Log.Error(exception.ToString());
 			}
 
@@ -315,7 +328,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						Marshal.ReleaseComObject(journalItem);
 						break;
 					case MailItem mailItem:
-						mailItem.Move(destination);
+						mailItem = mailItem.Move(destination);
 						Marshal.ReleaseComObject(mailItem);
 						break;
 					case MeetingItem meetingItem:
@@ -427,7 +440,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						break;
 					case MailItem mailItem:
 						await Task.Run(() =>
-							mailItem.Move(destination)).
+							mailItem = mailItem.Move(destination)).
 								ConfigureAwait(false);
 						Marshal.ReleaseComObject(mailItem);
 						break;
@@ -1028,7 +1041,9 @@ namespace DigitalZenWorks.Email.ToolKit
 			return buffer;
 		}
 
-		private static byte[] GetItemBytes(MailItem mailItem)
+		private static byte[] GetItemBytes(
+			MailItem mailItem,
+			bool strict = false)
 		{
 			byte[] finalBuffer = null;
 
@@ -1065,12 +1080,12 @@ namespace DigitalZenWorks.Email.ToolKit
 							mailItem.Subject);
 					}
 
-					if (rtfBody != null)
+					if (rtfBody != null && strict == false)
 					{
 						rtfBody = RtfEmail.Trim(rtfBody);
 					}
 
-					byte[] strings = GetStringProperties(mailItem);
+					byte[] strings = GetStringProperties(mailItem, strict);
 					byte[] userProperties = GetUserProperties(mailItem);
 
 					long bufferSize = GetBufferSize(
@@ -1125,7 +1140,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			Justification = "It isn't hungarian notation.")]
 		private static string GetRecipients(MailItem mailItem)
 		{
-			string recipients = string.Empty;
+			string recipients;
 			List<string> toList = new ();
 			List<string> ccList = new ();
 			List<string> bccList = new ();
@@ -1194,7 +1209,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			return recipients;
 		}
 
-		private static byte[] GetStringProperties(MailItem mailItem)
+		private static byte[] GetStringProperties(
+			MailItem mailItem, bool ignoreConversation = true, bool strict = false)
 		{
 			byte[] data = null;
 
@@ -1213,7 +1229,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				string body = mailItem.Body;
 
-				if (body != null)
+				if (body != null && strict == false)
 				{
 					body = body.TrimEnd();
 				}
@@ -1221,20 +1237,38 @@ namespace DigitalZenWorks.Email.ToolKit
 				string categories = mailItem.Categories;
 				string cc = mailItem.CC;
 				string companies = mailItem.Companies;
-				string conversationID = mailItem.ConversationID;
+				string conversationID = null;
+
+				if (ignoreConversation == false)
+				{
+					conversationID = mailItem.ConversationID;
+				}
+
 				string conversationTopic = mailItem.ConversationTopic;
 				string flagRequest = mailItem.FlagRequest;
 				string header = mailItem.PropertyAccessor.GetProperty(
 					"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
 
-				if (header != null)
+				if (header != null && strict == false)
 				{
 					header = RemoveMimeOleVersion(header);
+#if NETCOREAPP1_0_OR_GREATER
+					header = header.Replace(
+						"Errors-to:",
+						"Errors-To:",
+						StringComparison.Ordinal);
+#else
+					header = header.Replace(
+						"Errors-to:",
+						"Errors-To:");
+#endif
+
+					header = NormalizeHeaders(header);
 				}
 
 				string htmlBody = mailItem.HTMLBody;
 
-				if (htmlBody != null)
+				if (htmlBody != null && strict == false)
 				{
 					htmlBody = HtmlEmail.Trim(htmlBody);
 				}
@@ -1395,6 +1429,27 @@ namespace DigitalZenWorks.Email.ToolKit
 				mailItem.SenderName,
 				mailItem.SenderEmailAddress,
 				mailItem.Subject);
+		}
+
+		private static string NormalizeHeaders(string headers)
+		{
+#if NETCOREAPP1_0_OR_GREATER
+			string[] parts = headers.Split("\r\n");
+#else
+			string[] parts = headers.Split('\n');
+#endif
+
+			List<string> list = new List<string>(parts);
+
+			list.Sort();
+
+#if NETCOREAPP1_0_OR_GREATER
+			headers = string.Join("\r\n", list);
+#else
+			headers = string.Join("\n", list);
+#endif
+
+			return headers;
 		}
 	}
 }

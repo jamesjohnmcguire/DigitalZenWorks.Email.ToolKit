@@ -2,6 +2,8 @@
 
 This is a C# application and library for interacting with email messages and storage.
 
+Please :star: star this project!
+
 ## Getting Started
 
 ### Installation
@@ -30,7 +32,7 @@ This project includes the [DbxOutlookExpress project](https://github.com/jamesjo
 
 ### Usage:
 
-NOTE: Always back up any data you might be modifying.  This package has been tested with hundreds of thousands of messages, about 50 GBs of data, without any problems.  But there can always be a first.  So, please back up your data before using this tool.  Did I mention that you should back up?  
+NOTE: Always back up any data you might be modifying.  This package has been tested with hundreds of thousands of messages, more than 50 GBs of data, without any problems.  But there can always be a first.  So, please back up your data before using this tool.  Did I mention that you should back up?  
 
 This is, currently, a command line program to be run from the command line or terminal.  
 
@@ -38,20 +40,20 @@ This is, currently, a command line program to be run from the command line or te
 
 DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>  
 
-| Commands:              |                                         | options        |
-| ---------------------- | --------------------------------------- | -------------- |
-| dbx-to-pst             | Migrate dbx files to pst file           | -e, --encoding |
-| eml-to-pst             | Migrate eml files to pst file           | -a, --adjust   |
-| list-folders           | List all sub folders of a given folder  | -r, --recurse  |
-| list-top-senders       | List the top senders of a given store   | -cm --count    |
-| list-total-duplicates  | List all duplicates in a given store    |                |
-| merge-folders          | Merge duplicate Outlook folders         | -n, --dryrun   |
-| merge-stores           | Merge one store into another            |                |
-| move-folder            | Move one folder to another              |                |
-| remove-duplicates      | Remove duplicate messages               | -n, --dryrun   |
-|                        |                                         | -s, --flush    |
-| remove-empty-folders   | Prune empty folders                     |                |
-| help                   | Display this information                |                |
+| Commands:             |                                        | options        |
+| --------------------- | -------------------------------------- | -------------- |
+| dbx-to-pst            | Migrate dbx files to pst file          | -e, --encoding |
+| eml-to-pst            | Migrate eml files to pst file          | -a, --adjust   |
+| list-folders          | List all sub folders of a given folder | -r, --recurse  |
+| list-top-senders      | List the top senders of a given store  | -cm --count    |
+| list-total-duplicates | List all duplicates in a given store   |                |
+| merge-folders         | Merge duplicate Outlook folders        | -n, --dryrun   |
+| merge-stores          | Merge one store into another           |                |
+| move-folder           | Move one folder to another             |                |
+| remove-duplicates     | Remove duplicate messages              | -n, --dryrun   |
+|                       |                                        | -s, --flush    |
+| remove-empty-folders  | Prune empty folders                    |                |
+| help                  | Display this information               |                |
 
 ##### Command line usage notes:
 The command is optional if the command can be inferred from the source-path.  For example, if the source path is a directory containing *.eml files, they will processed accordingly.  
@@ -73,14 +75,14 @@ The optional --encoding option allows you to add a preferred encoding, in the ra
 If a PST file location is not specified, it will use the base location of the DBX files.
 
 ###### eml-to-pst
-Some applications, like 'Windows Live Mail' often include interim folders, such as 'Imported Folders', 'Local Folders' and 'Storage Folders', creating unnecessary levels of nesting.  Using the --adjust option will remove these interim folders in the PST file.
+Some applications, like 'Windows Live Mail' often include interim folders, such as 'Imported Folders', 'Local Folders' and 'Storage Folders', creating unnecessary levels of nested folders.  Using the --adjust option will remove these interim folders in the PST file.
 
 ###### merge-folders
 Sometimes, folders get duplicated, like in the following manner:  
 Testing  
 Testing (1)  
 Testing (1) (1)  
-Testing (1) (2()  
+Testing (1) (2)  
 
 If you ever try to move or copy a folder to a place where a folder with that name exists, Outlook will add, but will give it a name an appendix like ' (1)'.  In import or export processes, often these are the exact same folders, so you can end up with multiple duplicate folders like this.  This will merge these folders into a single folder.  If there are duplicate mail items, these will copied.  So, this wil not remove the duplicate mail items.  But, it doesn't create any duplicates and the merging of folders, is an essential precursor to the eventual duplicates removal.  
 
@@ -112,14 +114,14 @@ outlookAccont.RemoveDuplicates();
 
 ## Contributing
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have found a bug or have a suggestion that would make this better, please fork this repository and create a pull request. You can also simply open an issue with the tag "bug" or "enhancement".
 
 ### Process:
 
 1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
+2. Create your Bug / Feature Branch (`git checkout -b feature/amazing-feature`)
+3. Commit your Changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the Branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
 ### Coding style
