@@ -31,13 +31,17 @@ CD MsgKit
 git checkout for-exe
 CD ..
 
-msbuild -property:Configuration=Release;OutputPath=Bin\Release\Library -restore -target:rebuild;pack ToolKit.Library
+CD ToolKit.Library
+
+msbuild -property:Configuration=Release -restore -target:rebuild;pack ToolKit.Library.csproj
+CD ..
 
 CD MsgKit
 git checkout dzw-complete
 CD ..
 PAUSE
-CD ToolKit.Library\Bin\Release\Library
+
+CD bin\Release
 nuget push DigitalZenWorks.Email.ToolKit.%2.nupkg %3 -Source https://api.nuget.org/v3/index.json
 GOTO end
 
