@@ -1041,7 +1041,9 @@ namespace DigitalZenWorks.Email.ToolKit
 			return buffer;
 		}
 
-		private static byte[] GetItemBytes(MailItem mailItem)
+		private static byte[] GetItemBytes(
+			MailItem mailItem,
+			bool strict = false)
 		{
 			byte[] finalBuffer = null;
 
@@ -1078,12 +1080,12 @@ namespace DigitalZenWorks.Email.ToolKit
 							mailItem.Subject);
 					}
 
-					if (rtfBody != null)
+					if (rtfBody != null && strict == false)
 					{
 						rtfBody = RtfEmail.Trim(rtfBody);
 					}
 
-					byte[] strings = GetStringProperties(mailItem);
+					byte[] strings = GetStringProperties(mailItem, strict);
 					byte[] userProperties = GetUserProperties(mailItem);
 
 					long bufferSize = GetBufferSize(
@@ -1208,7 +1210,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static byte[] GetStringProperties(
-			MailItem mailItem, bool ignoreConversation = true)
+			MailItem mailItem, bool ignoreConversation = true, bool strict = false)
 		{
 			byte[] data = null;
 
@@ -1227,7 +1229,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				string body = mailItem.Body;
 
-				if (body != null)
+				if (body != null && strict == false)
 				{
 					body = body.TrimEnd();
 				}
@@ -1247,14 +1249,20 @@ namespace DigitalZenWorks.Email.ToolKit
 				string header = mailItem.PropertyAccessor.GetProperty(
 					"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
 
-				if (header != null)
+				if (header != null && strict == false)
 				{
 					header = RemoveMimeOleVersion(header);
+					header = header.Replace(
+						"Errors-to:",
+						"Errors-To:",
+						StringComparison.Ordinal);
+
+					header = NormalizeHeaders(header);
 				}
 
 				string htmlBody = mailItem.HTMLBody;
 
-				if (htmlBody != null)
+				if (htmlBody != null && strict == false)
 				{
 					htmlBody = HtmlEmail.Trim(htmlBody);
 				}
@@ -1415,6 +1423,19 @@ namespace DigitalZenWorks.Email.ToolKit
 				mailItem.SenderName,
 				mailItem.SenderEmailAddress,
 				mailItem.Subject);
+		}
+
+		private static string NormalizeHeaders(string headers)
+		{
+			string[] parts = headers.Split("\r\n");
+
+			List<string> list = new List<string>(parts);
+
+			list.Sort();
+
+			headers = string.Join("\r\n", list);
+
+			return headers;
 		}
 	}
 }

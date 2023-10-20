@@ -19,7 +19,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MsgKit", "MsgKit\MsgKit\Msg
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AD368271-FA36-481F-BAE4-0B380987E534}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		CodeAnalysis.ruleset = CodeAnalysis.ruleset
 		README.md = README.md
+		stylecop.json = stylecop.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilitiesNET", "UtilitiesNet\UtilitiesNET.csproj", "{8E747F72-8F55-4E94-9032-51527F952E62}"
