@@ -1252,10 +1252,16 @@ namespace DigitalZenWorks.Email.ToolKit
 				if (header != null && strict == false)
 				{
 					header = RemoveMimeOleVersion(header);
+#if NETCOREAPP1_0_OR_GREATER
 					header = header.Replace(
 						"Errors-to:",
 						"Errors-To:",
 						StringComparison.Ordinal);
+#else
+					header = header.Replace(
+						"Errors-to:",
+						"Errors-To:");
+#endif
 
 					header = NormalizeHeaders(header);
 				}
@@ -1427,13 +1433,21 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static string NormalizeHeaders(string headers)
 		{
+#if NETCOREAPP1_0_OR_GREATER
 			string[] parts = headers.Split("\r\n");
+#else
+			string[] parts = headers.Split('\n');
+#endif
 
 			List<string> list = new List<string>(parts);
 
 			list.Sort();
 
+#if NETCOREAPP1_0_OR_GREATER
 			headers = string.Join("\r\n", list);
+#else
+			headers = string.Join("\n", list);
+#endif
 
 			return headers;
 		}
