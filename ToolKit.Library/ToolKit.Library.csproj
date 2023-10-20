@@ -2,7 +2,6 @@
 
 	<PropertyGroup>
 		<AnalysisMode>All</AnalysisMode>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AssemblyName>DigitalZenWorks.Email.ToolKit.Library</AssemblyName>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<Authors>James John McGuire</Authors>
@@ -21,7 +20,6 @@
 		<LangVersion>Latest</LangVersion>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<NoWarn>NU1701</NoWarn>
-		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<PackageId>DigitalZenWorks.Email.ToolKit</PackageId>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -31,6 +29,8 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<TargetFramework>net7.0-windows</TargetFramework>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
