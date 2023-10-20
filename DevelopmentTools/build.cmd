@@ -34,15 +34,16 @@ CD ..
 CD ToolKit.Library
 
 msbuild -property:Configuration=Release -restore -target:rebuild;pack ToolKit.Library.csproj
-CD ..
+
+CD bin\Release
+nuget push DigitalZenWorks.Email.ToolKit.%2.nupkg %3 -Source https://api.nuget.org/v3/index.json
+
+CD ..\..\..
 
 CD MsgKit
 git checkout dzw-complete
 CD ..
-PAUSE
 
-CD bin\Release
-nuget push DigitalZenWorks.Email.ToolKit.%2.nupkg %3 -Source https://api.nuget.org/v3/index.json
 GOTO end
 
 :release
