@@ -4,8 +4,10 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -24,6 +26,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		private OutlookStore pstOutlook;
 		private Store store;
 		private string storePath;
+		private DirectoryInfo testFolder;
 
 		/// <summary>
 		/// One time set up method.
@@ -34,6 +37,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			outlookAccount = OutlookAccount.Instance;
 
 			pstOutlook = new (outlookAccount);
+
+			testFolder = Directory.CreateDirectory("TestFolder");
 
 			string fileName = Path.GetTempFileName();
 
@@ -68,6 +73,13 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			OutlookStore.EmptyDeletedItemsFolder(store);
 			pstOutlook.RemoveStore(store);
+
+			bool result = Directory.Exists(testFolder.FullName);
+
+			if (true == result)
+			{
+				Directory.Delete(testFolder.FullName, true);
+			}
 		}
 
 		/// <summary>
@@ -332,20 +344,14 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
-			MailItem mailItem = outlookAccount.CreateMailItem(
-				"someone@example.com",
-				"This is the subject",
-				"This is the message.");
-			mailItem = mailItem.Move(mainFolder);
+			string path = Path.Combine(testFolder.FullName, "TestEmail.eml");
+			bool result = FileUtils.CreateFileFromEmbeddedResource(
+				"ToolKit.Tests.TestEmail.eml", path);
 
-			MailItem mailItem2 = outlookAccount.CreateMailItem(
-				"someone@example.com",
-				"This is the subject",
-				"This is the message.");
-			mailItem2 = mailItem2.Move(mainFolder);
+			Assert.True(result);
 
-			mailItem.Save();
-			mailItem2.Save();
+			MailItem mailItem = Migrate.EmlFileToPst(path, storePath);
+			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath);
 
 			string hash = MapiItem.GetItemHash(mailItem);
 			string hash2 = MapiItem.GetItemHash(mailItem2);
@@ -746,22 +752,22 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Duplicates Test Folder");
 
+			string path = Path.Combine(testFolder.FullName, "TestEmail.eml");
+			bool result = FileUtils.CreateFileFromEmbeddedResource(
+				"ToolKit.Tests.TestEmail.eml", path);
+
+			Assert.True(result);
+
 			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
+
+			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath);
+			MailItem mailItem3 = Migrate.EmlFileToPst(path, storePath);
+
 			mailItem = mailItem.Move(mainFolder);
-
-			MailItem mailItem2 = outlookAccount.CreateMailItem(
-				"someone@example.com",
-				"This is aka subject",
-				"This is the message.");
 			mailItem2 = mailItem2.Move(mainFolder);
-
-			MailItem mailItem3 = outlookAccount.CreateMailItem(
-				"someone@example.com",
-				"This is the subject",
-				"This is the message.");
 			mailItem3 = mailItem3.Move(mainFolder);
 
 			OutlookFolder outlookFolder = new (outlookAccount);
