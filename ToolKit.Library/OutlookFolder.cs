@@ -966,10 +966,15 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Add MSG file as MailItem in folder.
 		/// </summary>
+		/// <remarks>The caller is responsible for deleting
+		/// the object.</remarks>
 		/// <param name="pstFolder">The MSG file path.</param>
 		/// <param name="filePath">The folder to add to.</param>
-		public void AddMsgFile(MAPIFolder pstFolder, string filePath)
+		/// <returns>A valid MailItem or null.</returns>
+		public MailItem AddMsgFile(MAPIFolder pstFolder, string filePath)
 		{
+			MailItem item = null;
+
 			if (pstFolder != null && !string.IsNullOrWhiteSpace(filePath))
 			{
 				bool exists = File.Exists(filePath);
@@ -980,14 +985,12 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						NameSpace session = outlookAccount.Session;
 
-						MailItem item = session.OpenSharedItem(filePath);
+						item = session.OpenSharedItem(filePath);
 
 						item.UnRead = false;
 						item.Save();
 
 						item = item.Move(pstFolder);
-
-						Marshal.ReleaseComObject(item);
 					}
 					catch (COMException exception)
 					{
@@ -999,6 +1002,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					Log.Warn("File doesn't exist: " + filePath);
 				}
 			}
+
+			return item;
 		}
 
 		/// <summary>

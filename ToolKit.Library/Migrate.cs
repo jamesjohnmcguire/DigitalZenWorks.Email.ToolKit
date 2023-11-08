@@ -183,6 +183,43 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Dbx files to pst.
+		/// </summary>
+		/// <remarks>The caller is responsible for deleting
+		/// the object.</remarks>
+		/// <param name="filePath">The file path to migrate.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <returns>A valid MailItem or null.</returns>
+		public static MailItem EmlFileToPst(string filePath, string pstPath)
+		{
+			MailItem mailItem = null;
+
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			Store pstStore = outlookAccount.GetStore(pstPath);
+
+			string baseName = Path.GetFileNameWithoutExtension(pstPath);
+
+			MAPIFolder pstFolder =
+				OutlookStore.GetTopLevelFolder(pstStore, baseName);
+
+			if (pstFolder != null)
+			{
+				try
+				{
+					mailItem = CopyEmlToPst(pstFolder, filePath);
+				}
+				catch (IOException exception)
+				{
+					Log.Error(exception.ToString());
+				}
+
+				Marshal.ReleaseComObject(pstFolder);
+			}
+
+			return mailItem;
+		}
+
+		/// <summary>
 		/// Dbx to pst.
 		/// </summary>
 		/// <param name="path">the path of the eml directory or file.</param>
@@ -319,8 +356,10 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private static void CopyEmlToPst(MAPIFolder mapiFolder, string emlFile)
+		private static MailItem CopyEmlToPst(MAPIFolder mapiFolder, string emlFile)
 		{
+			MailItem mailItem = null;
+
 			if (!string.IsNullOrWhiteSpace(emlFile) && File.Exists(emlFile))
 			{
 				string msgFile = GetTemporaryMsgFile();
@@ -329,7 +368,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					Converter.ConvertEmlToMsg(emlFile, msgFile);
 				}
-				catch (System.IO.IOException exception)
+				catch (IOException exception)
 				{
 					Log.Warn(exception.ToString());
 
@@ -347,10 +386,12 @@ namespace DigitalZenWorks.Email.ToolKit
 				OutlookAccount outlookAccount = OutlookAccount.Instance;
 				OutlookFolder outlookFolder = new (outlookAccount);
 
-				outlookFolder.AddMsgFile(mapiFolder, msgFile);
+				mailItem = outlookFolder.AddMsgFile(mapiFolder, msgFile);
 
 				File.Delete(msgFile);
 			}
+
+			return mailItem;
 		}
 
 		/// <summary>
@@ -531,36 +572,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					Log.Error(exception.ToString());
 				}
-			}
-		}
-
-		/// <summary>
-		/// Dbx files to pst.
-		/// </summary>
-		/// <param name="filePath">The file path to migrate.</param>
-		/// <param name="pstPath">The path to pst file to copy to.</param>
-		private static void EmlFileToPst(string filePath, string pstPath)
-		{
-			OutlookAccount outlookAccount = OutlookAccount.Instance;
-			Store pstStore = outlookAccount.GetStore(pstPath);
-
-			string baseName = Path.GetFileNameWithoutExtension(pstPath);
-
-			MAPIFolder pstFolder =
-				OutlookStore.GetTopLevelFolder(pstStore, baseName);
-
-			if (pstFolder != null)
-			{
-				try
-				{
-					CopyEmlToPst(pstFolder, filePath);
-				}
-				catch (IOException exception)
-				{
-					Log.Error(exception.ToString());
-				}
-
-				Marshal.ReleaseComObject(pstFolder);
 			}
 		}
 
