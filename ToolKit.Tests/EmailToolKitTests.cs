@@ -348,7 +348,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			bool result = FileUtils.CreateFileFromEmbeddedResource(
 				"ToolKit.Tests.TestEmail.eml", path);
 
-			Assert.True(result);
+			Assert.That(result, Is.True);
 
 			MailItem mailItem = Migrate.EmlFileToPst(path, storePath);
 			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath);
@@ -756,7 +756,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			bool result = FileUtils.CreateFileFromEmbeddedResource(
 				"ToolKit.Tests.TestEmail.eml", path);
 
-			Assert.True(result);
+			Assert.That(result, Is.True);
 
 			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
