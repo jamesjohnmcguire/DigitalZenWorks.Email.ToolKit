@@ -6,6 +6,7 @@
 
 using Common.Logging;
 using DigitalZenWorks.CommandLine.Commands;
+using DigitalZenWorks.Common.VersionUtilities;
 using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using Serilog;
@@ -52,7 +53,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			try
 			{
 				LogInitialization();
-				string version = GetVersion();
+				string version = VersionSupport.GetVersion();
 
 				IList<Command> commands = GetCommands();
 
@@ -162,7 +163,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (!command.Name.Equals(
 				"help", StringComparison.OrdinalIgnoreCase))
 			{
-				string version = GetVersion();
+				string version = VersionSupport.GetVersion();
 
 				string message = string.Format(
 					CultureInfo.InvariantCulture,
@@ -232,29 +233,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return result;
-		}
-
-		private static FileVersionInfo GetAssemblyInformation()
-		{
-			FileVersionInfo fileVersionInfo = null;
-
-			Assembly assembly = Assembly.GetExecutingAssembly();
-
-			string location = assembly.Location;
-
-			if (string.IsNullOrWhiteSpace(location))
-			{
-				// Single file apps have no assemblies.
-				Process process = Process.GetCurrentProcess();
-				location = process.MainModule.FileName;
-			}
-
-			if (!string.IsNullOrWhiteSpace(location))
-			{
-				fileVersionInfo = FileVersionInfo.GetVersionInfo(location);
-			}
-
-			return fileVersionInfo;
 		}
 
 		private static IList<Command> GetCommands()
@@ -385,7 +363,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			AssemblyName assemblyName = assembly.GetName();
 			string name = assemblyName.Name;
 
-			FileVersionInfo versionInfo = GetAssemblyInformation();
+			FileVersionInfo versionInfo =
+				VersionSupport.GetAssemblyInformation();
 			string companyName = versionInfo.CompanyName;
 			string copyright = versionInfo.LegalCopyright;
 			string assemblyVersion = versionInfo.FileVersion;
@@ -399,15 +378,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				companyName);
 
 			return title;
-		}
-
-		private static string GetVersion()
-		{
-			FileVersionInfo fileVersionInfo = GetAssemblyInformation();
-
-			string assemblyVersion = fileVersionInfo.FileVersion;
-
-			return assemblyVersion;
 		}
 
 		private static Command InferCommand(
