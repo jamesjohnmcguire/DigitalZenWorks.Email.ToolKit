@@ -465,7 +465,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
-			System.Threading.Thread.Sleep(200);
+			await Task.Delay(200).ConfigureAwait(false);
+
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Testing (1)");
 
@@ -565,7 +566,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
-			System.Threading.Thread.Sleep(200);
+			await Task.Delay(200).ConfigureAwait(false);
 
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Testing_5");
@@ -650,7 +651,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
-			System.Threading.Thread.Sleep(200);
+			await Task.Delay(200).ConfigureAwait(false);
+
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "2023");
 
@@ -729,7 +731,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
-			System.Threading.Thread.Sleep(200);
+			await Task.Delay(200).ConfigureAwait(false);
+
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Main Test Folder");
 
