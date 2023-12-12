@@ -99,7 +99,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder folder =
 				OutlookFolder.CreateFolderPath(store, "Testing/Test");
 
-			Assert.NotNull(folder);
+			Assert.That(folder, Is.Not.Null);
 
 			folder.Delete();
 			Marshal.ReleaseComObject(folder);
@@ -111,7 +111,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[Test]
 		public void TestCreatePstStore()
 		{
-			Assert.NotNull(store);
+			Assert.That(store, Is.Not.Null);
 		}
 
 		/// <summary>
@@ -126,7 +126,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			bool exists =
 				OutlookFolder.DoesFolderExist(mainFolder, "Some Sub Folder");
-			Assert.False(exists);
+			Assert.That(exists, Is.False);
 
 			Marshal.ReleaseComObject(mainFolder);
 			Marshal.ReleaseComObject(rootFolder);
@@ -146,7 +146,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			bool exists =
 				OutlookFolder.DoesFolderExist(mainFolder, "Some Sub Folder");
-			Assert.True(exists);
+			Assert.That(exists, Is.True);
 
 			Marshal.ReleaseComObject(subFolder);
 			Marshal.ReleaseComObject(mainFolder);
@@ -181,7 +181,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			string tester = mailItem.EntryID;
 			string tester2 = mailItem2.EntryID;
 
-			Assert.AreNotEqual(tester, tester2);
+			Assert.That(tester2, Is.Not.EqualTo(tester));
 
 			// Clean up
 			mailItem.Delete();
@@ -212,7 +212,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "testing", true);
 
-			Assert.Null(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			// Clean up
 			Marshal.ReleaseComObject(mainFolder);
@@ -239,7 +239,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Testing", true);
 
-			Assert.NotNull(subFolder);
+			Assert.That(subFolder, Is.Not.Null);
 
 			// Clean up
 			Marshal.ReleaseComObject(subFolder);
@@ -260,7 +260,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			htmlBody = HtmlEmail.Trim(htmlBody);
 
-			Assert.AreEqual(htmlBody, afterHtmlBody);
+			Assert.That(afterHtmlBody, Is.EqualTo(htmlBody));
 		}
 
 		/// <summary>
@@ -279,7 +279,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			htmlBody = HtmlEmail.Trim(htmlBody);
 
-			Assert.AreEqual(afterHtmlBody, htmlBody);
+			Assert.That(htmlBody, Is.EqualTo(afterHtmlBody));
 		}
 
 		/// <summary>
@@ -295,7 +295,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			htmlBody = HtmlEmail.Trim(htmlBody);
 
-			Assert.AreEqual(afterHtmlBody, htmlBody);
+			Assert.That(htmlBody, Is.EqualTo(afterHtmlBody));
 		}
 
 		/// <summary>
@@ -323,7 +323,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			string hash = MapiItem.GetItemHash(mailItem);
 			string hash2 = MapiItem.GetItemHash(mailItem2);
 
-			Assert.AreNotEqual(hash, hash2);
+			Assert.That(hash2, Is.Not.EqualTo(hash));
 
 			// Clean up
 			mailItem.Delete();
@@ -348,7 +348,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			bool result = FileUtils.CreateFileFromEmbeddedResource(
 				"ToolKit.Tests.TestEmail.eml", path);
 
-			Assert.True(result);
+			Assert.That(result, Is.True);
 
 			MailItem mailItem = Migrate.EmlFileToPst(path, storePath);
 			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath);
@@ -356,7 +356,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			string hash = MapiItem.GetItemHash(mailItem);
 			string hash2 = MapiItem.GetItemHash(mailItem2);
 
-			Assert.AreEqual(hash, hash2);
+			Assert.That(hash2, Is.EqualTo(hash));
 
 			// Clean up
 			mailItem.Delete();
@@ -387,7 +387,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			string hash = MapiItem.GetItemHash(mailItem);
 			string hash2 = MapiItem.GetItemHash(mailItem);
 
-			Assert.AreEqual(hash, hash2);
+			Assert.That(hash2, Is.EqualTo(hash));
 
 			// Clean up
 			mailItem.Delete();
@@ -425,7 +425,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Testing (1)");
 
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			// Clean up
 			mailItem.Delete();
@@ -465,11 +465,12 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
-			System.Threading.Thread.Sleep(200);
+			await Task.Delay(200).ConfigureAwait(false);
+
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Testing (1)");
 
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			// Clean up
 			mailItem.Delete();
@@ -516,11 +517,11 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Testing_5");
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "_Testing");
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			// Clean up
 			mailItem.Delete();
@@ -565,15 +566,15 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
-			System.Threading.Thread.Sleep(200);
+			await Task.Delay(200).ConfigureAwait(false);
 
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Testing_5");
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "_Testing");
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			// Clean up
 			mailItem.Delete();
@@ -613,7 +614,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "2023");
 
-			Assert.IsNotNull(subFolder);
+			Assert.That(subFolder, Is.Not.Null);
 
 			// Clean up
 			mailItem.Delete();
@@ -650,11 +651,12 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
-			System.Threading.Thread.Sleep(200);
+			await Task.Delay(200).ConfigureAwait(false);
+
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "2023");
 
-			Assert.IsNotNull(subFolder);
+			Assert.That(subFolder, Is.Not.Null);
 
 			// Clean up
 			mailItem.Delete();
@@ -692,7 +694,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Main Test Folder");
 
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			// Clean up
 			mailItem.Delete();
@@ -729,11 +731,12 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
-			System.Threading.Thread.Sleep(200);
+			await Task.Delay(200).ConfigureAwait(false);
+
 			subFolder =
 				OutlookFolder.GetSubFolder(mainFolder, "Main Test Folder");
 
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			// Clean up
 			mailItem.Delete();
@@ -756,7 +759,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			bool result = FileUtils.CreateFileFromEmbeddedResource(
 				"ToolKit.Tests.TestEmail.eml", path);
 
-			Assert.True(result);
+			Assert.That(result, Is.True);
 
 			MailItem mailItem = outlookAccount.CreateMailItem(
 				"someone@example.com",
@@ -774,7 +777,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			int removedDuplicates =
 				outlookFolder.RemoveDuplicates(mainFolder, false);
 
-			Assert.AreEqual(1, removedDuplicates);
+			Assert.That(removedDuplicates, Is.EqualTo(1));
 
 			// Clean up
 			mailItem.Delete();
@@ -804,7 +807,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			subFolder = OutlookFolder.GetSubFolder(
 				rootFolder, "Temporary Test Folder");
 
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			if (subFolder != null)
 			{
@@ -831,7 +834,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			subFolder = OutlookFolder.GetSubFolder(
 				rootFolder, "Temporary Test Folder");
 
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			if (subFolder != null)
 			{
@@ -861,7 +864,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			subFolder = OutlookFolder.GetSubFolder(
 				rootFolder, "Temporary Test Folder");
 
-			Assert.IsNull(subFolder);
+			Assert.That(subFolder, Is.Null);
 
 			if (subFolder != null)
 			{
@@ -890,7 +893,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			header = MapiItem.RemoveMimeOleVersion(header);
 
-			Assert.AreEqual(afterHeader, header);
+			Assert.That(header, Is.EqualTo(afterHeader));
 		}
 
 		/// <summary>
@@ -914,7 +917,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			sampleBytes = RtfEmail.Trim(sampleBytes);
 
-			Assert.AreEqual(sampleBytes, afterBytes);
+			Assert.That(afterBytes, Is.EqualTo(sampleBytes));
 		}
 
 		/// <summary>
