@@ -7,7 +7,7 @@
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 		<Company>James John McGuire</Company>
-		<Copyright>Copyright © 2021 - 2023</Copyright>
+		<Copyright>Copyright © 2021 - 2024</Copyright>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<FileVersion>1.8.50.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -15,7 +15,7 @@
 		<NoWarn>NU1701</NoWarn>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<Version>1.8.50</Version>
 	</PropertyGroup>
 
