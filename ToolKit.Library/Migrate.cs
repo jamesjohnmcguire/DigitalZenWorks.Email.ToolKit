@@ -183,7 +183,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Dbx files to pst.
+		/// Eml file to pst.
 		/// </summary>
 		/// <remarks>The caller is responsible for deleting
 		/// the object.</remarks>
@@ -220,7 +220,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Dbx to pst.
+		/// Eml to pst.
 		/// </summary>
 		/// <param name="path">the path of the eml directory or file.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
@@ -233,7 +233,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Dbx to pst.
+		/// Eml to pst.
 		/// </summary>
 		/// <param name="path">the path of the eml directory or file.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
