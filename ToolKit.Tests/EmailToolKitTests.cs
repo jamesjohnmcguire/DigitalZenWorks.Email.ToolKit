@@ -193,6 +193,37 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// Test EML to PST with sucess.
+		/// </summary>
+		[Test]
+		public void TestEmlToPstSuccess()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			string path = Path.Combine(testFolder.FullName, "TestEmail.eml");
+			bool result = FileUtils.CreateFileFromEmbeddedResource(
+				"ToolKit.Tests.TestEmail.eml", path);
+
+			Assert.That(result, Is.True);
+
+			Migrate.EmlToPst(path, storePath, true);
+
+			string baseName =
+				Path.GetFileNameWithoutExtension(storePath);
+
+			bool exists =
+				OutlookFolder.DoesFolderExist(rootFolder, baseName);
+			Assert.That(exists, Is.True);
+
+			MAPIFolder folder =
+				OutlookFolder.GetSubFolder(rootFolder, baseName);
+			Assert.That(folder, Is.Not.Null);
+
+			int count = folder.Items.Count;
+			Assert.That(count, Is.GreaterThan(0));
+		}
+
+		/// <summary>
 		/// Test to check if trying to get a folder with a name in a
 		/// different case sensitivity fails.
 		/// </summary>
