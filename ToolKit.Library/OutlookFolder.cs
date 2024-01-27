@@ -107,6 +107,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		private IDictionary<string, IList<string>> storeHashTable =
 			new Dictionary<string, IList<string>>();
 
+		private MAPIFolder folder;
+
 		/// <summary>
 		/// Initializes a new instance of the
 		/// <see cref="OutlookFolder"/> class.
@@ -115,6 +117,18 @@ namespace DigitalZenWorks.Email.ToolKit
 		public OutlookFolder(OutlookAccount outlookAccount)
 		{
 			this.outlookAccount = outlookAccount;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the
+		/// <see cref="OutlookFolder"/> class.
+		/// </summary>
+		/// <param name="outlookAccount">The outlook account object.</param>
+		/// <param name="folder">The folder object.</param>
+		public OutlookFolder(OutlookAccount outlookAccount, MAPIFolder folder)
+			: this(outlookAccount)
+		{
+			this.folder = folder;
 		}
 
 		/// <summary>
@@ -147,9 +161,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// folder name, this method will return that folder.</remarks>
 		/// <param name="parentFolder">The parent folder.</param>
 		/// <param name="folderName">The new folder name.</param>
+		/// <param name="normalizeFolderName">Indicates whether to attempt the
+		/// forlder name or not.</param>
 		/// <returns>The added or existing folder.</returns>
 		public static MAPIFolder AddFolder(
-			MAPIFolder parentFolder, string folderName)
+			MAPIFolder parentFolder,
+			string folderName,
+			bool normalizeFolderName = false)
 		{
 			MAPIFolder pstFolder = null;
 
@@ -159,6 +177,11 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				if (pstFolder == null)
 				{
+					if (normalizeFolderName == true)
+					{
+						folderName = NormalizeFolderName(folderName);
+					}
+
 					string parentPath = GetFolderPath(parentFolder);
 					Log.Info("At: " + parentPath + " Adding outlook folder: " +
 						folderName);
