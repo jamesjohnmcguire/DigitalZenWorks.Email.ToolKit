@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -188,6 +187,60 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <remarks>The caller is responsible for deleting
 		/// the object.</remarks>
 		/// <param name="filePath">The file path to migrate.</param>
+		/// <param name="folder">The Outlook folder to copy to.</param>
+		/// <returns>A valid MailItem or null.</returns>
+		public static MailItem EmlFileToPst(string filePath, MAPIFolder folder)
+		{
+			MailItem mailItem = null;
+
+			if (folder != null)
+			{
+				try
+				{
+					mailItem = CopyEmlToPst(folder, filePath);
+				}
+				catch (IOException exception)
+				{
+					Log.Error(exception.ToString());
+				}
+			}
+
+			return mailItem;
+		}
+
+		/// <summary>
+		/// Eml file to pst.
+		/// </summary>
+		/// <remarks>The caller is responsible for deleting
+		/// the object.</remarks>
+		/// <param name="filePath">The file path to migrate.</param>
+		/// <param name="pstStore">The pst store to copy to.</param>
+		/// <param name="folderName">The name of the folder to copy to.</param>
+		/// <returns>A valid MailItem or null.</returns>
+		public static MailItem EmlFileToPst(
+			string filePath, Store pstStore, string folderName)
+		{
+			MailItem mailItem = null;
+
+			MAPIFolder pstFolder =
+				OutlookStore.GetTopLevelFolder(pstStore, folderName);
+
+			if (pstFolder != null)
+			{
+				mailItem = EmlFileToPst(filePath, pstFolder);
+
+				Marshal.ReleaseComObject(pstFolder);
+			}
+
+			return mailItem;
+		}
+
+		/// <summary>
+		/// Eml file to pst.
+		/// </summary>
+		/// <remarks>The caller is responsible for deleting
+		/// the object.</remarks>
+		/// <param name="filePath">The file path to migrate.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		/// <returns>A valid MailItem or null.</returns>
 		public static MailItem EmlFileToPst(string filePath, string pstPath)
@@ -212,6 +265,36 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					Log.Error(exception.ToString());
 				}
+
+				Marshal.ReleaseComObject(pstFolder);
+			}
+
+			return mailItem;
+		}
+
+		/// <summary>
+		/// Eml file to pst.
+		/// </summary>
+		/// <remarks>The caller is responsible for deleting
+		/// the object.</remarks>
+		/// <param name="filePath">The file path to migrate.</param>
+		/// <param name="pstPath">The path to pst file to copy to.</param>
+		/// <param name="folderName">The name of the folder to copy to.</param>
+		/// <returns>A valid MailItem or null.</returns>
+		public static MailItem EmlFileToPst(
+			string filePath, string pstPath, string folderName)
+		{
+			MailItem mailItem = null;
+
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			Store pstStore = outlookAccount.GetStore(pstPath);
+
+			MAPIFolder pstFolder =
+				OutlookStore.GetTopLevelFolder(pstStore, folderName);
+
+			if (pstFolder != null)
+			{
+				mailItem = EmlFileToPst(filePath, pstFolder);
 
 				Marshal.ReleaseComObject(pstFolder);
 			}
@@ -362,7 +445,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (!string.IsNullOrWhiteSpace(emlFile) && File.Exists(emlFile))
 			{
-				string msgFile = GetTemporaryMsgFile();
+				string msgFile = GetTemporaryFileName(".msg");
 
 				try
 				{
@@ -373,7 +456,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					Log.Warn(exception.ToString());
 
 					// Hmmmn, try one more time.
-					msgFile = GetTemporaryMsgFile();
+					msgFile = GetTemporaryFileName(".msg");
 					Converter.ConvertEmlToMsg(emlFile, msgFile);
 				}
 				catch (System.Exception exception) when
@@ -486,40 +569,40 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (dbxMessage != null && dbxMessage.Message.Length > 0)
 			{
-				// Need to get the rfc email as a stream, then
-				// convert the stream to a MSG file, import the
-				// MSG file into the Pst, finally move the message
-				using Stream emailStream = dbxMessage.MessageStream;
-
-				string msgFile = GetTemporaryMsgFile();
-
-				using Stream msgStream =
-					new FileStream(msgFile, FileMode.Create);
-
 				try
 				{
-					Converter.ConvertEmlToMsg(emailStream, msgStream);
+					string filePath = GetTemporaryFileName(".eml");
+					dbxMessage.GetAsFile(filePath);
+
+					string msgFile = GetTemporaryFileName(".msg");
+
+					Converter.ConvertEmlToMsg(filePath, msgFile);
+
+					File.Delete(filePath);
+
+					OutlookAccount outlookAccount = OutlookAccount.Instance;
+					OutlookFolder outlookFolder =
+						new (outlookAccount, mapiFolder);
+					outlookFolder.AddMsgFile(mapiFolder, msgFile);
+
+					File.Delete(msgFile);
 				}
 				catch (System.Exception exception) when
 					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is DirectoryNotFoundException ||
 					exception is FormatException ||
 					exception is InvalidCastException ||
+					exception is IOException ||
 					exception is NotSupportedException ||
-					exception is NullReferenceException)
+					exception is NullReferenceException ||
+					exception is PathTooLongException ||
+					exception is UnauthorizedAccessException)
 				{
 					Log.Error(exception.ToString());
 				}
-
-				msgStream.Dispose();
-
-				OutlookAccount outlookAccount = OutlookAccount.Instance;
-				OutlookFolder outlookFolder = new (outlookAccount);
-
-				outlookFolder.AddMsgFile(mapiFolder, msgFile);
-
-				File.Delete(msgFile);
+				}
 			}
-		}
 
 		private static void EmlDirectoryToPst(
 			MAPIFolder pstParent, string emlFolderFilePath, bool adjust)
@@ -531,11 +614,11 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (directories.Length > 0 || emlFiles.Count > 0)
 			{
-				DirectoryInfo directoryInfo = new (emlFolderFilePath);
-				string directoryName = directoryInfo.Name;
-
 				try
 				{
+					DirectoryInfo directoryInfo = new (emlFolderFilePath);
+					string directoryName = directoryInfo.Name;
+
 					MAPIFolder thisFolder = pstParent;
 
 					bool isInterimFolder =
@@ -543,22 +626,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					if (adjust == false || isInterimFolder == false)
 					{
-						string folderName =
-							OutlookFolder.NormalizeFolderName(directoryName);
-						thisFolder =
-							OutlookFolder.AddFolder(pstParent, folderName);
+						thisFolder = OutlookFolder.AddFolder(
+							pstParent, directoryName, true);
 					}
 
-					if (directories.Length > 0)
+					foreach (string directory in directories)
 					{
-						foreach (string directory in directories)
-						{
-							directoryInfo = new (directory);
-							string thisFolderPath = directoryInfo.FullName;
-
-							EmlDirectoryToPst(
-								thisFolder, thisFolderPath, adjust);
-						}
+						EmlDirectoryToPst(thisFolder, directory, adjust);
 					}
 
 					CopyEmlFilesToPst(thisFolder, emlFiles);
@@ -596,15 +670,23 @@ namespace DigitalZenWorks.Email.ToolKit
 			return interimFolder;
 		}
 
-		private static string GetTemporaryMsgFile()
+		private static string GetTemporaryFileName(string extension)
 		{
-			string msgFile = Path.GetTempFileName();
+			string filePath = Path.GetTempFileName();
 
 			// A 0 byte sized file is created.  Need to remove it.
-			File.Delete(msgFile);
-			msgFile = Path.ChangeExtension(msgFile, ".msg");
+			File.Delete(filePath);
 
-			return msgFile;
+			filePath = Path.ChangeExtension(filePath, extension);
+
+			return filePath;
+		}
+
+		private static Stream GetTemporaryMsgFileStream(string msgFile)
+		{
+			Stream msgStream = new FileStream(msgFile, FileMode.Create);
+
+			return msgStream;
 		}
 	}
 }
