@@ -64,22 +64,21 @@ namespace DigitalZenWorks.Email.ToolKit
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		private static readonly string[] DeletedFolders =
-		{
+		[
 			"Deleted Items", "Deleted Messages"
-		};
+		];
 
 		private static readonly string[] ReservedFolders =
-		{
+		[
 			"Calendar", "Contacts", "Conversation Action Settings",
 			"Deleted Items", "Deleted Messages", "Drafts", "Inbox",
 			"Junk E-mail", "Journal", "Notes", "Outbox", "Quick Step Settings",
 			"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
-		};
+		];
 
 #pragma warning disable SA1311 // StaticReadonlyFieldsMustBeginWithUpperCaseLetter
 		private static readonly IList<string> duplicatePatterns =
-			new List<string>()
-		{
+		[
 			@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
 			@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
 
@@ -96,13 +95,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			// Matches Something - 77f (1 space and 2 or3 hex numbers)
 			@"(?<=[a-zA-Z0-9&,])\s{1}-\s{1}[0-9a-fA-F]{2,3}$",
 			@"\s*-\s*Copy$", @"^[A-F]{1}_"
-		};
+		];
 #pragma warning restore SA1311
 
 		private readonly OutlookAccount outlookAccount;
 
-		private readonly IDictionary<string, int> sendersCounts =
-			new Dictionary<string, int>();
+		private readonly Dictionary<string, int> sendersCounts = [];
 
 		private IDictionary<string, IList<string>> storeHashTable =
 			new Dictionary<string, IList<string>>();
@@ -1228,7 +1226,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
-					IList<string> bucket = new List<string>();
+					List<string> bucket = [];
 					bucket.Add(entryId);
 
 					hashTable.Add(hash, bucket);
@@ -1304,7 +1302,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			path = RemoveStoreFromPath(path);
 
-			char[] charSeparators = new char[] { '\\', '/' };
+			char[] charSeparators = ['\\', '/'];
 			string[] parts = path.Split(
 				charSeparators, StringSplitOptions.RemoveEmptyEntries);
 
