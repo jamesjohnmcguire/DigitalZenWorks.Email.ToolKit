@@ -101,7 +101,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private readonly OutlookAccount outlookAccount;
 
-		private readonly IDictionary<string, int> sendersCounts =
+		private readonly Dictionary<string, int> sendersCounts =
 			new Dictionary<string, int>();
 
 		private IDictionary<string, IList<string>> storeHashTable =
@@ -1228,7 +1228,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
-					IList<string> bucket = new List<string>();
+					List<string> bucket = new List<string>();
 					bucket.Add(entryId);
 
 					hashTable.Add(hash, bucket);
