@@ -968,8 +968,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <remarks>The caller is responsible for deleting
 		/// the object.</remarks>
-		/// <param name="pstFolder">The MSG file path.</param>
-		/// <param name="filePath">The folder to add to.</param>
+		/// <param name="pstFolder">The folder to add to.</param>
+		/// <param name="filePath">The MSG file path.</param>
 		/// <returns>A valid MailItem or null.</returns>
 		public MailItem AddMsgFile(MAPIFolder pstFolder, string filePath)
 		{
