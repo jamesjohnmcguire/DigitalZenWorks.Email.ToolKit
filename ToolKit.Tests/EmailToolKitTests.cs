@@ -489,9 +489,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Testing (1)",
 				"This is the subject");
 
-			// Review
-			storePath = OutlookStore.GetStoreName(store) + "::";
-
 			OutlookFolder outlookFolder = new (outlookAccount);
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
@@ -537,9 +534,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				mainFolder,
 				"_Testing",
 				"This is the subject 3");
-
-			// Review
-			storePath = OutlookStore.GetStoreName(store) + "::";
 
 			OutlookFolder outlookFolder = new (outlookAccount);
 			outlookFolder.MergeFolders(rootFolder, false);

@@ -2,12 +2,11 @@
 
 	<PropertyGroup>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<IsTestProject>true</IsTestProject>
-		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
+		<LangVersion>Latest</LangVersion>
 		<TargetFramework>net8.0-windows</TargetFramework>
 	</PropertyGroup>
 
