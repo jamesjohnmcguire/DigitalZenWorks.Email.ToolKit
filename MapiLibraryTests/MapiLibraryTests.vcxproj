@@ -1,114 +1,100 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project
-	DefaultTargets="Build"
-	ToolsVersion="15.0"
-	xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-	<ItemGroup Label="ProjectConfigurations">
-		<ProjectConfiguration Include="Debug|Win32">
-			<Configuration>Debug</Configuration>
-			<Platform>Win32</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Release|Win32">
-			<Configuration>Release</Configuration>
-			<Platform>Win32</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Debug|x64">
-			<Configuration>Debug</Configuration>
-			<Platform>x64</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Release|x64">
-			<Configuration>Release</Configuration>
-			<Platform>x64</Platform>
-		</ProjectConfiguration>
-	</ItemGroup>
-
-	<PropertyGroup Label="Globals">
-		<ProjectGuid>{a134f402-f6e6-4b1a-9b5b-91051377a9bf}</ProjectGuid>
-		<Keyword>Win32Proj</Keyword>
-		<WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
-		<ConfigurationType>Application</ConfigurationType>
-		<PlatformToolset>v143</PlatformToolset>
-		<CharacterSet>Unicode</CharacterSet>
-	</PropertyGroup>
-
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-	<ImportGroup Label="ExtensionSettings" />
-	<ImportGroup Label="Shared" />
-	<ImportGroup Label="PropertySheets" />
-	<PropertyGroup Label="UserMacros" />
-	<ItemDefinitionGroup />
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-
-	<ImportGroup Label="ExtensionTargets">
-	<Import
-		Project="..\..\..\packages\Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn.1.8.1.7\build\native\Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn.targets"
-		Condition="Exists('..\..\..\packages\Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn.1.8.1.7\build\native\Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" />
-	</ImportGroup>
-
-	<ItemDefinitionGroup>
-		<ClCompile>
-			<AdditionalIncludeDirectories>$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-			<LanguageStandard>stdcpp20</LanguageStandard>
-			<LanguageStandard_C>stdc17</LanguageStandard_C>
-			<PrecompiledHeader>Use</PrecompiledHeader>
-			<PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-			<WarningLevel>Level3</WarningLevel>
-		</ClCompile>
-		<Link>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<SubSystem>Console</SubSystem>
-		</Link>
-	</ItemDefinitionGroup>
-
-	<ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
-		<ClCompile>
-			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-			<Optimization>Disabled</Optimization>
-			<PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-		</ClCompile>
-	</ItemDefinitionGroup>
-
-	<ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
-		<ClCompile>
-			<PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-		</ClCompile>
-		<Link>
-			<OptimizeReferences>true</OptimizeReferences>
-			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-		</Link>
-	</ItemDefinitionGroup>
-
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<ClCompile>
-			<PreprocessorDefinitions>X64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ClCompile>
-	</ItemDefinitionGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\MapiLibrary\MapiLibrary.vcxproj">
-			<Project>{7a846964-8a20-46f3-a714-a5fba41ae093}</Project>
-		</ProjectReference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<ClInclude Include="pch.h" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ClCompile Include="pch.cpp" >
-			<PrecompiledHeader>Create</PrecompiledHeader>
-		</ClCompile>
-		<ClCompile Include="test.cpp" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="packages.config" />
-	</ItemGroup>
-
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{a134f402-f6e6-4b1a-9b5b-91051377a9bf}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn.1.8.1.7\build\native\Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\packages\Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn.1.8.1.7\build\native\Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" />
+  </ImportGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <EntryPointSymbol Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointSymbol>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>X64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MapiLibrary\MapiLibrary.vcxproj">
+      <Project>{7a846964-8a20-46f3-a714-a5fba41ae093}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>
