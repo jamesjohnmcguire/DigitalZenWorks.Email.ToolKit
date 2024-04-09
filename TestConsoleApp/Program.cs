@@ -396,7 +396,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			folder.GetChildren(folders);
 
-			IList<uint> orderedIndexes = new List<uint>();
+			IList<uint> orderedIndexes = [];
 			folder.SetOrderedIndexes(orderedIndexes);
 		}
 	}
