@@ -37,9 +37,9 @@
 		<PackageReference Include="Common.Logging.Serilog" Version="4.4.0" />
 		<PackageReference Include="DigitalZenWorks.CommandLine.Commands" Version="1.1.6" />
 		<PackageReference Include="DigitalZenWorks.Common.VersionUtilities" Version="1.1.12" />
-		<PackageReference Include="Serilog" Version="3.1.1" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
-		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="Serilog" Version="4.0.1" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
