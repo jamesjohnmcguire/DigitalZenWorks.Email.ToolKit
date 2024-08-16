@@ -60,7 +60,9 @@ namespace DigitalZenWorks.Email.ToolKit
 						Marshal.ReleaseComObject(mailItem);
 					}
 				}
-				catch (COMException exception)
+				catch (System.Exception exception) when
+				(exception is COMException ||
+				exception is InvalidCastException)
 				{
 					Log.Error(exception.ToString());
 				}
