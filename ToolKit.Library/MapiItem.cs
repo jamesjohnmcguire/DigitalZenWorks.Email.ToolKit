@@ -1143,9 +1143,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static string GetRecipients(MailItem mailItem)
 		{
 			string recipients;
-			List<string> toList = new ();
-			List<string> ccList = new ();
-			List<string> bccList = new ();
+			List<string> toList = [];
+			List<string> ccList = [];
+			List<string> bccList = [];
 
 			int total = mailItem.Recipients.Count;
 
@@ -1449,7 +1449,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string[] parts = headers.Split('\n');
 #endif
 
-			List<string> list = new List<string>(parts);
+			List<string> list = new (parts);
 
 			list.Sort();
 

@@ -130,7 +130,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					Log.Info("Checking for empty folders in: " +
 						storePath);
-					storePath += "::";
 
 					MAPIFolder rootFolder = store.GetRootFolder();
 
@@ -304,7 +303,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		public IList<string> ListFolders(
 			string pstFilePath, string folderPath, bool recurse)
 		{
-			IList<string> folderNames = new List<string>();
+			IList<string> folderNames = [];
 
 			Store store = outlookAccount.GetStore(pstFilePath);
 
@@ -334,8 +333,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		public IList<KeyValuePair<string, int>> ListTopSenders(
 			string pstFilePath, int amount)
 		{
-			IList<KeyValuePair<string, int>> topSenders =
-				new List<KeyValuePair<string, int>>();
+			IList<KeyValuePair<string, int>> topSenders = [];
 
 			Store store = outlookAccount.GetStore(pstFilePath);
 
@@ -435,7 +433,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				string storePath = GetStoreName(store);
 				Log.Info("Merging folders in: " + storePath);
 
-				storePath += "::";
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
