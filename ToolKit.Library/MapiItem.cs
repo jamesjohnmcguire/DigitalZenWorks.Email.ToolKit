@@ -1277,12 +1277,11 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				string messageClass = mailItem.MessageClass;
 				string mileage = mailItem.Mileage;
-				string receivedByEntryID = mailItem.ReceivedByEntryID;
+				string receivedByEntryID = null;
 				string receivedByName = mailItem.ReceivedByName;
-				string receivedOnBehalfOfEntryID =
-					mailItem.ReceivedOnBehalfOfEntryID;
-				string receivedOnBehalfOfName =
-					mailItem.ReceivedOnBehalfOfName;
+				string receivedOnBehalfOfEntryID = null;
+
+				string receivedOnBehalfOfName = null;
 				string reminderSoundFile = mailItem.ReminderSoundFile;
 				string replyRecipientNames = mailItem.ReplyRecipientNames;
 				string retentionPolicyName = mailItem.RetentionPolicyName;
@@ -1295,6 +1294,15 @@ namespace DigitalZenWorks.Email.ToolKit
 				string to = mailItem.To;
 				string votingOptions = mailItem.VotingOptions;
 				string votingResponse = mailItem.VotingResponse;
+
+				if (strict == true)
+				{
+					// Might need to investigate further.
+					receivedByEntryID = mailItem.ReceivedByEntryID;
+					receivedOnBehalfOfEntryID =
+						mailItem.ReceivedOnBehalfOfEntryID;
+					receivedOnBehalfOfName = mailItem.ReceivedOnBehalfOfName;
+				}
 
 				StringBuilder builder = new ();
 				builder.Append(bcc);
