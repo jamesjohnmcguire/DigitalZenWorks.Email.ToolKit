@@ -1354,20 +1354,37 @@ namespace DigitalZenWorks.Email.ToolKit
 			// Iterate in reverse order as the group may change.
 			for (int index = items.Count; index > 0; index--)
 			{
-				object item = items[index];
-
-				int sectionIndicator = ascendingCount % 100;
-
-				if (ascendingCount == 1 || sectionIndicator == 0)
+				try
 				{
-					Log.Info(
-						messageTemplate +
-						ascendingCount.ToString(CultureInfo.InvariantCulture));
+					object item = items[index];
+
+					int sectionIndicator = ascendingCount % 100;
+
+					if (ascendingCount == 1 || sectionIndicator == 0)
+					{
+						string count =
+							ascendingCount.ToString(CultureInfo.InvariantCulture);
+						string message = messageTemplate + count;
+						Log.Info(message);
+					}
+
+					await itemAction(destination, item).ConfigureAwait(false);
+
+					ascendingCount++;
 				}
+				catch (COMException exception)
+				{
+					string path = GetFolderPath(source);
 
-				await itemAction(destination, item).ConfigureAwait(false);
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Exception at: {0} index: {1}",
+						path,
+						index.ToString(CultureInfo.InvariantCulture));
 
-				ascendingCount++;
+					Log.Error(message);
+					Log.Error(exception.ToString());
+				}
 			}
 		}
 
