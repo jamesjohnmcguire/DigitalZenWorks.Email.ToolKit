@@ -45,19 +45,19 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				try
 				{
-					MailItem mailItem = session.GetItemFromID(duplicateId);
+					object mapiItem = session.GetItemFromID(duplicateId);
 
-					if (mailItem != null)
+					if (mapiItem != null)
 					{
 						bool isValidDuplicate =
-							DoubleCheckDuplicate(keeperSynopses, mailItem);
+							DoubleCheckDuplicate(keeperSynopses, mapiItem);
 
 						if (isValidDuplicate == true && dryRun == false)
 						{
-							mailItem.Delete();
+							DeleteItem(mapiItem);
 						}
 
-						Marshal.ReleaseComObject(mailItem);
+						Marshal.ReleaseComObject(mapiItem);
 					}
 				}
 				catch (System.Exception exception) when
@@ -256,24 +256,35 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Get the item's synopses.
 		/// </summary>
-		/// <param name="mailItem">The MailItem to check.</param>
+		/// <param name="mapiItem">The specific MAPI item to check.</param>
 		/// <returns>The synoses of the item.</returns>
-		public static string GetItemSynopses(MailItem mailItem)
+		public static string GetItemSynopses(object mapiItem)
 		{
 			string synopses = null;
 
-			if (mailItem != null)
+			if (mapiItem != null)
 			{
-				string sentOn = mailItem.SentOn.ToString(
-					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-				synopses = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0}: From: {1}: {2} Subject: {3}",
-					sentOn,
-					mailItem.SenderName,
-					mailItem.SenderEmailAddress,
-					mailItem.Subject);
+				try
+				{
+					switch (mapiItem)
+					{
+						case AppointmentItem appointmentItem:
+							synopses = GetItemSynopses(appointmentItem);
+							break;
+						case MailItem mailItem:
+							synopses = GetItemSynopses(mailItem);
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
+					}
+				}
+				catch (COMException exception)
+				{
+					Log.Error(exception.ToString());
+				}
 			}
 
 			return synopses;
@@ -548,10 +559,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static bool DoubleCheckDuplicate(
-			string baseSynopses, MailItem mailItem)
+			string baseSynopses, object mapiItem)
 		{
 			bool valid = true;
-			string duplicateSynopses = GetItemSynopses(mailItem);
+			string duplicateSynopses = GetItemSynopses(mapiItem);
 
 			if (!duplicateSynopses.Equals(
 				baseSynopses, StringComparison.Ordinal))
@@ -1134,6 +1145,58 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return finalBuffer;
+		}
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="appointmentItem">The AppointmentItemto check.</param>
+		/// <returns>The synoses of the item.</returns>
+		private static string GetItemSynopses(AppointmentItem appointmentItem)
+		{
+			string synopses = null;
+
+			if (appointmentItem != null)
+			{
+				string sentOn = appointmentItem.Start.ToString(
+					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+				synopses = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: From: {1}: {2} Subject: {3}",
+					sentOn,
+					appointmentItem.Organizer,
+					appointmentItem.Subject,
+					appointmentItem.Body);
+			}
+
+			return synopses;
+		}
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="mailItem">The MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		private static string GetItemSynopses(MailItem mailItem)
+		{
+			string synopses = null;
+
+			if (mailItem != null)
+			{
+				string sentOn = mailItem.SentOn.ToString(
+					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+				synopses = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: From: {1}: {2} Subject: {3}",
+					sentOn,
+					mailItem.SenderName,
+					mailItem.SenderEmailAddress,
+					mailItem.Subject);
+			}
+
+			return synopses;
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage(

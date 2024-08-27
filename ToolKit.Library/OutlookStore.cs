@@ -249,8 +249,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		public string GetItemSynopses(string entryId)
 		{
 			NameSpace session = outlookAccount.Session;
-			MailItem mailItem = session.GetItemFromID(entryId);
-			string synopses = MapiItem.GetItemSynopses(mailItem);
+			object mapiItem = session.GetItemFromID(entryId);
+			string synopses = MapiItem.GetItemSynopses(mapiItem);
 
 			return synopses;
 		}

@@ -7,7 +7,6 @@
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1605,15 +1604,18 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			NameSpace session = outlookAccount.Session;
 
-			MailItem mailItem = session.GetItemFromID(keeper);
-			string keeperSynopses = MapiItem.GetItemSynopses(mailItem);
+			object mapiItem = session.GetItemFromID(keeper);
+			string keeperSynopses = MapiItem.GetItemSynopses(mapiItem);
 
 			string message = string.Format(
 				CultureInfo.InvariantCulture,
 				"{0} Duplicates Found for: ",
 				removeDuplicates.ToString(CultureInfo.InvariantCulture));
 
-			ListItem(mailItem, message);
+			LogFormatMessage.Info(
+				"{0} {1}",
+				message,
+				keeperSynopses);
 
 			foreach (string duplicateId in duplicateSet)
 			{
