@@ -14,12 +14,14 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using static Common.Logging.Configuration.ArgUtils;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -296,17 +298,49 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Get the current item's folder path.
 		/// </summary>
-		/// <param name="mailItem">The mailItem to check.</param>
+		/// <param name="mapiItem">The item to check.</param>
 		/// <returns>The current item's folder path.</returns>
-		public static string GetPath(MailItem mailItem)
+		public static string GetPath(object mapiItem)
 		{
 			string path = null;
 
-			if (mailItem != null)
+			if (mapiItem != null)
 			{
-				MAPIFolder parent = mailItem.Parent;
+				try
+				{
+					List<byte[]> buffers = [];
+					ushort booleans = 0;
+					byte[] recipients = null;
+					byte[] strings = null;
+					MAPIFolder parent = null;
 
-				path = OutlookFolder.GetFolderPath(parent);
+					switch (mapiItem)
+					{
+						case AppointmentItem appointmentItem:
+							parent = appointmentItem.Parent;
+							break;
+						case MailItem mailItem:
+							parent = mailItem.Parent;
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
+					}
+
+					path = OutlookFolder.GetFolderPath(parent);
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Error(exception.ToString());
+				}
 			}
 
 			return path;
@@ -948,12 +982,64 @@ namespace DigitalZenWorks.Email.ToolKit
 			return data;
 		}
 
+		private static byte[] GetEnums(AppointmentItem appointmentItem)
+		{
+			byte[] buffer = null;
+
+			try
+			{
+				List<int> ints = [];
+
+				int busyStatus = (int)appointmentItem.BusyStatus;
+				ints.Add(busyStatus);
+
+				int itemClass = (int)appointmentItem.Class;
+				ints.Add(itemClass);
+
+				int importance = (int)appointmentItem.Importance;
+				ints.Add(importance);
+
+				int markForDownload = (int)appointmentItem.MarkForDownload;
+				ints.Add(markForDownload);
+
+				int meetingStatus = (int)appointmentItem.MeetingStatus;
+				ints.Add(meetingStatus);
+
+				int recurrenceState = (int)appointmentItem.RecurrenceState;
+				ints.Add(recurrenceState);
+
+				int responseStatus = (int)appointmentItem.ResponseStatus;
+				ints.Add(responseStatus);
+
+				int sensitivity = (int)appointmentItem.Sensitivity;
+				ints.Add(sensitivity);
+
+				buffer = GetEnumsBuffer(ints);
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is COMException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				LogException(appointmentItem);
+				Log.Error(exception.ToString());
+			}
+
+			return buffer;
+		}
+
 		private static byte[] GetEnums(MailItem mailItem)
 		{
 			byte[] buffer = null;
 
 			try
 			{
+				List<int> ints = [];
+
 				int bodyFormat = 0;
 
 				try
@@ -963,13 +1049,18 @@ namespace DigitalZenWorks.Email.ToolKit
 				catch (COMException)
 				{
 				}
+				ints.Add(bodyFormat);
 
 				int itemClass = (int)mailItem.Class;
+				ints.Add(itemClass);
+
 				int importance = (int)mailItem.Importance;
+				ints.Add(importance);
+
 				int markForDownload = (int)mailItem.MarkForDownload;
+				ints.Add(markForDownload);
+
 				int permission = 0;
-				int permissionService = (int)mailItem.PermissionService;
-				int sensitivity = (int)mailItem.Sensitivity;
 
 				try
 				{
@@ -979,33 +1070,15 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 				}
 
-				// 9 ints * size of int
-				int bufferSize = 9 * 4;
-				buffer = new byte[bufferSize];
+				ints.Add(permission);
 
-				int index = 0;
-				buffer =
-					BitBytes.CopyIntToByteArray(buffer, index, bodyFormat);
-				index += 4;
-				buffer = BitBytes.CopyIntToByteArray(buffer, index, itemClass);
-				index += 4;
-				buffer =
-					BitBytes.CopyIntToByteArray(buffer, index, importance);
-				index += 4;
-				buffer = BitBytes.CopyIntToByteArray(
-					buffer, index, markForDownload);
-				index += 4;
-				buffer =
-					BitBytes.CopyIntToByteArray(buffer, index, permission);
-				index += 4;
-				buffer = BitBytes.CopyIntToByteArray(
-					buffer, index, permissionService);
-				index += 4;
-				buffer =
-					BitBytes.CopyIntToByteArray(buffer, index, sensitivity);
-				index += 4;
-				buffer = BitBytes.CopyIntToByteArray(
-					buffer, index, mailItem.InternetCodepage);
+				int permissionService = (int)mailItem.PermissionService;
+				ints.Add(permissionService);
+
+				int sensitivity = (int)mailItem.Sensitivity;
+				ints.Add(sensitivity);
+
+				buffer = GetEnumsBuffer(ints);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -1018,6 +1091,22 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				LogException(mailItem);
 				Log.Error(exception.ToString());
+			}
+
+			return buffer;
+		}
+
+		private static byte[] GetEnumsBuffer(List<int> ints)
+		{
+			// count of ints * size of int
+			int bufferSize = ints.Count * 4;
+			byte[] buffer = new byte[bufferSize];
+
+			int index = 0;
+			foreach (int item in ints)
+			{
+				buffer = BitBytes.CopyIntToByteArray(buffer, index, item);
+				index += 4;
 			}
 
 			return buffer;
@@ -1611,21 +1700,22 @@ namespace DigitalZenWorks.Email.ToolKit
 			return metaDataBytes;
 		}
 
+		private static void LogException(AppointmentItem appointmentItem)
+		{
+			string path = GetPath(appointmentItem);
+			Log.Error("Exception at: " + path);
+
+			string synopses = GetItemSynopses(appointmentItem);
+			LogFormatMessage.Error("Item: {0}:", synopses);
+		}
+
 		private static void LogException(MailItem mailItem)
 		{
 			string path = GetPath(mailItem);
 			Log.Error("Exception at: " + path);
 
-			string sentOn = mailItem.SentOn.ToString(
-				"yyyy-MM-dd HH:mm:ss",
-				CultureInfo.InvariantCulture);
-
-			LogFormatMessage.Error(
-				"Item: {0}: From: {1}: {2} Subject: {3}",
-				sentOn,
-				mailItem.SenderName,
-				mailItem.SenderEmailAddress,
-				mailItem.Subject);
+			string synopses = GetItemSynopses(mailItem);
+			LogFormatMessage.Error("Item: {0}:", synopses);
 		}
 
 		private static string NormalizeHeaders(string headers)
