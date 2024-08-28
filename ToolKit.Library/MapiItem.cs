@@ -7,21 +7,16 @@
 using Common.Logging;
 using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
-using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using static Common.Logging.Configuration.ArgUtils;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
