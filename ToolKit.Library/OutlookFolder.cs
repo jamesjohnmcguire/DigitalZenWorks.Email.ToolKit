@@ -1492,44 +1492,54 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private void AddItemHashToTable(MAPIFolder folder, object item)
 		{
+			string entryId = null;
+
 			switch (item)
 			{
-				// Initially, just focus on MailItems
+				case AppointmentItem appointmentItem:
+					entryId = appointmentItem.EntryID;
+					break;
 				case MailItem mailItem:
-					string entryId = mailItem.EntryID;
-					string hash = MapiItem.GetItemHash(mailItem);
-
-					storeHashTable =
-						AddHashToTable(storeHashTable, hash, entryId);
-
-					Marshal.ReleaseComObject(mailItem);
+					entryId = mailItem.EntryID;
 					break;
 				default:
-					Log.Info("Ignoring item of non-MailItem type: ");
+					Log.Info("Ignoring item of non-supported type");
 					break;
 			}
+
+			string hash = MapiItem.GetItemHash(item);
+
+			storeHashTable =
+				AddHashToTable(storeHashTable, hash, entryId);
+
+			Marshal.ReleaseComObject(item);
 		}
 
 		private async Task AddItemHashToTableAsync(
 			MAPIFolder folder, object item)
 		{
+			string entryId = null;
+
 			switch (item)
 			{
-				// Initially, just focus on MailItems
+				case AppointmentItem appointmentItem:
+					entryId = appointmentItem.EntryID;
+					break;
 				case MailItem mailItem:
-					string entryId = mailItem.EntryID;
-					string hash = await MapiItem.GetItemHashAsync(mailItem).
-						ConfigureAwait(false);
-
-					storeHashTable =
-						AddHashToTable(storeHashTable, hash, entryId);
-
-					Marshal.ReleaseComObject(mailItem);
+					entryId = mailItem.EntryID;
 					break;
 				default:
-					Log.Info("Ignoring item of non-MailItem type: ");
+					Log.Info("Ignoring item of non-supported type");
 					break;
 			}
+
+			string hash = await MapiItem.GetItemHashAsync(item).
+				ConfigureAwait(false);
+
+			storeHashTable =
+				AddHashToTable(storeHashTable, hash, entryId);
+
+			Marshal.ReleaseComObject(item);
 		}
 
 		private void AddSenderCount(MAPIFolder folder, object item)

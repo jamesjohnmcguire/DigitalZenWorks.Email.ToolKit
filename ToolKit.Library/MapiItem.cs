@@ -170,17 +170,17 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Gets the item's hash.
 		/// </summary>
-		/// <param name="mailItem">The items to compute.</param>
+		/// <param name="mapiItem">The items to compute.</param>
 		/// <returns>The item's hash encoded in base 64.</returns>
-		public static string GetItemHash(MailItem mailItem)
+		public static string GetItemHash(object mapiItem)
 		{
 			string hashBase64 = null;
 
-			try
+			if (mapiItem != null)
 			{
-				if (mailItem != null)
+				try
 				{
-					byte[] finalBuffer = GetItemBytes(mailItem);
+					byte[] finalBuffer = GetItemBytes(mapiItem);
 
 #if NET5_0_OR_GREATER
 					byte[] hashValue = SHA256.HashData(finalBuffer);
@@ -190,22 +190,18 @@ namespace DigitalZenWorks.Email.ToolKit
 #endif
 					hashBase64 = Convert.ToBase64String(hashValue);
 				}
-			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is InvalidCastException ||
-				exception is OutOfMemoryException ||
-				exception is RankException)
-			{
-				if (mailItem != null)
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is OutOfMemoryException ||
+					exception is RankException)
 				{
-					LogException(mailItem);
+					LogException(mapiItem);
+					Log.Error(exception.ToString());
 				}
-
-				Log.Error(exception.ToString());
 			}
 
 			return hashBase64;
@@ -214,20 +210,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Gets the item's hash.
 		/// </summary>
-		/// <param name="mailItem">The items to compute.</param>
+		/// <param name="mapiItem">The items to compute.</param>
 		/// <returns>The item's hash encoded in base 64.</returns>
-		public static async Task<string> GetItemHashAsync(
-			MailItem mailItem)
+		public static async Task<string> GetItemHashAsync(object mapiItem)
 		{
 			string hashBase64 = null;
 			byte[] finalBuffer = null;
 
-			try
+			if (mapiItem != null)
 			{
-				if (mailItem != null)
+				try
 				{
 					finalBuffer = await Task.Run(() =>
-						GetItemBytes(mailItem)).ConfigureAwait(false);
+						GetItemBytes(mapiItem)).ConfigureAwait(false);
 
 #if NET5_0_OR_GREATER
 					byte[] hashValue = SHA256.HashData(finalBuffer);
@@ -237,22 +232,18 @@ namespace DigitalZenWorks.Email.ToolKit
 #endif
 					hashBase64 = Convert.ToBase64String(hashValue);
 				}
-			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is InvalidCastException ||
-				exception is OutOfMemoryException ||
-				exception is RankException)
-			{
-				if (mailItem != null)
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is OutOfMemoryException ||
+					exception is RankException)
 				{
-					LogException(mailItem);
+					LogException(mapiItem);
+					Log.Error(exception.ToString());
 				}
-
-				Log.Error(exception.ToString());
 			}
 
 			return hashBase64;
@@ -1222,9 +1213,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			byte[] finalBuffer = null;
 
-			try
+			if (mapiItem != null)
 			{
-				if (mapiItem != null)
+				try
 				{
 					List<byte[]> buffers = [];
 					ushort booleans = 0;
@@ -1327,16 +1318,16 @@ namespace DigitalZenWorks.Email.ToolKit
 					finalBuffer = BitBytes.CopyUshortToByteArray(
 						finalBuffer, currentIndex, booleans);
 				}
-			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is InvalidCastException ||
-				exception is RankException)
-			{
-				Log.Error(exception.ToString());
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Error(exception.ToString());
+				}
 			}
 
 			return finalBuffer;
@@ -1822,21 +1813,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			return metaDataBytes;
 		}
 
-		private static void LogException(AppointmentItem appointmentItem)
+		private static void LogException(object mapiItem)
 		{
-			string path = GetPath(appointmentItem);
+			string path = GetPath(mapiItem);
 			Log.Error("Exception at: " + path);
 
-			string synopses = GetItemSynopses(appointmentItem);
-			LogFormatMessage.Error("Item: {0}:", synopses);
-		}
-
-		private static void LogException(MailItem mailItem)
-		{
-			string path = GetPath(mailItem);
-			Log.Error("Exception at: " + path);
-
-			string synopses = GetItemSynopses(mailItem);
+			string synopses = GetItemSynopses(mapiItem);
 			LogFormatMessage.Error("Item: {0}:", synopses);
 		}
 
