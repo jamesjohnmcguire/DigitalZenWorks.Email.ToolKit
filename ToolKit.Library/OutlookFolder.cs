@@ -1416,13 +1416,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static void MoveItem(MAPIFolder destination, object item)
 		{
-			MapiItem.Moveitem(item, destination);
+			MapiItem.MoveItem(item, destination);
 		}
 
 		private static async Task MoveItemAsync(
 			MAPIFolder destination, object item)
 		{
-			await MapiItem.MoveitemAsync(item, destination).
+			await MapiItem.MoveItemAsync(item, destination).
 				ConfigureAwait(false);
 		}
 

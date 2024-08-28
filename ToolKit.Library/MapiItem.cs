@@ -351,7 +351,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="item">The item to move.</param>
 		/// <param name="destination">The destination folder.</param>
-		public static void Moveitem(object item, MAPIFolder destination)
+		public static void MoveItem(object item, MAPIFolder destination)
 		{
 			try
 			{
@@ -447,7 +447,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="destination">The destination folder.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous
 		/// operation.</returns>
-		public static async Task MoveitemAsync(
+		public static async Task MoveItemAsync(
 			object item, MAPIFolder destination)
 		{
 			CancellationTokenSource source = new ();
