@@ -910,12 +910,75 @@ namespace DigitalZenWorks.Email.ToolKit
 			return bufferSize;
 		}
 
+		private static byte[] GetDateTimesBytes(List<DateTime> times)
+		{
+			byte[] data = null;
+
+			List<string> timesStrings = [];
+
+			foreach (DateTime time in times)
+			{
+				string timeString = time.ToString("O");
+				timesStrings.Add(timeString);
+			}
+
+			StringBuilder builder = new ();
+
+			foreach (string timeString in timesStrings)
+			{
+				builder.Append(timeString);
+			}
+
+			string buffer = builder.ToString();
+
+			Encoding encoding = Encoding.UTF8;
+			data = encoding.GetBytes(buffer);
+
+			return data;
+		}
+
+		private static byte[] GetDateTimes(AppointmentItem appointmentItem)
+		{
+			byte[] data = null;
+
+			try
+			{
+				List<DateTime> times = [];
+
+				DateTime endUTC = appointmentItem.EndUTC;
+				times.Add(endUTC);
+
+				DateTime expiryTimeDateTime = appointmentItem.ReplyTime;
+				times.Add(expiryTimeDateTime);
+
+				DateTime receivedTimeDateTime = appointmentItem.StartUTC;
+				times.Add(receivedTimeDateTime);
+
+				data = GetDateTimesBytes(times);
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is COMException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				Log.Warn(exception.ToString());
+			}
+
+			return data;
+		}
+
 		private static byte[] GetDateTimes(MailItem mailItem)
 		{
 			byte[] data = null;
 
 			try
 			{
+				List<DateTime> times = [];
+
 				DateTime deferredDeliveryTimeDateTime = DateTime.MinValue;
 
 				try
@@ -927,45 +990,35 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 				}
 
+				times.Add(deferredDeliveryTimeDateTime);
+
 				DateTime expiryTimeDateTime = mailItem.ExpiryTime;
+				times.Add(expiryTimeDateTime);
+
 				DateTime receivedTimeDateTime = mailItem.ReceivedTime;
+				times.Add(receivedTimeDateTime);
+
 				DateTime reminderTimeDateTime = mailItem.ReminderTime;
+				times.Add(reminderTimeDateTime);
+
 				DateTime retentionExpirationDateDateTime =
 					mailItem.RetentionExpirationDate;
+				times.Add(retentionExpirationDateDateTime);
+
 				DateTime sentOnDateTime = mailItem.SentOn;
+				times.Add(sentOnDateTime);
+
 				DateTime taskCompletedDateDateTime =
 					mailItem.TaskCompletedDate;
+				times.Add(taskCompletedDateDateTime);
+
 				DateTime taskDueDateDateTime = mailItem.TaskDueDate;
+				times.Add(taskDueDateDateTime);
+
 				DateTime taskStartDateDateTime = mailItem.TaskStartDate;
+				times.Add(taskStartDateDateTime);
 
-				string deferredDeliveryTime =
-					deferredDeliveryTimeDateTime.ToString("O");
-				string expiryTime = expiryTimeDateTime.ToString("O");
-				string receivedTime = receivedTimeDateTime.ToString("O");
-				string reminderTime = reminderTimeDateTime.ToString("O");
-				string retentionExpirationDate =
-					retentionExpirationDateDateTime.ToString("O");
-				string sentOn = sentOnDateTime.ToString("O");
-				string taskCompletedDate =
-					taskCompletedDateDateTime.ToString("O");
-				string taskDueDate = taskDueDateDateTime.ToString("O");
-				string taskStartDate = taskStartDateDateTime.ToString("O");
-
-				string buffer = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0}{1}{2}{3}{4}{5}{6}{7}{8}",
-					deferredDeliveryTime,
-					expiryTime,
-					receivedTime,
-					reminderTime,
-					retentionExpirationDate,
-					sentOn,
-					taskCompletedDate,
-					taskDueDate,
-					taskStartDate);
-
-				Encoding encoding = Encoding.UTF8;
-				data = encoding.GetBytes(buffer);
+				data = GetDateTimesBytes(times);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
