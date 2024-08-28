@@ -308,10 +308,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				try
 				{
-					List<byte[]> buffers = [];
-					ushort booleans = 0;
-					byte[] recipients = null;
-					byte[] strings = null;
 					MAPIFolder parent = null;
 
 					switch (mapiItem)
