@@ -775,40 +775,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return attachmentData;
 		}
 
-		private static byte[] GetBody(MailItem mailItem)
-		{
-			byte[] allBody = null;
-
-			try
-			{
-				Encoding encoding = Encoding.UTF8;
-
-				string body = mailItem.Body;
-				string htmlBody = mailItem.HTMLBody;
-
-				byte[] bodyBytes = encoding.GetBytes(body);
-				byte[] htmlBodyBytes = encoding.GetBytes(htmlBody);
-				byte[] rtfBody = mailItem.RTFBody as byte[];
-
-				byte[] tempBody =
-					BitBytes.MergeByteArrays(bodyBytes, htmlBodyBytes);
-				allBody = BitBytes.MergeByteArrays(allBody, rtfBody);
-			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is COMException ||
-				exception is InvalidCastException ||
-				exception is RankException)
-			{
-				Log.Warn(exception.ToString());
-			}
-
-			return allBody;
-		}
-
 		private static ushort GetBooleans(AppointmentItem appointmentItem)
 		{
 			ushort boolHolder = 0;
