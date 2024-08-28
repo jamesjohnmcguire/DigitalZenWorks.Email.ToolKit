@@ -863,6 +863,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			byte[] attachments,
 			byte[] dateTimes,
 			byte[] enums,
+			byte[] recipients,
 			byte[] rtfBody,
 			byte[] strings,
 			byte[] userProperties)
@@ -887,6 +888,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (enums != null)
 			{
 				bufferSize += enums.LongLength;
+			}
+
+			if (recipients!= null)
+			{
+				bufferSize += recipients.LongLength;
 			}
 
 			if (rtfBody != null)
@@ -1072,6 +1078,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					byte[] attachments = GetAttachments(mailItem);
 					byte[] dateTimes = GetDateTimes(mailItem);
 					byte[] enums = GetEnums(mailItem);
+					byte[] recipients = GetRecipients(mailItem.Recipients);
 					byte[] rtfBody = null;
 
 					try
@@ -1109,6 +1116,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						attachments,
 						dateTimes,
 						enums,
+						recipients,
 						rtfBody,
 						strings,
 						userProperties);
@@ -1125,6 +1133,8 @@ namespace DigitalZenWorks.Email.ToolKit
 						dateTimes, ref finalBuffer, currentIndex);
 					currentIndex = BitBytes.ArrayCopyConditional(
 						enums, ref finalBuffer, currentIndex);
+					currentIndex = BitBytes.ArrayCopyConditional(
+						recipients, ref finalBuffer, currentIndex);
 					currentIndex = BitBytes.ArrayCopyConditional(
 						rtfBody, ref finalBuffer, currentIndex);
 					currentIndex = BitBytes.ArrayCopyConditional(
@@ -1206,75 +1216,98 @@ namespace DigitalZenWorks.Email.ToolKit
 			"StyleCop.CSharp.NamingRules",
 			"SA1305:Field names should not use Hungarian notation",
 			Justification = "It isn't hungarian notation.")]
-		private static string GetRecipients(MailItem mailItem)
+		private static byte[] GetRecipients(Recipients recipients)
 		{
-			string recipients;
-			List<string> toList = [];
-			List<string> ccList = [];
-			List<string> bccList = [];
+			byte[] data = null;
 
-			int total = mailItem.Recipients.Count;
-
-			for (int index = 1; index <= total; index++)
+			if (recipients != null)
 			{
-				Recipient recipient = mailItem.Recipients[index];
-				string name = recipient.Name;
-				string address = recipient.Address;
-
-				string formattedRecipient = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0} <{1}>; ",
-					name,
-					address);
-
-				OlMailRecipientType recipientType =
-					(OlMailRecipientType)recipient.Type;
-				switch (recipientType)
+				try
 				{
-					case OlMailRecipientType.olTo:
-						toList.Add(formattedRecipient);
-						break;
-					case OlMailRecipientType.olCC:
-						ccList.Add(formattedRecipient);
-						break;
-					case OlMailRecipientType.olBCC:
-						bccList.Add(formattedRecipient);
-						break;
-					case OlMailRecipientType.olOriginator:
-						Log.Warn("Ignoring olOriginator recipient type");
-						break;
-					default:
-						Log.Warn("Ignoring uknown recipient type");
-						break;
+					string recipientsData = null;
+					List<string> toList = [];
+					List<string> ccList = [];
+					List<string> bccList = [];
+
+					int total = recipients.Count;
+
+					for (int index = 1; index <= total; index++)
+					{
+						Recipient recipient = recipients[index];
+						string name = recipient.Name;
+						string address = recipient.Address;
+
+						string formattedRecipient = string.Format(
+							CultureInfo.InvariantCulture,
+							"{0} <{1}>; ",
+							name,
+							address);
+
+						OlMailRecipientType recipientType =
+							(OlMailRecipientType)recipient.Type;
+
+						switch (recipientType)
+						{
+							case OlMailRecipientType.olTo:
+								toList.Add(formattedRecipient);
+								break;
+							case OlMailRecipientType.olCC:
+								ccList.Add(formattedRecipient);
+								break;
+							case OlMailRecipientType.olBCC:
+								bccList.Add(formattedRecipient);
+								break;
+							case OlMailRecipientType.olOriginator:
+								Log.Warn("Ignoring olOriginator recipient type");
+								break;
+							default:
+								Log.Warn("Ignoring uknown recipient type");
+								break;
+						}
+
+						Marshal.ReleaseComObject(recipient);
+					}
+
+					toList.Sort();
+					ccList.Sort();
+					bccList.Sort();
+
+					StringBuilder builder = new ();
+
+					foreach (string formattedRecipient in toList)
+					{
+						builder.Append(formattedRecipient);
+					}
+
+					foreach (string formattedRecipient in ccList)
+					{
+						builder.Append(formattedRecipient);
+					}
+
+					foreach (string formattedRecipient in bccList)
+					{
+						builder.Append(formattedRecipient);
+					}
+
+					recipientsData = builder.ToString();
+
+					Encoding encoding = Encoding.UTF8;
+					data = encoding.GetBytes(recipientsData);
 				}
-
-				Marshal.ReleaseComObject(recipient);
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is COMException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Error(exception.ToString());
+				}
 			}
 
-			toList.Sort();
-			ccList.Sort();
-			bccList.Sort();
-
-			StringBuilder builder = new ();
-
-			foreach (string formattedRecipient in toList)
-			{
-				builder.Append(formattedRecipient);
-			}
-
-			foreach (string formattedRecipient in ccList)
-			{
-				builder.Append(formattedRecipient);
-			}
-
-			foreach (string formattedRecipient in bccList)
-			{
-				builder.Append(formattedRecipient);
-			}
-
-			recipients = builder.ToString();
-
-			return recipients;
+			return data;
 		}
 
 		private static byte[] GetStringProperties(
