@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -1099,6 +1100,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					}
 
 					byte[] strings = GetStringProperties(mailItem, strict);
+
 					byte[] userProperties = GetUserProperties(mailItem);
 
 					long bufferSize = GetBufferSize(
@@ -1418,44 +1420,73 @@ namespace DigitalZenWorks.Email.ToolKit
 			return data;
 		}
 
-		private static byte[] GetUserProperties(MailItem mailItem)
+		private static byte[] GetUserProperties(object mapiItem)
 		{
 			byte[] properties = null;
 
-			try
+			if (mapiItem != null)
 			{
-				int total = mailItem.UserProperties.Count;
-
-				for (int index = 1; index <= total; index++)
+				try
 				{
-					UserProperty property = mailItem.UserProperties[index];
+					UserProperties userProperties = null;
 
-					byte[] userPropertyData = GetUserPropertyData(property);
-
-					if (properties == null)
+					switch (mapiItem)
 					{
-						properties = userPropertyData;
-					}
-					else
-					{
-						properties = BitBytes.MergeByteArrays(
-							properties, userPropertyData);
+						case AppointmentItem appointmentItem:
+							userProperties = appointmentItem.UserProperties;
+							break;
+						case MailItem mailItem:
+							userProperties = mailItem.UserProperties;
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
 					}
 
-					Marshal.ReleaseComObject(property);
+					if (userProperties != null)
+					{
+						int total = userProperties.Count;
+
+						for (int index = 1; index <= total; index++)
+						{
+							UserProperty property = userProperties[index];
+							properties = GetUserProperty(properties, property);
+						}
+					}
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is COMException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Warn(exception.ToString());
 				}
 			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is COMException ||
-				exception is InvalidCastException ||
-				exception is RankException)
+
+			return properties;
+		}
+
+		private static byte[] GetUserProperty(byte[] properties, UserProperty property)
+		{
+			byte[] userPropertyData = GetUserPropertyData(property);
+
+			if (properties == null)
 			{
-				Log.Warn(exception.ToString());
+				properties = userPropertyData;
 			}
+			else
+			{
+				properties = BitBytes.MergeByteArrays(
+					properties, userPropertyData);
+			}
+
+			Marshal.ReleaseComObject(property);
 
 			return properties;
 		}
