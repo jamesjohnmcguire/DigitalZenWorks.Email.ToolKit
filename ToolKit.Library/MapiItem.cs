@@ -613,47 +613,50 @@ namespace DigitalZenWorks.Email.ToolKit
 			return valid;
 		}
 
-		private static byte[] GetActions(MailItem mailItem)
+		private static byte[] GetActions(Actions actions)
 		{
-			byte[] actions = null;
+			byte[] actionsData = null;
 
-			try
+			if (actions != null)
 			{
-				int total = mailItem.Actions.Count;
-
-				for (int index = 1; index <= total; index++)
+				try
 				{
-					Microsoft.Office.Interop.Outlook.Action action =
-						mailItem.Actions[index];
+					int total = actions.Count;
 
-					byte[] metaDataBytes = GetActionData(action);
-
-					if (actions == null)
+					for (int index = 1; index <= total; index++)
 					{
-						actions = metaDataBytes;
-					}
-					else
-					{
-						actions =
-							BitBytes.MergeByteArrays(actions, metaDataBytes);
-					}
+						Microsoft.Office.Interop.Outlook.Action action =
+							actions[index];
 
-					Marshal.ReleaseComObject(action);
+						byte[] metaDataBytes = GetActionData(action);
+
+						if (actionsData == null)
+						{
+							actionsData = metaDataBytes;
+						}
+						else
+						{
+							actionsData =
+								BitBytes.MergeByteArrays(actionsData, metaDataBytes);
+						}
+
+						Marshal.ReleaseComObject(action);
+					}
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is COMException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Warn(exception.ToString());
 				}
 			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is COMException ||
-				exception is InvalidCastException ||
-				exception is RankException)
-			{
-				Log.Warn(exception.ToString());
-			}
 
-			return actions;
+			return actionsData;
 		}
 
 		private static byte[] GetActionData(
@@ -1241,6 +1244,9 @@ namespace DigitalZenWorks.Email.ToolKit
 						case AppointmentItem appointmentItem:
 							booleans = GetBooleans(appointmentItem);
 
+							actions = GetActions(appointmentItem.Actions);
+							buffers.Add(actions);
+
 							attachments = GetAttachments(appointmentItem.Attachments);
 							buffers.Add(attachments);
 
@@ -1259,7 +1265,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						case MailItem mailItem:
 							booleans = GetBooleans(mailItem);
 
-							actions = GetActions(mailItem);
+							actions = GetActions(mailItem.Actions);
 							buffers.Add(actions);
 
 							attachments = GetAttachments(mailItem.Attachments);
