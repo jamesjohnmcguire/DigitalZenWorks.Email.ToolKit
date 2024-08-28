@@ -19,6 +19,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using static Common.Logging.Configuration.ArgUtils;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -858,56 +859,16 @@ namespace DigitalZenWorks.Email.ToolKit
 			return boolHolder;
 		}
 
-		private static long GetBufferSize(
-			byte[] actions,
-			byte[] attachments,
-			byte[] dateTimes,
-			byte[] enums,
-			byte[] recipients,
-			byte[] rtfBody,
-			byte[] strings,
-			byte[] userProperties)
+		private static long GetBufferSize(List<byte[]> buffers)
 		{
 			long bufferSize = 0;
 
-			if (actions != null)
+			foreach (byte[] buffer in buffers)
 			{
-				bufferSize += actions.LongLength;
-			}
-
-			if (attachments != null)
-			{
-				bufferSize += attachments.LongLength;
-			}
-
-			if (dateTimes != null)
-			{
-				bufferSize += dateTimes.LongLength;
-			}
-
-			if (enums != null)
-			{
-				bufferSize += enums.LongLength;
-			}
-
-			if (recipients!= null)
-			{
-				bufferSize += recipients.LongLength;
-			}
-
-			if (rtfBody != null)
-			{
-				bufferSize += rtfBody.LongLength;
-			}
-
-			if (strings != null)
-			{
-				bufferSize += strings.LongLength;
-			}
-
-			if (userProperties != null)
-			{
-				bufferSize += userProperties.LongLength;
+				if (buffer != null)
+				{
+					bufferSize += buffer.LongLength;
+				}
 			}
 
 			bufferSize += 2;
@@ -1063,84 +1024,94 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static byte[] GetItemBytes(
-			MailItem mailItem,
+			object mapiItem,
 			bool strict = false)
 		{
 			byte[] finalBuffer = null;
 
 			try
 			{
-				if (mailItem != null)
+				if (mapiItem != null)
 				{
-					ushort booleans = GetBooleans(mailItem);
+					List<byte[]> buffers = [];
+					ushort booleans = 0;
+					byte[] recipients = null;
+					byte[] strings = null;
 
-					byte[] actions = GetActions(mailItem);
-					byte[] attachments = GetAttachments(mailItem);
-					byte[] dateTimes = GetDateTimes(mailItem);
-					byte[] enums = GetEnums(mailItem);
-					byte[] recipients = GetRecipients(mailItem.Recipients);
-					byte[] rtfBody = null;
-
-					try
+					switch (mapiItem)
 					{
-						rtfBody = mailItem.RTFBody as byte[];
+						case AppointmentItem appointmentItem:
+							recipients = GetRecipients(appointmentItem.Recipients);
+							buffers.Add(recipients);
+
+							strings = GetStringProperties(appointmentItem, strict);
+							buffers.Add(strings);
+							break;
+						case MailItem mailItem:
+							booleans = GetBooleans(mailItem);
+
+							byte[] actions = GetActions(mailItem);
+							buffers.Add(actions);
+
+							byte[] attachments = GetAttachments(mailItem);
+							buffers.Add(attachments);
+
+							byte[] dateTimes = GetDateTimes(mailItem);
+							buffers.Add(dateTimes);
+
+							byte[] enums = GetEnums(mailItem);
+							buffers.Add(enums);
+
+							recipients = GetRecipients(mailItem.Recipients);
+							buffers.Add(recipients);
+
+							byte[] rtfBody = null;
+
+							try
+							{
+								rtfBody = mailItem.RTFBody as byte[];
+							}
+							catch (COMException)
+							{
+								string path = GetPath(mailItem);
+
+								Log.Warn("Exception on RTFBody at: " + path);
+
+								string synopses = GetItemSynopses(mailItem);
+								Log.Warn(synopses);
+							}
+
+							if (rtfBody != null && strict == false)
+							{
+								rtfBody = RtfEmail.Trim(rtfBody);
+							}
+
+							buffers.Add(rtfBody);
+
+							strings = GetStringProperties(mailItem, strict);
+							buffers.Add(strings);
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
 					}
-					catch (System.Runtime.InteropServices.COMException)
-					{
-						string path = GetPath(mailItem);
 
-						Log.Warn("Exception on RTFBody at: " + path);
+					byte[] userProperties = GetUserProperties(mapiItem);
+					buffers.Add(userProperties);
 
-						string sentOn = mailItem.SentOn.ToString(
-							"yyyy-MM-dd HH:mm:ss",
-							CultureInfo.InvariantCulture);
-						LogFormatMessage.Warn(
-							"Item: {0}: From: {1}: {2} Subject: {3}",
-							sentOn,
-							mailItem.SenderName,
-							mailItem.SenderEmailAddress,
-							mailItem.Subject);
-					}
-
-					if (rtfBody != null && strict == false)
-					{
-						rtfBody = RtfEmail.Trim(rtfBody);
-					}
-
-					byte[] strings = GetStringProperties(mailItem, strict);
-
-					byte[] userProperties = GetUserProperties(mailItem);
-
-					long bufferSize = GetBufferSize(
-						actions,
-						attachments,
-						dateTimes,
-						enums,
-						recipients,
-						rtfBody,
-						strings,
-						userProperties);
+					long bufferSize = GetBufferSize(buffers);
 
 					finalBuffer = new byte[bufferSize];
 
 					// combine the parts
-					long currentIndex = BitBytes.ArrayCopyConditional(
-						actions, ref finalBuffer, 0);
-
-					currentIndex = BitBytes.ArrayCopyConditional(
-						attachments, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						dateTimes, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						enums, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						recipients, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						rtfBody, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						strings, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						userProperties, ref finalBuffer, currentIndex);
+					long currentIndex = 0;
+					foreach (byte[] buffer in buffers)
+					{
+						currentIndex = BitBytes.ArrayCopyConditional(
+							buffer, ref finalBuffer, currentIndex);
+					}
 
 					finalBuffer = BitBytes.CopyUshortToByteArray(
 						finalBuffer, currentIndex, booleans);
