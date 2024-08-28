@@ -695,49 +695,51 @@ namespace DigitalZenWorks.Email.ToolKit
 			return metaDataBytes;
 		}
 
-		private static byte[] GetAttachments(MailItem mailItem)
+		private static byte[] GetAttachments(Attachments attachments)
 		{
-			byte[] attachments = null;
+			byte[] attachmentsData = null;
 
-			try
+			if (attachments != null)
 			{
-				string basePath = Path.GetTempPath();
-
-				int total = mailItem.Attachments.Count;
-
-				for (int index = 1; index <= total; index++)
+				try
 				{
-					Attachment attachment =
-						mailItem.Attachments[index];
+					string basePath = Path.GetTempPath();
 
-					byte[] attachementData = GetAttachmentData(attachment);
+					int total = attachments.Count;
 
-					if (attachments == null)
+					for (int index = 1; index <= total; index++)
 					{
-						attachments = attachementData;
-					}
-					else
-					{
-						attachments = BitBytes.MergeByteArrays(
-							attachments, attachementData);
-					}
+						Attachment attachment = attachments[index];
 
-					Marshal.ReleaseComObject(attachment);
+						byte[] attachementData = GetAttachmentData(attachment);
+
+						if (attachmentsData == null)
+						{
+							attachmentsData = attachementData;
+						}
+						else
+						{
+							attachmentsData = BitBytes.MergeByteArrays(
+								attachmentsData, attachementData);
+						}
+
+						Marshal.ReleaseComObject(attachment);
+					}
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is COMException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Warn(exception.ToString());
 				}
 			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is COMException ||
-				exception is InvalidCastException ||
-				exception is RankException)
-			{
-				Log.Warn(exception.ToString());
-			}
 
-			return attachments;
+			return attachmentsData;
 		}
 
 		private static byte[] GetAttachmentData(Attachment attachment)
@@ -1227,12 +1229,27 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					List<byte[]> buffers = [];
 					ushort booleans = 0;
+					byte[] attachments = null;
 					byte[] recipients = null;
 					byte[] strings = null;
+					byte[] actions = null;
+					byte[] dateTimes = null;
+					byte[] enums = null;
 
 					switch (mapiItem)
 					{
 						case AppointmentItem appointmentItem:
+							booleans = GetBooleans(appointmentItem);
+
+							attachments = GetAttachments(appointmentItem.Attachments);
+							buffers.Add(attachments);
+
+							dateTimes = GetDateTimes(appointmentItem);
+							buffers.Add(dateTimes);
+
+							enums = GetEnums(appointmentItem);
+							buffers.Add(enums);
+
 							recipients = GetRecipients(appointmentItem.Recipients);
 							buffers.Add(recipients);
 
@@ -1242,16 +1259,16 @@ namespace DigitalZenWorks.Email.ToolKit
 						case MailItem mailItem:
 							booleans = GetBooleans(mailItem);
 
-							byte[] actions = GetActions(mailItem);
+							actions = GetActions(mailItem);
 							buffers.Add(actions);
 
-							byte[] attachments = GetAttachments(mailItem);
+							attachments = GetAttachments(mailItem.Attachments);
 							buffers.Add(attachments);
 
-							byte[] dateTimes = GetDateTimes(mailItem);
+							dateTimes = GetDateTimes(mailItem);
 							buffers.Add(dateTimes);
 
-							byte[] enums = GetEnums(mailItem);
+							enums = GetEnums(mailItem);
 							buffers.Add(enums);
 
 							recipients = GetRecipients(mailItem.Recipients);
