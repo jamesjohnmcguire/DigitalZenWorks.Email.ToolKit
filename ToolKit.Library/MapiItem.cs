@@ -7,6 +7,7 @@
 using Common.Logging;
 using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -1274,6 +1275,94 @@ namespace DigitalZenWorks.Email.ToolKit
 			recipients = builder.ToString();
 
 			return recipients;
+		}
+
+		private static byte[] GetStringProperties(
+			AppointmentItem appointmentItem, bool ignoreConversation = true, bool strict = false)
+		{
+			byte[] data = null;
+
+			try
+			{
+				string billingInformation = null;
+
+				try
+				{
+					billingInformation = appointmentItem.BillingInformation;
+				}
+				catch (COMException)
+				{
+				}
+
+				string body = appointmentItem.Body;
+
+				if (body != null && strict == false)
+				{
+					body = body.TrimEnd();
+				}
+
+				string categories = appointmentItem.Categories;
+				string companies = appointmentItem.Companies;
+
+				string conversationID = null;
+
+				if (ignoreConversation == false)
+				{
+					conversationID = appointmentItem.ConversationID;
+				}
+
+				// String  ConversationIndex   Returns a String(string in C#) representing the index of the conversation thread of the Outlook item. Read-only.
+
+				string conversationTopic = appointmentItem.ConversationTopic;
+				string globalAppointmentID = appointmentItem.GlobalAppointmentID;
+				string location = appointmentItem.Location;
+				string meetingWorkspaceURL = appointmentItem.MeetingWorkspaceURL;
+				string messageClass = appointmentItem.MessageClass;
+				string mileage = appointmentItem.Mileage;
+				string optionalAttendees = appointmentItem.OptionalAttendees;
+				string organizer = appointmentItem.Organizer;
+				string reminderSoundFile = appointmentItem.ReminderSoundFile;
+				string requiredAttendees = appointmentItem.RequiredAttendees;
+				string resources = appointmentItem.Resources;
+				string subject = appointmentItem.Subject;
+
+				StringBuilder builder = new ();
+				builder.Append(billingInformation);
+				builder.Append(body);
+				builder.Append(categories);
+				builder.Append(companies);
+				builder.Append(conversationID);
+				builder.Append(conversationTopic);
+				builder.Append(globalAppointmentID);
+				builder.Append(location);
+				builder.Append(meetingWorkspaceURL);
+				builder.Append(messageClass);
+				builder.Append(mileage);
+				builder.Append(optionalAttendees);
+				builder.Append(organizer);
+				builder.Append(reminderSoundFile);
+				builder.Append(requiredAttendees);
+				builder.Append(resources);
+				builder.Append(subject);
+
+				string buffer = builder.ToString();
+
+				Encoding encoding = Encoding.UTF8;
+				data = encoding.GetBytes(buffer);
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is COMException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
+
+			return data;
 		}
 
 		private static byte[] GetStringProperties(
