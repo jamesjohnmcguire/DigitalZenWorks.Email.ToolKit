@@ -822,6 +822,56 @@ namespace DigitalZenWorks.Email.ToolKit
 			return allBody;
 		}
 
+		private static ushort GetBooleans(AppointmentItem appointmentItem)
+		{
+			ushort boolHolder = 0;
+
+			try
+			{
+				bool rawValue = appointmentItem.AllDayEvent;
+				boolHolder = BitBytes.SetBit(boolHolder, 0, rawValue);
+
+				rawValue = appointmentItem.AutoResolvedWinner;
+				boolHolder = BitBytes.SetBit(boolHolder, 1, rawValue);
+
+				rawValue = appointmentItem.ForceUpdateToAllAttendees;
+				boolHolder = BitBytes.SetBit(boolHolder, 2, rawValue);
+
+				rawValue = appointmentItem.IsConflict;
+				boolHolder = BitBytes.SetBit(boolHolder, 3, rawValue);
+
+				rawValue = appointmentItem.IsRecurring;
+				boolHolder = BitBytes.SetBit(boolHolder, 4, rawValue);
+
+				rawValue = appointmentItem.NoAging;
+				boolHolder = BitBytes.SetBit(boolHolder, 5, rawValue);
+
+				rawValue = appointmentItem.ReminderOverrideDefault;
+				boolHolder = BitBytes.SetBit(boolHolder, 6, rawValue);
+
+				rawValue = appointmentItem.ReminderPlaySound;
+				boolHolder = BitBytes.SetBit(boolHolder, 7, rawValue);
+
+				rawValue = appointmentItem.ReminderSet;
+				boolHolder = BitBytes.SetBit(boolHolder, 8, rawValue);
+
+				rawValue = appointmentItem.ResponseRequested;
+				boolHolder = BitBytes.SetBit(boolHolder, 9, rawValue);
+
+				rawValue = appointmentItem.Saved;
+				boolHolder = BitBytes.SetBit(boolHolder, 10, rawValue);
+
+				rawValue = appointmentItem.UnRead;
+				boolHolder = BitBytes.SetBit(boolHolder, 11, rawValue);
+			}
+			catch (COMException exception)
+			{
+				Log.Warn(exception.ToString());
+			}
+
+			return boolHolder;
+		}
+
 		private static ushort GetBooleans(MailItem mailItem)
 		{
 			ushort boolHolder = 0;
