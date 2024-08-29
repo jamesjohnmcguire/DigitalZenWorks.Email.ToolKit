@@ -1445,7 +1445,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static byte[] GetStringProperties(
-			AppointmentItem appointmentItem, bool ignoreConversation = true, bool strict = false)
+			AppointmentItem appointmentItem,
+			bool strict = false,
+			bool ignoreConversation = true)
 		{
 			byte[] data = null;
 
@@ -1533,7 +1535,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static byte[] GetStringProperties(
-			MailItem mailItem, bool ignoreConversation = true, bool strict = false)
+			MailItem mailItem,
+			bool strict = false,
+			bool ignoreConversation = true)
 		{
 			byte[] data = null;
 
