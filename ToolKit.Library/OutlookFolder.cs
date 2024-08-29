@@ -1507,12 +1507,15 @@ namespace DigitalZenWorks.Email.ToolKit
 					break;
 			}
 
-			string hash = MapiItem.GetItemHash(item);
+			if (entryId != null)
+			{
+				string hash = MapiItem.GetItemHash(item);
 
-			storeHashTable =
-				AddHashToTable(storeHashTable, hash, entryId);
+				storeHashTable =
+					AddHashToTable(storeHashTable, hash, entryId);
 
-			Marshal.ReleaseComObject(item);
+				Marshal.ReleaseComObject(item);
+			}
 		}
 
 		private async Task AddItemHashToTableAsync(
@@ -1533,13 +1536,16 @@ namespace DigitalZenWorks.Email.ToolKit
 					break;
 			}
 
-			string hash = await MapiItem.GetItemHashAsync(item).
-				ConfigureAwait(false);
+			if (entryId != null)
+			{
+				string hash = await MapiItem.GetItemHashAsync(item).
+					ConfigureAwait(false);
 
-			storeHashTable =
-				AddHashToTable(storeHashTable, hash, entryId);
+				storeHashTable =
+					AddHashToTable(storeHashTable, hash, entryId);
 
-			Marshal.ReleaseComObject(item);
+				Marshal.ReleaseComObject(item);
+			}
 		}
 
 		private void AddSenderCount(MAPIFolder folder, object item)
