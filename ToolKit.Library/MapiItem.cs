@@ -951,11 +951,11 @@ namespace DigitalZenWorks.Email.ToolKit
 				DateTime endUTC = appointmentItem.EndUTC;
 				times.Add(endUTC);
 
-				DateTime expiryTimeDateTime = appointmentItem.ReplyTime;
-				times.Add(expiryTimeDateTime);
+				DateTime replyTime = appointmentItem.ReplyTime;
+				times.Add(replyTime);
 
-				DateTime receivedTimeDateTime = appointmentItem.StartUTC;
-				times.Add(receivedTimeDateTime);
+				DateTime startUTC = appointmentItem.StartUTC;
+				times.Add(startUTC);
 
 				data = GetDateTimesBytes(times);
 			}
@@ -1475,15 +1475,15 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				string conversationID = null;
 
+				string conversationTopic = appointmentItem.ConversationTopic;
+				string globalAppointmentID = null;
+
 				if (ignoreConversation == false)
 				{
 					conversationID = appointmentItem.ConversationID;
+					globalAppointmentID = appointmentItem.GlobalAppointmentID;
 				}
 
-				// String  ConversationIndex   Returns a String(string in C#) representing the index of the conversation thread of the Outlook item. Read-only.
-
-				string conversationTopic = appointmentItem.ConversationTopic;
-				string globalAppointmentID = appointmentItem.GlobalAppointmentID;
 				string location = appointmentItem.Location;
 				string meetingWorkspaceURL = appointmentItem.MeetingWorkspaceURL;
 				string messageClass = appointmentItem.MessageClass;
