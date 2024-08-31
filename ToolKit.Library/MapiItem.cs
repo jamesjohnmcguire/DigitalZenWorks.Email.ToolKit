@@ -747,12 +747,19 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			string metaData = string.Format(
 				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}",
+				"{0}{1}{2}{3}",
 				attachment.DisplayName,
-				attachment.FileName,
 				indexValue,
 				position,
 				attachmentType);
+
+			try
+			{
+				metaData += attachment.FileName;
+			}
+			catch (COMException)
+			{
+			}
 
 			try
 			{
