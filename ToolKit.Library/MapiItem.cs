@@ -915,7 +915,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static byte[] GetDateTimesBytes(List<DateTime> times)
 		{
-			byte[] data = null;
+			byte[] data;
 
 			List<string> timesStrings = [];
 
@@ -1105,6 +1105,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				catch (COMException)
 				{
 				}
+
 				ints.Add(bodyFormat);
 
 				int itemClass = (int)mailItem.Class;
