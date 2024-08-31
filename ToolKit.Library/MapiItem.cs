@@ -45,19 +45,19 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				try
 				{
-					MailItem mailItem = session.GetItemFromID(duplicateId);
+					object mapiItem = session.GetItemFromID(duplicateId);
 
-					if (mailItem != null)
+					if (mapiItem != null)
 					{
 						bool isValidDuplicate =
-							DoubleCheckDuplicate(keeperSynopses, mailItem);
+							DoubleCheckDuplicate(keeperSynopses, mapiItem);
 
 						if (isValidDuplicate == true && dryRun == false)
 						{
-							mailItem.Delete();
+							DeleteItem(mapiItem);
 						}
 
-						Marshal.ReleaseComObject(mailItem);
+						Marshal.ReleaseComObject(mapiItem);
 					}
 				}
 				catch (System.Exception exception) when
@@ -165,17 +165,17 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Gets the item's hash.
 		/// </summary>
-		/// <param name="mailItem">The items to compute.</param>
+		/// <param name="mapiItem">The items to compute.</param>
 		/// <returns>The item's hash encoded in base 64.</returns>
-		public static string GetItemHash(MailItem mailItem)
+		public static string GetItemHash(object mapiItem)
 		{
 			string hashBase64 = null;
 
-			try
+			if (mapiItem != null)
 			{
-				if (mailItem != null)
+				try
 				{
-					byte[] finalBuffer = GetItemBytes(mailItem);
+					byte[] finalBuffer = GetItemBytes(mapiItem);
 
 #if NET5_0_OR_GREATER
 					byte[] hashValue = SHA256.HashData(finalBuffer);
@@ -185,22 +185,18 @@ namespace DigitalZenWorks.Email.ToolKit
 #endif
 					hashBase64 = Convert.ToBase64String(hashValue);
 				}
-			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is InvalidCastException ||
-				exception is OutOfMemoryException ||
-				exception is RankException)
-			{
-				if (mailItem != null)
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is OutOfMemoryException ||
+					exception is RankException)
 				{
-					LogException(mailItem);
+					LogException(mapiItem);
+					Log.Error(exception.ToString());
 				}
-
-				Log.Error(exception.ToString());
 			}
 
 			return hashBase64;
@@ -209,20 +205,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Gets the item's hash.
 		/// </summary>
-		/// <param name="mailItem">The items to compute.</param>
+		/// <param name="mapiItem">The items to compute.</param>
 		/// <returns>The item's hash encoded in base 64.</returns>
-		public static async Task<string> GetItemHashAsync(
-			MailItem mailItem)
+		public static async Task<string> GetItemHashAsync(object mapiItem)
 		{
 			string hashBase64 = null;
 			byte[] finalBuffer = null;
 
-			try
+			if (mapiItem != null)
 			{
-				if (mailItem != null)
+				try
 				{
 					finalBuffer = await Task.Run(() =>
-						GetItemBytes(mailItem)).ConfigureAwait(false);
+						GetItemBytes(mapiItem)).ConfigureAwait(false);
 
 #if NET5_0_OR_GREATER
 					byte[] hashValue = SHA256.HashData(finalBuffer);
@@ -232,22 +227,18 @@ namespace DigitalZenWorks.Email.ToolKit
 #endif
 					hashBase64 = Convert.ToBase64String(hashValue);
 				}
-			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is InvalidCastException ||
-				exception is OutOfMemoryException ||
-				exception is RankException)
-			{
-				if (mailItem != null)
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is OutOfMemoryException ||
+					exception is RankException)
 				{
-					LogException(mailItem);
+					LogException(mapiItem);
+					Log.Error(exception.ToString());
 				}
-
-				Log.Error(exception.ToString());
 			}
 
 			return hashBase64;
@@ -256,24 +247,35 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Get the item's synopses.
 		/// </summary>
-		/// <param name="mailItem">The MailItem to check.</param>
+		/// <param name="mapiItem">The specific MAPI item to check.</param>
 		/// <returns>The synoses of the item.</returns>
-		public static string GetItemSynopses(MailItem mailItem)
+		public static string GetItemSynopses(object mapiItem)
 		{
 			string synopses = null;
 
-			if (mailItem != null)
+			if (mapiItem != null)
 			{
-				string sentOn = mailItem.SentOn.ToString(
-					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-				synopses = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0}: From: {1}: {2} Subject: {3}",
-					sentOn,
-					mailItem.SenderName,
-					mailItem.SenderEmailAddress,
-					mailItem.Subject);
+				try
+				{
+					switch (mapiItem)
+					{
+						case AppointmentItem appointmentItem:
+							synopses = GetItemSynopses(appointmentItem);
+							break;
+						case MailItem mailItem:
+							synopses = GetItemSynopses(mailItem);
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
+					}
+				}
+				catch (COMException exception)
+				{
+					Log.Error(exception.ToString());
+				}
 			}
 
 			return synopses;
@@ -282,17 +284,45 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Get the current item's folder path.
 		/// </summary>
-		/// <param name="mailItem">The mailItem to check.</param>
+		/// <param name="mapiItem">The item to check.</param>
 		/// <returns>The current item's folder path.</returns>
-		public static string GetPath(MailItem mailItem)
+		public static string GetPath(object mapiItem)
 		{
 			string path = null;
 
-			if (mailItem != null)
+			if (mapiItem != null)
 			{
-				MAPIFolder parent = mailItem.Parent;
+				try
+				{
+					MAPIFolder parent = null;
 
-				path = OutlookFolder.GetFolderPath(parent);
+					switch (mapiItem)
+					{
+						case AppointmentItem appointmentItem:
+							parent = appointmentItem.Parent;
+							break;
+						case MailItem mailItem:
+							parent = mailItem.Parent;
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
+					}
+
+					path = OutlookFolder.GetFolderPath(parent);
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Error(exception.ToString());
+				}
 			}
 
 			return path;
@@ -303,7 +333,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="item">The item to move.</param>
 		/// <param name="destination">The destination folder.</param>
-		public static void Moveitem(object item, MAPIFolder destination)
+		public static void MoveItem(object item, MAPIFolder destination)
 		{
 			try
 			{
@@ -399,7 +429,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="destination">The destination folder.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous
 		/// operation.</returns>
-		public static async Task MoveitemAsync(
+		public static async Task MoveItemAsync(
 			object item, MAPIFolder destination)
 		{
 			CancellationTokenSource source = new ();
@@ -548,10 +578,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static bool DoubleCheckDuplicate(
-			string baseSynopses, MailItem mailItem)
+			string baseSynopses, object mapiItem)
 		{
 			bool valid = true;
-			string duplicateSynopses = GetItemSynopses(mailItem);
+			string duplicateSynopses = GetItemSynopses(mapiItem);
 
 			if (!duplicateSynopses.Equals(
 				baseSynopses, StringComparison.Ordinal))
@@ -565,47 +595,50 @@ namespace DigitalZenWorks.Email.ToolKit
 			return valid;
 		}
 
-		private static byte[] GetActions(MailItem mailItem)
+		private static byte[] GetActions(Actions actions)
 		{
-			byte[] actions = null;
+			byte[] actionsData = null;
 
-			try
+			if (actions != null)
 			{
-				int total = mailItem.Actions.Count;
-
-				for (int index = 1; index <= total; index++)
+				try
 				{
-					Microsoft.Office.Interop.Outlook.Action action =
-						mailItem.Actions[index];
+					int total = actions.Count;
 
-					byte[] metaDataBytes = GetActionData(action);
-
-					if (actions == null)
+					for (int index = 1; index <= total; index++)
 					{
-						actions = metaDataBytes;
-					}
-					else
-					{
-						actions =
-							BitBytes.MergeByteArrays(actions, metaDataBytes);
-					}
+						Microsoft.Office.Interop.Outlook.Action action =
+							actions[index];
 
-					Marshal.ReleaseComObject(action);
+						byte[] metaDataBytes = GetActionData(action);
+
+						if (actionsData == null)
+						{
+							actionsData = metaDataBytes;
+						}
+						else
+						{
+							actionsData =
+								BitBytes.MergeByteArrays(actionsData, metaDataBytes);
+						}
+
+						Marshal.ReleaseComObject(action);
+					}
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is COMException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Warn(exception.ToString());
 				}
 			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is COMException ||
-				exception is InvalidCastException ||
-				exception is RankException)
-			{
-				Log.Warn(exception.ToString());
-			}
 
-			return actions;
+			return actionsData;
 		}
 
 		private static byte[] GetActionData(
@@ -647,49 +680,51 @@ namespace DigitalZenWorks.Email.ToolKit
 			return metaDataBytes;
 		}
 
-		private static byte[] GetAttachments(MailItem mailItem)
+		private static byte[] GetAttachments(Attachments attachments)
 		{
-			byte[] attachments = null;
+			byte[] attachmentsData = null;
 
-			try
+			if (attachments != null)
 			{
-				string basePath = Path.GetTempPath();
-
-				int total = mailItem.Attachments.Count;
-
-				for (int index = 1; index <= total; index++)
+				try
 				{
-					Attachment attachment =
-						mailItem.Attachments[index];
+					string basePath = Path.GetTempPath();
 
-					byte[] attachementData = GetAttachmentData(attachment);
+					int total = attachments.Count;
 
-					if (attachments == null)
+					for (int index = 1; index <= total; index++)
 					{
-						attachments = attachementData;
-					}
-					else
-					{
-						attachments = BitBytes.MergeByteArrays(
-							attachments, attachementData);
-					}
+						Attachment attachment = attachments[index];
 
-					Marshal.ReleaseComObject(attachment);
+						byte[] attachementData = GetAttachmentData(attachment);
+
+						if (attachmentsData == null)
+						{
+							attachmentsData = attachementData;
+						}
+						else
+						{
+							attachmentsData = BitBytes.MergeByteArrays(
+								attachmentsData, attachementData);
+						}
+
+						Marshal.ReleaseComObject(attachment);
+					}
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is COMException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Warn(exception.ToString());
 				}
 			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is COMException ||
-				exception is InvalidCastException ||
-				exception is RankException)
-			{
-				Log.Warn(exception.ToString());
-			}
 
-			return attachments;
+			return attachmentsData;
 		}
 
 		private static byte[] GetAttachmentData(Attachment attachment)
@@ -712,12 +747,19 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			string metaData = string.Format(
 				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}",
+				"{0}{1}{2}{3}",
 				attachment.DisplayName,
-				attachment.FileName,
 				indexValue,
 				position,
 				attachmentType);
+
+			try
+			{
+				metaData += attachment.FileName;
+			}
+			catch (COMException)
+			{
+			}
 
 			try
 			{
@@ -740,38 +782,54 @@ namespace DigitalZenWorks.Email.ToolKit
 			return attachmentData;
 		}
 
-		private static byte[] GetBody(MailItem mailItem)
+		private static ushort GetBooleans(AppointmentItem appointmentItem)
 		{
-			byte[] allBody = null;
+			ushort boolHolder = 0;
 
 			try
 			{
-				Encoding encoding = Encoding.UTF8;
+				bool rawValue = appointmentItem.AllDayEvent;
+				boolHolder = BitBytes.SetBit(boolHolder, 0, rawValue);
 
-				string body = mailItem.Body;
-				string htmlBody = mailItem.HTMLBody;
+				rawValue = appointmentItem.AutoResolvedWinner;
+				boolHolder = BitBytes.SetBit(boolHolder, 1, rawValue);
 
-				byte[] bodyBytes = encoding.GetBytes(body);
-				byte[] htmlBodyBytes = encoding.GetBytes(htmlBody);
-				byte[] rtfBody = mailItem.RTFBody as byte[];
+				rawValue = appointmentItem.ForceUpdateToAllAttendees;
+				boolHolder = BitBytes.SetBit(boolHolder, 2, rawValue);
 
-				byte[] tempBody =
-					BitBytes.MergeByteArrays(bodyBytes, htmlBodyBytes);
-				allBody = BitBytes.MergeByteArrays(allBody, rtfBody);
+				rawValue = appointmentItem.IsConflict;
+				boolHolder = BitBytes.SetBit(boolHolder, 3, rawValue);
+
+				rawValue = appointmentItem.IsRecurring;
+				boolHolder = BitBytes.SetBit(boolHolder, 4, rawValue);
+
+				rawValue = appointmentItem.NoAging;
+				boolHolder = BitBytes.SetBit(boolHolder, 5, rawValue);
+
+				rawValue = appointmentItem.ReminderOverrideDefault;
+				boolHolder = BitBytes.SetBit(boolHolder, 6, rawValue);
+
+				rawValue = appointmentItem.ReminderPlaySound;
+				boolHolder = BitBytes.SetBit(boolHolder, 7, rawValue);
+
+				rawValue = appointmentItem.ReminderSet;
+				boolHolder = BitBytes.SetBit(boolHolder, 8, rawValue);
+
+				rawValue = appointmentItem.ResponseRequested;
+				boolHolder = BitBytes.SetBit(boolHolder, 9, rawValue);
+
+				rawValue = appointmentItem.Saved;
+				boolHolder = BitBytes.SetBit(boolHolder, 10, rawValue);
+
+				rawValue = appointmentItem.UnRead;
+				boolHolder = BitBytes.SetBit(boolHolder, 11, rawValue);
 			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is COMException ||
-				exception is InvalidCastException ||
-				exception is RankException)
+			catch (COMException exception)
 			{
 				Log.Warn(exception.ToString());
 			}
 
-			return allBody;
+			return boolHolder;
 		}
 
 		private static ushort GetBooleans(MailItem mailItem)
@@ -845,50 +903,16 @@ namespace DigitalZenWorks.Email.ToolKit
 			return boolHolder;
 		}
 
-		private static long GetBufferSize(
-			byte[] actions,
-			byte[] attachments,
-			byte[] dateTimes,
-			byte[] enums,
-			byte[] rtfBody,
-			byte[] strings,
-			byte[] userProperties)
+		private static long GetBufferSize(List<byte[]> buffers)
 		{
 			long bufferSize = 0;
 
-			if (actions != null)
+			foreach (byte[] buffer in buffers)
 			{
-				bufferSize += actions.LongLength;
-			}
-
-			if (attachments != null)
-			{
-				bufferSize += attachments.LongLength;
-			}
-
-			if (dateTimes != null)
-			{
-				bufferSize += dateTimes.LongLength;
-			}
-
-			if (enums != null)
-			{
-				bufferSize += enums.LongLength;
-			}
-
-			if (rtfBody != null)
-			{
-				bufferSize += rtfBody.LongLength;
-			}
-
-			if (strings != null)
-			{
-				bufferSize += strings.LongLength;
-			}
-
-			if (userProperties != null)
-			{
-				bufferSize += userProperties.LongLength;
+				if (buffer != null)
+				{
+					bufferSize += buffer.LongLength;
+				}
 			}
 
 			bufferSize += 2;
@@ -896,62 +920,51 @@ namespace DigitalZenWorks.Email.ToolKit
 			return bufferSize;
 		}
 
-		private static byte[] GetDateTimes(MailItem mailItem)
+		private static byte[] GetDateTimesBytes(List<DateTime> times)
+		{
+			byte[] data;
+
+			List<string> timesStrings = [];
+
+			foreach (DateTime time in times)
+			{
+				string timeString = time.ToString("O");
+				timesStrings.Add(timeString);
+			}
+
+			StringBuilder builder = new ();
+
+			foreach (string timeString in timesStrings)
+			{
+				builder.Append(timeString);
+			}
+
+			string buffer = builder.ToString();
+
+			Encoding encoding = Encoding.UTF8;
+			data = encoding.GetBytes(buffer);
+
+			return data;
+		}
+
+		private static byte[] GetDateTimes(AppointmentItem appointmentItem)
 		{
 			byte[] data = null;
 
 			try
 			{
-				DateTime deferredDeliveryTimeDateTime = DateTime.MinValue;
+				List<DateTime> times = [];
 
-				try
-				{
-					deferredDeliveryTimeDateTime =
-						mailItem.DeferredDeliveryTime;
-				}
-				catch (COMException)
-				{
-				}
+				DateTime endUTC = appointmentItem.EndUTC;
+				times.Add(endUTC);
 
-				DateTime expiryTimeDateTime = mailItem.ExpiryTime;
-				DateTime receivedTimeDateTime = mailItem.ReceivedTime;
-				DateTime reminderTimeDateTime = mailItem.ReminderTime;
-				DateTime retentionExpirationDateDateTime =
-					mailItem.RetentionExpirationDate;
-				DateTime sentOnDateTime = mailItem.SentOn;
-				DateTime taskCompletedDateDateTime =
-					mailItem.TaskCompletedDate;
-				DateTime taskDueDateDateTime = mailItem.TaskDueDate;
-				DateTime taskStartDateDateTime = mailItem.TaskStartDate;
+				DateTime replyTime = appointmentItem.ReplyTime;
+				times.Add(replyTime);
 
-				string deferredDeliveryTime =
-					deferredDeliveryTimeDateTime.ToString("O");
-				string expiryTime = expiryTimeDateTime.ToString("O");
-				string receivedTime = receivedTimeDateTime.ToString("O");
-				string reminderTime = reminderTimeDateTime.ToString("O");
-				string retentionExpirationDate =
-					retentionExpirationDateDateTime.ToString("O");
-				string sentOn = sentOnDateTime.ToString("O");
-				string taskCompletedDate =
-					taskCompletedDateDateTime.ToString("O");
-				string taskDueDate = taskDueDateDateTime.ToString("O");
-				string taskStartDate = taskStartDateDateTime.ToString("O");
+				DateTime startUTC = appointmentItem.StartUTC;
+				times.Add(startUTC);
 
-				string buffer = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0}{1}{2}{3}{4}{5}{6}{7}{8}",
-					deferredDeliveryTime,
-					expiryTime,
-					receivedTime,
-					reminderTime,
-					retentionExpirationDate,
-					sentOn,
-					taskCompletedDate,
-					taskDueDate,
-					taskStartDate);
-
-				Encoding encoding = Encoding.UTF8;
-				data = encoding.GetBytes(buffer);
+				data = GetDateTimesBytes(times);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -968,12 +981,128 @@ namespace DigitalZenWorks.Email.ToolKit
 			return data;
 		}
 
+		private static byte[] GetDateTimes(MailItem mailItem)
+		{
+			byte[] data = null;
+
+			try
+			{
+				List<DateTime> times = [];
+
+				DateTime deferredDeliveryTimeDateTime = DateTime.MinValue;
+
+				try
+				{
+					deferredDeliveryTimeDateTime =
+						mailItem.DeferredDeliveryTime;
+				}
+				catch (COMException)
+				{
+				}
+
+				times.Add(deferredDeliveryTimeDateTime);
+
+				DateTime expiryTimeDateTime = mailItem.ExpiryTime;
+				times.Add(expiryTimeDateTime);
+
+				DateTime receivedTimeDateTime = mailItem.ReceivedTime;
+				times.Add(receivedTimeDateTime);
+
+				DateTime reminderTimeDateTime = mailItem.ReminderTime;
+				times.Add(reminderTimeDateTime);
+
+				DateTime retentionExpirationDateDateTime =
+					mailItem.RetentionExpirationDate;
+				times.Add(retentionExpirationDateDateTime);
+
+				DateTime sentOnDateTime = mailItem.SentOn;
+				times.Add(sentOnDateTime);
+
+				DateTime taskCompletedDateDateTime =
+					mailItem.TaskCompletedDate;
+				times.Add(taskCompletedDateDateTime);
+
+				DateTime taskDueDateDateTime = mailItem.TaskDueDate;
+				times.Add(taskDueDateDateTime);
+
+				DateTime taskStartDateDateTime = mailItem.TaskStartDate;
+				times.Add(taskStartDateDateTime);
+
+				data = GetDateTimesBytes(times);
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is COMException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				Log.Warn(exception.ToString());
+			}
+
+			return data;
+		}
+
+		private static byte[] GetEnums(AppointmentItem appointmentItem)
+		{
+			byte[] buffer = null;
+
+			try
+			{
+				List<int> ints = [];
+
+				int busyStatus = (int)appointmentItem.BusyStatus;
+				ints.Add(busyStatus);
+
+				int itemClass = (int)appointmentItem.Class;
+				ints.Add(itemClass);
+
+				int importance = (int)appointmentItem.Importance;
+				ints.Add(importance);
+
+				int markForDownload = (int)appointmentItem.MarkForDownload;
+				ints.Add(markForDownload);
+
+				int meetingStatus = (int)appointmentItem.MeetingStatus;
+				ints.Add(meetingStatus);
+
+				int recurrenceState = (int)appointmentItem.RecurrenceState;
+				ints.Add(recurrenceState);
+
+				int responseStatus = (int)appointmentItem.ResponseStatus;
+				ints.Add(responseStatus);
+
+				int sensitivity = (int)appointmentItem.Sensitivity;
+				ints.Add(sensitivity);
+
+				buffer = GetEnumsBuffer(ints);
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is COMException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				LogException(appointmentItem);
+				Log.Error(exception.ToString());
+			}
+
+			return buffer;
+		}
+
 		private static byte[] GetEnums(MailItem mailItem)
 		{
 			byte[] buffer = null;
 
 			try
 			{
+				List<int> ints = [];
+
 				int bodyFormat = 0;
 
 				try
@@ -984,12 +1113,18 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 				}
 
+				ints.Add(bodyFormat);
+
 				int itemClass = (int)mailItem.Class;
+				ints.Add(itemClass);
+
 				int importance = (int)mailItem.Importance;
+				ints.Add(importance);
+
 				int markForDownload = (int)mailItem.MarkForDownload;
+				ints.Add(markForDownload);
+
 				int permission = 0;
-				int permissionService = (int)mailItem.PermissionService;
-				int sensitivity = (int)mailItem.Sensitivity;
 
 				try
 				{
@@ -999,33 +1134,15 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 				}
 
-				// 9 ints * size of int
-				int bufferSize = 9 * 4;
-				buffer = new byte[bufferSize];
+				ints.Add(permission);
 
-				int index = 0;
-				buffer =
-					BitBytes.CopyIntToByteArray(buffer, index, bodyFormat);
-				index += 4;
-				buffer = BitBytes.CopyIntToByteArray(buffer, index, itemClass);
-				index += 4;
-				buffer =
-					BitBytes.CopyIntToByteArray(buffer, index, importance);
-				index += 4;
-				buffer = BitBytes.CopyIntToByteArray(
-					buffer, index, markForDownload);
-				index += 4;
-				buffer =
-					BitBytes.CopyIntToByteArray(buffer, index, permission);
-				index += 4;
-				buffer = BitBytes.CopyIntToByteArray(
-					buffer, index, permissionService);
-				index += 4;
-				buffer =
-					BitBytes.CopyIntToByteArray(buffer, index, sensitivity);
-				index += 4;
-				buffer = BitBytes.CopyIntToByteArray(
-					buffer, index, mailItem.InternetCodepage);
+				int permissionService = (int)mailItem.PermissionService;
+				ints.Add(permissionService);
+
+				int sensitivity = (int)mailItem.Sensitivity;
+				ints.Add(sensitivity);
+
+				buffer = GetEnumsBuffer(ints);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -1043,176 +1160,392 @@ namespace DigitalZenWorks.Email.ToolKit
 			return buffer;
 		}
 
+		private static byte[] GetEnumsBuffer(List<int> ints)
+		{
+			// count of ints * size of int
+			int bufferSize = ints.Count * 4;
+			byte[] buffer = new byte[bufferSize];
+
+			int index = 0;
+			foreach (int item in ints)
+			{
+				buffer = BitBytes.CopyIntToByteArray(buffer, index, item);
+				index += 4;
+			}
+
+			return buffer;
+		}
+
 		private static byte[] GetItemBytes(
-			MailItem mailItem,
+			object mapiItem,
 			bool strict = false)
 		{
 			byte[] finalBuffer = null;
 
-			try
+			if (mapiItem != null)
 			{
-				if (mailItem != null)
+				try
 				{
-					ushort booleans = GetBooleans(mailItem);
+					List<byte[]> buffers = [];
+					ushort booleans = 0;
+					byte[] attachments = null;
+					byte[] recipients = null;
+					byte[] strings = null;
+					byte[] actions = null;
+					byte[] dateTimes = null;
+					byte[] enums = null;
 
-					byte[] actions = GetActions(mailItem);
-					byte[] attachments = GetAttachments(mailItem);
-					byte[] dateTimes = GetDateTimes(mailItem);
-					byte[] enums = GetEnums(mailItem);
-					byte[] rtfBody = null;
-
-					try
+					switch (mapiItem)
 					{
-						rtfBody = mailItem.RTFBody as byte[];
+						case AppointmentItem appointmentItem:
+							booleans = GetBooleans(appointmentItem);
+
+							actions = GetActions(appointmentItem.Actions);
+							buffers.Add(actions);
+
+							attachments = GetAttachments(appointmentItem.Attachments);
+							buffers.Add(attachments);
+
+							dateTimes = GetDateTimes(appointmentItem);
+							buffers.Add(dateTimes);
+
+							enums = GetEnums(appointmentItem);
+							buffers.Add(enums);
+
+							recipients = GetRecipients(appointmentItem.Recipients);
+							buffers.Add(recipients);
+
+							strings = GetStringProperties(appointmentItem, strict);
+							buffers.Add(strings);
+							break;
+						case MailItem mailItem:
+							booleans = GetBooleans(mailItem);
+
+							actions = GetActions(mailItem.Actions);
+							buffers.Add(actions);
+
+							attachments = GetAttachments(mailItem.Attachments);
+							buffers.Add(attachments);
+
+							dateTimes = GetDateTimes(mailItem);
+							buffers.Add(dateTimes);
+
+							enums = GetEnums(mailItem);
+							buffers.Add(enums);
+
+							recipients = GetRecipients(mailItem.Recipients);
+							buffers.Add(recipients);
+
+							byte[] rtfBody = null;
+
+							try
+							{
+								rtfBody = mailItem.RTFBody as byte[];
+							}
+							catch (COMException)
+							{
+								string path = GetPath(mailItem);
+
+								Log.Warn("Exception on RTFBody at: " + path);
+
+								string synopses = GetItemSynopses(mailItem);
+								Log.Warn(synopses);
+							}
+
+							if (rtfBody != null && strict == false)
+							{
+								rtfBody = RtfEmail.Trim(rtfBody);
+							}
+
+							buffers.Add(rtfBody);
+
+							strings = GetStringProperties(mailItem, strict);
+							buffers.Add(strings);
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
 					}
-					catch (System.Runtime.InteropServices.COMException)
-					{
-						string path = GetPath(mailItem);
 
-						Log.Warn("Exception on RTFBody at: " + path);
+					byte[] userProperties = GetUserProperties(mapiItem);
+					buffers.Add(userProperties);
 
-						string sentOn = mailItem.SentOn.ToString(
-							"yyyy-MM-dd HH:mm:ss",
-							CultureInfo.InvariantCulture);
-						LogFormatMessage.Warn(
-							"Item: {0}: From: {1}: {2} Subject: {3}",
-							sentOn,
-							mailItem.SenderName,
-							mailItem.SenderEmailAddress,
-							mailItem.Subject);
-					}
-
-					if (rtfBody != null && strict == false)
-					{
-						rtfBody = RtfEmail.Trim(rtfBody);
-					}
-
-					byte[] strings = GetStringProperties(mailItem, strict);
-					byte[] userProperties = GetUserProperties(mailItem);
-
-					long bufferSize = GetBufferSize(
-						actions,
-						attachments,
-						dateTimes,
-						enums,
-						rtfBody,
-						strings,
-						userProperties);
+					long bufferSize = GetBufferSize(buffers);
 
 					finalBuffer = new byte[bufferSize];
 
 					// combine the parts
-					long currentIndex = BitBytes.ArrayCopyConditional(
-						actions, ref finalBuffer, 0);
-
-					currentIndex = BitBytes.ArrayCopyConditional(
-						attachments, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						dateTimes, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						enums, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						rtfBody, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						strings, ref finalBuffer, currentIndex);
-					currentIndex = BitBytes.ArrayCopyConditional(
-						userProperties, ref finalBuffer, currentIndex);
+					long currentIndex = 0;
+					foreach (byte[] buffer in buffers)
+					{
+						currentIndex = BitBytes.ArrayCopyConditional(
+							buffer, ref finalBuffer, currentIndex);
+					}
 
 					finalBuffer = BitBytes.CopyUshortToByteArray(
 						finalBuffer, currentIndex, booleans);
 				}
-			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is InvalidCastException ||
-				exception is RankException)
-			{
-				Log.Error(exception.ToString());
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Error(exception.ToString());
+				}
 			}
 
 			return finalBuffer;
+		}
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="appointmentItem">The AppointmentItemto check.</param>
+		/// <returns>The synoses of the item.</returns>
+		private static string GetItemSynopses(AppointmentItem appointmentItem)
+		{
+			string synopses = null;
+
+			if (appointmentItem != null)
+			{
+				string sentOn = appointmentItem.Start.ToString(
+					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+				synopses = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: From: {1}: {2} Subject: {3}",
+					sentOn,
+					appointmentItem.Organizer,
+					appointmentItem.Subject,
+					appointmentItem.Body);
+			}
+
+			return synopses;
+		}
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="mailItem">The MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		private static string GetItemSynopses(MailItem mailItem)
+		{
+			string synopses = null;
+
+			if (mailItem != null)
+			{
+				string sentOn = mailItem.SentOn.ToString(
+					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+				synopses = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: From: {1}: {2} Subject: {3}",
+					sentOn,
+					mailItem.SenderName,
+					mailItem.SenderEmailAddress,
+					mailItem.Subject);
+			}
+
+			return synopses;
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage(
 			"StyleCop.CSharp.NamingRules",
 			"SA1305:Field names should not use Hungarian notation",
 			Justification = "It isn't hungarian notation.")]
-		private static string GetRecipients(MailItem mailItem)
+		private static byte[] GetRecipients(Recipients recipients)
 		{
-			string recipients;
-			List<string> toList = [];
-			List<string> ccList = [];
-			List<string> bccList = [];
+			byte[] data = null;
 
-			int total = mailItem.Recipients.Count;
-
-			for (int index = 1; index <= total; index++)
+			if (recipients != null)
 			{
-				Recipient recipient = mailItem.Recipients[index];
-				string name = recipient.Name;
-				string address = recipient.Address;
-
-				string formattedRecipient = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0} <{1}>; ",
-					name,
-					address);
-
-				OlMailRecipientType recipientType =
-					(OlMailRecipientType)recipient.Type;
-				switch (recipientType)
+				try
 				{
-					case OlMailRecipientType.olTo:
-						toList.Add(formattedRecipient);
-						break;
-					case OlMailRecipientType.olCC:
-						ccList.Add(formattedRecipient);
-						break;
-					case OlMailRecipientType.olBCC:
-						bccList.Add(formattedRecipient);
-						break;
-					case OlMailRecipientType.olOriginator:
-						Log.Warn("Ignoring olOriginator recipient type");
-						break;
-					default:
-						Log.Warn("Ignoring uknown recipient type");
-						break;
+					string recipientsData = null;
+					List<string> toList = [];
+					List<string> ccList = [];
+					List<string> bccList = [];
+
+					int total = recipients.Count;
+
+					for (int index = 1; index <= total; index++)
+					{
+						Recipient recipient = recipients[index];
+						string name = recipient.Name;
+						string address = recipient.Address;
+
+						string formattedRecipient = string.Format(
+							CultureInfo.InvariantCulture,
+							"{0} <{1}>; ",
+							name,
+							address);
+
+						OlMailRecipientType recipientType =
+							(OlMailRecipientType)recipient.Type;
+
+						switch (recipientType)
+						{
+							case OlMailRecipientType.olTo:
+								toList.Add(formattedRecipient);
+								break;
+							case OlMailRecipientType.olCC:
+								ccList.Add(formattedRecipient);
+								break;
+							case OlMailRecipientType.olBCC:
+								bccList.Add(formattedRecipient);
+								break;
+							case OlMailRecipientType.olOriginator:
+								Log.Warn("Ignoring olOriginator recipient type");
+								break;
+							default:
+								Log.Warn("Ignoring uknown recipient type");
+								break;
+						}
+
+						Marshal.ReleaseComObject(recipient);
+					}
+
+					toList.Sort();
+					ccList.Sort();
+					bccList.Sort();
+
+					StringBuilder builder = new ();
+
+					foreach (string formattedRecipient in toList)
+					{
+						builder.Append(formattedRecipient);
+					}
+
+					foreach (string formattedRecipient in ccList)
+					{
+						builder.Append(formattedRecipient);
+					}
+
+					foreach (string formattedRecipient in bccList)
+					{
+						builder.Append(formattedRecipient);
+					}
+
+					recipientsData = builder.ToString();
+
+					Encoding encoding = Encoding.UTF8;
+					data = encoding.GetBytes(recipientsData);
 				}
-
-				Marshal.ReleaseComObject(recipient);
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is COMException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Error(exception.ToString());
+				}
 			}
 
-			toList.Sort();
-			ccList.Sort();
-			bccList.Sort();
-
-			StringBuilder builder = new ();
-
-			foreach (string formattedRecipient in toList)
-			{
-				builder.Append(formattedRecipient);
-			}
-
-			foreach (string formattedRecipient in ccList)
-			{
-				builder.Append(formattedRecipient);
-			}
-
-			foreach (string formattedRecipient in bccList)
-			{
-				builder.Append(formattedRecipient);
-			}
-
-			recipients = builder.ToString();
-
-			return recipients;
+			return data;
 		}
 
 		private static byte[] GetStringProperties(
-			MailItem mailItem, bool ignoreConversation = true, bool strict = false)
+			AppointmentItem appointmentItem,
+			bool strict = false,
+			bool ignoreConversation = true)
+		{
+			byte[] data = null;
+
+			try
+			{
+				string billingInformation = null;
+
+				try
+				{
+					billingInformation = appointmentItem.BillingInformation;
+				}
+				catch (COMException)
+				{
+				}
+
+				string body = appointmentItem.Body;
+
+				if (body != null && strict == false)
+				{
+					body = body.TrimEnd();
+				}
+
+				string categories = appointmentItem.Categories;
+				string companies = appointmentItem.Companies;
+
+				string conversationID = null;
+
+				string conversationTopic = appointmentItem.ConversationTopic;
+				string globalAppointmentID = null;
+
+				if (ignoreConversation == false)
+				{
+					conversationID = appointmentItem.ConversationID;
+					globalAppointmentID = appointmentItem.GlobalAppointmentID;
+				}
+
+				string location = appointmentItem.Location;
+				string meetingWorkspaceURL = appointmentItem.MeetingWorkspaceURL;
+				string messageClass = appointmentItem.MessageClass;
+				string mileage = appointmentItem.Mileage;
+				string optionalAttendees = appointmentItem.OptionalAttendees;
+				string organizer = appointmentItem.Organizer;
+				string reminderSoundFile = appointmentItem.ReminderSoundFile;
+				string requiredAttendees = appointmentItem.RequiredAttendees;
+				string resources = appointmentItem.Resources;
+				string subject = appointmentItem.Subject;
+
+				StringBuilder builder = new ();
+				builder.Append(billingInformation);
+				builder.Append(body);
+				builder.Append(categories);
+				builder.Append(companies);
+				builder.Append(conversationID);
+				builder.Append(conversationTopic);
+				builder.Append(globalAppointmentID);
+				builder.Append(location);
+				builder.Append(meetingWorkspaceURL);
+				builder.Append(messageClass);
+				builder.Append(mileage);
+				builder.Append(optionalAttendees);
+				builder.Append(organizer);
+				builder.Append(reminderSoundFile);
+				builder.Append(requiredAttendees);
+				builder.Append(resources);
+				builder.Append(subject);
+
+				string buffer = builder.ToString();
+
+				Encoding encoding = Encoding.UTF8;
+				data = encoding.GetBytes(buffer);
+			}
+			catch (System.Exception exception) when
+				(exception is ArgumentException ||
+				exception is ArgumentNullException ||
+				exception is ArgumentOutOfRangeException ||
+				exception is ArrayTypeMismatchException ||
+				exception is COMException ||
+				exception is InvalidCastException ||
+				exception is RankException)
+			{
+				Log.Error(exception.ToString());
+			}
+
+			return data;
+		}
+
+		private static byte[] GetStringProperties(
+			MailItem mailItem,
+			bool strict = false,
+			bool ignoreConversation = true)
 		{
 			byte[] data = null;
 
@@ -1355,44 +1688,73 @@ namespace DigitalZenWorks.Email.ToolKit
 			return data;
 		}
 
-		private static byte[] GetUserProperties(MailItem mailItem)
+		private static byte[] GetUserProperties(object mapiItem)
 		{
 			byte[] properties = null;
 
-			try
+			if (mapiItem != null)
 			{
-				int total = mailItem.UserProperties.Count;
-
-				for (int index = 1; index <= total; index++)
+				try
 				{
-					UserProperty property = mailItem.UserProperties[index];
+					UserProperties userProperties = null;
 
-					byte[] userPropertyData = GetUserPropertyData(property);
-
-					if (properties == null)
+					switch (mapiItem)
 					{
-						properties = userPropertyData;
-					}
-					else
-					{
-						properties = BitBytes.MergeByteArrays(
-							properties, userPropertyData);
+						case AppointmentItem appointmentItem:
+							userProperties = appointmentItem.UserProperties;
+							break;
+						case MailItem mailItem:
+							userProperties = mailItem.UserProperties;
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
 					}
 
-					Marshal.ReleaseComObject(property);
+					if (userProperties != null)
+					{
+						int total = userProperties.Count;
+
+						for (int index = 1; index <= total; index++)
+						{
+							UserProperty property = userProperties[index];
+							properties = GetUserProperty(properties, property);
+						}
+					}
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is COMException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Warn(exception.ToString());
 				}
 			}
-			catch (System.Exception exception) when
-				(exception is ArgumentException ||
-				exception is ArgumentNullException ||
-				exception is ArgumentOutOfRangeException ||
-				exception is ArrayTypeMismatchException ||
-				exception is COMException ||
-				exception is InvalidCastException ||
-				exception is RankException)
+
+			return properties;
+		}
+
+		private static byte[] GetUserProperty(byte[] properties, UserProperty property)
+		{
+			byte[] userPropertyData = GetUserPropertyData(property);
+
+			if (properties == null)
 			{
-				Log.Warn(exception.ToString());
+				properties = userPropertyData;
 			}
+			else
+			{
+				properties = BitBytes.MergeByteArrays(
+					properties, userPropertyData);
+			}
+
+			Marshal.ReleaseComObject(property);
 
 			return properties;
 		}
@@ -1424,21 +1786,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			return metaDataBytes;
 		}
 
-		private static void LogException(MailItem mailItem)
+		private static void LogException(object mapiItem)
 		{
-			string path = GetPath(mailItem);
+			string path = GetPath(mapiItem);
 			Log.Error("Exception at: " + path);
 
-			string sentOn = mailItem.SentOn.ToString(
-				"yyyy-MM-dd HH:mm:ss",
-				CultureInfo.InvariantCulture);
-
-			LogFormatMessage.Error(
-				"Item: {0}: From: {1}: {2} Subject: {3}",
-				sentOn,
-				mailItem.SenderName,
-				mailItem.SenderEmailAddress,
-				mailItem.Subject);
+			string synopses = GetItemSynopses(mapiItem);
+			LogFormatMessage.Error("Item: {0}:", synopses);
 		}
 
 		private static string NormalizeHeaders(string headers)

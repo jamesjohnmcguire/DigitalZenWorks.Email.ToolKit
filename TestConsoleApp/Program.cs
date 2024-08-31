@@ -13,7 +13,6 @@ using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -23,6 +22,8 @@ using System.Text.RegularExpressions;
 using CommonLogging = Common.Logging;
 
 [assembly: CLSCompliant(true)]
+#pragma warning disable IDE0051
+#pragma warning disable IDE0059
 
 namespace DigitalZenWorks.Email.ToolKit.Test
 {
@@ -60,6 +61,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			TestTargetFrameworks();
 
+			TestDeleteCalendarItem(outlookAccount);
 			TestGetHash(outlookAccount);
 
 			TestMsgCompare(outlookAccount);
@@ -129,6 +131,35 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				new FileStream(msgPath, FileMode.Create);
 
 			Converter.ConvertEmlToMsg(dbxStream, msgStream);
+		}
+
+		private static void TestDeleteCalendarItem(OutlookAccount outlookAccount)
+		{
+			string storePath = @"C:\Users\JamesMc\Data\ProgramData\Outlook\" +
+				"Test.pst";
+
+			Store store = outlookAccount.GetStore(storePath);
+
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Calendar");
+
+			Items items = mainFolder.Items;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int index = items.Count; index > 0; index--)
+			{
+				object item = items[index];
+
+				if (item != null)
+				{
+					AppointmentItem? appointmentItem = item as AppointmentItem;
+
+					appointmentItem!.Delete();
+				}
+			}
 		}
 
 		private static void TestFolder(string path, Encoding encoding)

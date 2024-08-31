@@ -7,7 +7,6 @@
 using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1417,13 +1416,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static void MoveItem(MAPIFolder destination, object item)
 		{
-			MapiItem.Moveitem(item, destination);
+			MapiItem.MoveItem(item, destination);
 		}
 
 		private static async Task MoveItemAsync(
 			MAPIFolder destination, object item)
 		{
-			await MapiItem.MoveitemAsync(item, destination).
+			await MapiItem.MoveItemAsync(item, destination).
 				ConfigureAwait(false);
 		}
 
@@ -1493,43 +1492,59 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private void AddItemHashToTable(MAPIFolder folder, object item)
 		{
+			string entryId = null;
+
 			switch (item)
 			{
-				// Initially, just focus on MailItems
+				case AppointmentItem appointmentItem:
+					entryId = appointmentItem.EntryID;
+					break;
 				case MailItem mailItem:
-					string entryId = mailItem.EntryID;
-					string hash = MapiItem.GetItemHash(mailItem);
-
-					storeHashTable =
-						AddHashToTable(storeHashTable, hash, entryId);
-
-					Marshal.ReleaseComObject(mailItem);
+					entryId = mailItem.EntryID;
 					break;
 				default:
-					Log.Info("Ignoring item of non-MailItem type: ");
+					Log.Info("Ignoring item of non-supported type");
 					break;
+			}
+
+			if (entryId != null)
+			{
+				string hash = MapiItem.GetItemHash(item);
+
+				storeHashTable =
+					AddHashToTable(storeHashTable, hash, entryId);
+
+				Marshal.ReleaseComObject(item);
 			}
 		}
 
 		private async Task AddItemHashToTableAsync(
 			MAPIFolder folder, object item)
 		{
+			string entryId = null;
+
 			switch (item)
 			{
-				// Initially, just focus on MailItems
+				case AppointmentItem appointmentItem:
+					entryId = appointmentItem.EntryID;
+					break;
 				case MailItem mailItem:
-					string entryId = mailItem.EntryID;
-					string hash = await MapiItem.GetItemHashAsync(mailItem).
-						ConfigureAwait(false);
-
-					storeHashTable =
-						AddHashToTable(storeHashTable, hash, entryId);
-
-					Marshal.ReleaseComObject(mailItem);
+					entryId = mailItem.EntryID;
 					break;
 				default:
-					Log.Info("Ignoring item of non-MailItem type: ");
+					Log.Info("Ignoring item of non-supported type");
 					break;
+			}
+
+			if (entryId != null)
+			{
+				string hash = await MapiItem.GetItemHashAsync(item).
+					ConfigureAwait(false);
+
+				storeHashTable =
+					AddHashToTable(storeHashTable, hash, entryId);
+
+				Marshal.ReleaseComObject(item);
 			}
 		}
 
@@ -1605,15 +1620,18 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			NameSpace session = outlookAccount.Session;
 
-			MailItem mailItem = session.GetItemFromID(keeper);
-			string keeperSynopses = MapiItem.GetItemSynopses(mailItem);
+			object mapiItem = session.GetItemFromID(keeper);
+			string keeperSynopses = MapiItem.GetItemSynopses(mapiItem);
 
 			string message = string.Format(
 				CultureInfo.InvariantCulture,
 				"{0} Duplicates Found for: ",
 				removeDuplicates.ToString(CultureInfo.InvariantCulture));
 
-			ListItem(mailItem, message);
+			LogFormatMessage.Info(
+				"{0} {1}",
+				message,
+				keeperSynopses);
 
 			foreach (string duplicateId in duplicateSet)
 			{
