@@ -140,26 +140,26 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 			Store store = outlookAccount.GetStore(storePath);
 
-			MAPIFolder rootFolder = store.GetRootFolder();
+			Folder? rootFolder = store.GetRootFolder() as Folder;
 
-			MAPIFolder mainFolder = OutlookFolder.AddFolder(
-				rootFolder, "Calendar");
+			//Folder mainFolder = OutlookFolder.AddFolder(
+			//	rootFolder, "Calendar");
 
-			Items items = mainFolder.Items;
+			//Items items = mainFolder.Items;
 
-			// Office uses 1 based indexes from VBA.
-			// Iterate in reverse order as the group may change.
-			for (int index = items.Count; index > 0; index--)
-			{
-				object item = items[index];
+			//// Office uses 1 based indexes from VBA.
+			//// Iterate in reverse order as the group may change.
+			//for (int index = items.Count; index > 0; index--)
+			//{
+			//	object item = items[index];
 
-				if (item != null)
-				{
-					AppointmentItem? appointmentItem = item as AppointmentItem;
+			//	if (item != null)
+			//	{
+			//		AppointmentItem? appointmentItem = item as AppointmentItem;
 
-					appointmentItem!.Delete();
-				}
-			}
+			//		appointmentItem!.Delete();
+			//	}
+			//}
 		}
 
 		private static void TestFolder(string path, Encoding encoding)
@@ -304,7 +304,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			Store store = outlookAccount.GetStore(storePath);
 
 			// Create top level folders
-			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder? rootFolder = store.GetRootFolder() as MAPIFolder;
 
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
