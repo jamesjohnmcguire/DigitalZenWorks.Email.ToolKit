@@ -22,6 +22,8 @@ using System.Text.RegularExpressions;
 using CommonLogging = Common.Logging;
 
 [assembly: CLSCompliant(true)]
+#pragma warning disable IDE0051
+#pragma warning disable IDE0059
 
 namespace DigitalZenWorks.Email.ToolKit.Test
 {
@@ -133,9 +135,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 		private static void TestDeleteCalendarItem(OutlookAccount outlookAccount)
 		{
-//			string storePath = @"C:\Users\JamesMc\Data\ProgramData\Outlook\" +
-//				"Test.pst";
-			string storePath = @"C:\Users\JamesMc\Documents\Outlook Files\" +
+			string storePath = @"C:\Users\JamesMc\Data\ProgramData\Outlook\" +
 				"Test.pst";
 
 			Store store = outlookAccount.GetStore(storePath);
