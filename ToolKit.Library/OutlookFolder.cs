@@ -1136,7 +1136,11 @@ namespace DigitalZenWorks.Email.ToolKit
 					sourceName,
 					destinationName);
 
-				MoveFolderItems(source, destination);
+				ItemsIterator(
+					source,
+					destination,
+					MapiItem.MoveItem,
+					"Moving Items from: ");
 				MoveSubFolders(source, destination);
 			}
 		}
@@ -1179,7 +1183,11 @@ namespace DigitalZenWorks.Email.ToolKit
 					sourceName,
 					destinationName);
 
-				await MoveFolderItemsAsync(source, destination).
+				await ItemsIteratorAsync(
+					source,
+					destination,
+					MapiItem.MoveItemAsync,
+					"Moving Items from: ").
 					ConfigureAwait(false);
 				await MoveSubFoldersAsync(source, destination).
 					ConfigureAwait(false);
@@ -1473,23 +1481,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return removed;
-		}
-
-		private static void MoveFolderItems(
-			MAPIFolder source, MAPIFolder destination)
-		{
-			ItemsIterator(
-				source, destination, MapiItem.MoveItem, "Moving Items from: ");
-		}
-
-		private static async Task MoveFolderItemsAsync(
-			MAPIFolder source, MAPIFolder destination)
-		{
-			await ItemsIteratorAsync(
-				source,
-				destination,
-				MapiItem.MoveItemAsync,
-				"Moving Items from: ").ConfigureAwait(false);
 		}
 
 		private static int RemoveEmptyFolder(MAPIFolder folder, bool condition)
