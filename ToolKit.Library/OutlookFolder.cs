@@ -49,10 +49,41 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// </summary>
 	/// <param name="folder">The folder to use.</param>
 	/// <param name="item">The item to use.</param>
-	/// <returns>A <see cref="Task"/> representing the asynchronous
-	/// operation.</returns>
+	/// <returns>A value processed from the delegate.</returns>
 	public delegate Task ItemActionAsync(
 		MAPIFolder folder, object item);
+
+	/// <summary>
+	/// Item action Delegate.
+	/// </summary>
+	/// <param name="item">The item to use.</param>
+	/// <param name="folder">The folder to use.</param>
+	public delegate void ItemActionMove(
+		object item, MAPIFolder folder);
+
+	/// <summary>
+	/// Item action Delegate.
+	/// </summary>
+	/// <param name="item">The item to use.</param>
+	/// <param name="folder">The folder to use.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
+	public delegate Task ItemActionMoveAsync(
+		object item, MAPIFolder folder);
+
+	/// <summary>
+	/// Item action Delegate.
+	/// </summary>
+	/// <param name="item">The item to use.</param>
+	public delegate void ItemIteratorAction(object item);
+
+	/// <summary>
+	/// Item action Delegate.
+	/// </summary>
+	/// <param name="item">The item to use.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
+	public delegate Task ItemIteratorActionAsync(object item);
 
 	/// <summary>
 	/// Represents an Outlook Folder.
@@ -1310,8 +1341,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static void ItemsIterator(
 			MAPIFolder source,
-			MAPIFolder destination,
-			ItemAction itemAction,
+			ItemIteratorAction itemAction,
 			string messageTemplate)
 		{
 			Items items = source.Items;
@@ -1333,7 +1363,38 @@ namespace DigitalZenWorks.Email.ToolKit
 						ascendingCount.ToString(CultureInfo.InvariantCulture));
 				}
 
-				itemAction(destination, item);
+				itemAction(item);
+
+				ascendingCount++;
+			}
+		}
+
+		private static void ItemsIterator(
+			MAPIFolder source,
+			MAPIFolder destination,
+			ItemActionMove itemAction,
+			string messageTemplate)
+		{
+			Items items = source.Items;
+
+			int ascendingCount = 1;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int index = items.Count; index > 0; index--)
+			{
+				object item = items[index];
+
+				int sectionIndicator = ascendingCount % 100;
+
+				if (ascendingCount == 1 || sectionIndicator == 0)
+				{
+					Log.Info(
+						messageTemplate +
+						ascendingCount.ToString(CultureInfo.InvariantCulture));
+				}
+
+				itemAction(item, destination);
 
 				ascendingCount++;
 			}
@@ -1342,7 +1403,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static async Task ItemsIteratorAsync(
 			MAPIFolder source,
 			MAPIFolder destination,
-			ItemActionAsync itemAction,
+			ItemActionMoveAsync itemAction,
 			string messageTemplate)
 		{
 			Items items = source.Items;
@@ -1367,7 +1428,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						Log.Info(message);
 					}
 
-					await itemAction(destination, item).ConfigureAwait(false);
+					await itemAction(item, destination).ConfigureAwait(false);
 
 					ascendingCount++;
 				}
@@ -1414,31 +1475,21 @@ namespace DigitalZenWorks.Email.ToolKit
 			return removed;
 		}
 
-		private static void MoveItem(MAPIFolder destination, object item)
-		{
-			MapiItem.MoveItem(item, destination);
-		}
-
-		private static async Task MoveItemAsync(
-			MAPIFolder destination, object item)
-		{
-			await MapiItem.MoveItemAsync(item, destination).
-				ConfigureAwait(false);
-		}
-
 		private static void MoveFolderItems(
 			MAPIFolder source, MAPIFolder destination)
 		{
 			ItemsIterator(
-				source, destination, MoveItem, "Moving Items from: ");
+				source, destination, MapiItem.MoveItem, "Moving Items from: ");
 		}
 
 		private static async Task MoveFolderItemsAsync(
 			MAPIFolder source, MAPIFolder destination)
 		{
 			await ItemsIteratorAsync(
-				source, destination, MoveItemAsync, "Moving Items from: ").
-				ConfigureAwait(false);
+				source,
+				destination,
+				MapiItem.MoveItemAsync,
+				"Moving Items from: ").ConfigureAwait(false);
 		}
 
 		private static int RemoveEmptyFolder(MAPIFolder folder, bool condition)
@@ -1490,7 +1541,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return path;
 		}
 
-		private void AddItemHashToTable(MAPIFolder folder, object item)
+		private void AddItemHashToTable(object item)
 		{
 			string entryId = null;
 
@@ -1519,7 +1570,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private async Task AddItemHashToTableAsync(
-			MAPIFolder folder, object item)
+			object item, MAPIFolder folder)
 		{
 			string entryId = null;
 
@@ -1548,7 +1599,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private void AddSenderCount(MAPIFolder folder, object item)
+		private void AddSenderCount(object item)
 		{
 			switch (item)
 			{
@@ -1660,7 +1711,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				ItemsIterator(
 					folder,
-					folder,
 					AddItemHashToTable,
 					"Getting Item Hashes from: ");
 			}
@@ -1716,7 +1766,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (folder != null)
 			{
 				ItemsIterator(
-					folder,
 					folder,
 					AddSenderCount,
 					"Getting Item Senders Count from: ");
