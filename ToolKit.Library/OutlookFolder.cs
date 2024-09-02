@@ -1396,6 +1396,45 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static async Task ItemsIteratorAsync(
 			MAPIFolder source,
+			ItemIteratorActionAsync itemAction,
+			string messageTemplate)
+		{
+			Items items = source.Items;
+
+			int ascendingCount = 1;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int index = items.Count; index > 0; index--)
+			{
+				try
+				{
+					object item = items[index];
+
+					LogItemCount(messageTemplate, ascendingCount);
+
+					await itemAction(item).ConfigureAwait(false);
+
+					ascendingCount++;
+				}
+				catch (COMException exception)
+				{
+					string path = GetFolderPath(source);
+
+					string message = string.Format(
+						CultureInfo.InvariantCulture,
+						"Exception at: {0} index: {1}",
+						path,
+						index.ToString(CultureInfo.InvariantCulture));
+
+					Log.Error(message);
+					Log.Error(exception.ToString());
+				}
+			}
+		}
+
+		private static async Task ItemsIteratorAsync(
+			MAPIFolder source,
 			MAPIFolder destination,
 			ItemActionMoveAsync itemAction,
 			string messageTemplate)
@@ -1540,8 +1579,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private async Task AddItemHashToTableAsync(
-			object item, MAPIFolder folder)
+		private async Task AddItemHashToTableAsync(object item)
 		{
 			string entryId = null;
 
@@ -1706,7 +1744,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				storeHashTable = new Dictionary<string, IList<string>>();
 
 				await ItemsIteratorAsync(
-					folder,
 					folder,
 					AddItemHashToTableAsync,
 					"Getting Item Hashes from: ").ConfigureAwait(false);
