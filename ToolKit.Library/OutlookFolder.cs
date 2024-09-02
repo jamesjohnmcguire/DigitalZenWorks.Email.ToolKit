@@ -1361,13 +1361,20 @@ namespace DigitalZenWorks.Email.ToolKit
 			// Iterate in reverse order as the group may change.
 			for (int index = items.Count; index > 0; index--)
 			{
-				object item = items[index];
+				try
+				{
+					object item = items[index];
 
-				LogItemCount(messageTemplate, ascendingCount);
+					LogItemCount(messageTemplate, ascendingCount);
 
-				itemAction(item);
+					itemAction(item);
 
-				ascendingCount++;
+					ascendingCount++;
+				}
+				catch (COMException exception)
+				{
+					LogIteratorException(exception, source, index);
+				}
 			}
 		}
 
@@ -1385,13 +1392,20 @@ namespace DigitalZenWorks.Email.ToolKit
 			// Iterate in reverse order as the group may change.
 			for (int index = items.Count; index > 0; index--)
 			{
-				object item = items[index];
+				try
+				{
+					object item = items[index];
 
-				LogItemCount(messageTemplate, ascendingCount);
+					LogItemCount(messageTemplate, ascendingCount);
 
-				itemAction(item, destination);
+					itemAction(item, destination);
 
-				ascendingCount++;
+					ascendingCount++;
+				}
+				catch (COMException exception)
+				{
+					LogIteratorException(exception, source, index);
+				}
 			}
 		}
 
