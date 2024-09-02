@@ -6,7 +6,7 @@
 
 using Microsoft.Office.Interop.Outlook;
 
-namespace ToolKit.Library
+namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
 	/// Content Item Interface.
