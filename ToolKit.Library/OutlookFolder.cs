@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -1419,16 +1420,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				catch (COMException exception)
 				{
-					string path = GetFolderPath(source);
-
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"Exception at: {0} index: {1}",
-						path,
-						index.ToString(CultureInfo.InvariantCulture));
-
-					Log.Error(message);
-					Log.Error(exception.ToString());
+					LogIteratorException(exception, source, index);
 				}
 			}
 		}
@@ -1459,16 +1451,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				catch (COMException exception)
 				{
-					string path = GetFolderPath(source);
-
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"Exception at: {0} index: {1}",
-						path,
-						index.ToString(CultureInfo.InvariantCulture));
-
-					Log.Error(message);
-					Log.Error(exception.ToString());
+					LogIteratorException(exception, source, index);
 				}
 			}
 		}
@@ -1487,6 +1470,24 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				Log.Info(message);
 			}
+		}
+
+		private static void LogIteratorException(
+			COMException exception, MAPIFolder source, int index)
+		{
+			string path = GetFolderPath(source);
+
+			string indexText =
+				index.ToString(CultureInfo.InvariantCulture);
+
+			string message = string.Format(
+				CultureInfo.InvariantCulture,
+				"Exception at: {0} index: {1}",
+				path,
+				indexText);
+
+			Log.Error(message);
+			Log.Error(exception.ToString());
 		}
 
 		private static bool MergeDeletedItemsFolder(MAPIFolder folder)
