@@ -1362,14 +1362,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				object item = items[index];
 
-				int sectionIndicator = ascendingCount % 100;
-
-				if (ascendingCount == 1 || sectionIndicator == 0)
-				{
-					Log.Info(
-						messageTemplate +
-						ascendingCount.ToString(CultureInfo.InvariantCulture));
-				}
+				LogItemCount(messageTemplate, ascendingCount);
 
 				itemAction(item);
 
@@ -1393,14 +1386,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				object item = items[index];
 
-				int sectionIndicator = ascendingCount % 100;
-
-				if (ascendingCount == 1 || sectionIndicator == 0)
-				{
-					Log.Info(
-						messageTemplate +
-						ascendingCount.ToString(CultureInfo.InvariantCulture));
-				}
+				LogItemCount(messageTemplate, ascendingCount);
 
 				itemAction(item, destination);
 
@@ -1426,15 +1412,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					object item = items[index];
 
-					int sectionIndicator = ascendingCount % 100;
-
-					if (ascendingCount == 1 || sectionIndicator == 0)
-					{
-						string count =
-							ascendingCount.ToString(CultureInfo.InvariantCulture);
-						string message = messageTemplate + count;
-						Log.Info(message);
-					}
+					LogItemCount(messageTemplate, ascendingCount);
 
 					await itemAction(item, destination).ConfigureAwait(false);
 
@@ -1456,18 +1434,20 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private static void ListItem(MailItem mailItem, string prefixMessage)
+		private static void LogItemCount(
+			string messageTemplate, int ascendingCount)
 		{
-			string sentOn = mailItem.SentOn.ToString(
-				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+			int sectionIndicator = ascendingCount % 100;
 
-			LogFormatMessage.Info(
-				"{0} {1}: From: {2}: {3} Subject: {4}",
-				prefixMessage,
-				sentOn,
-				mailItem.SenderName,
-				mailItem.SenderEmailAddress,
-				mailItem.Subject);
+			if (ascendingCount == 1 || sectionIndicator == 0)
+			{
+				string ascendingCountText = ascendingCount.ToString(
+					CultureInfo.InvariantCulture);
+
+				string message = messageTemplate + ascendingCountText;
+
+				Log.Info(message);
+			}
 		}
 
 		private static bool MergeDeletedItemsFolder(MAPIFolder folder)
