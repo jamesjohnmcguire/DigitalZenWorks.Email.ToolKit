@@ -8,6 +8,7 @@ using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -79,6 +80,28 @@ namespace DigitalZenWorks.Email.ToolKit
 			buffers.Add(itemBytes);
 
 			return buffers;
+		}
+
+		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <returns>The synoses of the item.</returns>
+		public string GetSynopses()
+		{
+			string synopses = null;
+
+			string sentOn = appointmentItem.Start.ToString(
+				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+			synopses = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}: From: {1}: {2} Subject: {3}",
+				sentOn,
+				appointmentItem.Organizer,
+				appointmentItem.Subject,
+				appointmentItem.Body);
+
+			return synopses;
 		}
 
 		private ushort GetBooleans()
