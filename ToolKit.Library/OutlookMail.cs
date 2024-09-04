@@ -33,6 +33,32 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="mailItem">The MailItem to check.</param>
+		/// <returns>The synoses of the item.</returns>
+		public static string GetSynopses(MailItem mailItem)
+		{
+			string synopses = null;
+
+			if (mailItem != null)
+			{
+				string sentOn = mailItem.SentOn.ToString(
+					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+				synopses = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: From: {1}: {2} Subject: {3}",
+					sentOn,
+					mailItem.SenderName,
+					mailItem.SenderEmailAddress,
+					mailItem.Subject);
+			}
+
+			return synopses;
+		}
+
+		/// <summary>
 		/// Get the bytes of all relevant properties.
 		/// </summary>
 		/// <param name="strict">Indicates whether the check should be strict
@@ -89,18 +115,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The synoses of the item.</returns>
 		public string GetSynopses()
 		{
-			string synopses = null;
-
-			string sentOn = mailItem.SentOn.ToString(
-				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-			synopses = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}: From: {1}: {2} Subject: {3}",
-				sentOn,
-				mailItem.SenderName,
-				mailItem.SenderEmailAddress,
-				mailItem.Subject);
+			string synopses = GetSynopses(mailItem);
 
 			return synopses;
 		}

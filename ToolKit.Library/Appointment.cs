@@ -32,6 +32,32 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the item's synopses.
+		/// </summary>
+		/// <param name="appointmentItem">The AppointmentItemto check.</param>
+		/// <returns>The synoses of the item.</returns>
+		public static string GetSynopses(AppointmentItem appointmentItem)
+		{
+			string synopses = null;
+
+			if (appointmentItem != null)
+			{
+				string sentOn = appointmentItem.Start.ToString(
+					"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+				synopses = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: From: {1}: {2} Subject: {3}",
+					sentOn,
+					appointmentItem.Organizer,
+					appointmentItem.Subject,
+					appointmentItem.Body);
+			}
+
+			return synopses;
+		}
+
+		/// <summary>
 		/// Get the bytes of all relevant properties.
 		/// </summary>
 		/// <param name="strict">Indicates whether the check should be strict
@@ -88,18 +114,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The synoses of the item.</returns>
 		public string GetSynopses()
 		{
-			string synopses = null;
-
-			string sentOn = appointmentItem.Start.ToString(
-				"yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-			synopses = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}: From: {1}: {2} Subject: {3}",
-				sentOn,
-				appointmentItem.Organizer,
-				appointmentItem.Subject,
-				appointmentItem.Body);
+			string synopses = GetSynopses(appointmentItem);
 
 			return synopses;
 		}

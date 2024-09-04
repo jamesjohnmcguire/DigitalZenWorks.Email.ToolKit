@@ -997,12 +997,10 @@ namespace DigitalZenWorks.Email.ToolKit
 					switch (mapiItem)
 					{
 						case AppointmentItem appointmentItem:
-							Appointment appointment = new Appointment(mapiItem);
-							synopses = appointment.GetSynopses();
+							synopses = Appointment.GetSynopses(appointmentItem);
 							break;
 						case MailItem mailItem:
-							OutlookMail mail = new OutlookMail(mapiItem);
-							synopses = mail.GetSynopses();
+							synopses = OutlookMail.GetSynopses(mailItem);
 							break;
 						default:
 							string message = "Item is of unsupported type: " +
