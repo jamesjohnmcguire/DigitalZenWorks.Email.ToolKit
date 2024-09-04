@@ -4,7 +4,6 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Common.Logging;
 using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
@@ -29,6 +28,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="mapiItem">The Outlook item.</param>
 		public OutlookMail(object mapiItem)
 		{
+			ArgumentNullException.ThrowIfNull(mapiItem);
+
 			mailItem = mapiItem as MailItem;
 		}
 

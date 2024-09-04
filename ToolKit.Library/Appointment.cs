@@ -28,6 +28,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="mapiItem">The Outlook item.</param>
 		public Appointment(object mapiItem)
 		{
+			ArgumentNullException.ThrowIfNull(mapiItem);
+
 			appointmentItem = mapiItem as AppointmentItem;
 		}
 
