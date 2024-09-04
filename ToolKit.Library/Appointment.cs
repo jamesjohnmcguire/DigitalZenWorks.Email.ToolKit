@@ -4,7 +4,6 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Common.Logging;
 using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
@@ -73,6 +72,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			userProperties = ContentItem.GetUserProperties(
 				appointmentItem.UserProperties);
 			buffers.Add(userProperties);
+
+			byte[] itemBytes = new byte[2];
+			itemBytes = BitBytes.CopyUshortToByteArray(
+				itemBytes, 0, booleans);
+			buffers.Add(itemBytes);
 
 			return buffers;
 		}

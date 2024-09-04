@@ -14,6 +14,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -68,6 +71,99 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Deletes the given item.
+		/// </summary>
+		/// <param name="mapiItem">The Outlook item.</param>
+		public static void Delete(object mapiItem)
+		{
+			try
+			{
+				switch (mapiItem)
+				{
+					case AppointmentItem appointmentItem:
+						appointmentItem.Delete();
+						Marshal.ReleaseComObject(appointmentItem);
+						break;
+					case ContactItem contactItem:
+						contactItem.Delete();
+						Marshal.ReleaseComObject(contactItem);
+						break;
+					case DistListItem distListItem:
+						distListItem.Delete();
+						Marshal.ReleaseComObject(distListItem);
+						break;
+					case DocumentItem documentItem:
+						documentItem.Delete();
+						Marshal.ReleaseComObject(documentItem);
+						break;
+					case JournalItem journalItem:
+						journalItem.Delete();
+						Marshal.ReleaseComObject(journalItem);
+						break;
+					case MailItem mailItem:
+						mailItem.Delete();
+						Marshal.ReleaseComObject(mailItem);
+						break;
+					case MeetingItem meetingItem:
+						meetingItem.Delete();
+						Marshal.ReleaseComObject(meetingItem);
+						break;
+					case NoteItem noteItem:
+						noteItem.Delete();
+						Marshal.ReleaseComObject(noteItem);
+						break;
+					case PostItem postItem:
+						postItem.Delete();
+						Marshal.ReleaseComObject(postItem);
+						break;
+					case RemoteItem remoteItem:
+						remoteItem.Delete();
+						Marshal.ReleaseComObject(remoteItem);
+						break;
+					case ReportItem reportItem:
+						reportItem.Delete();
+						Marshal.ReleaseComObject(reportItem);
+						break;
+					case TaskItem taskItem:
+						taskItem.Delete();
+						Marshal.ReleaseComObject(taskItem);
+						break;
+					case TaskRequestAcceptItem taskRequestAcceptItem:
+						taskRequestAcceptItem.Delete();
+						Marshal.ReleaseComObject(taskRequestAcceptItem);
+						break;
+					case TaskRequestDeclineItem taskRequestDeclineItem:
+						taskRequestDeclineItem.Delete();
+						Marshal.ReleaseComObject(taskRequestDeclineItem);
+						break;
+					case TaskRequestItem taskRequestItem:
+						taskRequestItem.Delete();
+						Marshal.ReleaseComObject(taskRequestItem);
+						break;
+					case TaskRequestUpdateItem taskRequestUpdateItem:
+						taskRequestUpdateItem.Delete();
+						Marshal.ReleaseComObject(taskRequestUpdateItem);
+						break;
+					default:
+						string message = "Folder item of unknown type";
+						if (mapiItem != null)
+						{
+							message += ": " + mapiItem.ToString();
+						}
+
+						Log.Warn(message);
+						break;
+				}
+
+				Marshal.ReleaseComObject(mapiItem);
+			}
+			catch (COMException exception)
+			{
+				Log.Error(exception.ToString());
+			}
+		}
+
+		/// <summary>
 		/// Get Actions Data.
 		/// </summary>
 		/// <param name="actions">The item actions.</param>
@@ -115,8 +211,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (attachments != null)
 			{
-				string basePath = Path.GetTempPath();
-
 				int total = attachments.Count;
 
 				for (int index = 1; index <= total; index++)
@@ -217,7 +311,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (recipients != null)
 			{
-				string recipientsData = null;
+				string recipientsData;
 				List<string> toList = [];
 				List<string> ccList = [];
 				List<string> bccList = [];
@@ -315,102 +409,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Deletes the given item.
-		/// </summary>
-		public void Delete()
-		{
-			try
-			{
-				switch (mapiItem)
-				{
-					case AppointmentItem appointmentItem:
-						appointmentItem.Delete();
-						Marshal.ReleaseComObject(appointmentItem);
-						break;
-					case ContactItem contactItem:
-						contactItem.Delete();
-						Marshal.ReleaseComObject(contactItem);
-						break;
-					case DistListItem distListItem:
-						distListItem.Delete();
-						Marshal.ReleaseComObject(distListItem);
-						break;
-					case DocumentItem documentItem:
-						documentItem.Delete();
-						Marshal.ReleaseComObject(documentItem);
-						break;
-					case JournalItem journalItem:
-						journalItem.Delete();
-						Marshal.ReleaseComObject(journalItem);
-						break;
-					case MailItem mailItem:
-						mailItem.Delete();
-						Marshal.ReleaseComObject(mailItem);
-						break;
-					case MeetingItem meetingItem:
-						meetingItem.Delete();
-						Marshal.ReleaseComObject(meetingItem);
-						break;
-					case NoteItem noteItem:
-						noteItem.Delete();
-						Marshal.ReleaseComObject(noteItem);
-						break;
-					case PostItem postItem:
-						postItem.Delete();
-						Marshal.ReleaseComObject(postItem);
-						break;
-					case RemoteItem remoteItem:
-						remoteItem.Delete();
-						Marshal.ReleaseComObject(remoteItem);
-						break;
-					case ReportItem reportItem:
-						reportItem.Delete();
-						Marshal.ReleaseComObject(reportItem);
-						break;
-					case TaskItem taskItem:
-						taskItem.Delete();
-						Marshal.ReleaseComObject(taskItem);
-						break;
-					case TaskRequestAcceptItem taskRequestAcceptItem:
-						taskRequestAcceptItem.Delete();
-						Marshal.ReleaseComObject(taskRequestAcceptItem);
-						break;
-					case TaskRequestDeclineItem taskRequestDeclineItem:
-						taskRequestDeclineItem.Delete();
-						Marshal.ReleaseComObject(taskRequestDeclineItem);
-						break;
-					case TaskRequestItem taskRequestItem:
-						taskRequestItem.Delete();
-						Marshal.ReleaseComObject(taskRequestItem);
-						break;
-					case TaskRequestUpdateItem taskRequestUpdateItem:
-						taskRequestUpdateItem.Delete();
-						Marshal.ReleaseComObject(taskRequestUpdateItem);
-						break;
-					default:
-						string message = "Folder item of unknown type";
-						if (mapiItem != null)
-						{
-							message += ": " + mapiItem.ToString();
-						}
-
-						Log.Warn(message);
-						break;
-				}
-
-				Marshal.ReleaseComObject(mapiItem);
-			}
-			catch (COMException exception)
-			{
-				Log.Error(exception.ToString());
-			}
-		}
-
-		/// <summary>
 		/// Move item to destination folder.
 		/// </summary>
+		/// <param name="mapiItem">The Outlook item.</param>
 		/// <param name="destination">The destination folder.</param>
-		public void Move(MAPIFolder destination)
+		public static void Move(object mapiItem, MAPIFolder destination)
 		{
 			try
 			{
@@ -497,6 +500,189 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				Log.Error(exception.ToString());
 			}
+		}
+
+		/// <summary>
+		/// Move item to destination folder.
+		/// </summary>
+		/// <param name="mapiItem">The Outlook item.</param>
+		/// <param name="destination">The destination folder.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public static async Task MoveAsync(
+			object mapiItem, MAPIFolder destination)
+		{
+			CancellationTokenSource source = new ();
+
+			try
+			{
+				source.CancelAfter(TimeSpan.FromSeconds(5));
+
+				switch (mapiItem)
+				{
+					case AppointmentItem appointmentItem:
+						await Task.Run(() =>
+							appointmentItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(appointmentItem);
+						break;
+					case ContactItem contactItem:
+						await Task.Run(() =>
+							contactItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(contactItem);
+						break;
+					case DistListItem distListItem:
+						await Task.Run(() =>
+							distListItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(distListItem);
+						break;
+					case DocumentItem documentItem:
+						await Task.Run(() =>
+							documentItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(documentItem);
+						break;
+					case JournalItem journalItem:
+						await Task.Run(() =>
+							journalItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(journalItem);
+						break;
+					case MailItem mailItem:
+						await Task.Run(() =>
+							mailItem = mailItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(mailItem);
+						break;
+					case MeetingItem meetingItem:
+						await Task.Run(() =>
+							meetingItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(meetingItem);
+						break;
+					case NoteItem noteItem:
+						await Task.Run(() =>
+							noteItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(noteItem);
+						break;
+					case PostItem postItem:
+						await Task.Run(() =>
+							postItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(postItem);
+						break;
+					case RemoteItem remoteItem:
+						await Task.Run(() =>
+							remoteItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(remoteItem);
+						break;
+					case ReportItem reportItem:
+						await Task.Run(() =>
+							reportItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(reportItem);
+						break;
+					case TaskItem taskItem:
+						await Task.Run(() =>
+							taskItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskItem);
+						break;
+					case TaskRequestAcceptItem taskRequestAcceptItem:
+						await Task.Run(() =>
+							taskRequestAcceptItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestAcceptItem);
+						break;
+					case TaskRequestDeclineItem taskRequestDeclineItem:
+						await Task.Run(() =>
+							taskRequestDeclineItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestDeclineItem);
+						break;
+					case TaskRequestItem taskRequestItem:
+						await Task.Run(() =>
+							taskRequestItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestItem);
+						break;
+					case TaskRequestUpdateItem taskRequestUpdateItem:
+						await Task.Run(() =>
+							taskRequestUpdateItem.Move(destination)).
+								ConfigureAwait(false);
+						Marshal.ReleaseComObject(taskRequestUpdateItem);
+						break;
+					default:
+						string message = "Folder item of unknown type";
+						if (mapiItem != null)
+						{
+							message += ": " + mapiItem.ToString();
+						}
+
+						Log.Warn(message);
+						break;
+				}
+
+				Marshal.ReleaseComObject(mapiItem);
+			}
+			catch (System.Exception exception) when
+				(exception is COMException ||
+				exception is OperationCanceledException)
+			{
+				Log.Error(exception.ToString());
+			}
+			finally
+			{
+				source.Dispose();
+			}
+		}
+
+		/// <summary>
+		/// Removes the MimeOLE version number.
+		/// </summary>
+		/// <param name="header">The header to check.</param>
+		/// <returns>The modified header.</returns>
+		public static string RemoveMimeOleVersion(string header)
+		{
+			string pattern = @"(?<=Produced By Microsoft MimeOLE)" +
+				@" V(\d+)\.(\d+)\.(\d+)\.(\d+)";
+
+			header = Regex.Replace(
+				header, pattern, string.Empty, RegexOptions.ExplicitCapture);
+
+			return header;
+		}
+
+		/// <summary>
+		/// Deletes the given item.
+		/// </summary>
+		public void Delete()
+		{
+			Delete(mapiItem);
+		}
+
+		/// <summary>
+		/// Move item to destination folder.
+		/// </summary>
+		/// <param name="destination">The destination folder.</param>
+		public void Move(MAPIFolder destination)
+		{
+			Move(mapiItem, destination);
+		}
+
+		/// <summary>
+		/// Move item to destination folder.
+		/// </summary>
+		/// <param name="destination">The destination folder.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous
+		/// operation.</returns>
+		public async Task MoveAsync(MAPIFolder destination)
+		{
+			await MoveAsync(mapiItem, destination).ConfigureAwait(false);
 		}
 
 		private static byte[] GetActionData(
@@ -723,50 +909,10 @@ namespace DigitalZenWorks.Email.ToolKit
 							Appointment appointment = new (mapiItem);
 							buffers = appointment.GetPropertiesBytes(strict);
 							break;
-						//case MailItem mailItem:
-						//	booleans = GetBooleans(mailItem);
-
-						//	actions = GetActions(mailItem.Actions);
-						//	buffers.Add(actions);
-
-						//	attachments = GetAttachments(mailItem.Attachments);
-						//	buffers.Add(attachments);
-
-						//	dateTimes = GetDateTimes(mailItem);
-						//	buffers.Add(dateTimes);
-
-						//	enums = GetEnums(mailItem);
-						//	buffers.Add(enums);
-
-						//	recipients = GetRecipients(mailItem.Recipients);
-						//	buffers.Add(recipients);
-
-						//	byte[] rtfBody = null;
-
-						//	try
-						//	{
-						//		rtfBody = mailItem.RTFBody as byte[];
-						//	}
-						//	catch (COMException)
-						//	{
-						//		string path = GetPath(mailItem);
-
-						//		Log.Warn("Exception on RTFBody at: " + path);
-
-						//		string synopses = GetItemSynopses(mailItem);
-						//		Log.Warn(synopses);
-						//	}
-
-						//	if (rtfBody != null && strict == false)
-						//	{
-						//		rtfBody = RtfEmail.Trim(rtfBody);
-						//	}
-
-						//	buffers.Add(rtfBody);
-
-						//	strings = GetStringProperties(mailItem, strict);
-						//	buffers.Add(strings);
-						break;
+						case MailItem mailItem:
+							OutlookMail mail = new (mapiItem);
+							buffers = mail.GetPropertiesBytes(strict);
+							break;
 						default:
 							string message = "Item is of unsupported type: " +
 								mapiItem.ToString();
@@ -774,23 +920,17 @@ namespace DigitalZenWorks.Email.ToolKit
 							break;
 					}
 
-					//byte[] userProperties = GetUserProperties(mapiItem);
-					//buffers.Add(userProperties);
-
 					long bufferSize = GetBufferSize(buffers);
 
-					//itemBytes = new byte[bufferSize];
+					itemBytes = new byte[bufferSize];
 
-					//// combine the parts
-					//long currentIndex = 0;
-					//foreach (byte[] buffer in buffers)
-					//{
-					//	currentIndex = BitBytes.ArrayCopyConditional(
-					//		buffer, ref itemBytes, currentIndex);
-					//}
-
-					//itemBytes = BitBytes.CopyUshortToByteArray(
-					//	itemBytes, currentIndex, booleans);
+					// combine the parts
+					long currentIndex = 0;
+					foreach (byte[] buffer in buffers)
+					{
+						currentIndex = BitBytes.ArrayCopyConditional(
+							buffer, ref itemBytes, currentIndex);
+					}
 				}
 				catch (System.Exception exception) when
 					(exception is ArgumentException ||

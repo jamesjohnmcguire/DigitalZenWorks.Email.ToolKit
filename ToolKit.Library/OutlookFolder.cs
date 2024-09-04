@@ -58,8 +58,7 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// </summary>
 	/// <param name="item">The item to use.</param>
 	/// <param name="folder">The folder to use.</param>
-	public delegate void ItemActionMove(
-		object item, MAPIFolder folder);
+	public delegate void ItemActionMove(object item, MAPIFolder folder);
 
 	/// <summary>
 	/// Item action Delegate.
@@ -68,8 +67,7 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <param name="folder">The folder to use.</param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous
 	/// operation.</returns>
-	public delegate Task ItemActionMoveAsync(
-		object item, MAPIFolder folder);
+	public delegate Task ItemActionMoveAsync(object item, MAPIFolder folder);
 
 	/// <summary>
 	/// Item action Delegate.
@@ -1139,7 +1137,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				ItemsIterator(
 					source,
 					destination,
-					MapiItem.MoveItem,
+					ContentItem.Move,
 					"Moving Items from: ");
 				MoveSubFolders(source, destination);
 			}
@@ -1186,9 +1184,10 @@ namespace DigitalZenWorks.Email.ToolKit
 				await ItemsIteratorAsync(
 					source,
 					destination,
-					MapiItem.MoveItemAsync,
+					ContentItem.MoveAsync,
 					"Moving Items from: ").
 					ConfigureAwait(false);
+
 				await MoveSubFoldersAsync(source, destination).
 					ConfigureAwait(false);
 			}
@@ -1366,6 +1365,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					LogItemCount(messageTemplate, ascendingCount);
 
+					ContentItem contentItem = new (item);
 					itemAction(item);
 
 					ascendingCount++;

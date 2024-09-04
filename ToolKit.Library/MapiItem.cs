@@ -54,7 +54,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (isValidDuplicate == true && dryRun == false)
 						{
-							DeleteItem(mapiItem);
+							ContentItem contentItem = new (mapiItem);
+							contentItem.Delete();
 						}
 
 						Marshal.ReleaseComObject(mapiItem);
@@ -73,6 +74,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Deletes the given item.
 		/// </summary>
 		/// <param name="item">The item to delete.</param>
+		[Obsolete("DeleteItem is deprecated, " +
+			"please use ContentItem.Delete instead.")]
 		public static void DeleteItem(object item)
 		{
 			try

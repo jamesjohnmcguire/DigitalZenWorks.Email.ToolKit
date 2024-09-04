@@ -1123,7 +1123,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				object item = items[index];
 
-				MapiItem.DeleteItem(item);
+				ContentItem contentItem = new (item);
+				contentItem.Delete();
 			}
 		}
 
