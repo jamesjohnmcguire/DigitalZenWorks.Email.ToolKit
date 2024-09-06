@@ -65,7 +65,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="strict">Indicates whether the check should be strict
 		/// or not.</param>
 		/// <returns>The bytes of all relevant properties.</returns>
-		public IList<byte[]> GetPropertiesBytes(bool strict = false)
+		public IList<byte[]> GetProperties(bool strict = false)
 		{
 			List<byte[]> buffers = [];
 			byte[] actions = null;

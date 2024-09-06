@@ -55,6 +55,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				if (hash == null)
 				{
+
 				}
 
 				return hash;
@@ -907,11 +908,11 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						case AppointmentItem appointmentItem:
 							Appointment appointment = new (mapiItem);
-							buffers = appointment.GetPropertiesBytes(strict);
+							buffers = appointment.GetProperties(strict);
 							break;
 						case MailItem mailItem:
 							OutlookMail mail = new (mapiItem);
-							buffers = mail.GetPropertiesBytes(strict);
+							buffers = mail.GetProperties(strict);
 							break;
 						default:
 							string message = "Item is of unsupported type: " +
