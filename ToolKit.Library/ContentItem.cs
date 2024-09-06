@@ -55,7 +55,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				if (hash == null)
 				{
-
+					hash = GetItemHash();
 				}
 
 				return hash;
