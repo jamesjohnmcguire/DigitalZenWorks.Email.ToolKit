@@ -187,8 +187,9 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem = mailItem.Move(mainFolder);
 
-			string hash = MapiItem.GetItemHash(mailItem);
-			string hash2 = MapiItem.GetItemHash(mailItem);
+			OutlookItem outlookItem = new (mailItem);
+			string hash = outlookItem.Hash;
+			string hash2 = outlookItem.Hash;
 
 			if (hash.Equals(hash2, StringComparison.Ordinal))
 			{
@@ -205,7 +206,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem2 = mailItem2.Move(mainFolder);
 
-			hash2 = MapiItem.GetItemHash(mailItem2);
+			OutlookItem outlookItem2 = new (mailItem2);
+			hash2 = outlookItem2.Hash;
 
 			if (hash.Equals(hash2, StringComparison.Ordinal))
 			{
@@ -222,7 +224,8 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem3 = mailItem3.Move(mainFolder);
 
-			hash2 = MapiItem.GetItemHash(mailItem3);
+			OutlookItem outlookItem3 = new (mailItem3);
+			hash2 = outlookItem3.Hash;
 
 			if (hash.Equals(hash2, StringComparison.Ordinal))
 			{

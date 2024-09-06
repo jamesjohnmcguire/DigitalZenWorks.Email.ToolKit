@@ -246,11 +246,15 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="entryId">The entryId of the MailItem to check.</param>
 		/// <returns>The synoses of the item.</returns>
+		[Obsolete("GetMailItemSynopses is deprecated, " +
+			"please use OutlookItem.Synopses instead.")]
 		public string GetItemSynopses(string entryId)
 		{
 			NameSpace session = outlookAccount.Session;
 			object mapiItem = session.GetItemFromID(entryId);
-			string synopses = MapiItem.GetItemSynopses(mapiItem);
+
+			OutlookItem outlookItem = new (mapiItem);
+			string synopses = outlookItem.Synopses;
 
 			return synopses;
 		}
@@ -1123,7 +1127,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				object item = items[index];
 
-				MapiItem.DeleteItem(item);
+				OutlookItem contentItem = new (item);
+				contentItem.Delete();
 			}
 		}
 
