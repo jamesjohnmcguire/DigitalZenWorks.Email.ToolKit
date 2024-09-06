@@ -54,7 +54,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (isValidDuplicate == true && dryRun == false)
 						{
-							ContentItem contentItem = new (mapiItem);
+							OutlookItem contentItem = new (mapiItem);
 							contentItem.Delete();
 						}
 
@@ -75,7 +75,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="item">The item to delete.</param>
 		[Obsolete("DeleteItem is deprecated, " +
-			"please use ContentItem.Delete instead.")]
+			"please use OutlookItem.Delete instead.")]
 		public static void DeleteItem(object item)
 		{
 			try

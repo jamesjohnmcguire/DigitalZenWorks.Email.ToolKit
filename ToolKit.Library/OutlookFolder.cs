@@ -1137,7 +1137,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				ItemsIterator(
 					source,
 					destination,
-					ContentItem.Move,
+					OutlookItem.Move,
 					"Moving Items from: ");
 				MoveSubFolders(source, destination);
 			}
@@ -1184,7 +1184,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				await ItemsIteratorAsync(
 					source,
 					destination,
-					ContentItem.MoveAsync,
+					OutlookItem.MoveAsync,
 					"Moving Items from: ").
 					ConfigureAwait(false);
 
@@ -1365,7 +1365,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					LogItemCount(messageTemplate, ascendingCount);
 
-					ContentItem contentItem = new (item);
+					OutlookItem contentItem = new (item);
 					itemAction(item);
 
 					ascendingCount++;

@@ -1,5 +1,5 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
-// <copyright file="Appointment.cs" company="James John McGuire">
+// <copyright file="OutlookAppointment.cs" company="James John McGuire">
 // Copyright © 2021 - 2024 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
@@ -15,18 +15,18 @@ using System.Text;
 namespace DigitalZenWorks.Email.ToolKit
 {
 	/// <summary>
-	/// Appointment Class.
+	/// OutlookAppointment Class.
 	/// </summary>
-	public class Appointment
+	public class OutlookAppointment
 	{
 		private readonly AppointmentItem appointmentItem;
 
 		/// <summary>
 		/// Initializes a new instance of the
-		/// <see cref="Appointment"/> class.
+		/// <see cref="OutlookAppointment"/> class.
 		/// </summary>
 		/// <param name="mapiItem">The Outlook item.</param>
-		public Appointment(object mapiItem)
+		public OutlookAppointment(object mapiItem)
 		{
 			ArgumentNullException.ThrowIfNull(mapiItem);
 
@@ -79,10 +79,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			booleans = GetBooleans();
 
-			actions = ContentItem.GetActions(appointmentItem.Actions);
+			actions = OutlookItem.GetActions(appointmentItem.Actions);
 			buffers.Add(actions);
 
-			attachments = ContentItem.GetAttachments(
+			attachments = OutlookItem.GetAttachments(
 				appointmentItem.Attachments);
 			buffers.Add(attachments);
 
@@ -92,13 +92,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			enums = GetEnums();
 			buffers.Add(enums);
 
-			recipients = ContentItem.GetRecipients(appointmentItem.Recipients);
+			recipients = OutlookItem.GetRecipients(appointmentItem.Recipients);
 			buffers.Add(recipients);
 
 			strings = GetStringProperties(strict);
 			buffers.Add(strings);
 
-			userProperties = ContentItem.GetUserProperties(
+			userProperties = OutlookItem.GetUserProperties(
 				appointmentItem.UserProperties);
 			buffers.Add(userProperties);
 
@@ -179,7 +179,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			DateTime startUTC = appointmentItem.StartUTC;
 			times.Add(startUTC);
 
-			data = ContentItem.GetDateTimesBytes(times);
+			data = OutlookItem.GetDateTimesBytes(times);
 
 			return data;
 		}
@@ -214,7 +214,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			int sensitivity = (int)appointmentItem.Sensitivity;
 			ints.Add(sensitivity);
 
-			buffer = ContentItem.GetEnumsBuffer(ints);
+			buffer = OutlookItem.GetEnumsBuffer(ints);
 
 			return buffer;
 		}

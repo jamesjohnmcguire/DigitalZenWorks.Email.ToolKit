@@ -1123,7 +1123,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				object item = items[index];
 
-				ContentItem contentItem = new (item);
+				OutlookItem contentItem = new (item);
 				contentItem.Delete();
 			}
 		}

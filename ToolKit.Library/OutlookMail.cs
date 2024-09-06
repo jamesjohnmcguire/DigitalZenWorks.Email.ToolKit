@@ -79,10 +79,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			booleans = GetBooleans();
 
-			actions = ContentItem.GetActions(mailItem.Actions);
+			actions = OutlookItem.GetActions(mailItem.Actions);
 			buffers.Add(actions);
 
-			attachments = ContentItem.GetAttachments(
+			attachments = OutlookItem.GetAttachments(
 				mailItem.Attachments);
 			buffers.Add(attachments);
 
@@ -92,13 +92,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			enums = GetEnums();
 			buffers.Add(enums);
 
-			recipients = ContentItem.GetRecipients(mailItem.Recipients);
+			recipients = OutlookItem.GetRecipients(mailItem.Recipients);
 			buffers.Add(recipients);
 
 			strings = GetStringProperties(strict);
 			buffers.Add(strings);
 
-			userProperties = ContentItem.GetUserProperties(
+			userProperties = OutlookItem.GetUserProperties(
 				mailItem.UserProperties);
 			buffers.Add(userProperties);
 
@@ -251,7 +251,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			DateTime taskStartDateDateTime = mailItem.TaskStartDate;
 			times.Add(taskStartDateDateTime);
 
-			data = ContentItem.GetDateTimesBytes(times);
+			data = OutlookItem.GetDateTimesBytes(times);
 
 			return data;
 		}
@@ -301,7 +301,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			int sensitivity = (int)mailItem.Sensitivity;
 			ints.Add(sensitivity);
 
-			buffer = ContentItem.GetEnumsBuffer(ints);
+			buffer = OutlookItem.GetEnumsBuffer(ints);
 
 			return buffer;
 		}
@@ -347,7 +347,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (header != null && strict == false)
 			{
-				header = ContentItem.RemoveMimeOleVersion(header);
+				header = OutlookItem.RemoveMimeOleVersion(header);
 
 #if NETCOREAPP1_0_OR_GREATER
 				header = header.Replace(

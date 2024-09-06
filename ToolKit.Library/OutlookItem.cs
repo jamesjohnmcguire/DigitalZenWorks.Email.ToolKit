@@ -1,5 +1,5 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
-// <copyright file="ContentItem.cs" company="James John McGuire">
+// <copyright file="OutlookItem.cs" company="James John McGuire">
 // Copyright © 2021 - 2024 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ namespace DigitalZenWorks.Email.ToolKit
 	/// <summary>
 	/// Content Item.
 	/// </summary>
-	public class ContentItem : IContentItem
+	public class OutlookItem : IContentItem
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -35,10 +35,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		/// <summary>
 		/// Initializes a new instance of the
-		/// <see cref="ContentItem"/> class.
+		/// <see cref="OutlookItem"/> class.
 		/// </summary>
 		/// <param name="mapiItem">The Outlook item.</param>
-		public ContentItem(object mapiItem)
+		public OutlookItem(object mapiItem)
 		{
 			this.mapiItem = mapiItem;
 
@@ -907,7 +907,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					switch (mapiItem)
 					{
 						case AppointmentItem appointmentItem:
-							Appointment appointment = new (mapiItem);
+							OutlookAppointment appointment = new (mapiItem);
 							buffers = appointment.GetProperties(strict);
 							break;
 						case MailItem mailItem:
@@ -998,7 +998,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					switch (mapiItem)
 					{
 						case AppointmentItem appointmentItem:
-							synopses = Appointment.GetSynopses(appointmentItem);
+							synopses = OutlookAppointment.GetSynopses(appointmentItem);
 							break;
 						case MailItem mailItem:
 							synopses = OutlookMail.GetSynopses(mailItem);
