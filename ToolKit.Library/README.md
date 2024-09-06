@@ -3,7 +3,7 @@
 This is a C# library for interacting with email messages and storage.
 
 ### Usage:
-The main classes are MapiItem, Migrate, OutlookOutlook, OutlookFolder and OutlookStore.  
+The main classes are Migrate, OutlookFolder, OutlookItem and OutlookStore.  
 Migrate is for migrating messages in other formats into Outlook.  Some examples:  
 Migrate.DbxToPst(dbxPath, pstPath);  
 Migrate.EmlToPst(dbxPath, pstPath);  

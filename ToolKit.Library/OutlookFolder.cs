@@ -345,10 +345,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="mailItem">The MailItem to check.</param>
 		/// <returns>The synoses of the item.</returns>
 		[Obsolete("GetMailItemSynopses is deprecated, " +
-			"please use MapiItem.GetItemSynopses instead.")]
+			"please use OutlookItem.Synopses instead.")]
 		public static string GetMailItemSynopses(MailItem mailItem)
 		{
-			string synopses = MapiItem.GetItemSynopses(mailItem);
+			OutlookItem outlookItem = new (mailItem);
+			string synopses = outlookItem.Synopses;
 
 			return synopses;
 		}
@@ -1584,7 +1585,9 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (entryId != null)
 			{
-				string hash = MapiItem.GetItemHash(item);
+				OutlookItem outlookItem = new (item);
+
+				string hash = outlookItem.Hash;
 
 				storeHashTable =
 					AddHashToTable(storeHashTable, hash, entryId);
@@ -1612,7 +1615,10 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (entryId != null)
 			{
-				string hash = await MapiItem.GetItemHashAsync(item).
+				OutlookItem outlookItem = new (item);
+
+				string hash = outlookItem.Hash;
+				await OutlookItem.GetHashAsync(item).
 					ConfigureAwait(false);
 
 				storeHashTable =
@@ -1695,7 +1701,9 @@ namespace DigitalZenWorks.Email.ToolKit
 			NameSpace session = outlookAccount.Session;
 
 			object mapiItem = session.GetItemFromID(keeper);
-			string keeperSynopses = MapiItem.GetItemSynopses(mapiItem);
+
+			OutlookItem outlookItem = new (mapiItem);
+			string keeperSynopses = outlookItem.Synopses;
 
 			string message = string.Format(
 				CultureInfo.InvariantCulture,
@@ -1709,7 +1717,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			foreach (string duplicateId in duplicateSet)
 			{
-				MapiItem.DeleteDuplicate(
+				OutlookItem.DeleteDuplicate(
 					session, duplicateId, keeperSynopses, dryRun);
 			}
 

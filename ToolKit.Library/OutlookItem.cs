@@ -42,7 +42,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			this.mapiItem = mapiItem;
 
-			synopses = GetItemSynopses();
+			synopses = GetSynopses();
 		}
 
 		/// <summary>
@@ -53,10 +53,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			get
 			{
-				if (hash == null)
-				{
-					hash = GetItemHash();
-				}
+				hash ??= GetItemHash();
 
 				return hash;
 			}
@@ -161,6 +158,48 @@ namespace DigitalZenWorks.Email.ToolKit
 			catch (COMException exception)
 			{
 				Log.Error(exception.ToString());
+			}
+		}
+
+		/// <summary>
+		/// Delete duplicate item.
+		/// </summary>
+		/// <param name="session">The Outlook session.</param>
+		/// <param name="duplicateId">The duplicate id.</param>
+		/// <param name="keeperSynopses">The keeper synopses.</param>
+		/// <param name="dryRun">Indicates if this is a dry run or not.</param>
+		public static void DeleteDuplicate(
+			NameSpace session,
+			string duplicateId,
+			string keeperSynopses,
+			bool dryRun)
+		{
+			if (session != null)
+			{
+				try
+				{
+					object mapiItem = session.GetItemFromID(duplicateId);
+
+					if (mapiItem != null)
+					{
+						bool isValidDuplicate =
+							DoubleCheckDuplicate(keeperSynopses, mapiItem);
+
+						if (isValidDuplicate == true && dryRun == false)
+						{
+							OutlookItem contentItem = new (mapiItem);
+							contentItem.Delete();
+						}
+
+						Marshal.ReleaseComObject(mapiItem);
+					}
+				}
+				catch (System.Exception exception) when
+				(exception is COMException ||
+				exception is InvalidCastException)
+				{
+					Log.Error(exception.ToString());
+				}
 			}
 		}
 
@@ -295,6 +334,89 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return buffer;
+		}
+
+		/// <summary>
+		/// Gets the item's hash.
+		/// </summary>
+		/// <param name="mapiItem">The items to compute.</param>
+		/// <returns>The item's hash encoded in base 64.</returns>
+		public static async Task<string> GetHashAsync(object mapiItem)
+		{
+			string hashBase64 = null;
+			byte[] finalBuffer = null;
+
+			if (mapiItem != null)
+			{
+				try
+				{
+					finalBuffer = await Task.Run(() =>
+							GetItemBytes(mapiItem)).ConfigureAwait(false);
+
+					hashBase64 = GetBytesHash(finalBuffer);
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is OutOfMemoryException ||
+					exception is RankException)
+				{
+					LogException(mapiItem);
+					Log.Error(exception.ToString());
+				}
+			}
+
+			return hashBase64;
+		}
+
+		/// <summary>
+		/// Get the current item's folder path.
+		/// </summary>
+		/// <param name="mapiItem">The item to check.</param>
+		/// <returns>The current item's folder path.</returns>
+		public static string GetPath(object mapiItem)
+		{
+			string path = null;
+
+			if (mapiItem != null)
+			{
+				try
+				{
+					MAPIFolder parent = null;
+
+					switch (mapiItem)
+					{
+						case AppointmentItem appointmentItem:
+							parent = appointmentItem.Parent;
+							break;
+						case MailItem mailItem:
+							parent = mailItem.Parent;
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
+					}
+
+					path = OutlookFolder.GetFolderPath(parent);
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Error(exception.ToString());
+				}
+			}
+
+			return path;
 		}
 
 		/// <summary>
@@ -686,6 +808,24 @@ namespace DigitalZenWorks.Email.ToolKit
 			await MoveAsync(mapiItem, destination).ConfigureAwait(false);
 		}
 
+		private static bool DoubleCheckDuplicate(
+			string baseSynopses, object mapiItem)
+		{
+			bool valid = true;
+			string duplicateSynopses = GetSynopses(mapiItem);
+
+			if (!duplicateSynopses.Equals(
+				baseSynopses, StringComparison.Ordinal))
+			{
+				Log.Error("Warning! Duplicate Items Don't Seem to Match");
+				Log.Error("Not Matching Item: " + duplicateSynopses);
+
+				valid = false;
+			}
+
+			return valid;
+		}
+
 		private static byte[] GetActionData(
 			Microsoft.Office.Interop.Outlook.Action action)
 		{
@@ -797,104 +937,21 @@ namespace DigitalZenWorks.Email.ToolKit
 			return bufferSize;
 		}
 
-		private static byte[] GetUserProperty(
-			byte[] properties, UserProperty property)
+		private static string GetBytesHash(byte[] data)
 		{
-			byte[] userPropertyData = GetUserPropertyData(property);
+#if NET5_0_OR_GREATER
+			byte[] hashValue = SHA256.HashData(data);
+#else
+					using SHA256 hasher = SHA256.Create();
+					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+#endif
+			string hashBase64 = Convert.ToBase64String(hashValue);
 
-			if (properties == null)
-			{
-				properties = userPropertyData;
-			}
-			else
-			{
-				properties = BitBytes.MergeByteArrays(
-					properties, userPropertyData);
-			}
-
-			Marshal.ReleaseComObject(property);
-
-			return properties;
+			return hashBase64;
 		}
 
-		private static byte[] GetUserPropertyData(UserProperty property)
-		{
-			Encoding encoding = Encoding.UTF8;
-
-			int typeEnum = (int)property.Type;
-			var propertyValue = property.Value;
-
-			string typeValue =
-				typeEnum.ToString(CultureInfo.InvariantCulture);
-			string value =
-				propertyValue.ToString(CultureInfo.InvariantCulture);
-
-			string metaData = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}",
-				property.Formula,
-				property.Name,
-				typeValue,
-				property.ValidationFormula,
-				property.ValidationText,
-				value);
-
-			byte[] metaDataBytes = encoding.GetBytes(metaData);
-
-			return metaDataBytes;
-		}
-
-		private string GetPath()
-		{
-			string path = null;
-
-			if (mapiItem != null)
-			{
-				try
-				{
-					MAPIFolder parent = null;
-
-					switch (mapiItem)
-					{
-						case AppointmentItem appointmentItem:
-							parent = appointmentItem.Parent;
-							break;
-						case MailItem mailItem:
-							parent = mailItem.Parent;
-							break;
-						default:
-							string message = "Item is of unsupported type: " +
-								mapiItem.ToString();
-							Log.Warn(message);
-							break;
-					}
-
-					path = OutlookFolder.GetFolderPath(parent);
-				}
-				catch (System.Exception exception) when
-					(exception is ArgumentException ||
-					exception is ArgumentNullException ||
-					exception is ArgumentOutOfRangeException ||
-					exception is ArrayTypeMismatchException ||
-					exception is InvalidCastException ||
-					exception is RankException)
-				{
-					Log.Error(exception.ToString());
-				}
-			}
-
-			return path;
-		}
-
-		private void LogException()
-		{
-			string path = GetPath();
-			Log.Error("Exception at: " + path);
-
-			LogFormatMessage.Error("Item: {0}:", synopses);
-		}
-
-		private byte[] GetItemBytes(bool strict = false)
+		private static byte[] GetItemBytes(
+			object mapiItem, bool strict = false)
 		{
 			byte[] itemBytes = null;
 
@@ -949,45 +1006,54 @@ namespace DigitalZenWorks.Email.ToolKit
 			return itemBytes;
 		}
 
-		private string GetItemHash()
+		private static byte[] GetUserProperty(
+			byte[] properties, UserProperty property)
 		{
-			string hashBase64 = null;
+			byte[] userPropertyData = GetUserPropertyData(property);
 
-			if (mapiItem != null)
+			if (properties == null)
 			{
-				try
-				{
-					byte[] itemBytes = GetItemBytes();
-
-					if (itemBytes != null)
-					{
-#if NET5_0_OR_GREATER
-						byte[] hashValue = SHA256.HashData(itemBytes);
-#else
-					using SHA256 hasher = SHA256.Create();
-					byte[] hashValue = hasher.ComputeHash(itemBytes);
-#endif
-						hashBase64 = Convert.ToBase64String(hashValue);
-					}
-				}
-				catch (System.Exception exception) when
-					(exception is ArgumentException ||
-					exception is ArgumentNullException ||
-					exception is ArgumentOutOfRangeException ||
-					exception is ArrayTypeMismatchException ||
-					exception is InvalidCastException ||
-					exception is OutOfMemoryException ||
-					exception is RankException)
-				{
-					LogException();
-					Log.Error(exception.ToString());
-				}
+				properties = userPropertyData;
+			}
+			else
+			{
+				properties = BitBytes.MergeByteArrays(
+					properties, userPropertyData);
 			}
 
-			return hashBase64;
+			Marshal.ReleaseComObject(property);
+
+			return properties;
 		}
 
-		private string GetItemSynopses()
+		private static byte[] GetUserPropertyData(UserProperty property)
+		{
+			Encoding encoding = Encoding.UTF8;
+
+			int typeEnum = (int)property.Type;
+			var propertyValue = property.Value;
+
+			string typeValue =
+				typeEnum.ToString(CultureInfo.InvariantCulture);
+			string value =
+				propertyValue.ToString(CultureInfo.InvariantCulture);
+
+			string metaData = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}{1}{2}{3}{4}{5}",
+				property.Formula,
+				property.Name,
+				typeValue,
+				property.ValidationFormula,
+				property.ValidationText,
+				value);
+
+			byte[] metaDataBytes = encoding.GetBytes(metaData);
+
+			return metaDataBytes;
+		}
+
+		private static string GetSynopses(object mapiItem)
 		{
 			string synopses = null;
 
@@ -998,7 +1064,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					switch (mapiItem)
 					{
 						case AppointmentItem appointmentItem:
-							synopses = OutlookAppointment.GetSynopses(appointmentItem);
+							synopses = OutlookAppointment.GetSynopses(
+								appointmentItem);
 							break;
 						case MailItem mailItem:
 							synopses = OutlookMail.GetSynopses(mailItem);
@@ -1015,6 +1082,61 @@ namespace DigitalZenWorks.Email.ToolKit
 					Log.Error(exception.ToString());
 				}
 			}
+
+			return synopses;
+		}
+
+		private static void LogException(object mapiItem)
+		{
+			string path = GetPath(mapiItem);
+			Log.Error("Exception at: " + path);
+
+			string synopses = GetSynopses(mapiItem);
+			LogFormatMessage.Error("Item: {0}:", synopses);
+		}
+
+		private byte[] GetItemBytes(bool strict = false)
+		{
+			byte[] itemBytes = GetItemBytes(mapiItem, strict);
+
+			return itemBytes;
+		}
+
+		private string GetItemHash()
+		{
+			string hashBase64 = null;
+
+			if (mapiItem != null)
+			{
+				try
+				{
+					byte[] itemBytes = GetItemBytes();
+
+					if (itemBytes != null)
+					{
+						hashBase64 = GetBytesHash(itemBytes);
+					}
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is InvalidCastException ||
+					exception is OutOfMemoryException ||
+					exception is RankException)
+				{
+					LogException(mapiItem);
+					Log.Error(exception.ToString());
+				}
+			}
+
+			return hashBase64;
+		}
+
+		private string GetSynopses()
+		{
+			string synopses = GetSynopses(mapiItem);
 
 			return synopses;
 		}

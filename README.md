@@ -98,7 +98,7 @@ For large stores, this can take some time.
 #### Library and API usage:
 Except for command line argument processing, all of the functionality is located in the main library project.  The main APIs match the command line commands.
 
-The main classes are MapiItem, Migrate, OutlookOutlook, OutlookFolder and OutlookStore.  
+The main classes are Migrate, OutlookFolder, OutlookItem and OutlookStore.  
 Migrate is for migrating messages in other formats into Outlook.  Some examples:  
 ```c#
 Migrate.DbxToPst(dbxPath, pstPath);  

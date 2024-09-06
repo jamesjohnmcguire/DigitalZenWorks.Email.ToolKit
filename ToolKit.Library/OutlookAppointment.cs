@@ -68,39 +68,30 @@ namespace DigitalZenWorks.Email.ToolKit
 		public IList<byte[]> GetProperties(bool strict = false)
 		{
 			List<byte[]> buffers = [];
-			byte[] actions = null;
-			byte[] attachments = null;
-			ushort booleans = 0;
-			byte[] dateTimes = null;
-			byte[] enums = null;
-			byte[] recipients = null;
-			byte[] strings = null;
-			byte[] userProperties = null;
 
-			booleans = GetBooleans();
+			ushort booleans = GetBooleans();
 
-			actions = OutlookItem.GetActions(appointmentItem.Actions);
-			buffers.Add(actions);
+			byte[] buffer = OutlookItem.GetActions(appointmentItem.Actions);
+			buffers.Add(buffer);
 
-			attachments = OutlookItem.GetAttachments(
-				appointmentItem.Attachments);
-			buffers.Add(attachments);
+			buffer = OutlookItem.GetAttachments(appointmentItem.Attachments);
+			buffers.Add(buffer);
 
-			dateTimes = GetDateTimes();
-			buffers.Add(dateTimes);
+			buffer = GetDateTimes();
+			buffers.Add(buffer);
 
-			enums = GetEnums();
-			buffers.Add(enums);
+			buffer = GetEnums();
+			buffers.Add(buffer);
 
-			recipients = OutlookItem.GetRecipients(appointmentItem.Recipients);
-			buffers.Add(recipients);
+			buffer = OutlookItem.GetRecipients(appointmentItem.Recipients);
+			buffers.Add(buffer);
 
-			strings = GetStringProperties(strict);
-			buffers.Add(strings);
+			buffer = GetStringProperties(strict);
+			buffers.Add(buffer);
 
-			userProperties = OutlookItem.GetUserProperties(
+			buffer = OutlookItem.GetUserProperties(
 				appointmentItem.UserProperties);
-			buffers.Add(userProperties);
+			buffers.Add(buffer);
 
 			byte[] itemBytes = new byte[2];
 			itemBytes = BitBytes.CopyUshortToByteArray(
@@ -166,8 +157,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private byte[] GetDateTimes()
 		{
-			byte[] data = null;
-
 			List<DateTime> times = [];
 
 			DateTime endUTC = appointmentItem.EndUTC;
@@ -179,15 +168,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			DateTime startUTC = appointmentItem.StartUTC;
 			times.Add(startUTC);
 
-			data = OutlookItem.GetDateTimesBytes(times);
+			byte[] data = OutlookItem.GetDateTimesBytes(times);
 
 			return data;
 		}
 
 		private byte[] GetEnums()
 		{
-			byte[] buffer = null;
-
 			List<int> ints = [];
 
 			int busyStatus = (int)appointmentItem.BusyStatus;
@@ -214,7 +201,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			int sensitivity = (int)appointmentItem.Sensitivity;
 			ints.Add(sensitivity);
 
-			buffer = OutlookItem.GetEnumsBuffer(ints);
+			byte[] buffer = OutlookItem.GetEnumsBuffer(ints);
 
 			return buffer;
 		}
@@ -223,8 +210,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			bool strict = false,
 			bool ignoreConversation = true)
 		{
-			byte[] data = null;
-
 			string billingInformation = null;
 
 			try
@@ -289,7 +274,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			string buffer = builder.ToString();
 
 			Encoding encoding = Encoding.UTF8;
-			data = encoding.GetBytes(buffer);
+
+			byte[] data = encoding.GetBytes(buffer);
 
 			return data;
 		}
