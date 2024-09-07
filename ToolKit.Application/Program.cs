@@ -55,7 +55,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				LogInitialization();
 				string version = VersionSupport.GetVersion();
 
-				IList<Command> commands = GetCommands();
+				List<Command> commands = GetCommands();
 
 				CommandLineArguments commandLine =
 					new (commands, arguments, InferCommand);
@@ -235,33 +235,30 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			return result;
 		}
 
-		private static IList<Command> GetCommands()
+		private static List<Command> GetCommands()
 		{
-			IList<Command> commands = new List<Command>();
+			List<Command> commands = [];
 
 			Command help = new ("help");
 			help.Description = "Show this information";
 			commands.Add(help);
 
 			CommandOption encoding = new ("e", "encoding", true);
-			IList<CommandOption> options = new List<CommandOption>();
-			options.Add(encoding);
+			List<CommandOption> options = [encoding];
 
 			Command dbxToPst = new (
 				"dbx-to-pst", options, 1, "Migrate dbx files to pst file");
 			commands.Add(dbxToPst);
 
 			CommandOption adjust = new ("a", "adjust");
-			options = new List<CommandOption>();
-			options.Add(adjust);
+			options = [adjust];
 
 			Command emlToPst = new (
 				"eml-to-pst", options, 1, "Migrate eml files to pst file");
 			commands.Add(emlToPst);
 
 			CommandOption recurse = new ("r", "recurse");
-			options = new List<CommandOption>();
-			options.Add(recurse);
+			options = [recurse];
 
 			Command listFolders = new (
 				"list-folders",
@@ -271,8 +268,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			commands.Add(listFolders);
 
 			CommandOption count = new ("c", "count");
-			options = new List<CommandOption>();
-			options.Add(count);
+			options = [count];
 			Command listTopSenders = new (
 				"list-top-senders",
 				options,
@@ -288,8 +284,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			commands.Add(listTotalDuplicates);
 
 			CommandOption dryRun = new ("n", "dryrun");
-			options = new List<CommandOption>();
-			options.Add(dryRun);
+			options = [dryRun];
 
 			Command mergeFolders = new (
 				"merge-folders",
@@ -307,9 +302,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			commands.Add(moveFolders);
 
 			CommandOption flush = new ("s", "flush");
-			options = new List<CommandOption>();
-			options.Add(dryRun);
-			options.Add(flush);
+			options = [dryRun, flush];
 
 			Command removeDuplicates = new (
 				"remove-duplicates",
@@ -327,7 +320,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static IEnumerable<string> GetEmlFiles(string location)
 		{
-			List<string> extensions = new () { ".eml", ".txt" };
+			List<string> extensions = [".eml", ".txt"];
 			IEnumerable<string> allFiles =
 				Directory.EnumerateFiles(location, "*.*");
 
@@ -524,8 +517,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					MailItem mailItem =
 						outlookStore.GetMailItemFromEntryId(entryId1);
 
-					string synopses =
-						MapiItem.GetItemSynopses(mailItem);
+					OutlookItem outlookItem = new (mailItem);
+					string synopses = outlookItem.Synopses;
 
 					string message = string.Format(
 						CultureInfo.InvariantCulture,

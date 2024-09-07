@@ -14,7 +14,7 @@
 			Additional notes - https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
 		</Description>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<FileVersion>1.8.50.0</FileVersion>
+		<FileVersion>1.9.56.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>Latest</LangVersion>
@@ -25,7 +25,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>Digital Zen Works;Email;Dbx;Eml;Outlook;Duplicates</PackageTags>
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-		<Version>1.8.50</Version>
+		<Version>1.9.56</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -52,7 +52,7 @@
 	<ItemGroup>
 		<PackageReference Include="Common.Logging" Version="3.4.1" />
 		<PackageReference Include="Common.Logging.Core" Version="3.4.1" />
-		<PackageReference Include="DigitalZenWorks.Common.Utilities" Version="1.3.68" />
+		<PackageReference Include="DigitalZenWorks.Common.Utilities" Version="1.3.71" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -61,7 +61,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Debug'">
-		<ProjectReference Include="..\DbxOutlookExpress\DbxOutlookExpressLibrary\DbxOutlookExpressLibrary.csproj" />
+		<ProjectReference Include="..\DbxOutlookExpress\DbxOutlookExpress\DigitalZenWorks.Email.DbxOutlookExpress.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
 		<PackageReference Include="DigitalZenWorks.Email.DbxOutlookExpress" Version="1.3.22" />

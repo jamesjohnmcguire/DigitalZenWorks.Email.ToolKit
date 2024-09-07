@@ -39,6 +39,8 @@ gh release create v%2 --notes "%2" DigitalZenWorks.Email.ToolKit.zip
 
 CD ..\..\..
 
+GOTO end
+
 :error1
 ECHO No version tag specified
 GOTO end

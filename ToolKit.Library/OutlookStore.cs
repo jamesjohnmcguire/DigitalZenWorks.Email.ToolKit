@@ -130,7 +130,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					Log.Info("Checking for empty folders in: " +
 						storePath);
-					storePath += "::";
 
 					MAPIFolder rootFolder = store.GetRootFolder();
 
@@ -247,11 +246,15 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="entryId">The entryId of the MailItem to check.</param>
 		/// <returns>The synoses of the item.</returns>
+		[Obsolete("GetMailItemSynopses is deprecated, " +
+			"please use OutlookItem.Synopses instead.")]
 		public string GetItemSynopses(string entryId)
 		{
 			NameSpace session = outlookAccount.Session;
-			MailItem mailItem = session.GetItemFromID(entryId);
-			string synopses = MapiItem.GetItemSynopses(mailItem);
+			object mapiItem = session.GetItemFromID(entryId);
+
+			OutlookItem outlookItem = new (mapiItem);
+			string synopses = outlookItem.Synopses;
 
 			return synopses;
 		}
@@ -304,7 +307,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		public IList<string> ListFolders(
 			string pstFilePath, string folderPath, bool recurse)
 		{
-			IList<string> folderNames = new List<string>();
+			IList<string> folderNames = [];
 
 			Store store = outlookAccount.GetStore(pstFilePath);
 
@@ -334,8 +337,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		public IList<KeyValuePair<string, int>> ListTopSenders(
 			string pstFilePath, int amount)
 		{
-			IList<KeyValuePair<string, int>> topSenders =
-				new List<KeyValuePair<string, int>>();
+			IList<KeyValuePair<string, int>> topSenders = [];
 
 			Store store = outlookAccount.GetStore(pstFilePath);
 
@@ -435,7 +437,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				string storePath = GetStoreName(store);
 				Log.Info("Merging folders in: " + storePath);
 
-				storePath += "::";
 				MAPIFolder rootFolder = store.GetRootFolder();
 
 				OutlookFolder outlookFolder = new (outlookAccount);
@@ -1126,7 +1127,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				object item = items[index];
 
-				MapiItem.DeleteItem(item);
+				OutlookItem contentItem = new (item);
+				contentItem.Delete();
 			}
 		}
 
