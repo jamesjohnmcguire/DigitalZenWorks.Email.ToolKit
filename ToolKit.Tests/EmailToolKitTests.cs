@@ -351,8 +351,11 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem2 = mailItem2.Move(mainFolder);
 
-			string hash = MapiItem.GetItemHash(mailItem);
-			string hash2 = MapiItem.GetItemHash(mailItem2);
+			OutlookItem outlookItem = new (mailItem);
+			string hash = outlookItem.Hash;
+
+			OutlookItem outlookItem2 = new (mailItem2);
+			string hash2 = outlookItem2.Hash;
 
 			Assert.That(hash2, Is.Not.EqualTo(hash));
 
@@ -384,8 +387,11 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MailItem mailItem = Migrate.EmlFileToPst(path, storePath);
 			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath);
 
-			string hash = MapiItem.GetItemHash(mailItem);
-			string hash2 = MapiItem.GetItemHash(mailItem2);
+			OutlookItem outlookItem = new (mailItem);
+			string hash = outlookItem.Hash;
+
+			OutlookItem outlookItem2 = new (mailItem2);
+			string hash2 = outlookItem2.Hash;
 
 			Assert.That(hash2, Is.EqualTo(hash));
 
@@ -415,8 +421,11 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem = mailItem.Move(mainFolder);
 
-			string hash = MapiItem.GetItemHash(mailItem);
-			string hash2 = MapiItem.GetItemHash(mailItem);
+			OutlookItem outlookItem = new (mailItem);
+			string hash = outlookItem.Hash;
+
+			OutlookItem outlookItem2 = new (mailItem);
+			string hash2 = outlookItem2.Hash;
 
 			Assert.That(hash2, Is.EqualTo(hash));
 
@@ -916,7 +925,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				@"<somebody@example.com>,\t<somebodyelse@example.com>\r\n" +
 				@"Subject: Subject Statement\r\n";
 
-			header = MapiItem.RemoveMimeOleVersion(header);
+			header = OutlookItem.RemoveMimeOleVersion(header);
 
 			Assert.That(header, Is.EqualTo(afterHeader));
 		}
@@ -927,18 +936,18 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[Test]
 		public void TestRftBodyTrim()
 		{
-			byte[] sampleBytes = new byte[]
-			{
+			byte[] sampleBytes =
+			[
 				32, 32, 32, 32, 32, 32, 92, 112, 97, 114, 13, 10, 92, 112, 97,
 				114, 13, 10, 92, 112, 97, 114, 13, 10, 92, 112, 97, 114, 13,
 				10, 92, 112, 97, 114, 13, 10, 92, 112, 97, 114, 13, 10, 92,
 				112, 97, 114, 13, 10, 92, 112, 97, 114, 13, 10, 125, 13, 10, 0
-			};
-			byte[] afterBytes = new byte[]
-			{
+			];
+			byte[] afterBytes =
+			[
 				32, 32, 32, 32, 32, 32, 92, 112, 97, 114, 13, 10, 125, 13,
 				10, 0
-			};
+			];
 
 			sampleBytes = RtfEmail.Trim(sampleBytes);
 

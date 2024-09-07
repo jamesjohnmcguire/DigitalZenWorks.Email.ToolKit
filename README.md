@@ -32,7 +32,8 @@ This project includes the [DbxOutlookExpress project](https://github.com/jamesjo
 
 ### Usage:
 
-NOTE: Always back up any data you might be modifying.  This package has been tested with hundreds of thousands of messages, more than 50 GBs of data, without any problems.  But there can always be a first.  So, please back up your data before using this tool.  Did I mention that you should back up?  
+NOTE: Always back up any data you might be modifying.  This package has been tested with hundreds of thousands of messages, 
+more than 50 GBs of data, without any problems.  But there can always be a first.  So, please back up your data before using this tool.  Did I mention that you should back up?  
 
 This is, currently, a command line program to be run from the command line or terminal.  
 
@@ -98,7 +99,7 @@ For large stores, this can take some time.
 #### Library and API usage:
 Except for command line argument processing, all of the functionality is located in the main library project.  The main APIs match the command line commands.
 
-The main classes are MapiItem, Migrate, OutlookOutlook, OutlookFolder and OutlookStore.  
+The main classes are Migrate, OutlookFolder, OutlookItem and OutlookStore.  
 Migrate is for migrating messages in other formats into Outlook.  Some examples:  
 ```c#
 Migrate.DbxToPst(dbxPath, pstPath);  

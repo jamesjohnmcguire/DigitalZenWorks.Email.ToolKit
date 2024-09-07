@@ -517,8 +517,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					MailItem mailItem =
 						outlookStore.GetMailItemFromEntryId(entryId1);
 
-					string synopses =
-						MapiItem.GetItemSynopses(mailItem);
+					OutlookItem outlookItem = new (mailItem);
+					string synopses = outlookItem.Synopses;
 
 					string message = string.Format(
 						CultureInfo.InvariantCulture,
