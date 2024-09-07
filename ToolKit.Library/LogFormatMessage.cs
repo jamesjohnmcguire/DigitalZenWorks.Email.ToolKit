@@ -23,6 +23,22 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="template">The format template to use.</param>
 		/// <param name="parameter1">The first parameter.</param>
+		public static void Error(
+			string template, string parameter1)
+		{
+			string message = string.Format(
+				CultureInfo.InvariantCulture,
+				template,
+				parameter1);
+
+			Log.Error(message);
+		}
+
+		/// <summary>
+		/// Sends an error log message.
+		/// </summary>
+		/// <param name="template">The format template to use.</param>
+		/// <param name="parameter1">The first parameter.</param>
 		/// <param name="parameter2">The second parameter.</param>
 		public static void Error(
 			string template, string parameter1, string parameter2)
