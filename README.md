@@ -32,7 +32,8 @@ This project includes the [DbxOutlookExpress project](https://github.com/jamesjo
 
 ### Usage:
 
-NOTE: Always back up any data you might be modifying.  This package has been tested with hundreds of thousands of messages, more than 50 GBs of data, without any problems.  But there can always be a first.  So, please back up your data before using this tool.  Did I mention that you should back up?  
+NOTE: Always back up any data you might be modifying.  This package has been tested with hundreds of thousands of messages, 
+more than 50 GBs of data, without any problems.  But there can always be a first.  So, please back up your data before using this tool.  Did I mention that you should back up?  
 
 This is, currently, a command line program to be run from the command line or terminal.  
 
