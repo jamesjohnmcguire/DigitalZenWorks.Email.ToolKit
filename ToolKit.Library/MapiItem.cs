@@ -85,7 +85,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			"please use OutlookItem.Synopses instead.")]
 		public static string GetItemSynopses(object mapiItem)
 		{
-			OutlookItem outlookItem = new OutlookItem(mapiItem);
+			OutlookItem outlookItem = new (mapiItem);
 			string synopses = outlookItem.Synopses;
 
 			return synopses;
