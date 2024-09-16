@@ -944,8 +944,8 @@ namespace DigitalZenWorks.Email.ToolKit
 #if NET5_0_OR_GREATER
 			byte[] hashValue = SHA256.HashData(data);
 #else
-					using SHA256 hasher = SHA256.Create();
-					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+			using SHA256 hasher = SHA256.Create();
+			byte[] hashValue = hasher.ComputeHash(data);
 #endif
 			string hashBase64 = Convert.ToBase64String(hashValue);
 
