@@ -28,7 +28,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="mapiItem">The Outlook item.</param>
 		public OutlookMail(object mapiItem)
 		{
+#if NET6_0_OR_GREATER
 			ArgumentNullException.ThrowIfNull(mapiItem);
+#else
+			if (mapiItem == null)
+			{
+				throw new ArgumentNullException(nameof(mapiItem));
+			}
+#endif
 
 			mailItem = mapiItem as MailItem;
 		}

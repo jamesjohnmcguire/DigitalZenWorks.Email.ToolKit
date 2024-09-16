@@ -7,15 +7,10 @@
 using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Security.Claims;
 using System.Text;
-using System.Threading;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -33,7 +28,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="mapiItem">The Outlook item.</param>
 		public OutlookContact(object mapiItem)
 		{
+#if NET6_0_OR_GREATER
 			ArgumentNullException.ThrowIfNull(mapiItem);
+#else
+			if (mapiItem == null)
+			{
+				throw new ArgumentNullException(nameof(mapiItem));
+			}
+#endif
 
 			contactItem = mapiItem as ContactItem;
 		}
