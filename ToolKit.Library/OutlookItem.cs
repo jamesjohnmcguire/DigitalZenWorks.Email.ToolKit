@@ -7,6 +7,7 @@
 using Common.Logging;
 using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
+using Org.BouncyCastle.Asn1.Cms;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -17,6 +18,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -214,6 +216,26 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (actions != null)
 			{
+				string actionsText = GetActionsText(actions);
+
+				Encoding encoding = Encoding.UTF8;
+				actionsData = encoding.GetBytes(actionsText);
+			}
+
+			return actionsData;
+		}
+
+		/// <summary>
+		/// Get Actions Data.
+		/// </summary>
+		/// <param name="actions">The item actions.</param>
+		/// <returns>The item actions data as text.</returns>
+		public static string GetActionsText(Actions actions)
+		{
+			string actionsText = null;
+
+			if (actions != null)
+			{
 				int total = actions.Count;
 
 				for (int index = 1; index <= total; index++)
@@ -221,23 +243,22 @@ namespace DigitalZenWorks.Email.ToolKit
 					Microsoft.Office.Interop.Outlook.Action action =
 						actions[index];
 
-					byte[] metaDataBytes = GetActionData(action);
+					string actionText = GetActionText(action);
 
-					if (actionsData == null)
+					if (actionText == null)
 					{
-						actionsData = metaDataBytes;
+						actionsText = actionText;
 					}
 					else
 					{
-						actionsData =
-							BitBytes.MergeByteArrays(actionsData, metaDataBytes);
+						actionsText += actionText;
 					}
 
 					Marshal.ReleaseComObject(action);
 				}
 			}
 
-			return actionsData;
+			return actionsText;
 		}
 
 		/// <summary>
@@ -251,29 +272,71 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (attachments != null)
 			{
+				string attachmentsText = GetAttachmentsText(attachments);
+
+				if (attachmentsText != null)
+				{
+					Encoding encoding = Encoding.UTF8;
+					attachmentsData = encoding.GetBytes(attachmentsText);
+				}
+			}
+
+			return attachmentsData;
+		}
+
+		/// <summary>
+		/// Get Attachments Data.
+		/// </summary>
+		/// <param name="attachments">The item attachments.</param>
+		/// <returns>The item attachments data as text.</returns>
+		public static string GetAttachmentsText(Attachments attachments)
+		{
+			string attachmentsText = null;
+
+			if (attachments != null)
+			{
 				int total = attachments.Count;
 
 				for (int index = 1; index <= total; index++)
 				{
 					Attachment attachment = attachments[index];
 
-					byte[] attachementData = GetAttachmentData(attachment);
+					string attachmentText = GetAttachmentText(attachment);
 
-					if (attachmentsData == null)
+					if (attachmentsText == null)
 					{
-						attachmentsData = attachementData;
+						attachmentsText = attachmentText;
 					}
 					else
 					{
-						attachmentsData = BitBytes.MergeByteArrays(
-							attachmentsData, attachementData);
+						attachmentsText += attachmentText;
 					}
 
 					Marshal.ReleaseComObject(attachment);
 				}
 			}
 
-			return attachmentsData;
+			return attachmentsText;
+		}
+
+		/// <summary>
+		/// Get boolean text.
+		/// </summary>
+		/// <param name="item">The item to check.</param>
+		/// <returns>The formatted text value.</returns>
+		public static string GetBooleanText(bool item)
+		{
+			string booleanText = string.Empty;
+
+			string name = nameof(item);
+
+			booleanText = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}: {1}",
+				name,
+				item.ToString());
+
+			return booleanText;
 		}
 
 		/// <summary>
@@ -284,6 +347,26 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static byte[] GetDateTimesBytes(IList<DateTime> times)
 		{
 			byte[] data = null;
+
+			if (times != null)
+			{
+				string buffer = GetDateTimesText(times);
+
+				Encoding encoding = Encoding.UTF8;
+				data = encoding.GetBytes(buffer);
+			}
+
+			return data;
+		}
+
+		/// <summary>
+		/// Get DateTime Properites Data.
+		/// </summary>
+		/// <param name="times">The DataTime properties data.</param>
+		/// <returns>The DataTime properties data as text.</returns>
+		public static string GetDateTimesText(IList<DateTime> times)
+		{
+			string dateTimesText = null;
 
 			if (times != null)
 			{
@@ -302,13 +385,58 @@ namespace DigitalZenWorks.Email.ToolKit
 					builder.Append(timeString);
 				}
 
-				string buffer = builder.ToString();
-
-				Encoding encoding = Encoding.UTF8;
-				data = encoding.GetBytes(buffer);
+				dateTimesText = builder.ToString();
 			}
 
-			return data;
+			return dateTimesText;
+		}
+
+		public static string GetDetails(
+			object mapiItem, bool strict = false)
+		{
+			string details = null;
+
+			if (mapiItem != null)
+			{
+				try
+				{
+					IList<byte[]> buffers = [];
+
+					switch (mapiItem)
+					{
+						case AppointmentItem appointmentItem:
+							OutlookAppointment appointment = new (mapiItem);
+							details = appointment.GetPropertiesText(strict);
+							break;
+						//case ContactItem contact:
+						//	OutlookContact outlookContact = new(mapiItem);
+						//	buffers = outlookContact.GetProperties(strict);
+						//	break;
+						case MailItem mailItem:
+							OutlookMail mail = new (mapiItem);
+							details = mail.GetPropertiesText(strict);
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
+					}
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is COMException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Error(exception.ToString());
+				}
+			}
+
+			return details;
 		}
 
 		/// <summary>
@@ -426,17 +554,36 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="recipients">The enums recipients data.</param>
 		/// <returns>The recipients properties data in bytes.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage(
-			"StyleCop.CSharp.NamingRules",
-			"SA1305:Field names should not use Hungarian notation",
-			Justification = "It isn't hungarian notation.")]
 		public static byte[] GetRecipients(Recipients recipients)
 		{
 			byte[] data = null;
 
 			if (recipients != null)
 			{
-				string recipientsData;
+				string recipientsData = GetRecipientsText(recipients);
+
+				Encoding encoding = Encoding.UTF8;
+				data = encoding.GetBytes(recipientsData);
+			}
+
+			return data;
+		}
+
+		/// <summary>
+		/// Get recipients properites data.
+		/// </summary>
+		/// <param name="recipients">The enums recipients data.</param>
+		/// <returns>The recipients properties data as text.</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage(
+			"StyleCop.CSharp.NamingRules",
+			"SA1305:Field names should not use Hungarian notation",
+			Justification = "It isn't hungarian notation.")]
+		public static string GetRecipientsText(Recipients recipients)
+		{
+			string recipientsData = null;
+
+			if (recipients != null)
+			{
 				List<string> toList = [];
 				List<string> ccList = [];
 				List<string> bccList = [];
@@ -502,12 +649,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 
 				recipientsData = builder.ToString();
-
-				Encoding encoding = Encoding.UTF8;
-				data = encoding.GetBytes(recipientsData);
 			}
 
-			return data;
+			return recipientsData;
 		}
 
 		/// <summary>
@@ -521,12 +665,35 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (userProperties != null)
 			{
+				Encoding encoding = Encoding.UTF8;
+
+				string propertiesText = GetUserPropertiesText(userProperties);
+
+				properties = encoding.GetBytes(propertiesText);
+			}
+
+			return properties;
+		}
+
+		/// <summary>
+		/// Get user properites data.
+		/// </summary>
+		/// <param name="userProperties">The user properties data.</param>
+		/// <returns>The user properties data as text.</returns>
+		public static string GetUserPropertiesText(
+			UserProperties userProperties)
+		{
+			string properties = null;
+
+			if (userProperties != null)
+			{
+				properties = string.Empty;
 				int total = userProperties.Count;
 
 				for (int index = 1; index <= total; index++)
 				{
 					UserProperty property = userProperties[index];
-					properties = GetUserProperty(properties, property);
+					properties += GetUserPropertyText(property);
 				}
 			}
 
@@ -831,93 +998,127 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static byte[] GetActionData(
 			Microsoft.Office.Interop.Outlook.Action action)
 		{
-			Encoding encoding = Encoding.UTF8;
+			byte[] actionData = null;
 
-			int copyLikeEnum = (int)action.CopyLike;
-			bool enabledBool = action.Enabled;
-			int enabledInt = Convert.ToInt32(enabledBool);
-			int replyStyleEnum = (int)action.ReplyStyle;
-			int responseStyleEnum = (int)action.ResponseStyle;
-			int showOnEnum = (int)action.ShowOn;
+			if (action != null)
+			{
+				Encoding encoding = Encoding.UTF8;
 
-			string copyLike =
-				copyLikeEnum.ToString(CultureInfo.InvariantCulture);
-			string enabled =
-				enabledInt.ToString(CultureInfo.InvariantCulture);
-			string replyStyle =
-				replyStyleEnum.ToString(CultureInfo.InvariantCulture);
-			string responseStyle = responseStyleEnum.ToString(
-				CultureInfo.InvariantCulture);
-			string showOn =
-				showOnEnum.ToString(CultureInfo.InvariantCulture);
+				string metaData = GetActionText(action);
 
-			string metaData = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}{6}",
-				copyLike,
-				enabled,
-				action.Name,
-				action.Prefix,
-				replyStyle,
-				responseStyle,
-				showOn);
+				actionData = encoding.GetBytes(metaData);
+			}
 
-			byte[] metaDataBytes = encoding.GetBytes(metaData);
+			return actionData;
+		}
 
-			return metaDataBytes;
+		private static string GetActionText(
+			Microsoft.Office.Interop.Outlook.Action action)
+		{
+			string actionText = null;
+
+			if (action != null)
+			{
+				int copyLikeEnum = (int)action.CopyLike;
+				bool enabledBool = action.Enabled;
+				int enabledInt = Convert.ToInt32(enabledBool);
+				int replyStyleEnum = (int)action.ReplyStyle;
+				int responseStyleEnum = (int)action.ResponseStyle;
+				int showOnEnum = (int)action.ShowOn;
+
+				string copyLike =
+					copyLikeEnum.ToString(CultureInfo.InvariantCulture);
+				string enabled =
+					enabledInt.ToString(CultureInfo.InvariantCulture);
+				string replyStyle =
+					replyStyleEnum.ToString(CultureInfo.InvariantCulture);
+				string responseStyle = responseStyleEnum.ToString(
+					CultureInfo.InvariantCulture);
+				string showOn =
+					showOnEnum.ToString(CultureInfo.InvariantCulture);
+
+				actionText = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}{1}{2}{3}{4}{5}{6}",
+					copyLike,
+					enabled,
+					action.Name,
+					action.Prefix,
+					replyStyle,
+					responseStyle,
+					showOn);
+			}
+
+			return actionText;
 		}
 
 		private static byte[] GetAttachmentData(Attachment attachment)
 		{
-			string basePath = Path.GetTempPath();
+			byte[] attachmentData = null;
 
-			Encoding encoding = Encoding.UTF8;
-
-			int attachmentIndex = attachment.Index;
-			string indexValue = attachmentIndex.ToString(
-				CultureInfo.InvariantCulture);
-
-			int positionValue = attachment.Position;
-			string position = positionValue.ToString(
-				CultureInfo.InvariantCulture);
-
-			int intType = (int)attachment.Type;
-			string attachmentType =
-				intType.ToString(CultureInfo.InvariantCulture);
-
-			string metaData = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}",
-				attachment.DisplayName,
-				indexValue,
-				position,
-				attachmentType);
-
-			try
+			if (attachment != null)
 			{
-				metaData += attachment.FileName;
-			}
-			catch (COMException)
-			{
+				string attachmentText = GetAttachmentText(attachment);
+
+				Encoding encoding = Encoding.UTF8;
+				attachmentData = encoding.GetBytes(attachmentText);
 			}
 
-			try
+			return attachmentData;
+		}
+
+		private static string GetAttachmentText(Attachment attachment)
+		{
+			string attachmentData = null;
+
+			if (attachment != null)
 			{
-				metaData += attachment.PathName;
+				string basePath = Path.GetTempPath();
+
+				int attachmentIndex = attachment.Index;
+				string indexValue = attachmentIndex.ToString(
+					CultureInfo.InvariantCulture);
+
+				int positionValue = attachment.Position;
+				string position = positionValue.ToString(
+					CultureInfo.InvariantCulture);
+
+				int intType = (int)attachment.Type;
+				string attachmentType =
+					intType.ToString(CultureInfo.InvariantCulture);
+
+				string metaData = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}{1}{2}{3}",
+					attachment.DisplayName,
+					indexValue,
+					position,
+					attachmentType);
+
+				try
+				{
+					metaData += attachment.FileName;
+				}
+				catch (COMException)
+				{
+				}
+
+				try
+				{
+					metaData += attachment.PathName;
+				}
+				catch (COMException)
+				{
+				}
+
+				string filePath = basePath + attachment.FileName;
+				attachment.SaveAsFile(filePath);
+
+				byte[] fileBytes = File.ReadAllBytes(filePath);
+				string hashBase64 = Convert.ToBase64String(fileBytes);
+
+				attachmentData = metaData + hashBase64;
 			}
-			catch (COMException)
-			{
-			}
-
-			byte[] metaDataBytes = encoding.GetBytes(metaData);
-
-			string filePath = basePath + attachment.FileName;
-			attachment.SaveAsFile(filePath);
-
-			byte[] fileBytes = File.ReadAllBytes(filePath);
-
-			byte[] attachmentData =
-				BitBytes.MergeByteArrays(metaDataBytes, fileBytes);
 
 			return attachmentData;
 		}
@@ -1034,29 +1235,45 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static byte[] GetUserPropertyData(UserProperty property)
 		{
-			Encoding encoding = Encoding.UTF8;
+			byte[] propertyData = null;
 
-			int typeEnum = (int)property.Type;
-			var propertyValue = property.Value;
+			if (property != null)
+			{
+				string metaData = GetUserPropertyText(property);
 
-			string typeValue =
-				typeEnum.ToString(CultureInfo.InvariantCulture);
-			string value =
-				propertyValue.ToString(CultureInfo.InvariantCulture);
+				Encoding encoding = Encoding.UTF8;
+				propertyData = encoding.GetBytes(metaData);
+			}
 
-			string metaData = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}",
-				property.Formula,
-				property.Name,
-				typeValue,
-				property.ValidationFormula,
-				property.ValidationText,
-				value);
+			return propertyData;
+		}
 
-			byte[] metaDataBytes = encoding.GetBytes(metaData);
+		private static string GetUserPropertyText(UserProperty property)
+		{
+			string propertyText = null;
 
-			return metaDataBytes;
+			if (property != null)
+			{
+				int typeEnum = (int)property.Type;
+				var propertyValue = property.Value;
+
+				string typeValue =
+					typeEnum.ToString(CultureInfo.InvariantCulture);
+				string value =
+					propertyValue.ToString(CultureInfo.InvariantCulture);
+
+				propertyText = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}{1}{2}{3}{4}{5}",
+					property.Formula,
+					property.Name,
+					typeValue,
+					property.ValidationFormula,
+					property.ValidationText,
+					value);
+			}
+
+			return propertyText;
 		}
 
 		private static string GetSynopses(object mapiItem)

@@ -104,6 +104,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 					switch (command.Name)
 					{
+						case "details":
+							result = Details(command);
+							break;
 						case "dbx-to-pst":
 							result = DbxToPst(command);
 							break;
@@ -155,6 +158,22 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return result;
+		}
+
+		private static int Details(Command command)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			string pstFilePath = command.Parameters[0];
+			string entryId = command.Parameters[1];
+
+			outlookStore.Details(pstFilePath, entryId);
+
+			string message = "Details saved in file: " + entryId + ".txt";
+			Console.WriteLine(message);
+
+			return 0;
 		}
 
 		private static void DisplayParameters(
@@ -314,6 +333,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Command removeEmptyFolders = new (
 				"remove-empty-folders", null, 1, "Prune empty folders");
 			commands.Add(removeEmptyFolders);
+
+			Command details = new (
+				"details", null, 2, "Show details of given item");
+			commands.Add(details);
 
 			return commands;
 		}

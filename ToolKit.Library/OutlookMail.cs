@@ -84,14 +84,15 @@ namespace DigitalZenWorks.Email.ToolKit
 			buffer = OutlookItem.GetAttachments(mailItem.Attachments);
 			buffers.Add(buffer);
 
-			buffer = GetDateTimes();
+			buffer = GetDateTimesBytes();
 			buffers.Add(buffer);
 
 			buffer = GetEnums();
 			buffers.Add(buffer);
 
-			buffer = OutlookItem.GetRecipients(mailItem.Recipients);
-			buffers.Add(buffer);
+			// Recipients is included with string properties.
+			//buffer = OutlookItem.GetRecipients(mailItem.Recipients);
+			//buffers.Add(buffer);
 
 			buffer = GetStringProperties(strict);
 			buffers.Add(buffer);
@@ -106,6 +107,43 @@ namespace DigitalZenWorks.Email.ToolKit
 			buffers.Add(itemBytes);
 
 			return buffers;
+		}
+
+		/// <summary>
+		/// Get the text of all relevant properties.
+		/// </summary>
+		/// <param name="strict">Indicates whether the check should be strict
+		/// or not.</param>
+		/// <returns>The text of all relevant properties.</returns>
+		public string GetPropertiesText(bool strict = false)
+		{
+			string propertiesText = string.Empty;
+
+			propertiesText += GetBooleansText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText +=
+				OutlookItem.GetActionsText(mailItem.Actions);
+			propertiesText += Environment.NewLine;
+
+			propertiesText +=
+				OutlookItem.GetAttachmentsText(mailItem.Attachments);
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetDateTimesText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetEnumsText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetStringPropertiesText(strict);
+			propertiesText += Environment.NewLine;
+
+			propertiesText += OutlookItem.GetUserPropertiesText(
+				mailItem.UserProperties);
+			propertiesText += Environment.NewLine;
+
+			return propertiesText;
 		}
 
 		/// <summary>
@@ -165,6 +203,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			rawValue = mailItem.DeleteAfterSubmit;
 			boolHolder = BitBytes.SetBit(boolHolder, 3, rawValue);
 
+			// IsConflict ?
 			rawValue = mailItem.IsMarkedAsTask;
 			boolHolder = BitBytes.SetBit(boolHolder, 4, rawValue);
 
@@ -204,7 +243,45 @@ namespace DigitalZenWorks.Email.ToolKit
 			return boolHolder;
 		}
 
-		private byte[] GetDateTimes()
+		private string GetBooleansText()
+		{
+			string booleansText = string.Empty;
+
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.AutoForwarded);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.AutoResolvedWinner);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.DeleteAfterSubmit);
+			//booleansText += OutlookItem.GetBooleanText(
+			//	mailItem.IsConflict);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.IsMarkedAsTask);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.NoAging);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.OriginatorDeliveryReportRequested);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.ReadReceiptRequested);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.RecipientReassignmentProhibited);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.ReminderOverrideDefault);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.ReminderPlaySound);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.ReminderSet);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.Saved);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.Submitted);
+			booleansText += OutlookItem.GetBooleanText(
+				mailItem.UnRead);
+
+			return booleansText;
+		}
+
+		private List<DateTime> GetDateTimes()
 		{
 			List<DateTime> times = [];
 
@@ -247,9 +324,25 @@ namespace DigitalZenWorks.Email.ToolKit
 			DateTime taskStartDateDateTime = mailItem.TaskStartDate;
 			times.Add(taskStartDateDateTime);
 
+			return times;
+		}
+
+		private byte[] GetDateTimesBytes()
+		{
+			List<DateTime> times = GetDateTimes();
+
 			byte[] data = OutlookItem.GetDateTimesBytes(times);
 
 			return data;
+		}
+
+		private string GetDateTimesText()
+		{
+			List<DateTime> times = GetDateTimes();
+
+			string dateTimesText = OutlookItem.GetDateTimesText(times);
+
+			return dateTimesText;
 		}
 
 		private byte[] GetEnums()
@@ -300,13 +393,44 @@ namespace DigitalZenWorks.Email.ToolKit
 			return buffer;
 		}
 
+		private string GetEnumsText()
+		{
+			string enumsText = string.Empty;
+
+			enumsText += nameof(mailItem.BodyFormat);
+			enumsText += nameof(mailItem.Class);
+			enumsText += nameof(mailItem.Importance);
+			enumsText += nameof(mailItem.MarkForDownload);
+			enumsText += nameof(mailItem.Permission);
+			enumsText += nameof(mailItem.PermissionService);
+			enumsText += nameof(mailItem.Sensitivity);
+
+			return enumsText;
+		}
+
 		private byte[] GetStringProperties(
 			bool strict = false,
 			bool ignoreConversation = true)
 		{
-			byte[] data = null;
+			string propertiesText =
+				GetStringPropertiesText(false, true, false);
+
+			Encoding encoding = Encoding.UTF8;
+			byte[] data = encoding.GetBytes(propertiesText);
+
+			return data;
+		}
+
+		private string GetStringPropertiesText(
+			bool strict = false,
+			bool ignoreConversation = true,
+			bool addNewLine = false)
+		{
+			List<string> properties = [];
 
 			string bcc = mailItem.BCC;
+			properties.Add(bcc);
+
 			string billingInformation = null;
 
 			try
@@ -317,6 +441,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 			}
 
+			properties.Add(billingInformation);
+
 			string body = mailItem.Body;
 
 			if (body != null && strict == false)
@@ -324,18 +450,31 @@ namespace DigitalZenWorks.Email.ToolKit
 				body = body.TrimEnd();
 			}
 
+			properties.Add(billingInformation);
+
 			string categories = mailItem.Categories;
+			properties.Add(billingInformation);
+
 			string cc = mailItem.CC;
+			properties.Add(billingInformation);
+
 			string companies = mailItem.Companies;
+			properties.Add(billingInformation);
+
 			string conversationID = null;
 
 			if (ignoreConversation == false)
 			{
 				conversationID = mailItem.ConversationID;
+				properties.Add(billingInformation);
 			}
 
 			string conversationTopic = mailItem.ConversationTopic;
+			properties.Add(billingInformation);
+
 			string flagRequest = mailItem.FlagRequest;
+			properties.Add(billingInformation);
+
 			string header = mailItem.PropertyAccessor.GetProperty(
 				"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
 
@@ -357,6 +496,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				header = NormalizeHeaders(header);
 			}
 
+			properties.Add(billingInformation);
+
 			string htmlBody = mailItem.HTMLBody;
 
 			if (htmlBody != null && strict == false)
@@ -364,72 +505,93 @@ namespace DigitalZenWorks.Email.ToolKit
 				htmlBody = HtmlEmail.Trim(htmlBody);
 			}
 
+			properties.Add(billingInformation);
+
 			string messageClass = mailItem.MessageClass;
+			properties.Add(billingInformation);
+
 			string mileage = mailItem.Mileage;
+			properties.Add(billingInformation);
+
 			string receivedByEntryID = null;
+			properties.Add(billingInformation);
+
 			string receivedByName = mailItem.ReceivedByName;
+			properties.Add(billingInformation);
+
 			string receivedOnBehalfOfEntryID = null;
+			properties.Add(billingInformation);
 
 			string receivedOnBehalfOfName = null;
+			properties.Add(billingInformation);
+
 			string reminderSoundFile = mailItem.ReminderSoundFile;
+			properties.Add(billingInformation);
+
 			string replyRecipientNames = mailItem.ReplyRecipientNames;
+			properties.Add(billingInformation);
+
 			string retentionPolicyName = mailItem.RetentionPolicyName;
+			properties.Add(billingInformation);
+
 			string senderEmailAddress = mailItem.SenderEmailAddress;
+			properties.Add(billingInformation);
+
 			string senderEmailType = mailItem.SenderEmailType;
+			properties.Add(billingInformation);
+
 			string senderName = mailItem.SenderName;
+			properties.Add(billingInformation);
+
 			string sentOnBehalfOfName = mailItem.SentOnBehalfOfName;
+			properties.Add(billingInformation);
+
 			string subject = mailItem.Subject;
+			properties.Add(billingInformation);
+
 			string taskSubject = mailItem.TaskSubject;
+			properties.Add(billingInformation);
+
 			string to = mailItem.To;
+			properties.Add(billingInformation);
+
 			string votingOptions = mailItem.VotingOptions;
+			properties.Add(billingInformation);
+
 			string votingResponse = mailItem.VotingResponse;
+			properties.Add(billingInformation);
 
 			if (strict == true)
 			{
 				// Might need to investigate further.
 				receivedByEntryID = mailItem.ReceivedByEntryID;
+				properties.Add(billingInformation);
+
 				receivedOnBehalfOfEntryID =
 					mailItem.ReceivedOnBehalfOfEntryID;
+				properties.Add(billingInformation);
+
 				receivedOnBehalfOfName = mailItem.ReceivedOnBehalfOfName;
+				properties.Add(billingInformation);
 			}
 
 			StringBuilder builder = new ();
-			builder.Append(bcc);
-			builder.Append(billingInformation);
-			builder.Append(body);
-			builder.Append(categories);
-			builder.Append(cc);
-			builder.Append(companies);
-			builder.Append(conversationID);
-			builder.Append(conversationTopic);
-			builder.Append(flagRequest);
-			builder.Append(header);
-			builder.Append(htmlBody);
-			builder.Append(messageClass);
-			builder.Append(mileage);
-			builder.Append(receivedByEntryID);
-			builder.Append(receivedByName);
-			builder.Append(receivedOnBehalfOfEntryID);
-			builder.Append(receivedOnBehalfOfName);
-			builder.Append(reminderSoundFile);
-			builder.Append(replyRecipientNames);
-			builder.Append(retentionPolicyName);
-			builder.Append(senderEmailAddress);
-			builder.Append(senderEmailAddress);
-			builder.Append(senderName);
-			builder.Append(sentOnBehalfOfName);
-			builder.Append(subject);
-			builder.Append(taskSubject);
-			builder.Append(to);
-			builder.Append(votingOptions);
-			builder.Append(votingResponse);
 
-			string buffer = builder.ToString();
+			foreach (string item in properties)
+			{
+				if (addNewLine == true)
+				{
+					builder.AppendLine(item);
+				}
+				else
+				{
+					builder.Append(item);
+				}
+			}
 
-			Encoding encoding = Encoding.UTF8;
-			data = encoding.GetBytes(buffer);
+			string stringProperties = builder.ToString();
 
-			return data;
+			return stringProperties;
 		}
 	}
 }
