@@ -170,9 +170,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			outlookStore.Details(pstFilePath, entryId);
 
-			string message = "Details saved in file: " + entryId + ".txt";
-			Console.WriteLine(message);
-
 			return 0;
 		}
 

@@ -230,7 +230,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="actions">The item actions.</param>
 		/// <returns>The item actions data as text.</returns>
-		public static string GetActionsText(Actions actions)
+		public static string GetActionsText(
+			Actions actions, bool addNewLine = false)
 		{
 			string actionsText = null;
 
@@ -243,7 +244,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					Microsoft.Office.Interop.Outlook.Action action =
 						actions[index];
 
-					string actionText = GetActionText(action);
+					string actionText = GetActionText(action, addNewLine);
 
 					if (actionText == null)
 					{
@@ -252,6 +253,11 @@ namespace DigitalZenWorks.Email.ToolKit
 					else
 					{
 						actionsText += actionText;
+					}
+
+					if (addNewLine == true)
+					{
+						actionsText += Environment.NewLine;
 					}
 
 					Marshal.ReleaseComObject(action);
@@ -364,24 +370,27 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="times">The DataTime properties data.</param>
 		/// <returns>The DataTime properties data as text.</returns>
-		public static string GetDateTimesText(IList<DateTime> times)
+		public static string GetDateTimesText(
+			IList<DateTime> times, List<string> labels = null)
 		{
 			string dateTimesText = null;
 
 			if (times != null)
 			{
-				List<string> timesStrings = [];
-
-				foreach (DateTime time in times)
-				{
-					string timeString = time.ToString("O");
-					timesStrings.Add(timeString);
-				}
-
 				StringBuilder builder = new ();
 
-				foreach (string timeString in timesStrings)
+				for (int index = 0; index < times.Count; index++)
 				{
+					DateTime time = times[index];
+
+					string timeString = time.ToString("O");
+
+					if (labels != null)
+					{
+						string label = labels[index];
+						timeString = FormatValue(label, timeString);
+					}
+
 					builder.Append(timeString);
 				}
 
@@ -414,7 +423,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						//	break;
 						case MailItem mailItem:
 							OutlookMail mail = new (mapiItem);
-							details = mail.GetPropertiesText(strict);
+							details = mail.GetPropertiesText(strict, true);
 							break;
 						default:
 							string message = "Item is of unsupported type: " +
@@ -977,6 +986,57 @@ namespace DigitalZenWorks.Email.ToolKit
 			await MoveAsync(mapiItem, destination).ConfigureAwait(false);
 		}
 
+		public static string FormatEnumValue(
+			string propertyName,
+			object propertyValue)
+		{
+			int enumValue = (int)propertyValue;
+			string textValue = enumValue.ToString();
+
+			string result = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: {1}",
+					propertyName,
+					textValue);
+
+			result += Environment.NewLine;
+
+			return result;
+		}
+
+		public static string FormatValue(
+			string propertyName,
+			string propertyValue)
+		{
+			string formattedText = null;
+
+			if (propertyValue != null)
+			{
+				formattedText = string.Format(
+						CultureInfo.InvariantCulture,
+						"{0}: {1}",
+						propertyName,
+						propertyValue);
+
+				formattedText += Environment.NewLine;
+			}
+
+			return formattedText;
+		}
+
+		public static string FormatValueConditional(
+			string propertyName,
+			string propertyValue,
+			bool formatValue = false)
+		{
+			if (formatValue == true)
+			{
+				propertyValue = FormatValue(propertyName, propertyValue);
+			}
+
+			return propertyValue;
+		}
+
 		private static bool DoubleCheckDuplicate(
 			string baseSynopses, object mapiItem)
 		{
@@ -1013,7 +1073,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		private static string GetActionText(
-			Microsoft.Office.Interop.Outlook.Action action)
+			Microsoft.Office.Interop.Outlook.Action action,
+			bool addNewLine = false)
 		{
 			string actionText = null;
 
@@ -1037,9 +1098,16 @@ namespace DigitalZenWorks.Email.ToolKit
 				string showOn =
 					showOnEnum.ToString(CultureInfo.InvariantCulture);
 
+				string format = "{0}{1}{2}{3}{4}{5}{6}";
+
+				if (addNewLine == true)
+				{
+					format = "{0} {1} {2} {3} {4} {5} {6}";
+				}
+
 				actionText = string.Format(
 					CultureInfo.InvariantCulture,
-					"{0}{1}{2}{3}{4}{5}{6}",
+					format,
 					copyLike,
 					enabled,
 					action.Name,
