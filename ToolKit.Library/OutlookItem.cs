@@ -344,16 +344,18 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static async Task<string> GetHashAsync(object mapiItem)
 		{
 			string hashBase64 = null;
-			byte[] finalBuffer = null;
 
 			if (mapiItem != null)
 			{
 				try
 				{
-					finalBuffer = await Task.Run(() =>
+					byte[] itemBytes = await Task.Run(() =>
 							GetItemBytes(mapiItem)).ConfigureAwait(false);
 
-					hashBase64 = GetBytesHash(finalBuffer);
+					if (itemBytes != null)
+					{
+						hashBase64 = GetBytesHash(itemBytes);
+					}
 				}
 				catch (System.Exception exception) when
 					(exception is ArgumentException ||
@@ -942,8 +944,8 @@ namespace DigitalZenWorks.Email.ToolKit
 #if NET5_0_OR_GREATER
 			byte[] hashValue = SHA256.HashData(data);
 #else
-					using SHA256 hasher = SHA256.Create();
-					byte[] hashValue = hasher.ComputeHash(finalBuffer);
+			using SHA256 hasher = SHA256.Create();
+			byte[] hashValue = hasher.ComputeHash(data);
 #endif
 			string hashBase64 = Convert.ToBase64String(hashValue);
 
@@ -966,6 +968,10 @@ namespace DigitalZenWorks.Email.ToolKit
 						case AppointmentItem appointmentItem:
 							OutlookAppointment appointment = new (mapiItem);
 							buffers = appointment.GetProperties(strict);
+							break;
+						case ContactItem contact:
+							OutlookContact outlookContact = new (mapiItem);
+							buffers = outlookContact.GetProperties(strict);
 							break;
 						case MailItem mailItem:
 							OutlookMail mail = new (mapiItem);
@@ -1066,6 +1072,10 @@ namespace DigitalZenWorks.Email.ToolKit
 						case AppointmentItem appointmentItem:
 							synopses = OutlookAppointment.GetSynopses(
 								appointmentItem);
+							break;
+						case ContactItem contactItem:
+							synopses = OutlookContact.GetSynopses(
+								contactItem);
 							break;
 						case MailItem mailItem:
 							synopses = OutlookMail.GetSynopses(mailItem);
