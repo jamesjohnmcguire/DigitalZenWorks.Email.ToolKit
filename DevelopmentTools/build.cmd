@@ -34,8 +34,7 @@ GOTO end
 
 CD ToolKit.Application\Bin\publish
 7z u DigitalZenWorks.Email.ToolKit.zip
-
-gh release create v%2 --notes "%2" DigitalZenWorks.Email.ToolKit.zip
+gh release create v%2 --notes-file ..\..\..\DevelopmentTools\ReleaseNotes.txt DigitalZenWorks.Email.ToolKit.zip
 
 CD ..\..\..
 
