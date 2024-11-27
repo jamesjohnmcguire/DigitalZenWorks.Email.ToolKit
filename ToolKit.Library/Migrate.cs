@@ -377,9 +377,12 @@ namespace DigitalZenWorks.Email.ToolKit
 					Converter.ConvertEmlToMsg(emlFile, msgFile);
 				}
 				catch (System.Exception exception) when
-					(exception is InvalidCastException ||
+					(exception is ArgumentException ||
+					exception is InvalidCastException ||
 					exception is NullReferenceException)
 				{
+					string message = "Error processing file: " + emlFile;
+					Log.Error(message);
 					Log.Error(exception.ToString());
 				}
 
