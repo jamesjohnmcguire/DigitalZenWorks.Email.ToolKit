@@ -1598,6 +1598,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				case AppointmentItem appointmentItem:
 					entryId = appointmentItem.EntryID;
 					break;
+				case ContactItem contactItem:
+					entryId = contactItem.EntryID;
+					break;
 				case MailItem mailItem:
 					entryId = mailItem.EntryID;
 					break;
@@ -1627,6 +1630,9 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				case AppointmentItem appointmentItem:
 					entryId = appointmentItem.EntryID;
+					break;
+				case ContactItem contactItem:
+					entryId = contactItem.EntryID;
 					break;
 				case MailItem mailItem:
 					entryId = mailItem.EntryID;
