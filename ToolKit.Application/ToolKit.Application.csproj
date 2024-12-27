@@ -14,7 +14,7 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net8.0-windows</TargetFramework>
+		<TargetFramework>net9.0-windows</TargetFramework>
 		<Version>1.10.59</Version>
 	</PropertyGroup>
 
