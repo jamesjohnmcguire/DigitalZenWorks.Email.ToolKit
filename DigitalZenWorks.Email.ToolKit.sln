@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Tests", "ToolKit.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpress", "DbxOutlookExpress\DbxOutlookExpress\DigitalZenWorks.Email.DbxOutlookExpress.csproj", "{68961552-71D5-4CDC-943D-34A762E74699}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpressTests", "DbxOutlookExpress\DbxOutlookExpress\DbxOutlookExpressTests\DbxOutlookExpressTests.csproj", "{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpressTests", "DbxOutlookExpress\DbxOutlookExpressTests\DbxOutlookExpressTests.csproj", "{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsoleApp", "TestConsoleApp\TestConsoleApp.csproj", "{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}"
 EndProject
