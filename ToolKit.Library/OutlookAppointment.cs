@@ -109,6 +109,47 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the text of all relevant properties.
+		/// </summary>
+		/// <param name="strict">Indicates whether the check should be strict
+		/// or not.</param>
+		/// <returns>The text of all relevant properties.</returns>
+		public string GetPropertiesText(bool strict = false)
+		{
+			string propertiesText = string.Empty;
+
+			propertiesText += GetBooleansText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText +=
+				OutlookItem.GetActionsText(appointmentItem.Actions);
+			propertiesText += Environment.NewLine;
+
+			propertiesText +=
+				OutlookItem.GetAttachmentsText(appointmentItem.Attachments);
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetDateTimesText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetEnumsText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText +=
+				OutlookItem.GetRecipientsText(appointmentItem.Recipients);
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetStringPropertiesText(strict);
+			propertiesText += Environment.NewLine;
+
+			propertiesText += OutlookItem.GetUserPropertiesText(
+				appointmentItem.UserProperties);
+			propertiesText += Environment.NewLine;
+
+			return propertiesText;
+		}
+
+		/// <summary>
 		/// Get the item's synopses.
 		/// </summary>
 		/// <returns>The synoses of the item.</returns>
@@ -162,6 +203,38 @@ namespace DigitalZenWorks.Email.ToolKit
 			return boolHolder;
 		}
 
+		private string GetBooleansText()
+		{
+			string booleansText = string.Empty;
+
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.AllDayEvent);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.AutoResolvedWinner);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.ForceUpdateToAllAttendees);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.IsConflict);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.IsRecurring);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.NoAging);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.ReminderOverrideDefault);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.ReminderPlaySound);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.ReminderSet);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.ResponseRequested);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.Saved);
+			booleansText += OutlookItem.GetBooleanText(
+				appointmentItem.UnRead);
+
+			return booleansText;
+		}
+
 		private byte[] GetDateTimes()
 		{
 			List<DateTime> times = [];
@@ -178,6 +251,24 @@ namespace DigitalZenWorks.Email.ToolKit
 			byte[] data = OutlookItem.GetDateTimesBytes(times);
 
 			return data;
+		}
+
+		private string GetDateTimesText()
+		{
+			List<DateTime> times = [];
+
+			DateTime endUTC = appointmentItem.EndUTC;
+			times.Add(endUTC);
+
+			DateTime replyTime = appointmentItem.ReplyTime;
+			times.Add(replyTime);
+
+			DateTime startUTC = appointmentItem.StartUTC;
+			times.Add(startUTC);
+
+			string dateTimesText = OutlookItem.GetDateTimesText(times);
+
+			return dateTimesText;
 		}
 
 		private byte[] GetEnums()
@@ -213,7 +304,36 @@ namespace DigitalZenWorks.Email.ToolKit
 			return buffer;
 		}
 
+		private string GetEnumsText()
+		{
+			string enumsText = string.Empty;
+
+			enumsText += nameof(appointmentItem.BusyStatus);
+			enumsText += nameof(appointmentItem.Class);
+			enumsText += nameof(appointmentItem.Importance);
+			enumsText += nameof(appointmentItem.MarkForDownload);
+			enumsText += nameof(appointmentItem.MeetingStatus);
+			enumsText += nameof(appointmentItem.RecurrenceState);
+			enumsText += nameof(appointmentItem.ResponseStatus);
+			enumsText += nameof(appointmentItem.Sensitivity);
+
+			return enumsText;
+		}
+
 		private byte[] GetStringProperties(
+			bool strict = false,
+			bool ignoreConversation = true)
+		{
+			string buffer =
+				GetStringPropertiesText(strict, ignoreConversation);
+
+			Encoding encoding = Encoding.UTF8;
+			byte[] data = encoding.GetBytes(buffer);
+
+			return data;
+		}
+
+		private string GetStringPropertiesText(
 			bool strict = false,
 			bool ignoreConversation = true)
 		{
@@ -278,13 +398,9 @@ namespace DigitalZenWorks.Email.ToolKit
 			builder.Append(resources);
 			builder.Append(subject);
 
-			string buffer = builder.ToString();
+			string stringProperties = builder.ToString();
 
-			Encoding encoding = Encoding.UTF8;
-
-			byte[] data = encoding.GetBytes(buffer);
-
-			return data;
+			return stringProperties;
 		}
 	}
 }
