@@ -32,7 +32,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 	/// <summary>
 	/// Dbx to pst program class.
 	/// </summary>
-	public static class Program
+	internal static class Program
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -74,9 +74,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				{
 					Command command = commandLine.Command;
 
-#pragma warning disable CA1062
 					DisplayParameters(command, arguments);
-#pragma warning restore CA1062
 
 					try
 					{
