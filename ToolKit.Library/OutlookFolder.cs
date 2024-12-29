@@ -308,6 +308,37 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get the entry IDs of items the given folder.
+		/// </summary>
+		/// <param name="folder">The folder to act upon.</param>
+		/// <returns>The list of entry IDs.</returns>
+		public static IList<string> GetEntryIds(
+			MAPIFolder folder)
+		{
+			IList<string> entryIds = [];
+
+			if (folder != null)
+			{
+				Items items = folder.Items;
+				int count = items.Count;
+
+				for (int index = 1; index <= count; index++)
+				{
+					var item = items[index];
+					OutlookItem contentItem = new (item);
+
+					string synopses = contentItem.Synopses;
+					string entryId = item.EntryId;
+
+					string complete = entryId + " - " + synopses;
+					entryIds.Add(complete);
+				}
+			}
+
+			return entryIds;
+		}
+
+		/// <summary>
 		/// Get the folder's full path.
 		/// </summary>
 		/// <param name="folder">The folder to check.</param>

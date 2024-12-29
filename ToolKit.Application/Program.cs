@@ -113,6 +113,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						case "list-folders":
 							result = ListFolders(command);
 							break;
+						case "list-ids":
+							result = ListIds(command);
+							break;
 						case "list-top-senders":
 							result = ListTopSenders(command);
 							break;
@@ -266,6 +269,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				1,
 				"List all sub folders of a given store or folder");
 			commands.Add(listFolders);
+
+			Command listIds = new (
+				"list-ids",
+				null,
+				1,
+				"List all entry IDs of items in a given folder");
+			commands.Add(listIds);
 
 			CommandOption count = new ("c", "count");
 			options = [count];
@@ -443,6 +453,31 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			foreach (string folderName in sortedFolderName)
 			{
 				Console.WriteLine(folderName);
+			}
+
+			return 0;
+		}
+
+		private static int ListIds(Command command)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			string pstFilePath = command.Parameters[0];
+			string folderPath = null;
+
+			if (command.Parameters.Count > 1)
+			{
+				folderPath = command.Parameters[1];
+				folderPath = OutlookFolder.NormalizePath(folderPath);
+			}
+
+			IList<string> entryIds =
+				outlookStore.GetIds(pstFilePath, folderPath);
+
+			foreach (string entryId in entryIds)
+			{
+				Console.WriteLine(entryId);
 			}
 
 			return 0;
