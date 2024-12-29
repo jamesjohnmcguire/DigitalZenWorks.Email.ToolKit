@@ -145,6 +145,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						default:
 						case "help":
 							string title = GetTitle();
+							commandLine.UseLog = false;
 							commandLine.ShowHelp(title);
 							result = 0;
 							break;
