@@ -41,8 +41,8 @@ This is, currently, a command line program to be run from the command line or te
 
 DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 
-| Commands:             |                                 | options        | parameters
-| --------------------- | ------------------------------- | -------------- | ------------------------------------------------=- |
+| Commands:             |                                 | options        | parameters                                         |
+| --------------------- | ------------------------------- | -------------- | -------------------------------------------------- |
 | dbx-to-pst            | Migrate dbx files to pst file   | -e, --encoding | dbx files path, PST file path                      |
 | details               | Show details of given item      |                | PST file path, entry id                            |
 | eml-to-pst            | Migrate eml files to pst file   | -a, --adjust   | eml files path, PST file path                      |
@@ -63,6 +63,8 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 | remove-empty-folders  | Prune empty folders             |                | PST file path                                      |
 | help                  | Display this information        |                |                                                    |
 
+&nbsp;
+&nbsp;
 ##### Command line usage notes:
 The command is optional if the command can be inferred from the source-path.  For example, if the source path is a directory containing *.eml files, they will processed accordingly.
 If the source-path is a directory, the command will attempt to process the files in directory.  If the source-path is a file, it will process that file directly.
