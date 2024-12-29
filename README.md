@@ -41,23 +41,27 @@ This is, currently, a command line program to be run from the command line or te
 
 DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 
-| Commands:             |                                        | options        |
-| --------------------- | -------------------------------------- | -------------- |
-| dbx-to-pst            | Migrate dbx files to pst file          | -e, --encoding |
-| details               | Show details of given item             |                |
-| eml-to-pst            | Migrate eml files to pst file          | -a, --adjust   |
-| list-folders          | List all sub folders of a given folder | -r, --recurse  |
-| list-ids              | List all entry IDs of items in a given |                |
-|                       | folder                                 |                |
-| list-top-senders      | List the top senders of a given store  | -cm --count    |
-| list-total-duplicates | List all duplicates in a given store   |                |
-| merge-folders         | Merge duplicate Outlook folders        | -n, --dryrun   |
-| merge-stores          | Merge one store into another           |                |
-| move-folder           | Move one folder to another             |                |
-| remove-duplicates     | Remove duplicate messages              | -n, --dryrun   |
-|                       |                                        | -s, --flush    |
-| remove-empty-folders  | Prune empty folders                    |                |
-| help                  | Display this information               |                |
+| Commands:             |                                 | options        | parameters
+| --------------------- | ------------------------------- | -------------- | ------------------------------------------------=- |
+| dbx-to-pst            | Migrate dbx files to pst file   | -e, --encoding | dbx files path, PST file path                      |
+| details               | Show details of given item      |                | PST file path, entry id                            |
+| eml-to-pst            | Migrate eml files to pst file   | -a, --adjust   | eml files path, PST file path                      |
+| list-folders          | List all sub folders of a given | -r, --recurse  | PST file path, folder path                         |
+|                       | folder                          |                |                                                    |
+| list-ids              | List all entry IDs of items in  |                | PST file path, folder path                         |
+|                       | a given folder                  |                |                                                    |
+| list-top-senders      | List the top senders of a given | -cm --count    | PST file path                                      |
+|                       | store                           |                |                                                    |
+| list-total-duplicates | List all duplicates in a given  |                | PST file path                                      |
+|                       | store                           |                |                                                    |
+| merge-folders         | Merge duplicate Outlook folders | -n, --dryrun   |                                                    |
+| merge-stores          | Merge one store into another    |                | source PST file path, destination PST file path    |
+| move-folder           | Move one folder to another      |                | source PST file path, source folder path           |
+|                       |                                 |                | destination PST file path, destination folder path |
+| remove-duplicates     | Remove duplicate messages       | -n, --dryrun   | PST file path                                      |
+|                       |                                 | -s, --flush    |                                                    |
+| remove-empty-folders  | Prune empty folders             |                | PST file path                                      |
+| help                  | Display this information        |                |                                                    |
 
 ##### Command line usage notes:
 The command is optional if the command can be inferred from the source-path.  For example, if the source path is a directory containing *.eml files, they will processed accordingly.
