@@ -374,6 +374,35 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// List the entry IDs of items in a given folder.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <param name="folderPath">The folder path to check.</param>
+		/// <returns>The list of entry IDs.</returns>
+		public IList<string> GetIds(
+			string pstFilePath, string folderPath)
+		{
+			IList<string> entryIds = [];
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			if (store != null)
+			{
+				MAPIFolder folder = OutlookFolder.CreateFolderPath(
+					store, folderPath);
+
+				if (folder != null)
+				{
+					entryIds = OutlookFolder.GetEntryIds(folder);
+
+					Marshal.ReleaseComObject(folder);
+				}
+			}
+
+			return entryIds;
+		}
+
+		/// <summary>
 		/// List the top senders in  the store.
 		/// </summary>
 		/// <param name="pstFilePath">The PST file to check.</param>

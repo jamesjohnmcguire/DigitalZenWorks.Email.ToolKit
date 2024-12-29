@@ -8,6 +8,7 @@ using Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -104,8 +105,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			"RSS Feeds", "Search Folders", "Sent Items", "Tasks"
 		];
 
-#pragma warning disable SA1311 // StaticReadonlyFieldsMustBeginWithUpperCaseLetter
-		private static readonly IList<string> duplicatePatterns =
+		private static readonly IList<string> DuplicatePatternsInternal =
 		[
 			@"\s*\(\d*?\)$", @"^\s+(?=[a-zA-Z])+", @"^_+(?=[a-zA-Z])+",
 			@"_\d$", @"(?<=[a-zA-Z0-9])_$", @"^[a-fA-F]{1}\d{1}_",
@@ -124,7 +124,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			@"(?<=[a-zA-Z0-9&,])\s{1}-\s{1}[0-9a-fA-F]{2,3}$",
 			@"\s*-\s*Copy$", @"^[A-F]{1}_"
 		];
-#pragma warning restore SA1311
 
 		private readonly OutlookAccount outlookAccount;
 
@@ -149,7 +148,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <value>Duplicate patterns list.</value>
 		public static IList<string> DuplicatePatterns
 		{
-			get { return duplicatePatterns; }
+			get { return DuplicatePatternsInternal; }
 		}
 
 		/// <summary>
@@ -305,6 +304,37 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folderName;
+		}
+
+		/// <summary>
+		/// Get the entry IDs of items the given folder.
+		/// </summary>
+		/// <param name="folder">The folder to act upon.</param>
+		/// <returns>The list of entry IDs.</returns>
+		public static IList<string> GetEntryIds(
+			MAPIFolder folder)
+		{
+			IList<string> entryIds = [];
+
+			if (folder != null)
+			{
+				Items items = folder.Items;
+				int count = items.Count;
+
+				for (int index = 1; index <= count; index++)
+				{
+					var item = items[index];
+					OutlookItem contentItem = new (item);
+
+					string synopses = contentItem.Synopses;
+					string entryId = item.EntryId;
+
+					string complete = entryId + " - " + synopses;
+					entryIds.Add(complete);
+				}
+			}
+
+			return entryIds;
 		}
 
 		/// <summary>
@@ -662,7 +692,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folderName != null)
 			{
-				foreach (string pattern in duplicatePatterns)
+				foreach (string pattern in DuplicatePatternsInternal)
 				{
 					if (Regex.IsMatch(folderName, pattern))
 					{
@@ -2210,8 +2240,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			IEnumerable<KeyValuePair<string, IList<string>>> duplicatesRaw =
 				storeHashTable.Where(p => p.Value.Count > 1);
 
-			IReadOnlyCollection<KeyValuePair<string, IList<string>>> duplicates =
-				duplicatesRaw.ToList().AsReadOnly();
+			ReadOnlyCollection<KeyValuePair<string, IList<string>>>
+				duplicates = duplicatesRaw.ToList().AsReadOnly();
 
 			if (duplicates.Count > 0)
 			{
@@ -2242,8 +2272,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			IEnumerable<KeyValuePair<string, IList<string>>> duplicatesRaw =
 				hashTable.Where(p => p.Value.Count > 1);
 
-			IReadOnlyCollection<KeyValuePair<string, IList<string>>> duplicates =
-				duplicatesRaw.ToList().AsReadOnly();
+			ReadOnlyCollection<KeyValuePair<string, IList<string>>>
+				duplicates = duplicatesRaw.ToList().AsReadOnly();
 
 			if (duplicates.Count > 0)
 			{
