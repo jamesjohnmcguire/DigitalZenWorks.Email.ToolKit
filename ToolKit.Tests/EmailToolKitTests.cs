@@ -20,7 +20,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 	/// <summary>
 	/// Test class.
 	/// </summary>
-	public class EmailToolKitTests
+	internal class EmailToolKitTests
 	{
 		private OutlookAccount outlookAccount;
 		private OutlookStore pstOutlook;

@@ -30,7 +30,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 	/// <summary>
 	/// Dbx to pst test program class.
 	/// </summary>
-	public static class Program
+	internal static class Program
 	{
 		private const string ApplicationDataDirectory =
 			@"DigitalZenWorks\DbxToPst";

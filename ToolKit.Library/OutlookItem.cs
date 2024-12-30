@@ -7,9 +7,9 @@
 using Common.Logging;
 using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
-using Org.BouncyCastle.Asn1.Cms;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -18,7 +18,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DigitalZenWorks.Email.ToolKit
 {
@@ -229,6 +228,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Get Actions Data.
 		/// </summary>
 		/// <param name="actions">The item actions.</param>
+		/// <param name="addNewLine">Indicates whether to add a new line
+		/// or not.</param>
 		/// <returns>The item actions data as text.</returns>
 		public static string GetActionsText(
 			Actions actions, bool addNewLine = false)
@@ -332,11 +333,9 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The formatted text value.</returns>
 		public static string GetBooleanText(bool item)
 		{
-			string booleanText = string.Empty;
-
 			string name = nameof(item);
 
-			booleanText = string.Format(
+			string booleanText = string.Format(
 				CultureInfo.InvariantCulture,
 				"{0}: {1}",
 				name,
@@ -350,7 +349,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="times">The DataTime properties data.</param>
 		/// <returns>The DataTime properties data in bytes.</returns>
-		public static byte[] GetDateTimesBytes(IList<DateTime> times)
+		public static byte[] GetDateTimesBytes(List<DateTime> times)
 		{
 			byte[] data = null;
 
@@ -369,9 +368,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Get DateTime Properites Data.
 		/// </summary>
 		/// <param name="times">The DataTime properties data.</param>
+		/// <param name="labels">A list of lables.</param>
 		/// <returns>The DataTime properties data as text.</returns>
 		public static string GetDateTimesText(
-			IList<DateTime> times, List<string> labels = null)
+			List<DateTime> times, ReadOnlyCollection<string> labels = null)
 		{
 			string dateTimesText = null;
 
@@ -400,6 +400,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			return dateTimesText;
 		}
 
+		/// <summary>
+		/// Get details.
+		/// </summary>
+		/// <param name="mapiItem">The item to inspect.</param>
+		/// <param name="strict">Indicates whether to use a strict check
+		/// or not.</param>
+		/// <returns>A text of the details.</returns>
 		public static string GetDetails(
 			object mapiItem, bool strict = false)
 		{
@@ -986,12 +993,19 @@ namespace DigitalZenWorks.Email.ToolKit
 			await MoveAsync(mapiItem, destination).ConfigureAwait(false);
 		}
 
+		/// <summary>
+		/// Format for text an enum value.
+		/// </summary>
+		/// <param name="propertyName">The enum property name.</param>
+		/// <param name="propertyValue">The enum property value.</param>
+		/// <returns>A formatted string of the enum value.</returns>
 		public static string FormatEnumValue(
 			string propertyName,
 			object propertyValue)
 		{
 			int enumValue = (int)propertyValue;
-			string textValue = enumValue.ToString();
+			string textValue =
+				enumValue.ToString(CultureInfo.InvariantCulture);
 
 			string result = string.Format(
 					CultureInfo.InvariantCulture,
@@ -1004,6 +1018,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			return result;
 		}
 
+		/// <summary>
+		/// Format property value.
+		/// </summary>
+		/// <param name="propertyName">The property name.</param>
+		/// <param name="propertyValue">The property value.</param>
+		/// <returns>A formatted string of the property value.</returns>
 		public static string FormatValue(
 			string propertyName,
 			string propertyValue)
@@ -1024,6 +1044,14 @@ namespace DigitalZenWorks.Email.ToolKit
 			return formattedText;
 		}
 
+		/// <summary>
+		/// Format value on condition.
+		/// </summary>
+		/// <param name="propertyName">The property name.</param>
+		/// <param name="propertyValue">The property value.</param>
+		/// <param name="formatValue">The value on whether to format
+		/// or not.</param>
+		/// <returns>A formatted string of the property value.</returns>
 		public static string FormatValueConditional(
 			string propertyName,
 			string propertyValue,

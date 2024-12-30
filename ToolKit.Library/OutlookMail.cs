@@ -8,6 +8,7 @@ using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -72,6 +73,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="strict">Indicates whether the check should be strict
 		/// or not.</param>
 		/// <returns>The bytes of all relevant properties.</returns>
+		/// <remarks>Recipients is already included with
+		/// string properties.</remarks>
 		public IList<byte[]> GetProperties(bool strict = false)
 		{
 			List<byte[]> buffers = [];
@@ -89,10 +92,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			buffer = GetEnums();
 			buffers.Add(buffer);
-
-			// Recipients is included with string properties.
-			//buffer = OutlookItem.GetRecipients(mailItem.Recipients);
-			//buffers.Add(buffer);
 
 			buffer = GetStringProperties(strict);
 			buffers.Add(buffer);
@@ -114,6 +113,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="strict">Indicates whether the check should be strict
 		/// or not.</param>
+		/// <param name="addNewLine">Indicates whether to add a new line
+		/// or not.</param>
 		/// <returns>The text of all relevant properties.</returns>
 		public string GetPropertiesText(
 			bool strict = false, bool addNewLine = false)
@@ -131,7 +132,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				OutlookItem.GetAttachmentsText(mailItem.Attachments);
 			propertiesText += Environment.NewLine;
 
-			propertiesText += GetDateTimesText(addNewLine);
+			propertiesText += GetDateTimesText();
 			propertiesText += Environment.NewLine;
 
 			propertiesText += GetEnumsText();
@@ -309,7 +310,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return booleansText;
 		}
 
-		private List<DateTime> GetDateTimes(bool format = false)
+		private List<DateTime> GetDateTimes()
 		{
 			List<DateTime> times = [];
 
@@ -364,11 +365,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			return data;
 		}
 
-		private string GetDateTimesText(bool addNewLine = false)
+		private string GetDateTimesText()
 		{
 			List<DateTime> times = GetDateTimes();
 
-			List<string> labels =
+			List<string> labelsRaw =
 			[
 				"DeferredDeliveryTimeDateTime",
 				"ExpiryTime",
@@ -380,6 +381,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				"TaskDueDate",
 				"mailItem.TaskStartDate"
 			];
+
+			ReadOnlyCollection<string> labels = new (labelsRaw);
 
 			string dateTimesText =
 				OutlookItem.GetDateTimesText(times, labels);
@@ -468,7 +471,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			bool ignoreConversation = true)
 		{
 			string propertiesText =
-				GetStringPropertiesText(false, true, false);
+				GetStringPropertiesText(strict, ignoreConversation, false);
 
 			Encoding encoding = Encoding.UTF8;
 			byte[] data = encoding.GetBytes(propertiesText);
