@@ -205,6 +205,78 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Format for text an enum value.
+		/// </summary>
+		/// <param name="propertyName">The enum property name.</param>
+		/// <param name="propertyValue">The enum property value.</param>
+		/// <returns>A formatted string of the enum value.</returns>
+		public static string FormatEnumValue(
+			string propertyName,
+			object propertyValue)
+		{
+			int enumValue = (int)propertyValue;
+			string textValue =
+				enumValue.ToString(CultureInfo.InvariantCulture);
+
+			string result = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: {1}",
+					propertyName,
+					textValue);
+
+			result += Environment.NewLine;
+
+			return result;
+		}
+
+		/// <summary>
+		/// Format property value.
+		/// </summary>
+		/// <param name="propertyName">The property name.</param>
+		/// <param name="propertyValue">The property value.</param>
+		/// <returns>A formatted string of the property value.</returns>
+		public static string FormatValue(
+			string propertyName,
+			string propertyValue)
+		{
+			string formattedText = null;
+
+			if (propertyValue != null)
+			{
+				formattedText = string.Format(
+						CultureInfo.InvariantCulture,
+						"{0}: {1}",
+						propertyName,
+						propertyValue);
+
+				formattedText += Environment.NewLine;
+			}
+
+			return formattedText;
+		}
+
+		/// <summary>
+		/// Format value on condition.
+		/// </summary>
+		/// <param name="propertyName">The property name.</param>
+		/// <param name="propertyValue">The property value.</param>
+		/// <param name="formatValue">The value on whether to format
+		/// or not.</param>
+		/// <returns>A formatted string of the property value.</returns>
+		public static string FormatValueConditional(
+			string propertyName,
+			string propertyValue,
+			bool formatValue = false)
+		{
+			if (formatValue == true)
+			{
+				propertyValue = FormatValue(propertyName, propertyValue);
+			}
+
+			return propertyValue;
+		}
+
+		/// <summary>
 		/// Get Actions Data.
 		/// </summary>
 		/// <param name="actions">The item actions.</param>
@@ -991,78 +1063,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		public async Task MoveAsync(MAPIFolder destination)
 		{
 			await MoveAsync(mapiItem, destination).ConfigureAwait(false);
-		}
-
-		/// <summary>
-		/// Format for text an enum value.
-		/// </summary>
-		/// <param name="propertyName">The enum property name.</param>
-		/// <param name="propertyValue">The enum property value.</param>
-		/// <returns>A formatted string of the enum value.</returns>
-		public static string FormatEnumValue(
-			string propertyName,
-			object propertyValue)
-		{
-			int enumValue = (int)propertyValue;
-			string textValue =
-				enumValue.ToString(CultureInfo.InvariantCulture);
-
-			string result = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0}: {1}",
-					propertyName,
-					textValue);
-
-			result += Environment.NewLine;
-
-			return result;
-		}
-
-		/// <summary>
-		/// Format property value.
-		/// </summary>
-		/// <param name="propertyName">The property name.</param>
-		/// <param name="propertyValue">The property value.</param>
-		/// <returns>A formatted string of the property value.</returns>
-		public static string FormatValue(
-			string propertyName,
-			string propertyValue)
-		{
-			string formattedText = null;
-
-			if (propertyValue != null)
-			{
-				formattedText = string.Format(
-						CultureInfo.InvariantCulture,
-						"{0}: {1}",
-						propertyName,
-						propertyValue);
-
-				formattedText += Environment.NewLine;
-			}
-
-			return formattedText;
-		}
-
-		/// <summary>
-		/// Format value on condition.
-		/// </summary>
-		/// <param name="propertyName">The property name.</param>
-		/// <param name="propertyValue">The property value.</param>
-		/// <param name="formatValue">The value on whether to format
-		/// or not.</param>
-		/// <returns>A formatted string of the property value.</returns>
-		public static string FormatValueConditional(
-			string propertyName,
-			string propertyValue,
-			bool formatValue = false)
-		{
-			if (formatValue == true)
-			{
-				propertyValue = FormatValue(propertyName, propertyValue);
-			}
-
-			return propertyValue;
 		}
 
 		private static bool DoubleCheckDuplicate(
