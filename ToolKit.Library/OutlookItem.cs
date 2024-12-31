@@ -496,10 +496,10 @@ namespace DigitalZenWorks.Email.ToolKit
 							OutlookAppointment appointment = new (mapiItem);
 							details = appointment.GetPropertiesText(strict);
 							break;
-						//case ContactItem contact:
-						//	OutlookContact outlookContact = new(mapiItem);
-						//	buffers = outlookContact.GetProperties(strict);
-						//	break;
+						case ContactItem contact:
+							OutlookContact outlookContact = new (mapiItem);
+							details = outlookContact.GetPropertiesText(strict);
+							break;
 						case MailItem mailItem:
 							OutlookMail mail = new (mapiItem);
 							details = mail.GetPropertiesText(strict, true);

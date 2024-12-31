@@ -43,7 +43,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <summary>
 		/// Get the item's synopses.
 		/// </summary>
-		/// <param name="contactItem">The AppointmentItemto check.</param>
+		/// <param name="contactItem">The AppointmentItem to check.</param>
 		/// <returns>The synoses of the item.</returns>
 		public static string GetSynopses(ContactItem contactItem)
 		{
@@ -84,13 +84,13 @@ namespace DigitalZenWorks.Email.ToolKit
 			buffer = OutlookItem.GetAttachments(contactItem.Attachments);
 			buffers.Add(buffer);
 
-			buffer = GetDateTimes();
+			buffer = GetDateTimesBytes();
 			buffers.Add(buffer);
 
 			buffer = GetEnums();
 			buffers.Add(buffer);
 
-			buffer = GetStringProperties(strict);
+			buffer = GetStringPropertiesBytes(strict);
 			buffers.Add(buffer);
 
 			buffer = OutlookItem.GetUserProperties(
@@ -103,6 +103,43 @@ namespace DigitalZenWorks.Email.ToolKit
 			buffers.Add(itemBytes);
 
 			return buffers;
+		}
+
+		/// <summary>
+		/// Get the text of all relevant properties.
+		/// </summary>
+		/// <param name="strict">Indicates whether the check should be strict
+		/// or not.</param>
+		/// <returns>The text of all relevant properties.</returns>
+		public string GetPropertiesText(bool strict = false)
+		{
+			string propertiesText = string.Empty;
+
+			propertiesText += GetBooleansText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText +=
+				OutlookItem.GetActionsText(contactItem.Actions);
+			propertiesText += Environment.NewLine;
+
+			propertiesText +=
+				OutlookItem.GetAttachmentsText(contactItem.Attachments);
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetDateTimesText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetEnumsText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetStringProperties(strict);
+			propertiesText += Environment.NewLine;
+
+			propertiesText += OutlookItem.GetUserPropertiesText(
+				contactItem.UserProperties);
+			propertiesText += Environment.NewLine;
+
+			return propertiesText;
 		}
 
 		/// <summary>
@@ -155,7 +192,37 @@ namespace DigitalZenWorks.Email.ToolKit
 			return boolHolder;
 		}
 
-		private byte[] GetDateTimes()
+		private string GetBooleansText()
+		{
+			string booleansText = string.Empty;
+
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.AutoResolvedWinner);
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.HasPicture);
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.IsConflict);
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.IsMarkedAsTask);
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.Journal);
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.NoAging);
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.ReminderOverrideDefault);
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.ReminderPlaySound);
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.ReminderSet);
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.Saved);
+			booleansText += OutlookItem.GetBooleanText(
+				contactItem.UnRead);
+
+			return booleansText;
+		}
+
+		private List<DateTime> GetDateTimes()
 		{
 			List<DateTime> times = [];
 
@@ -177,9 +244,25 @@ namespace DigitalZenWorks.Email.ToolKit
 			time = contactItem.ToDoTaskOrdinal;
 			times.Add(time);
 
+			return times;
+		}
+
+		private byte[] GetDateTimesBytes()
+		{
+			List<DateTime> times = GetDateTimes();
+
 			byte[] data = OutlookItem.GetDateTimesBytes(times);
 
 			return data;
+		}
+
+		private string GetDateTimesText()
+		{
+			List<DateTime> times = GetDateTimes();
+
+			string dateTimesText = OutlookItem.GetDateTimesText(times);
+
+			return dateTimesText;
 		}
 
 		private byte[] GetEnums()
@@ -215,7 +298,23 @@ namespace DigitalZenWorks.Email.ToolKit
 			return buffer;
 		}
 
-		private byte[] GetStringProperties(
+		private string GetEnumsText()
+		{
+			string enumsText = string.Empty;
+
+			enumsText += nameof(contactItem.BusinessCardType);
+			enumsText += nameof(contactItem.Class);
+			enumsText += nameof(contactItem.DownloadState);
+			enumsText += nameof(contactItem.Gender);
+			enumsText += nameof(contactItem.Importance);
+			enumsText += nameof(contactItem.MarkForDownload);
+			enumsText += nameof(contactItem.SelectedMailingAddress);
+			enumsText += nameof(contactItem.Sensitivity);
+
+			return enumsText;
+		}
+
+		private string GetStringProperties(
 			bool strict = false,
 			bool ignoreConversation = true)
 		{
@@ -602,6 +701,16 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			string stringBuffer = builder.ToString();
+
+			return stringBuffer;
+		}
+
+		private byte[] GetStringPropertiesBytes(
+			bool strict = false,
+			bool ignoreConversation = true)
+		{
+			string stringBuffer =
+				GetStringProperties(strict, ignoreConversation);
 
 			Encoding encoding = Encoding.UTF8;
 
