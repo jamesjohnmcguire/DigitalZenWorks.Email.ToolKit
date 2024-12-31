@@ -84,7 +84,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			buffer = OutlookItem.GetAttachments(appointmentItem.Attachments);
 			buffers.Add(buffer);
 
-			buffer = GetDateTimes();
+			buffer = GetDateTimesBytes();
 			buffers.Add(buffer);
 
 			buffer = GetEnums();
@@ -93,7 +93,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			buffer = OutlookItem.GetRecipients(appointmentItem.Recipients);
 			buffers.Add(buffer);
 
-			buffer = GetStringProperties(strict);
+			buffer = GetStringPropertiesBytes(strict);
 			buffers.Add(buffer);
 
 			buffer = OutlookItem.GetUserProperties(
@@ -139,7 +139,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				OutlookItem.GetRecipientsText(appointmentItem.Recipients);
 			propertiesText += Environment.NewLine;
 
-			propertiesText += GetStringPropertiesText(strict);
+			propertiesText += GetStringProperties(strict);
 			propertiesText += Environment.NewLine;
 
 			propertiesText += OutlookItem.GetUserPropertiesText(
@@ -235,7 +235,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return booleansText;
 		}
 
-		private byte[] GetDateTimes()
+		private List<DateTime> GetDateTimes()
 		{
 			List<DateTime> times = [];
 
@@ -247,6 +247,13 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			DateTime startUTC = appointmentItem.StartUTC;
 			times.Add(startUTC);
+
+			return times;
+		}
+
+		private byte[] GetDateTimesBytes()
+		{
+			List<DateTime> times = GetDateTimes();
 
 			byte[] data = OutlookItem.GetDateTimesBytes(times);
 
@@ -255,16 +262,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private string GetDateTimesText()
 		{
-			List<DateTime> times = [];
-
-			DateTime endUTC = appointmentItem.EndUTC;
-			times.Add(endUTC);
-
-			DateTime replyTime = appointmentItem.ReplyTime;
-			times.Add(replyTime);
-
-			DateTime startUTC = appointmentItem.StartUTC;
-			times.Add(startUTC);
+			List<DateTime> times = GetDateTimes();
 
 			string dateTimesText = OutlookItem.GetDateTimesText(times);
 
@@ -320,20 +318,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return enumsText;
 		}
 
-		private byte[] GetStringProperties(
-			bool strict = false,
-			bool ignoreConversation = true)
-		{
-			string buffer =
-				GetStringPropertiesText(strict, ignoreConversation);
-
-			Encoding encoding = Encoding.UTF8;
-			byte[] data = encoding.GetBytes(buffer);
-
-			return data;
-		}
-
-		private string GetStringPropertiesText(
+		private string GetStringProperties(
 			bool strict = false,
 			bool ignoreConversation = true)
 		{
@@ -401,6 +386,18 @@ namespace DigitalZenWorks.Email.ToolKit
 			string stringProperties = builder.ToString();
 
 			return stringProperties;
+		}
+
+		private byte[] GetStringPropertiesBytes(
+			bool strict = false,
+			bool ignoreConversation = true)
+		{
+			string buffer = GetStringProperties(strict, ignoreConversation);
+
+			Encoding encoding = Encoding.UTF8;
+			byte[] data = encoding.GetBytes(buffer);
+
+			return data;
 		}
 	}
 }
