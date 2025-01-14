@@ -8,7 +8,7 @@
 		<CheckEolTargetFramework>false</CheckEolTargetFramework>
 		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 		<Company>Digital Zen Works</Company>
-		<Copyright>Copyright © 2021 - 2024</Copyright>
+		<Copyright>Copyright © 2021 - 2025</Copyright>
 		<Description>
 			This client library provides functionality to help migrate email messages from dbx (Outlook Express) or eml format to Outlook.  It also contains functionality to help clean up Outlook stores.
 			Additional notes - https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit

@@ -7,7 +7,7 @@
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 		<Company>James John McGuire</Company>
-		<Copyright>Copyright © 2021 - 2024</Copyright>
+		<Copyright>Copyright © 2021 - 2025</Copyright>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<FileVersion>1.11.60.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
