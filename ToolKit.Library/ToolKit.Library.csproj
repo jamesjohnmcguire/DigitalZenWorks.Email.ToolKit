@@ -63,7 +63,7 @@
 		<ProjectReference Include="..\DbxOutlookExpress\DbxOutlookExpress\DigitalZenWorks.Email.DbxOutlookExpress.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
-		<PackageReference Include="DigitalZenWorks.Email.DbxOutlookExpress" Version="1.3.22" />
+		<PackageReference Include="DigitalZenWorks.Email.DbxOutlookExpress" Version="1.3.24" />
 	</ItemGroup>
 
 	<ItemGroup>
