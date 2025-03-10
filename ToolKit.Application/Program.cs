@@ -57,7 +57,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				List<Command> commands = GetCommands();
 
-				CommandLineArguments commandLine =
+				CommandLineInstance commandLine =
 					new (commands, arguments, InferCommand);
 
 				commandLine.UseLog = true;
