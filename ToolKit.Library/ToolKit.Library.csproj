@@ -51,19 +51,19 @@
 	<ItemGroup>
 		<PackageReference Include="Common.Logging" Version="3.4.1" />
 		<PackageReference Include="Common.Logging.Core" Version="3.4.1" />
-		<PackageReference Include="DigitalZenWorks.Common.Utilities" Version="1.3.71" />
+		<PackageReference Include="DigitalZenWorks.Common.Utilities" Version="1.4.74" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.2" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<ProjectReference Include="..\DbxOutlookExpress\DbxOutlookExpress\DigitalZenWorks.Email.DbxOutlookExpress.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
-		<PackageReference Include="DigitalZenWorks.Email.DbxOutlookExpress" Version="1.3.22" />
+		<PackageReference Include="DigitalZenWorks.Email.DbxOutlookExpress" Version="1.3.24" />
 	</ItemGroup>
 
 	<ItemGroup>
