@@ -49,7 +49,7 @@
 		<ProjectReference Include="..\CommandLineCommands\SourceCode\CommandLineCommands\CommandLineCommands.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
-		<PackageReference Include="DigitalZenWorks.CommandLine.Commands" Version="1.2.8" />
+		<PackageReference Include="DigitalZenWorks.CommandLine.Commands" Version="1.4.11" />
 	</ItemGroup>
 
 	<ItemGroup>
