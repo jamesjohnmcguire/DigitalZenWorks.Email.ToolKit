@@ -9,13 +9,13 @@
 		<Company>James John McGuire</Company>
 		<Copyright>Copyright © 2021 - 2025</Copyright>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<FileVersion>1.11.60.0</FileVersion>
+		<FileVersion>1.12.62.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net9.0-windows</TargetFramework>
-		<Version>1.11.60</Version>
+		<Version>1.12.62</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
