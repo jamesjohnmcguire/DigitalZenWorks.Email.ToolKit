@@ -7,15 +7,15 @@
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 		<Company>James John McGuire</Company>
-		<Copyright>Copyright © 2021 - 2024</Copyright>
+		<Copyright>Copyright © 2021 - 2025</Copyright>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<FileVersion>1.10.59.0</FileVersion>
+		<FileVersion>1.12.62.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net8.0-windows</TargetFramework>
-		<Version>1.10.59</Version>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<Version>1.12.62</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -33,21 +33,26 @@
 	<ItemGroup>
 		<PackageReference Include="Common.Logging" Version="3.4.1" />
 		<PackageReference Include="Common.Logging.Core" Version="3.4.1" />
-		<PackageReference Include="Common.Logging.Serilog" Version="4.4.0" />
-		<PackageReference Include="DigitalZenWorks.CommandLine.Commands" Version="1.2.8" />
+		<PackageReference Include="Common.Logging.Serilog" Version="5.0.1" />
 		<PackageReference Include="DigitalZenWorks.Common.VersionUtilities" Version="1.1.12" />
-		<PackageReference Include="Serilog" Version="4.0.1" />
+		<PackageReference Include="Serilog" Version="4.2.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.2" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)'=='Debug'">
+		<ProjectReference Include="..\CommandLineCommands\CommandLineCommands\DigitalZenWorks.CommandLine.Commands.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<PackageReference Include="DigitalZenWorks.CommandLine.Commands" Version="1.4.11" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<!--ProjectReference Include="..\CommandLineCommands\SourceCode\CommandLineCommands\CommandLineCommands.csproj" /-->
 		<ProjectReference Include="..\ToolKit.Library\ToolKit.Library.csproj" />
 	</ItemGroup>
 

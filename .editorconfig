@@ -12,10 +12,10 @@ charset = utf-8 bom
 dotnet_style_object_initializer = false:suggestion
 
 # IDE0028: Use collection initializers
-dotnet_style_collection_initializer = false:suggestion
+# dotnet_style_collection_initializer = false:suggestion
 
 # IDE0290: Use primary constructor
-dotnet_diagnostic.IDE0290.severity = none
+# dotnet_diagnostic.IDE0290.severity = none
 
 # SA1010: Opening square brackets should be spaced correctly
 dotnet_diagnostic.SA1010.severity = none

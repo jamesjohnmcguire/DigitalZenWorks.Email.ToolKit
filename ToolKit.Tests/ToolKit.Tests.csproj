@@ -7,7 +7,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<IsTestProject>true</IsTestProject>
 		<LangVersion>Latest</LangVersion>
-		<TargetFramework>net8.0-windows</TargetFramework>
+		<TargetFramework>net9.0-windows</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -23,17 +23,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Coverlet.Collector" Version="6.0.2">
+		<PackageReference Include="Coverlet.Collector" Version="6.0.4">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
-		<PackageReference Include="NUnit" Version="4.2.1" />
-		<PackageReference Include="NUnit.Analyzers" Version="4.3.0">
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+		<PackageReference Include="NUnit" Version="4.3.2" />
+		<PackageReference Include="NUnit.Analyzers" Version="4.6.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+		<PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

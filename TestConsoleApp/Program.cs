@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="Program.cs" company="James John McGuire">
-// Copyright © 2021 - 2024 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2025 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -30,7 +30,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 	/// <summary>
 	/// Dbx to pst test program class.
 	/// </summary>
-	public static class Program
+	internal static class Program
 	{
 		private const string ApplicationDataDirectory =
 			@"DigitalZenWorks\DbxToPst";

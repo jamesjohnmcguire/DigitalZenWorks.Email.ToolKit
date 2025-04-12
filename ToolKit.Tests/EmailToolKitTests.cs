@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="EmailToolKitTests.cs" company="James John McGuire">
-// Copyright © 2021 - 2024 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2025 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -20,7 +20,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 	/// <summary>
 	/// Test class.
 	/// </summary>
-	public class EmailToolKitTests
+	internal sealed class EmailToolKitTests
 	{
 		private OutlookAccount outlookAccount;
 		private OutlookStore pstOutlook;
