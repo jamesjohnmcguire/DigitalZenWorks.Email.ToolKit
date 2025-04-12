@@ -46,7 +46,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Debug'">
-		<ProjectReference Include="..\CommandLineCommands\SourceCode\CommandLineCommands\CommandLineCommands.csproj" />
+		<ProjectReference Include="..\CommandLineCommands\CommandLineCommands\DigitalZenWorks.CommandLine.Commands.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
 		<PackageReference Include="DigitalZenWorks.CommandLine.Commands" Version="1.4.11" />

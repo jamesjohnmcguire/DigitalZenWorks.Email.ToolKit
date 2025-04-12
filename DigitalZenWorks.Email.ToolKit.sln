@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Tests", "ToolKit.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpress", "DbxOutlookExpress\DbxOutlookExpress\DigitalZenWorks.Email.DbxOutlookExpress.csproj", "{68961552-71D5-4CDC-943D-34A762E74699}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpressTests", "DbxOutlookExpress\DbxOutlookExpressTests\DbxOutlookExpressTests.csproj", "{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpressTests", "DbxOutlookExpress\DbxOutlookExpressTests\DigitalZenWorks.Email.DbxOutlookExpress.Tests.csproj", "{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsoleApp", "TestConsoleApp\TestConsoleApp.csproj", "{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}"
 EndProject
@@ -29,9 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilitiesNET", "UtilitiesNe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilitiesNetTests", "UtilitiesNet\UtilitiesNetTests\DigitalZenWorks.Common.Utilities.Tests.csproj", "{DA2D07B5-0175-4297-A13A-08143F2E1B0A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineCommands", "CommandLineCommands\SourceCode\CommandLineCommands\CommandLineCommands.csproj", "{589E8DA3-8454-4FB1-BA92-568FAD5DC90C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineCommands", "CommandLineCommands\CommandLineCommands\DigitalZenWorks.CommandLine.Commands.csproj", "{589E8DA3-8454-4FB1-BA92-568FAD5DC90C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineCommands.Tests", "CommandLineCommands\SourceCode\CommandLineCommands.Tests\CommandLineCommands.Tests.csproj", "{098735C5-9014-48F6-BFD2-724E4F1FBB3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineCommands.Tests", "CommandLineCommands\CommandLineCommands.Tests\DigitalZenWorks.CommandLine.Commands.Tests.csproj", "{098735C5-9014-48F6-BFD2-724E4F1FBB3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
