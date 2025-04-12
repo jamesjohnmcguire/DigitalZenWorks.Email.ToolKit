@@ -2,6 +2,8 @@
 
 This is a C# application and library for interacting with email messages and storage.
 
+It is a useful utility for converting email storage from Outlook Express, Windows Live Mail and Windows Mail.  It can migrate all .dbx and .eml files to .pst (Outlook) files.
+
 Please :star: star this project!
 
 ## Getting Started
