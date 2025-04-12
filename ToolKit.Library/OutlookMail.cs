@@ -168,7 +168,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string[] parts = headers.Split('\n');
 #endif
 
-			List<string> list = new (parts);
+			List<string> list = [.. parts];
 
 			list.Sort();
 
