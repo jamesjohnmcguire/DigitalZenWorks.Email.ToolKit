@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookMail.cs" company="James John McGuire">
-// Copyright © 2021 - 2024 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2025 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -8,6 +8,7 @@ using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -72,6 +73,8 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="strict">Indicates whether the check should be strict
 		/// or not.</param>
 		/// <returns>The bytes of all relevant properties.</returns>
+		/// <remarks>Recipients is already included with
+		/// string properties.</remarks>
 		public IList<byte[]> GetProperties(bool strict = false)
 		{
 			List<byte[]> buffers = [];
@@ -84,13 +87,10 @@ namespace DigitalZenWorks.Email.ToolKit
 			buffer = OutlookItem.GetAttachments(mailItem.Attachments);
 			buffers.Add(buffer);
 
-			buffer = GetDateTimes();
+			buffer = GetDateTimesBytes();
 			buffers.Add(buffer);
 
 			buffer = GetEnums();
-			buffers.Add(buffer);
-
-			buffer = OutlookItem.GetRecipients(mailItem.Recipients);
 			buffers.Add(buffer);
 
 			buffer = GetStringProperties(strict);
@@ -106,6 +106,47 @@ namespace DigitalZenWorks.Email.ToolKit
 			buffers.Add(itemBytes);
 
 			return buffers;
+		}
+
+		/// <summary>
+		/// Get the text of all relevant properties.
+		/// </summary>
+		/// <param name="strict">Indicates whether the check should be strict
+		/// or not.</param>
+		/// <param name="addNewLine">Indicates whether to add a new line
+		/// or not.</param>
+		/// <returns>The text of all relevant properties.</returns>
+		public string GetPropertiesText(
+			bool strict = false, bool addNewLine = false)
+		{
+			string propertiesText = string.Empty;
+
+			propertiesText += GetBooleansText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText +=
+				OutlookItem.GetActionsText(mailItem.Actions, addNewLine);
+			propertiesText += Environment.NewLine;
+
+			propertiesText +=
+				OutlookItem.GetAttachmentsText(mailItem.Attachments);
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetDateTimesText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText += GetEnumsText();
+			propertiesText += Environment.NewLine;
+
+			propertiesText +=
+				GetStringPropertiesText(strict, true, addNewLine);
+			propertiesText += Environment.NewLine;
+
+			propertiesText += OutlookItem.GetUserPropertiesText(
+				mailItem.UserProperties);
+			propertiesText += Environment.NewLine;
+
+			return propertiesText;
 		}
 
 		/// <summary>
@@ -127,7 +168,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string[] parts = headers.Split('\n');
 #endif
 
-			List<string> list = new (parts);
+			List<string> list = [.. parts];
 
 			list.Sort();
 
@@ -165,6 +206,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			rawValue = mailItem.DeleteAfterSubmit;
 			boolHolder = BitBytes.SetBit(boolHolder, 3, rawValue);
 
+			// IsConflict ?
 			rawValue = mailItem.IsMarkedAsTask;
 			boolHolder = BitBytes.SetBit(boolHolder, 4, rawValue);
 
@@ -204,7 +246,71 @@ namespace DigitalZenWorks.Email.ToolKit
 			return boolHolder;
 		}
 
-		private byte[] GetDateTimes()
+		private string GetBooleansText()
+		{
+			string booleansText = string.Empty;
+
+			string boolValue = mailItem.AutoForwarded.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("AutoForwarded", boolValue);
+
+			boolValue = mailItem.AutoResolvedWinner.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("AutoResolvedWinner", boolValue);
+
+			boolValue = mailItem.DeleteAfterSubmit.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("DeleteAfterSubmit", boolValue);
+
+			// mailItem.IsConflict
+			boolValue = mailItem.IsMarkedAsTask.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("IsMarkedAsTask", boolValue);
+
+			boolValue = mailItem.NoAging.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("NoAging", boolValue);
+
+			boolValue = mailItem.OriginatorDeliveryReportRequested.ToString();
+			booleansText += OutlookItem.FormatValue(
+				"OriginatorDeliveryReportRequested", boolValue);
+
+			boolValue = mailItem.ReadReceiptRequested.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("ReadReceiptRequested", boolValue);
+
+			boolValue = mailItem.RecipientReassignmentProhibited.ToString();
+			booleansText += OutlookItem.FormatValue(
+				"RecipientReassignmentProhibited", boolValue);
+
+			boolValue = mailItem.ReminderOverrideDefault.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("ReminderOverrideDefault", boolValue);
+
+			boolValue = mailItem.ReminderPlaySound.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("ReminderPlaySound", boolValue);
+
+			boolValue = mailItem.ReminderSet.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("ReminderSet", boolValue);
+
+			boolValue = mailItem.Saved.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("Saved", boolValue);
+
+			boolValue = mailItem.Submitted.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("Submitted", boolValue);
+
+			boolValue = mailItem.UnRead.ToString();
+			booleansText +=
+				OutlookItem.FormatValue("UnRead", boolValue);
+
+			return booleansText;
+		}
+
+		private List<DateTime> GetDateTimes()
 		{
 			List<DateTime> times = [];
 
@@ -247,9 +353,41 @@ namespace DigitalZenWorks.Email.ToolKit
 			DateTime taskStartDateDateTime = mailItem.TaskStartDate;
 			times.Add(taskStartDateDateTime);
 
+			return times;
+		}
+
+		private byte[] GetDateTimesBytes()
+		{
+			List<DateTime> times = GetDateTimes();
+
 			byte[] data = OutlookItem.GetDateTimesBytes(times);
 
 			return data;
+		}
+
+		private string GetDateTimesText()
+		{
+			List<DateTime> times = GetDateTimes();
+
+			List<string> labelsRaw =
+			[
+				"DeferredDeliveryTimeDateTime",
+				"ExpiryTime",
+				"ReceivedTime",
+				"ReminderTime",
+				"RetentionExpirationDate",
+				"SentOn",
+				"TaskCompletedDate",
+				"TaskDueDate",
+				"mailItem.TaskStartDate"
+			];
+
+			ReadOnlyCollection<string> labels = new (labelsRaw);
+
+			string dateTimesText =
+				OutlookItem.GetDateTimesText(times, labels);
+
+			return dateTimesText;
 		}
 
 		private byte[] GetEnums()
@@ -300,13 +438,60 @@ namespace DigitalZenWorks.Email.ToolKit
 			return buffer;
 		}
 
+		private string GetEnumsText()
+		{
+			string enumsText = string.Empty;
+
+			enumsText +=
+				OutlookItem.FormatEnumValue("BodyFormat", mailItem.BodyFormat);
+
+			enumsText +=
+				OutlookItem.FormatEnumValue("Class", mailItem.Class);
+
+			enumsText +=
+				OutlookItem.FormatEnumValue("Importance", mailItem.Importance);
+
+			enumsText += OutlookItem.FormatEnumValue(
+				"MarkForDownload", mailItem.MarkForDownload);
+
+			enumsText +=
+				OutlookItem.FormatEnumValue("Permission", mailItem.Permission);
+
+			enumsText += OutlookItem.FormatEnumValue(
+				"PermissionService", mailItem.PermissionService);
+
+			enumsText += OutlookItem.FormatEnumValue(
+				"Sensitivity", mailItem.Sensitivity);
+
+			return enumsText;
+		}
+
 		private byte[] GetStringProperties(
 			bool strict = false,
 			bool ignoreConversation = true)
 		{
-			byte[] data = null;
+			string propertiesText =
+				GetStringPropertiesText(strict, ignoreConversation, false);
 
+			Encoding encoding = Encoding.UTF8;
+			byte[] data = encoding.GetBytes(propertiesText);
+
+			return data;
+		}
+
+		private string GetStringPropertiesText(
+			bool strict = false,
+			bool ignoreConversation = true,
+			bool formatText = false)
+		{
+			List<string> properties = [];
+
+			string formattedText = string.Empty;
 			string bcc = mailItem.BCC;
+
+			bcc = OutlookItem.FormatValueConditional("BCC", bcc, formatText);
+			properties.Add(bcc);
+
 			string billingInformation = null;
 
 			try
@@ -317,6 +502,10 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 			}
 
+			billingInformation = OutlookItem.FormatValueConditional(
+				"BillingInformation", billingInformation, formatText);
+			properties.Add(billingInformation);
+
 			string body = mailItem.Body;
 
 			if (body != null && strict == false)
@@ -324,18 +513,45 @@ namespace DigitalZenWorks.Email.ToolKit
 				body = body.TrimEnd();
 			}
 
+			body = OutlookItem.FormatValueConditional(
+				"Body", body, formatText);
+			properties.Add(body);
+
 			string categories = mailItem.Categories;
+			categories = OutlookItem.FormatValueConditional(
+				"Categories", categories, formatText);
+			properties.Add(categories);
+
 			string cc = mailItem.CC;
+			cc = OutlookItem.FormatValueConditional(
+				"CC", cc, formatText);
+			properties.Add(cc);
+
 			string companies = mailItem.Companies;
+			companies = OutlookItem.FormatValueConditional(
+				"Companies", companies, formatText);
+			properties.Add(companies);
+
 			string conversationID = null;
 
 			if (ignoreConversation == false)
 			{
 				conversationID = mailItem.ConversationID;
+				conversationID = OutlookItem.FormatValueConditional(
+					"ConversationID", conversationID, formatText);
+				properties.Add(conversationID);
 			}
 
 			string conversationTopic = mailItem.ConversationTopic;
+			conversationTopic = OutlookItem.FormatValueConditional(
+				"ConversationTopic", conversationTopic, formatText);
+			properties.Add(conversationTopic);
+
 			string flagRequest = mailItem.FlagRequest;
+			flagRequest = OutlookItem.FormatValueConditional(
+				"FlagRequest", flagRequest, formatText);
+			properties.Add(flagRequest);
+
 			string header = mailItem.PropertyAccessor.GetProperty(
 				"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
 
@@ -357,6 +573,10 @@ namespace DigitalZenWorks.Email.ToolKit
 				header = NormalizeHeaders(header);
 			}
 
+			header = OutlookItem.FormatValueConditional(
+				"Header (0x007D001F)", header, formatText);
+			properties.Add(header);
+
 			string htmlBody = mailItem.HTMLBody;
 
 			if (htmlBody != null && strict == false)
@@ -364,72 +584,121 @@ namespace DigitalZenWorks.Email.ToolKit
 				htmlBody = HtmlEmail.Trim(htmlBody);
 			}
 
-			string messageClass = mailItem.MessageClass;
-			string mileage = mailItem.Mileage;
-			string receivedByEntryID = null;
-			string receivedByName = mailItem.ReceivedByName;
-			string receivedOnBehalfOfEntryID = null;
+			htmlBody = OutlookItem.FormatValueConditional(
+				"HTMLBody", htmlBody, formatText);
+			properties.Add(htmlBody);
 
-			string receivedOnBehalfOfName = null;
+			string messageClass = mailItem.MessageClass;
+			messageClass = OutlookItem.FormatValueConditional(
+				"MessageClass", messageClass, formatText);
+			properties.Add(messageClass);
+
+			string mileage = mailItem.Mileage;
+			mileage = OutlookItem.FormatValueConditional(
+				"Mileage", mileage, formatText);
+			properties.Add(mileage);
+
+			string receivedByName = mailItem.ReceivedByName;
+			receivedByName = OutlookItem.FormatValueConditional(
+				"ReceivedByName", receivedByName, formatText);
+			properties.Add(receivedByName);
+
 			string reminderSoundFile = mailItem.ReminderSoundFile;
+			reminderSoundFile = OutlookItem.FormatValueConditional(
+				"ReminderSoundFile", reminderSoundFile, formatText);
+			properties.Add(reminderSoundFile);
+
 			string replyRecipientNames = mailItem.ReplyRecipientNames;
+			replyRecipientNames = OutlookItem.FormatValueConditional(
+				"ReplyRecipientNames", replyRecipientNames, formatText);
+			properties.Add(replyRecipientNames);
+
 			string retentionPolicyName = mailItem.RetentionPolicyName;
+			retentionPolicyName = OutlookItem.FormatValueConditional(
+				"RetentionPolicyName", retentionPolicyName, formatText);
+			properties.Add(retentionPolicyName);
+
 			string senderEmailAddress = mailItem.SenderEmailAddress;
+			senderEmailAddress = OutlookItem.FormatValueConditional(
+				"SenderEmailAddress", senderEmailAddress, formatText);
+			properties.Add(senderEmailAddress);
+
 			string senderEmailType = mailItem.SenderEmailType;
+			senderEmailType = OutlookItem.FormatValueConditional(
+				"SenderEmailType", senderEmailType, formatText);
+			properties.Add(senderEmailType);
+
 			string senderName = mailItem.SenderName;
+			senderName = OutlookItem.FormatValueConditional(
+				"SenderName", senderName, formatText);
+			properties.Add(senderName);
+
 			string sentOnBehalfOfName = mailItem.SentOnBehalfOfName;
+			sentOnBehalfOfName = OutlookItem.FormatValueConditional(
+				"SentOnBehalfOfName", sentOnBehalfOfName, formatText);
+			properties.Add(sentOnBehalfOfName);
+
 			string subject = mailItem.Subject;
+			subject = OutlookItem.FormatValueConditional(
+				"Subject", subject, formatText);
+			properties.Add(subject);
+
 			string taskSubject = mailItem.TaskSubject;
+			taskSubject = OutlookItem.FormatValueConditional(
+				"TaskSubject", taskSubject, formatText);
+			properties.Add(taskSubject);
+
 			string to = mailItem.To;
+			to = OutlookItem.FormatValueConditional(
+				"To", to, formatText);
+			properties.Add(to);
+
 			string votingOptions = mailItem.VotingOptions;
+			votingOptions = OutlookItem.FormatValueConditional(
+				"VotingOptions", votingOptions, formatText);
+			properties.Add(votingOptions);
+
 			string votingResponse = mailItem.VotingResponse;
+			votingResponse = OutlookItem.FormatValueConditional(
+				"VotingResponse", votingResponse, formatText);
+			properties.Add(votingResponse);
 
 			if (strict == true)
 			{
 				// Might need to investigate further.
-				receivedByEntryID = mailItem.ReceivedByEntryID;
-				receivedOnBehalfOfEntryID =
+				string receivedByEntryID = mailItem.ReceivedByEntryID;
+				receivedByEntryID = OutlookItem.FormatValueConditional(
+					"ReceivedByEntryID", receivedByEntryID, formatText);
+				properties.Add(receivedByEntryID);
+
+				string receivedOnBehalfOfEntryID =
 					mailItem.ReceivedOnBehalfOfEntryID;
-				receivedOnBehalfOfName = mailItem.ReceivedOnBehalfOfName;
+				receivedOnBehalfOfEntryID =
+					OutlookItem.FormatValueConditional(
+						"ReceivedOnBehalfOfEntryID",
+						receivedOnBehalfOfEntryID,
+						formatText);
+				properties.Add(receivedOnBehalfOfEntryID);
+
+				string receivedOnBehalfOfName =
+					mailItem.ReceivedOnBehalfOfName;
+				receivedOnBehalfOfName = OutlookItem.FormatValueConditional(
+					"ReceivedOnBehalfOfName",
+					receivedOnBehalfOfName,
+					formatText);
+				properties.Add(receivedOnBehalfOfName);
 			}
 
 			StringBuilder builder = new ();
-			builder.Append(bcc);
-			builder.Append(billingInformation);
-			builder.Append(body);
-			builder.Append(categories);
-			builder.Append(cc);
-			builder.Append(companies);
-			builder.Append(conversationID);
-			builder.Append(conversationTopic);
-			builder.Append(flagRequest);
-			builder.Append(header);
-			builder.Append(htmlBody);
-			builder.Append(messageClass);
-			builder.Append(mileage);
-			builder.Append(receivedByEntryID);
-			builder.Append(receivedByName);
-			builder.Append(receivedOnBehalfOfEntryID);
-			builder.Append(receivedOnBehalfOfName);
-			builder.Append(reminderSoundFile);
-			builder.Append(replyRecipientNames);
-			builder.Append(retentionPolicyName);
-			builder.Append(senderEmailAddress);
-			builder.Append(senderEmailAddress);
-			builder.Append(senderName);
-			builder.Append(sentOnBehalfOfName);
-			builder.Append(subject);
-			builder.Append(taskSubject);
-			builder.Append(to);
-			builder.Append(votingOptions);
-			builder.Append(votingResponse);
 
-			string buffer = builder.ToString();
+			foreach (string item in properties)
+			{
+				builder.Append(item);
+			}
 
-			Encoding encoding = Encoding.UTF8;
-			data = encoding.GetBytes(buffer);
+			string stringProperties = builder.ToString();
 
-			return data;
+			return stringProperties;
 		}
 	}
 }
