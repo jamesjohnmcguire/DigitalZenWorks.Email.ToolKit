@@ -421,7 +421,35 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="times">The DataTime properties data.</param>
 		/// <returns>The DataTime properties data in bytes.</returns>
+		[Obsolete("GetDateTimesBytes(List<DateTime> is Deprecated. " +
+			"Use the overload accepting ReadOnlyCollection<DateTime> instead.")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage(
+			"Microsoft.Design",
+			"CA1002:AvoidExcessiveList",
+			Justification = "It Is a Current API.")]
 		public static byte[] GetDateTimesBytes(List<DateTime> times)
+		{
+			byte[] data = null;
+
+			if (times != null)
+			{
+				ReadOnlyCollection<DateTime> timesReadOnly = new (times);
+				string buffer = GetDateTimesText(timesReadOnly);
+
+				Encoding encoding = Encoding.UTF8;
+				data = encoding.GetBytes(buffer);
+			}
+
+			return data;
+		}
+
+		/// <summary>
+		/// Get DateTime Properites Data.
+		/// </summary>
+		/// <param name="times">The DataTime properties data.</param>
+		/// <returns>The DataTime properties data in bytes.</returns>
+		public static byte[] GetDateTimesBytes(
+			ReadOnlyCollection<DateTime> times)
 		{
 			byte[] data = null;
 
@@ -442,8 +470,31 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="times">The DataTime properties data.</param>
 		/// <param name="labels">A list of lables.</param>
 		/// <returns>The DataTime properties data as text.</returns>
+		[Obsolete("GetDateTimesText(List<DateTime>, " +
+			"ReadOnlyCollection<string> is Deprecated." +
+			"Use the overload accepting ReadOnlyCollection<DateTime> instead.")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage(
+			"Microsoft.Design",
+			"CA1002:AvoidExcessiveList",
+			Justification = "It Is a Current API.")]
 		public static string GetDateTimesText(
 			List<DateTime> times, ReadOnlyCollection<string> labels = null)
+		{
+			ReadOnlyCollection<DateTime> timesReadOnly = new (times);
+			string dateTimesText = GetDateTimesText(timesReadOnly, labels);
+
+			return dateTimesText;
+		}
+
+		/// <summary>
+		/// Get DateTime Properites Data.
+		/// </summary>
+		/// <param name="times">The DataTime properties data.</param>
+		/// <param name="labels">A list of lables.</param>
+		/// <returns>The DataTime properties data as text.</returns>
+		public static string GetDateTimesText(
+			ReadOnlyCollection<DateTime> times,
+			ReadOnlyCollection<string> labels = null)
 		{
 			string dateTimesText = null;
 
