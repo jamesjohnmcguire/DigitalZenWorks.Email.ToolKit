@@ -3,19 +3,27 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Application", "ToolKit.Application\ToolKit.Application.csproj", "{6971D486-5B3F-497F-86E8-47C98BF7FD70}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Application", "ToolKit.Application/ToolKit.Application.csproj", "{6971D486-5B3F-497F-86E8-47C98BF7FD70}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Library", "ToolKit.Library\ToolKit.Library.csproj", "{6D6C30E1-9240-4A2E-A167-3F23E6316656}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Library", "ToolKit.Library/ToolKit.Library.csproj", "{6D6C30E1-9240-4A2E-A167-3F23E6316656}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Tests", "ToolKit.Tests\ToolKit.Tests.csproj", "{66CA0D35-F2AF-430E-81D0-78506201ADCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToolKit.Tests", "ToolKit.Tests/ToolKit.Tests.csproj", "{66CA0D35-F2AF-430E-81D0-78506201ADCD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpress", "DbxOutlookExpress\DbxOutlookExpress\DigitalZenWorks.Email.DbxOutlookExpress.csproj", "{68961552-71D5-4CDC-943D-34A762E74699}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpress", "DbxOutlookExpress/DbxOutlookExpress/DigitalZenWorks.Email.DbxOutlookExpress.csproj", "{68961552-71D5-4CDC-943D-34A762E74699}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpressTests", "DbxOutlookExpress\DbxOutlookExpressTests\DigitalZenWorks.Email.DbxOutlookExpress.Tests.csproj", "{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbxOutlookExpressTests", "DbxOutlookExpress/DbxOutlookExpressTests/DigitalZenWorks.Email.DbxOutlookExpress.Tests.csproj", "{083B8FDD-5CF3-45BE-ABDB-3CF011FC7093}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsoleApp", "TestConsoleApp\TestConsoleApp.csproj", "{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsoleApp", "TestConsoleApp/TestConsoleApp.csproj", "{B1262D64-56E8-44CB-B0BA-FC0D5FD6007A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MsgKit", "MsgKit\MsgKit\MsgKit.csproj", "{8FC0FB7D-F820-4C03-9FBE-2FB58BDD9DFF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MsgKit", "MsgKit/MsgKit/MsgKit.csproj", "{8FC0FB7D-F820-4C03-9FBE-2FB58BDD9DFF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilitiesNET", "UtilitiesNet/UtilitiesNetLibrary/DigitalZenWorks.Common.Utilities.csproj", "{8E747F72-8F55-4E94-9032-51527F952E62}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilitiesNetTests", "UtilitiesNet/UtilitiesNetTests/DigitalZenWorks.Common.Utilities.Tests.csproj", "{DA2D07B5-0175-4297-A13A-08143F2E1B0A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineCommands", "CommandLineCommands/CommandLineCommands/DigitalZenWorks.CommandLine.Commands.csproj", "{589E8DA3-8454-4FB1-BA92-568FAD5DC90C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineCommands.Tests", "CommandLineCommands/CommandLineCommands.Tests/DigitalZenWorks.CommandLine.Commands.Tests.csproj", "{098735C5-9014-48F6-BFD2-724E4F1FBB3F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AD368271-FA36-481F-BAE4-0B380987E534}"
 	ProjectSection(SolutionItems) = preProject
@@ -24,14 +32,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 		stylecop.json = stylecop.json
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilitiesNET", "UtilitiesNet\UtilitiesNetLibrary\DigitalZenWorks.Common.Utilities.csproj", "{8E747F72-8F55-4E94-9032-51527F952E62}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilitiesNetTests", "UtilitiesNet\UtilitiesNetTests\DigitalZenWorks.Common.Utilities.Tests.csproj", "{DA2D07B5-0175-4297-A13A-08143F2E1B0A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineCommands", "CommandLineCommands\CommandLineCommands\DigitalZenWorks.CommandLine.Commands.csproj", "{589E8DA3-8454-4FB1-BA92-568FAD5DC90C}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineCommands.Tests", "CommandLineCommands\CommandLineCommands.Tests\DigitalZenWorks.CommandLine.Commands.Tests.csproj", "{098735C5-9014-48F6-BFD2-724E4F1FBB3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
