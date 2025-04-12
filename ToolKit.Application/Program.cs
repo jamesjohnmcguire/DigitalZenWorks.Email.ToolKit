@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="Program.cs" company="James John McGuire">
-// Copyright © 2021 - 2024 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2025 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +32,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 	/// <summary>
 	/// Dbx to pst program class.
 	/// </summary>
-	public static class Program
+	internal static class Program
 	{
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -57,7 +57,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				List<Command> commands = GetCommands();
 
-				CommandLineArguments commandLine =
+				CommandLineInstance commandLine =
 					new (commands, arguments, InferCommand);
 
 				commandLine.UseLog = true;
@@ -74,9 +74,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				{
 					Command command = commandLine.Command;
 
-#pragma warning disable CA1062
 					DisplayParameters(command, arguments);
-#pragma warning restore CA1062
 
 					try
 					{
@@ -104,6 +102,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 					switch (command.Name)
 					{
+						case "details":
+							result = Details(command);
+							break;
 						case "dbx-to-pst":
 							result = DbxToPst(command);
 							break;
@@ -112,6 +113,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 							break;
 						case "list-folders":
 							result = ListFolders(command);
+							break;
+						case "list-ids":
+							result = ListIds(command);
 							break;
 						case "list-top-senders":
 							result = ListTopSenders(command);
@@ -141,6 +145,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						default:
 						case "help":
 							string title = GetTitle();
+							commandLine.UseLog = false;
 							commandLine.ShowHelp(title);
 							result = 0;
 							break;
@@ -155,6 +160,19 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			return result;
+		}
+
+		private static int Details(Command command)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			string pstFilePath = command.Parameters[0];
+			string entryId = command.Parameters[1];
+
+			outlookStore.Details(pstFilePath, entryId);
+
+			return 0;
 		}
 
 		private static void DisplayParameters(
@@ -267,6 +285,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				"List all sub folders of a given store or folder");
 			commands.Add(listFolders);
 
+			Command listIds = new (
+				"list-ids",
+				null,
+				1,
+				"List all entry IDs of items in a given folder");
+			commands.Add(listIds);
+
 			CommandOption count = new ("c", "count");
 			options = [count];
 			Command listTopSenders = new (
@@ -314,6 +339,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Command removeEmptyFolders = new (
 				"remove-empty-folders", null, 1, "Prune empty folders");
 			commands.Add(removeEmptyFolders);
+
+			Command details = new (
+				"details", null, 2, "Show details of given item");
+			commands.Add(details);
 
 			return commands;
 		}
@@ -443,6 +472,31 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			foreach (string folderName in sortedFolderName)
 			{
 				Console.WriteLine(folderName);
+			}
+
+			return 0;
+		}
+
+		private static int ListIds(Command command)
+		{
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookStore outlookStore = new (outlookAccount);
+
+			string pstFilePath = command.Parameters[0];
+			string folderPath = null;
+
+			if (command.Parameters.Count > 1)
+			{
+				folderPath = command.Parameters[1];
+				folderPath = OutlookFolder.NormalizePath(folderPath);
+			}
+
+			IList<string> entryIds =
+				outlookStore.GetIds(pstFilePath, folderPath);
+
+			foreach (string entryId in entryIds)
+			{
+				Console.WriteLine(entryId);
 			}
 
 			return 0;

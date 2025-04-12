@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookItem.cs" company="James John McGuire">
-// Copyright © 2021 - 2024 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2025 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -9,6 +9,7 @@ using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -204,6 +205,78 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Format for text an enum value.
+		/// </summary>
+		/// <param name="propertyName">The enum property name.</param>
+		/// <param name="propertyValue">The enum property value.</param>
+		/// <returns>A formatted string of the enum value.</returns>
+		public static string FormatEnumValue(
+			string propertyName,
+			object propertyValue)
+		{
+			int enumValue = (int)propertyValue;
+			string textValue =
+				enumValue.ToString(CultureInfo.InvariantCulture);
+
+			string result = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}: {1}",
+					propertyName,
+					textValue);
+
+			result += Environment.NewLine;
+
+			return result;
+		}
+
+		/// <summary>
+		/// Format property value.
+		/// </summary>
+		/// <param name="propertyName">The property name.</param>
+		/// <param name="propertyValue">The property value.</param>
+		/// <returns>A formatted string of the property value.</returns>
+		public static string FormatValue(
+			string propertyName,
+			string propertyValue)
+		{
+			string formattedText = null;
+
+			if (propertyValue != null)
+			{
+				formattedText = string.Format(
+						CultureInfo.InvariantCulture,
+						"{0}: {1}",
+						propertyName,
+						propertyValue);
+
+				formattedText += Environment.NewLine;
+			}
+
+			return formattedText;
+		}
+
+		/// <summary>
+		/// Format value on condition.
+		/// </summary>
+		/// <param name="propertyName">The property name.</param>
+		/// <param name="propertyValue">The property value.</param>
+		/// <param name="formatValue">The value on whether to format
+		/// or not.</param>
+		/// <returns>A formatted string of the property value.</returns>
+		public static string FormatValueConditional(
+			string propertyName,
+			string propertyValue,
+			bool formatValue = false)
+		{
+			if (formatValue == true)
+			{
+				propertyValue = FormatValue(propertyName, propertyValue);
+			}
+
+			return propertyValue;
+		}
+
+		/// <summary>
 		/// Get Actions Data.
 		/// </summary>
 		/// <param name="actions">The item actions.</param>
@@ -214,6 +287,29 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (actions != null)
 			{
+				string actionsText = GetActionsText(actions);
+
+				Encoding encoding = Encoding.UTF8;
+				actionsData = encoding.GetBytes(actionsText);
+			}
+
+			return actionsData;
+		}
+
+		/// <summary>
+		/// Get Actions Data.
+		/// </summary>
+		/// <param name="actions">The item actions.</param>
+		/// <param name="addNewLine">Indicates whether to add a new line
+		/// or not.</param>
+		/// <returns>The item actions data as text.</returns>
+		public static string GetActionsText(
+			Actions actions, bool addNewLine = false)
+		{
+			string actionsText = null;
+
+			if (actions != null)
+			{
 				int total = actions.Count;
 
 				for (int index = 1; index <= total; index++)
@@ -221,23 +317,27 @@ namespace DigitalZenWorks.Email.ToolKit
 					Microsoft.Office.Interop.Outlook.Action action =
 						actions[index];
 
-					byte[] metaDataBytes = GetActionData(action);
+					string actionText = GetActionText(action, addNewLine);
 
-					if (actionsData == null)
+					if (actionText == null)
 					{
-						actionsData = metaDataBytes;
+						actionsText = actionText;
 					}
 					else
 					{
-						actionsData =
-							BitBytes.MergeByteArrays(actionsData, metaDataBytes);
+						actionsText += actionText;
+					}
+
+					if (addNewLine == true)
+					{
+						actionsText += Environment.NewLine;
 					}
 
 					Marshal.ReleaseComObject(action);
 				}
 			}
 
-			return actionsData;
+			return actionsText;
 		}
 
 		/// <summary>
@@ -251,25 +351,12 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (attachments != null)
 			{
-				int total = attachments.Count;
+				string attachmentsText = GetAttachmentsText(attachments);
 
-				for (int index = 1; index <= total; index++)
+				if (attachmentsText != null)
 				{
-					Attachment attachment = attachments[index];
-
-					byte[] attachementData = GetAttachmentData(attachment);
-
-					if (attachmentsData == null)
-					{
-						attachmentsData = attachementData;
-					}
-					else
-					{
-						attachmentsData = BitBytes.MergeByteArrays(
-							attachmentsData, attachementData);
-					}
-
-					Marshal.ReleaseComObject(attachment);
+					Encoding encoding = Encoding.UTF8;
+					attachmentsData = encoding.GetBytes(attachmentsText);
 				}
 			}
 
@@ -277,38 +364,218 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Get Attachments Data.
+		/// </summary>
+		/// <param name="attachments">The item attachments.</param>
+		/// <returns>The item attachments data as text.</returns>
+		public static string GetAttachmentsText(Attachments attachments)
+		{
+			string attachmentsText = null;
+
+			if (attachments != null)
+			{
+				int total = attachments.Count;
+
+				for (int index = 1; index <= total; index++)
+				{
+					Attachment attachment = attachments[index];
+
+					string attachmentText = GetAttachmentText(attachment);
+
+					if (attachmentsText == null)
+					{
+						attachmentsText = attachmentText;
+					}
+					else
+					{
+						attachmentsText += attachmentText;
+					}
+
+					Marshal.ReleaseComObject(attachment);
+				}
+			}
+
+			return attachmentsText;
+		}
+
+		/// <summary>
+		/// Get boolean text.
+		/// </summary>
+		/// <param name="item">The item to check.</param>
+		/// <returns>The formatted text value.</returns>
+		public static string GetBooleanText(bool item)
+		{
+			string name = nameof(item);
+
+			string booleanText = string.Format(
+				CultureInfo.InvariantCulture,
+				"{0}: {1}",
+				name,
+				item.ToString());
+
+			return booleanText;
+		}
+
+		/// <summary>
 		/// Get DateTime Properites Data.
 		/// </summary>
 		/// <param name="times">The DataTime properties data.</param>
 		/// <returns>The DataTime properties data in bytes.</returns>
-		public static byte[] GetDateTimesBytes(IList<DateTime> times)
+		[Obsolete("GetDateTimesBytes(List<DateTime> is Deprecated. " +
+			"Use the overload accepting ReadOnlyCollection<DateTime> instead.")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage(
+			"Microsoft.Design",
+			"CA1002:AvoidExcessiveList",
+			Justification = "It Is a Current API.")]
+		public static byte[] GetDateTimesBytes(List<DateTime> times)
 		{
 			byte[] data = null;
 
 			if (times != null)
 			{
-				List<string> timesStrings = [];
-
-				foreach (DateTime time in times)
-				{
-					string timeString = time.ToString("O");
-					timesStrings.Add(timeString);
-				}
-
-				StringBuilder builder = new ();
-
-				foreach (string timeString in timesStrings)
-				{
-					builder.Append(timeString);
-				}
-
-				string buffer = builder.ToString();
+				ReadOnlyCollection<DateTime> timesReadOnly = new (times);
+				string buffer = GetDateTimesText(timesReadOnly);
 
 				Encoding encoding = Encoding.UTF8;
 				data = encoding.GetBytes(buffer);
 			}
 
 			return data;
+		}
+
+		/// <summary>
+		/// Get DateTime Properites Data.
+		/// </summary>
+		/// <param name="times">The DataTime properties data.</param>
+		/// <returns>The DataTime properties data in bytes.</returns>
+		public static byte[] GetDateTimesBytes(
+			ReadOnlyCollection<DateTime> times)
+		{
+			byte[] data = null;
+
+			if (times != null)
+			{
+				string buffer = GetDateTimesText(times);
+
+				Encoding encoding = Encoding.UTF8;
+				data = encoding.GetBytes(buffer);
+			}
+
+			return data;
+		}
+
+		/// <summary>
+		/// Get DateTime Properites Data.
+		/// </summary>
+		/// <param name="times">The DataTime properties data.</param>
+		/// <param name="labels">A list of lables.</param>
+		/// <returns>The DataTime properties data as text.</returns>
+		[Obsolete("GetDateTimesText(List<DateTime>, " +
+			"ReadOnlyCollection<string> is Deprecated." +
+			"Use the overload accepting ReadOnlyCollection<DateTime> instead.")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage(
+			"Microsoft.Design",
+			"CA1002:AvoidExcessiveList",
+			Justification = "It Is a Current API.")]
+		public static string GetDateTimesText(
+			List<DateTime> times, ReadOnlyCollection<string> labels = null)
+		{
+			ReadOnlyCollection<DateTime> timesReadOnly = new (times);
+			string dateTimesText = GetDateTimesText(timesReadOnly, labels);
+
+			return dateTimesText;
+		}
+
+		/// <summary>
+		/// Get DateTime Properites Data.
+		/// </summary>
+		/// <param name="times">The DataTime properties data.</param>
+		/// <param name="labels">A list of lables.</param>
+		/// <returns>The DataTime properties data as text.</returns>
+		public static string GetDateTimesText(
+			ReadOnlyCollection<DateTime> times,
+			ReadOnlyCollection<string> labels = null)
+		{
+			string dateTimesText = null;
+
+			if (times != null)
+			{
+				StringBuilder builder = new ();
+
+				for (int index = 0; index < times.Count; index++)
+				{
+					DateTime time = times[index];
+
+					string timeString = time.ToString("O");
+
+					if (labels != null)
+					{
+						string label = labels[index];
+						timeString = FormatValue(label, timeString);
+					}
+
+					builder.Append(timeString);
+				}
+
+				dateTimesText = builder.ToString();
+			}
+
+			return dateTimesText;
+		}
+
+		/// <summary>
+		/// Get details.
+		/// </summary>
+		/// <param name="mapiItem">The item to inspect.</param>
+		/// <param name="strict">Indicates whether to use a strict check
+		/// or not.</param>
+		/// <returns>A text of the details.</returns>
+		public static string GetDetails(
+			object mapiItem, bool strict = false)
+		{
+			string details = null;
+
+			if (mapiItem != null)
+			{
+				try
+				{
+					IList<byte[]> buffers = [];
+
+					switch (mapiItem)
+					{
+						case AppointmentItem appointmentItem:
+							OutlookAppointment appointment = new (mapiItem);
+							details = appointment.GetPropertiesText(strict);
+							break;
+						case ContactItem contact:
+							OutlookContact outlookContact = new (mapiItem);
+							details = outlookContact.GetPropertiesText(strict);
+							break;
+						case MailItem mailItem:
+							OutlookMail mail = new (mapiItem);
+							details = mail.GetPropertiesText(strict, true);
+							break;
+						default:
+							string message = "Item is of unsupported type: " +
+								mapiItem.ToString();
+							Log.Warn(message);
+							break;
+					}
+				}
+				catch (System.Exception exception) when
+					(exception is ArgumentException ||
+					exception is ArgumentNullException ||
+					exception is ArgumentOutOfRangeException ||
+					exception is ArrayTypeMismatchException ||
+					exception is COMException ||
+					exception is InvalidCastException ||
+					exception is RankException)
+				{
+					Log.Error(exception.ToString());
+				}
+			}
+
+			return details;
 		}
 
 		/// <summary>
@@ -426,17 +693,36 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <param name="recipients">The enums recipients data.</param>
 		/// <returns>The recipients properties data in bytes.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage(
-			"StyleCop.CSharp.NamingRules",
-			"SA1305:Field names should not use Hungarian notation",
-			Justification = "It isn't hungarian notation.")]
 		public static byte[] GetRecipients(Recipients recipients)
 		{
 			byte[] data = null;
 
 			if (recipients != null)
 			{
-				string recipientsData;
+				string recipientsData = GetRecipientsText(recipients);
+
+				Encoding encoding = Encoding.UTF8;
+				data = encoding.GetBytes(recipientsData);
+			}
+
+			return data;
+		}
+
+		/// <summary>
+		/// Get recipients properites data.
+		/// </summary>
+		/// <param name="recipients">The enums recipients data.</param>
+		/// <returns>The recipients properties data as text.</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage(
+			"StyleCop.CSharp.NamingRules",
+			"SA1305:Field names should not use Hungarian notation",
+			Justification = "It isn't hungarian notation.")]
+		public static string GetRecipientsText(Recipients recipients)
+		{
+			string recipientsData = null;
+
+			if (recipients != null)
+			{
 				List<string> toList = [];
 				List<string> ccList = [];
 				List<string> bccList = [];
@@ -502,12 +788,9 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 
 				recipientsData = builder.ToString();
-
-				Encoding encoding = Encoding.UTF8;
-				data = encoding.GetBytes(recipientsData);
 			}
 
-			return data;
+			return recipientsData;
 		}
 
 		/// <summary>
@@ -521,12 +804,35 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (userProperties != null)
 			{
+				Encoding encoding = Encoding.UTF8;
+
+				string propertiesText = GetUserPropertiesText(userProperties);
+
+				properties = encoding.GetBytes(propertiesText);
+			}
+
+			return properties;
+		}
+
+		/// <summary>
+		/// Get user properites data.
+		/// </summary>
+		/// <param name="userProperties">The user properties data.</param>
+		/// <returns>The user properties data as text.</returns>
+		public static string GetUserPropertiesText(
+			UserProperties userProperties)
+		{
+			string properties = null;
+
+			if (userProperties != null)
+			{
+				properties = string.Empty;
 				int total = userProperties.Count;
 
 				for (int index = 1; index <= total; index++)
 				{
 					UserProperty property = userProperties[index];
-					properties = GetUserProperty(properties, property);
+					properties += GetUserPropertyText(property);
 				}
 			}
 
@@ -831,93 +1137,135 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static byte[] GetActionData(
 			Microsoft.Office.Interop.Outlook.Action action)
 		{
-			Encoding encoding = Encoding.UTF8;
+			byte[] actionData = null;
 
-			int copyLikeEnum = (int)action.CopyLike;
-			bool enabledBool = action.Enabled;
-			int enabledInt = Convert.ToInt32(enabledBool);
-			int replyStyleEnum = (int)action.ReplyStyle;
-			int responseStyleEnum = (int)action.ResponseStyle;
-			int showOnEnum = (int)action.ShowOn;
+			if (action != null)
+			{
+				Encoding encoding = Encoding.UTF8;
 
-			string copyLike =
-				copyLikeEnum.ToString(CultureInfo.InvariantCulture);
-			string enabled =
-				enabledInt.ToString(CultureInfo.InvariantCulture);
-			string replyStyle =
-				replyStyleEnum.ToString(CultureInfo.InvariantCulture);
-			string responseStyle = responseStyleEnum.ToString(
-				CultureInfo.InvariantCulture);
-			string showOn =
-				showOnEnum.ToString(CultureInfo.InvariantCulture);
+				string metaData = GetActionText(action);
 
-			string metaData = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}{6}",
-				copyLike,
-				enabled,
-				action.Name,
-				action.Prefix,
-				replyStyle,
-				responseStyle,
-				showOn);
+				actionData = encoding.GetBytes(metaData);
+			}
 
-			byte[] metaDataBytes = encoding.GetBytes(metaData);
+			return actionData;
+		}
 
-			return metaDataBytes;
+		private static string GetActionText(
+			Microsoft.Office.Interop.Outlook.Action action,
+			bool addNewLine = false)
+		{
+			string actionText = null;
+
+			if (action != null)
+			{
+				int copyLikeEnum = (int)action.CopyLike;
+				bool enabledBool = action.Enabled;
+				int enabledInt = Convert.ToInt32(enabledBool);
+				int replyStyleEnum = (int)action.ReplyStyle;
+				int responseStyleEnum = (int)action.ResponseStyle;
+				int showOnEnum = (int)action.ShowOn;
+
+				string copyLike =
+					copyLikeEnum.ToString(CultureInfo.InvariantCulture);
+				string enabled =
+					enabledInt.ToString(CultureInfo.InvariantCulture);
+				string replyStyle =
+					replyStyleEnum.ToString(CultureInfo.InvariantCulture);
+				string responseStyle = responseStyleEnum.ToString(
+					CultureInfo.InvariantCulture);
+				string showOn =
+					showOnEnum.ToString(CultureInfo.InvariantCulture);
+
+				string format = "{0}{1}{2}{3}{4}{5}{6}";
+
+				if (addNewLine == true)
+				{
+					format = "{0} {1} {2} {3} {4} {5} {6}";
+				}
+
+				actionText = string.Format(
+					CultureInfo.InvariantCulture,
+					format,
+					copyLike,
+					enabled,
+					action.Name,
+					action.Prefix,
+					replyStyle,
+					responseStyle,
+					showOn);
+			}
+
+			return actionText;
 		}
 
 		private static byte[] GetAttachmentData(Attachment attachment)
 		{
-			string basePath = Path.GetTempPath();
+			byte[] attachmentData = null;
 
-			Encoding encoding = Encoding.UTF8;
-
-			int attachmentIndex = attachment.Index;
-			string indexValue = attachmentIndex.ToString(
-				CultureInfo.InvariantCulture);
-
-			int positionValue = attachment.Position;
-			string position = positionValue.ToString(
-				CultureInfo.InvariantCulture);
-
-			int intType = (int)attachment.Type;
-			string attachmentType =
-				intType.ToString(CultureInfo.InvariantCulture);
-
-			string metaData = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}",
-				attachment.DisplayName,
-				indexValue,
-				position,
-				attachmentType);
-
-			try
+			if (attachment != null)
 			{
-				metaData += attachment.FileName;
-			}
-			catch (COMException)
-			{
+				string attachmentText = GetAttachmentText(attachment);
+
+				Encoding encoding = Encoding.UTF8;
+				attachmentData = encoding.GetBytes(attachmentText);
 			}
 
-			try
+			return attachmentData;
+		}
+
+		private static string GetAttachmentText(Attachment attachment)
+		{
+			string attachmentData = null;
+
+			if (attachment != null)
 			{
-				metaData += attachment.PathName;
+				string basePath = Path.GetTempPath();
+
+				int attachmentIndex = attachment.Index;
+				string indexValue = attachmentIndex.ToString(
+					CultureInfo.InvariantCulture);
+
+				int positionValue = attachment.Position;
+				string position = positionValue.ToString(
+					CultureInfo.InvariantCulture);
+
+				int intType = (int)attachment.Type;
+				string attachmentType =
+					intType.ToString(CultureInfo.InvariantCulture);
+
+				string metaData = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}{1}{2}{3}",
+					attachment.DisplayName,
+					indexValue,
+					position,
+					attachmentType);
+
+				try
+				{
+					metaData += attachment.FileName;
+				}
+				catch (COMException)
+				{
+				}
+
+				try
+				{
+					metaData += attachment.PathName;
+				}
+				catch (COMException)
+				{
+				}
+
+				string filePath = basePath + attachment.FileName;
+				attachment.SaveAsFile(filePath);
+
+				byte[] fileBytes = File.ReadAllBytes(filePath);
+				string hashBase64 = Convert.ToBase64String(fileBytes);
+
+				attachmentData = metaData + hashBase64;
 			}
-			catch (COMException)
-			{
-			}
-
-			byte[] metaDataBytes = encoding.GetBytes(metaData);
-
-			string filePath = basePath + attachment.FileName;
-			attachment.SaveAsFile(filePath);
-
-			byte[] fileBytes = File.ReadAllBytes(filePath);
-
-			byte[] attachmentData =
-				BitBytes.MergeByteArrays(metaDataBytes, fileBytes);
 
 			return attachmentData;
 		}
@@ -1034,29 +1382,45 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private static byte[] GetUserPropertyData(UserProperty property)
 		{
-			Encoding encoding = Encoding.UTF8;
+			byte[] propertyData = null;
 
-			int typeEnum = (int)property.Type;
-			var propertyValue = property.Value;
+			if (property != null)
+			{
+				string metaData = GetUserPropertyText(property);
 
-			string typeValue =
-				typeEnum.ToString(CultureInfo.InvariantCulture);
-			string value =
-				propertyValue.ToString(CultureInfo.InvariantCulture);
+				Encoding encoding = Encoding.UTF8;
+				propertyData = encoding.GetBytes(metaData);
+			}
 
-			string metaData = string.Format(
-				CultureInfo.InvariantCulture,
-				"{0}{1}{2}{3}{4}{5}",
-				property.Formula,
-				property.Name,
-				typeValue,
-				property.ValidationFormula,
-				property.ValidationText,
-				value);
+			return propertyData;
+		}
 
-			byte[] metaDataBytes = encoding.GetBytes(metaData);
+		private static string GetUserPropertyText(UserProperty property)
+		{
+			string propertyText = null;
 
-			return metaDataBytes;
+			if (property != null)
+			{
+				int typeEnum = (int)property.Type;
+				var propertyValue = property.Value;
+
+				string typeValue =
+					typeEnum.ToString(CultureInfo.InvariantCulture);
+				string value =
+					propertyValue.ToString(CultureInfo.InvariantCulture);
+
+				propertyText = string.Format(
+					CultureInfo.InvariantCulture,
+					"{0}{1}{2}{3}{4}{5}",
+					property.Formula,
+					property.Name,
+					typeValue,
+					property.ValidationFormula,
+					property.ValidationText,
+					value);
+			}
+
+			return propertyText;
 		}
 
 		private static string GetSynopses(object mapiItem)

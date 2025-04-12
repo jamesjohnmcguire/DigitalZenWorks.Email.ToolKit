@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookStore.cs" company="James John McGuire">
-// Copyright © 2021 - 2024 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2025 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -223,6 +223,39 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// List the folders.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <param name="entryId">The entry id of the item to check.</param>
+		public void Details(string pstFilePath, string entryId)
+		{
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			if (store != null)
+			{
+				object mapiItem = GetItemFromEntryId(entryId);
+
+				OutlookItem outlookItem = new (mapiItem);
+
+				string details = OutlookItem.GetDetails(mapiItem);
+
+				if (details != null)
+				{
+					string fileName = entryId + ".txt";
+
+					File.WriteAllText(fileName, details);
+					Log.Info("Item Details Saved in " + fileName);
+				}
+				else
+				{
+					Log.Warn("Item Details is NULL!");
+				}
+
+				Marshal.ReleaseComObject(mapiItem);
+			}
+		}
+
+		/// <summary>
 		/// Gets folder from entry id.
 		/// </summary>
 		/// <param name="entryId">The entry id.</param>
@@ -239,6 +272,19 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folder;
+		}
+
+		/// <summary>
+		/// Get the item by its entry id.
+		/// </summary>
+		/// <param name="entryId">The entryId of the item.</param>
+		/// <returns>The item object.</returns>
+		public object GetItemFromEntryId(string entryId)
+		{
+			NameSpace session = outlookAccount.Session;
+			object item = session.GetItemFromID(entryId);
+
+			return item;
 		}
 
 		/// <summary>
@@ -260,14 +306,13 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Get the item's synopses.
+		/// Get the item by its entry id.
 		/// </summary>
-		/// <param name="entryId">The entryId of the MailItem to check.</param>
-		/// <returns>The synoses of the item.</returns>
+		/// <param name="entryId">The entryId of the item.</param>
+		/// <returns>The MailItem object.</returns>
 		public MailItem GetMailItemFromEntryId(string entryId)
 		{
-			NameSpace session = outlookAccount.Session;
-			MailItem mailItem = session.GetItemFromID(entryId);
+			MailItem mailItem = GetItemFromEntryId(entryId) as MailItem;
 
 			return mailItem;
 		}
@@ -326,6 +371,35 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return folderNames;
+		}
+
+		/// <summary>
+		/// List the entry IDs of items in a given folder.
+		/// </summary>
+		/// <param name="pstFilePath">The PST file to check.</param>
+		/// <param name="folderPath">The folder path to check.</param>
+		/// <returns>The list of entry IDs.</returns>
+		public IList<string> GetIds(
+			string pstFilePath, string folderPath)
+		{
+			IList<string> entryIds = [];
+
+			Store store = outlookAccount.GetStore(pstFilePath);
+
+			if (store != null)
+			{
+				MAPIFolder folder = OutlookFolder.CreateFolderPath(
+					store, folderPath);
+
+				if (folder != null)
+				{
+					entryIds = OutlookFolder.GetEntryIds(folder);
+
+					Marshal.ReleaseComObject(folder);
+				}
+			}
+
+			return entryIds;
 		}
 
 		/// <summary>
