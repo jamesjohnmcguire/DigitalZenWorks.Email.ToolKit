@@ -310,7 +310,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return booleansText;
 		}
 
-		private List<DateTime> GetDateTimes()
+		private ReadOnlyCollection<DateTime> GetDateTimes()
 		{
 			List<DateTime> times = [];
 
@@ -353,12 +353,14 @@ namespace DigitalZenWorks.Email.ToolKit
 			DateTime taskStartDateDateTime = mailItem.TaskStartDate;
 			times.Add(taskStartDateDateTime);
 
-			return times;
+			ReadOnlyCollection<DateTime> collection = times.AsReadOnly();
+
+			return collection;
 		}
 
 		private byte[] GetDateTimesBytes()
 		{
-			List<DateTime> times = GetDateTimes();
+			ReadOnlyCollection<DateTime> times = GetDateTimes();
 
 			byte[] data = OutlookItem.GetDateTimesBytes(times);
 
@@ -367,7 +369,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private string GetDateTimesText()
 		{
-			List<DateTime> times = GetDateTimes();
+			ReadOnlyCollection<DateTime> times = GetDateTimes();
 
 			List<string> labelsRaw =
 			[

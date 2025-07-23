@@ -8,6 +8,7 @@ using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -235,7 +236,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			return booleansText;
 		}
 
-		private List<DateTime> GetDateTimes()
+		private ReadOnlyCollection<DateTime> GetDateTimes()
 		{
 			List<DateTime> times = [];
 
@@ -248,12 +249,14 @@ namespace DigitalZenWorks.Email.ToolKit
 			DateTime startUTC = appointmentItem.StartUTC;
 			times.Add(startUTC);
 
-			return times;
+			ReadOnlyCollection<DateTime> collection = times.AsReadOnly();
+
+			return collection;
 		}
 
 		private byte[] GetDateTimesBytes()
 		{
-			List<DateTime> times = GetDateTimes();
+			ReadOnlyCollection<DateTime> times = GetDateTimes();
 
 			byte[] data = OutlookItem.GetDateTimesBytes(times);
 
@@ -262,7 +265,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private string GetDateTimesText()
 		{
-			List<DateTime> times = GetDateTimes();
+			ReadOnlyCollection<DateTime> times = GetDateTimes();
 
 			string dateTimesText = OutlookItem.GetDateTimesText(times);
 
