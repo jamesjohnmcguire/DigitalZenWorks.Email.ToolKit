@@ -217,7 +217,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				Marshal.ReleaseComObject(pstFolder);
 				if (closeStore)
 				{
-					outlookAccount.RemoveStore(pstStore);
+					outlookAccount.RemoveStore(pstPath);
 				}
 			}
 
