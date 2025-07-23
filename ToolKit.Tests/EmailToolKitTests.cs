@@ -206,7 +206,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			Assert.That(result, Is.True);
 
-			Migrate.EmlToPst(path, storePath, true);
+			Migrate.EmlToPst(path, storePath, true, true);
 
 			string baseName =
 				Path.GetFileNameWithoutExtension(storePath);
@@ -384,8 +384,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			Assert.That(result, Is.True);
 
-			MailItem mailItem = Migrate.EmlFileToPst(path, storePath);
-			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath);
+			MailItem mailItem = Migrate.EmlFileToPst(path, storePath, true);
+			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath, true);
 
 			OutlookItem outlookItem = new (mailItem);
 			string hash = outlookItem.Hash;
@@ -800,8 +800,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the subject",
 				"This is the message.");
 
-			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath);
-			MailItem mailItem3 = Migrate.EmlFileToPst(path, storePath);
+			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath, true);
+			MailItem mailItem3 = Migrate.EmlFileToPst(path, storePath, true);
 
 			mailItem = mailItem.Move(mainFolder);
 			mailItem2 = mailItem2.Move(mainFolder);
