@@ -189,9 +189,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// the object.</remarks>
 		/// <param name="filePath">The file path to migrate.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
-		/// <param name="closeStore">Indicates whether to close the store after processing.</param>
+		/// <param name="closeStore">Indicates whether to close the store after
+		/// processing.</param>
 		/// <returns>A valid MailItem or null.</returns>
-		public static MailItem EmlFileToPst(string filePath, string pstPath, bool closeStore)
+		public static MailItem EmlFileToPst(
+			string filePath, string pstPath, bool closeStore)
 		{
 			MailItem mailItem = null;
 
@@ -215,7 +217,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 
 				Marshal.ReleaseComObject(pstFolder);
-				if (closeStore)
+
+				if (closeStore == true)
 				{
 					outlookAccount.RemoveStore(pstPath);
 				}
@@ -232,7 +235,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>A value indicating success or not.</returns>
 		public static bool EmlToPst(string path, string pstPath)
 		{
-			bool result = EmlToPst(path, pstPath, true, true);
+			bool result = EmlToPst(path, pstPath, true, false);
 
 			return result;
 		}
@@ -244,9 +247,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		/// <param name="adjust">Indicates whether to exclude interim
 		/// folders.</param>
-		/// <param name="closeStore">Indicates whether to close the store after processing.</param>
+		/// <param name="closeStore">Indicates whether to close the store after
+		/// processing.</param>
 		/// <returns>A value indicating success or not.</returns>
-		public static bool EmlToPst(string path, string pstPath, bool adjust, bool closeStore)
+		public static bool EmlToPst(
+			string path, string pstPath, bool adjust, bool closeStore)
 		{
 			bool result = false;
 
@@ -272,11 +277,13 @@ namespace DigitalZenWorks.Email.ToolKit
 					EmlDirectoryToPst(rootFolder, path, adjust);
 
 					Marshal.ReleaseComObject(rootFolder);
-					result = true;
-					if (closeStore)
+
+					if (closeStore == true)
 					{
 						outlookAccount.RemoveStore(pstPath);
 					}
+
+					result = true;
 				}
 			}
 			else if (File.Exists(path))

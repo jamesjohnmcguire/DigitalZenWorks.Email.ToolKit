@@ -244,7 +244,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			bool adjust = command.DoesOptionExist("a", "adjust");
 			bool closeStore = command.DoesOptionExist("c", "close-store");
 
-			bool success = Migrate.EmlToPst(emlLocation, pstLocation, adjust, closeStore);
+			bool success =
+				Migrate.EmlToPst(emlLocation, pstLocation, adjust, closeStore);
 
 			if (success == true)
 			{
