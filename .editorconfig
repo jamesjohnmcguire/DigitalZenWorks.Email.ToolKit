@@ -19,3 +19,9 @@ dotnet_style_object_initializer = false:suggestion
 
 # SA1010: Opening square brackets should be spaced correctly
 dotnet_diagnostic.SA1010.severity = none
+
+# Require space after 'new' keyword
+dotnet_diagnostic.SA1000.severity = warning
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+csharp_space_between_method_call_parameter_list_parentheses = false
