@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="Program.cs" company="James John McGuire">
-// Copyright © 2021 - 2025 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -242,8 +242,10 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 
 			bool adjust = command.DoesOptionExist("a", "adjust");
+			bool closeStore = command.DoesOptionExist("c", "close-store");
 
-			bool success = Migrate.EmlToPst(emlLocation, pstLocation, adjust);
+			bool success =
+				Migrate.EmlToPst(emlLocation, pstLocation, adjust, closeStore);
 
 			if (success == true)
 			{
@@ -269,10 +271,13 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			commands.Add(dbxToPst);
 
 			CommandOption adjust = new ("a", "adjust");
-			options = [adjust];
+
+			CommandOption closeStore = new ("c", "close-store");
+
+			options = [adjust, closeStore];
 
 			Command emlToPst = new (
-				"eml-to-pst", options, 1, "Migrate eml files to pst file");
+				"eml-to-pst", options, 2, "Migrate eml files to pst file");
 			commands.Add(emlToPst);
 
 			CommandOption recurse = new ("r", "recurse");

@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookAccount.cs" company="James John McGuire">
-// Copyright © 2021 - 2025 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -156,6 +156,44 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return newPst;
+		}
+
+		/// <summary>
+		/// Removes a store from Outlook.
+		/// </summary>
+		/// <param name="path">The path to the pst file.</param>
+		/// <returns>remove result.</returns>
+		public bool RemoveStore(string path)
+		{
+			bool result = false;
+
+			Log.Info("Begin to Removing store: " + path);
+
+			path = Path.GetFullPath(path);
+			string extension = Path.GetExtension(path);
+
+			if (!extension.Equals(".pst", StringComparison.OrdinalIgnoreCase))
+			{
+				// Attempt to fix mistaken or missing file extension.
+				path += ".pst";
+			}
+
+			Store store = GetStore(path);
+
+			if (store != null)
+			{
+				MAPIFolder rootFolder = store.GetRootFolder();
+				session.RemoveStore(rootFolder);
+
+				Log.Info("Store removed successfully: " + path);
+				result = true;
+			}
+			else
+			{
+				Log.Warn("Store not found: " + path);
+			}
+
+			return result;
 		}
 
 		/// <summary>
