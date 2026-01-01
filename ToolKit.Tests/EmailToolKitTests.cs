@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="EmailToolKitTests.cs" company="James John McGuire">
-// Copyright © 2021 - 2025 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -206,7 +206,69 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			Assert.That(result, Is.True);
 
-			Migrate.EmlToPst(path, storePath, true);
+			Migrate.EmlToPst(path, storePath, true, false);
+
+			string baseName =
+				Path.GetFileNameWithoutExtension(storePath);
+
+			bool exists =
+				OutlookFolder.DoesFolderExist(rootFolder, baseName);
+			Assert.That(exists, Is.True);
+
+			MAPIFolder folder =
+				OutlookFolder.GetSubFolder(rootFolder, baseName);
+			Assert.That(folder, Is.Not.Null);
+
+			int count = folder.Items.Count;
+			Assert.That(count, Is.GreaterThan(0));
+		}
+
+		/// <summary>
+		/// Test EML to PST with sucess, using brief method version.
+		/// </summary>
+		[Test]
+		public void TestEmlToPstSuccessBrief()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			string path = Path.Combine(testFolder.FullName, "TestEmail.eml");
+			bool result = FileUtils.CreateFileFromEmbeddedResource(
+				"ToolKit.Tests.TestEmail.eml", path);
+
+			Assert.That(result, Is.True);
+
+			Migrate.EmlToPst(path, storePath);
+
+			string baseName =
+				Path.GetFileNameWithoutExtension(storePath);
+
+			bool exists =
+				OutlookFolder.DoesFolderExist(rootFolder, baseName);
+			Assert.That(exists, Is.True);
+
+			MAPIFolder folder =
+				OutlookFolder.GetSubFolder(rootFolder, baseName);
+			Assert.That(folder, Is.Not.Null);
+
+			int count = folder.Items.Count;
+			Assert.That(count, Is.GreaterThan(0));
+		}
+
+		/// <summary>
+		/// Test EML to PST with sucess, closing store.
+		/// </summary>
+		[Test]
+		public void TestEmlToPstSuccessCloseStore()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			string path = Path.Combine(testFolder.FullName, "TestEmail.eml");
+			bool result = FileUtils.CreateFileFromEmbeddedResource(
+				"ToolKit.Tests.TestEmail.eml", path);
+
+			Assert.That(result, Is.True);
+
+			Migrate.EmlToPst(path, storePath, true, true);
 
 			string baseName =
 				Path.GetFileNameWithoutExtension(storePath);
@@ -384,8 +446,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			Assert.That(result, Is.True);
 
-			MailItem mailItem = Migrate.EmlFileToPst(path, storePath);
-			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath);
+			MailItem mailItem = Migrate.EmlFileToPst(path, storePath, false);
+			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath, false);
 
 			OutlookItem outlookItem = new (mailItem);
 			string hash = outlookItem.Hash;
@@ -800,8 +862,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the subject",
 				"This is the message.");
 
-			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath);
-			MailItem mailItem3 = Migrate.EmlFileToPst(path, storePath);
+			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath, false);
+			MailItem mailItem3 = Migrate.EmlFileToPst(path, storePath, false);
 
 			mailItem = mailItem.Move(mainFolder);
 			mailItem2 = mailItem2.Move(mainFolder);
