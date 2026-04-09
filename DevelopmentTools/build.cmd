@@ -8,6 +8,8 @@ CD ..
 IF "%1"=="publish" GOTO publish
 
 :default
+nuget restore
+
 msbuild -property:Configuration=Release;OutputPath=Bin\;Platform="Any CPU" -restore -target:rebuild DigitalZenWorks.Email.ToolKit.sln
 
 IF "%1"=="release" GOTO release
