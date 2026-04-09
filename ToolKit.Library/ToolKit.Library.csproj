@@ -30,21 +30,19 @@
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
-		<TargetFramework>net9.0-windows</TargetFramework>
+		<TargetFramework>net10.0-windows</TargetFramework>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
-		<TargetFrameworks>netstandard2.0;net472;net5.0-windows;net6.0-windows;net7.0-windows;net8.0-windows;net9.0-windows</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net472;net5.0-windows;net6.0-windows;net7.0-windows;net8.0-windows;net9.0-windows;net10.0-windows</TargetFrameworks>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<COMReference Include="Microsoft.Office.Interop.Outlook">
-			<WrapperTool>tlbimp</WrapperTool>
-			<VersionMinor>6</VersionMinor>
-			<VersionMajor>9</VersionMajor>
-			<Guid>00062fff-0000-0000-c000-000000000046</Guid>
-			<Lcid>0</Lcid>
-			<Isolated>false</Isolated>
 			<EmbedInteropTypes>true</EmbedInteropTypes>
+			<Guid>00062fff-0000-0000-c000-000000000046</Guid>
+			<VersionMajor>9</VersionMajor>
+			<VersionMinor>6</VersionMinor>
+			<WrapperTool>tlbimp</WrapperTool>
 		</COMReference>
 	</ItemGroup>
 
@@ -55,7 +53,6 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.10" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Debug'">

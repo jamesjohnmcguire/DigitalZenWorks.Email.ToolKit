@@ -48,3 +48,8 @@ GOTO end
 ECHO No API key specified
 
 :end
+IF /I "%1"=="clean" GOTO clean
+GOTO :EOF
+
+:clean
+CALL clean.cmd
