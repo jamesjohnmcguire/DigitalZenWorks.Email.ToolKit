@@ -1,4 +1,4 @@
-::@ECHO OFF
+@ECHO OFF
 CD %~dp0
 CD ..
 
@@ -7,6 +7,9 @@ DEL /S /Q *.csproj.user
 IF EXIST .vs\NUL RD /S /Q .vs
 IF EXIST 1\NUL RD /S /Q 1
 IF EXIST Bin\NUL RD /S /Q Bin
+IF EXIST obj\NUL RD /S /Q obj
+IF EXIST packages\NUL RD /S /Q packages
+IF EXIST x64\NUL RD /S /Q x64
 
 IF EXIST TestConsoleApp\bin\NUL RD /S /Q TestConsoleApp\bin
 IF EXIST TestConsoleApp\obj\NUL RD /S /Q TestConsoleApp\obj
@@ -25,6 +28,8 @@ IF EXIST DbxOutlookExpress\DbxOutlookExpress\bin\NUL RD /S /Q DbxOutlookExpress\
 IF EXIST DbxOutlookExpress\DbxOutlookExpress\obj\NUL RD /S /Q DbxOutlookExpress\DbxOutlookExpress\obj
 IF EXIST DbxOutlookExpress\DbxOutlookExpressTests\bin\NUL RD /S /Q DbxOutlookExpress\DbxOutlookExpressTests\bin
 IF EXIST DbxOutlookExpress\DbxOutlookExpressTests\obj\NUL RD /S /Q DbxOutlookExpress\DbxOutlookExpressTests\obj
+IF EXIST MapiLibrary\x64\NUL RD /S /Q MapiLibrary\x64
+IF EXIST MapiLibraryTests\x64\NUL RD /S /Q MapiLibraryTests\x64
 IF EXIST MsgKit\MsgKit\Bin\NUL RD /S /Q MsgKit\MsgKit\Bin
 IF EXIST MsgKit\MsgKit\obj\NUL RD /S /Q MsgKit\MsgKit\obj
 IF EXIST UtilitiesNet\UtilitiesNetLibrary\bin\NUL RD /S /Q UtilitiesNet\UtilitiesNetLibrary\bin
