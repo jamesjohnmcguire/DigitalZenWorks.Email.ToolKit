@@ -1,15 +1,20 @@
-[submodule "DbxOutlookExpress"]
-	path = DbxOutlookExpress
-	url = https://github.com/jamesjohnmcguire/DbxOutlookExpress
-[submodule "MsgKit"]
-	path = MsgKit
-	url = https://github.com/jamesjohnmcguire/MsgKit
-[submodule "UtilitiesNet"]
-	path = UtilitiesNet
-	url = https://github.com/jamesjohnmcguire/UtilitiesNet
-[submodule "MapiLibrary/MAPIStubLibrary"]
-	path = MapiLibrary/MAPIStubLibrary
-	url = https://github.com/jamesjohnmcguire/MAPIStubLibrary
 [submodule "CommandLineCommands"]
 	path = CommandLineCommands
 	url = https://github.com/jamesjohnmcguire/CommandLineCommands.git
+	branch = main
+[submodule "DbxOutlookExpress"]
+	path = DbxOutlookExpress
+	url = https://github.com/jamesjohnmcguire/DbxOutlookExpress
+	branch = main
+[submodule "MapiLibrary/MAPIStubLibrary"]
+	path = MapiLibrary/MAPIStubLibrary
+	url = https://github.com/jamesjohnmcguire/MAPIStubLibrary
+	branch = master
+[submodule "MsgKit"]
+	path = MsgKit
+	url = https://github.com/jamesjohnmcguire/MsgKit
+	branch = allow-loose-attachments
+[submodule "UtilitiesNet"]
+	path = UtilitiesNet
+	url = https://github.com/jamesjohnmcguire/UtilitiesNet
+	branch = main

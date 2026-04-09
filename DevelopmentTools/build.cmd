@@ -8,7 +8,7 @@ CD ..
 IF "%1"=="publish" GOTO publish
 
 :default
-msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;OutputPath=Bin\;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true -restore -target:publish;rebuild ToolKit.Application
+msbuild -property:Configuration=Release;OutputPath=Bin\;Platform="Any CPU" -restore -target:rebuild DigitalZenWorks.Email.ToolKit.sln
 
 IF "%1"=="release" GOTO release
 
@@ -31,6 +31,7 @@ CD ..\..\..
 GOTO end
 
 :release
+msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;OutputPath=Bin\;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true -restore -target:publish;rebuild ToolKit.Application
 
 CD ToolKit.Application\Bin\publish
 7z u DigitalZenWorks.Email.ToolKit.zip
