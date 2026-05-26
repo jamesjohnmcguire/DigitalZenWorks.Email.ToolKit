@@ -102,11 +102,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 					switch (command.Name)
 					{
-						case "details":
-							result = Details(command);
-							break;
 						case "dbx-to-pst":
 							result = DbxToPst(command);
+							break;
+						case "details":
+							result = Details(command);
 							break;
 						case "eml-to-pst":
 							result = EmlToPst(command);
