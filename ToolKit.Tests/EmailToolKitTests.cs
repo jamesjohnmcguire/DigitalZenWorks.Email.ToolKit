@@ -88,6 +88,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[SetUp]
 		public void Setup()
 		{
+			Assert.That(store, Is.Not.Null);
 		}
 
 		/// <summary>
