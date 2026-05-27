@@ -102,6 +102,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 					switch (command.Name)
 					{
+						case "add-pst":
+							result = AddPst(command);
+							break;
 						case "dbx-to-pst":
 							result = DbxToPst(command);
 							break;
@@ -205,6 +208,23 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 		}
 
+		private static int AddPst(Command command)
+		{
+			int result = -1;
+
+			string pstLocation = command.Parameters[0];
+
+			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			Store store = outlookAccount.GetStore(pstLocation);
+
+			if (store != null)
+			{
+				result = 0;
+			}
+
+			return result;
+		}
+
 		private static int DbxToPst(Command command)
 		{
 			int result = -1;
@@ -262,6 +282,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			Command help = new ("help");
 			help.Description = "Show this information";
 			commands.Add(help);
+
+			Command addPst = new("add-pst", null, 1, "Add a PST file");
+			commands.Add(addPst);
 
 			CommandOption encoding = new ("e", "encoding", true);
 			List<CommandOption> options = [encoding];
