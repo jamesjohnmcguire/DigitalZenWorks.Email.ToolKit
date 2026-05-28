@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="CodeAnalysis.ruleset" />
+    <File Path="README.md" />
+    <File Path="stylecop.json" />
+  </Folder>
+  <Project Path="CommandLineCommands/CommandLineCommands.Tests/DigitalZenWorks.CommandLine.Commands.Tests.csproj" />
+  <Project Path="CommandLineCommands/CommandLineCommands/DigitalZenWorks.CommandLine.Commands.csproj" />
+  <Project Path="DbxOutlookExpress/DbxOutlookExpress/DigitalZenWorks.Email.DbxOutlookExpress.csproj">
+    <Build Solution="Release|*" Project="false" />
+  </Project>
+  <Project Path="DbxOutlookExpress/DbxOutlookExpressTests/DigitalZenWorks.Email.DbxOutlookExpress.Tests.csproj">
+    <Build Solution="Release|*" Project="false" />
+  </Project>
+  <Project Path="MsgKit/MsgKit/MsgKit.csproj" />
+  <Project Path="TestConsoleApp/TestConsoleApp.csproj">
+    <Build Solution="Release|*" Project="false" />
+  </Project>
+  <Project Path="ToolKit.Application/ToolKit.Application.csproj" />
+  <Project Path="ToolKit.Library/ToolKit.Library.csproj" />
+  <Project Path="ToolKit.Tests/ToolKit.Tests.csproj">
+    <Build Solution="Release|*" Project="false" />
+  </Project>
+  <Project Path="UtilitiesNet/UtilitiesNetLibrary/DigitalZenWorks.Common.Utilities.csproj" />
+  <Project Path="UtilitiesNet/UtilitiesNetTests/DigitalZenWorks.Common.Utilities.Tests.csproj" />
+</Solution>
