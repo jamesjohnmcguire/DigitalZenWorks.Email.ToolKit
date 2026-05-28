@@ -3,12 +3,12 @@ REM %2 - Version (such as 1.0.0.5)
 REM %3 - API key
 
 CD %~dp0
-CD ..
+CD ..\SourceCode
 
 IF "%1"=="publish" GOTO publish
 
 :default
-msbuild -property:Configuration=Release;OutputPath=Bin\;Platform="Any CPU" -restore -target:rebuild DigitalZenWorks.Email.ToolKit.sln
+msbuild -property:Configuration=Release;OutputPath=Bin\;Platform="Any CPU" -restore -target:rebuild DigitalZenWorks.Email.ToolKit.slnx
 
 IF "%1"=="release" GOTO release
 
