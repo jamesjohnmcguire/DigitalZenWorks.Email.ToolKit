@@ -5,7 +5,6 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AssemblyName>Det</AssemblyName>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
-		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 		<Company>James John McGuire</Company>
 		<Copyright>Copyright © 2021 - 2026</Copyright>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
@@ -58,7 +57,6 @@
 	<ItemGroup>
 		<AdditionalFiles Include="../README.md" />
 		<AdditionalFiles Include="../stylecop.json" />
-		<CodeAnalysisDictionary Include="../CodeAnalysis.ruleset" />
 		<None Include="../.editorconfig" Link="../.editorconfig" />
 	</ItemGroup>
 
