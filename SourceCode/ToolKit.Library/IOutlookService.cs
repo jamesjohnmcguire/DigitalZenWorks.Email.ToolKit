@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+/////////////////////////////////////////////////////////////////////////////
+// <copyright file="IOutlookService.cs" company="James John McGuire">
+// Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
+// </copyright>
+/////////////////////////////////////////////////////////////////////////////
 
-namespace ToolKit.Library
+namespace DigitalZenWorks.Email.ToolKit;
+
+internal interface IOutlookService
 {
-	internal interface IOutlookService
-	{
-	}
 }
