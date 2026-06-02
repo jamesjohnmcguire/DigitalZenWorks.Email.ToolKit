@@ -10,7 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+#if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
 using Microsoft.Win32;
+#endif
 using Outlook = Microsoft.Office.Interop.Outlook;
 
 public class OutlookService : IOutlookService
@@ -19,6 +21,7 @@ public class OutlookService : IOutlookService
 	{
 		bool installed = false;
 
+#if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
 		string registryPath =
 			@"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\OUTLOOK.EXE";
 		using RegistryKey? key =
@@ -41,6 +44,7 @@ public class OutlookService : IOutlookService
 				installed = true;
 			}
 		}
+#endif
 
 		return installed;
 	}
