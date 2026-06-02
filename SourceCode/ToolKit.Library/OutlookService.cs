@@ -13,7 +13,7 @@ using System.Threading;
 using Microsoft.Win32;
 using Outlook = Microsoft.Office.Interop.Outlook;
 
-public static class OutlookService : IOutlookService
+public class OutlookService : IOutlookService
 {
 	public static bool IsOutlookInstalled()
 	{
@@ -31,8 +31,8 @@ public static class OutlookService : IOutlookService
 		else
 		{
 			// 32-bit Outlook on 64-bit Windows
-			string registryPath = @"SOFTWARE\WOW6432Node\Microsoft\Windows\" +
-				@"CurrentVersion\App Paths\OUTLOOK.EXE"
+			registryPath = @"SOFTWARE\WOW6432Node\Microsoft\Windows\" +
+				@"CurrentVersion\App Paths\OUTLOOK.EXE";
 			using RegistryKey? wowKey =
 				Registry.LocalMachine.OpenSubKey(registryPath);
 
@@ -41,7 +41,7 @@ public static class OutlookService : IOutlookService
 				installed = true;
 			}
 		}
-	
+
 		return installed;
 	}
 }
