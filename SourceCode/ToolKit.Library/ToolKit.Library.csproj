@@ -54,6 +54,10 @@
 		</PackageReference>
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net5.0-windows' Or '$(TargetFramework)' == 'netstandard2.0'">
+		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+	</ItemGroup>
+
 	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<ProjectReference Include="..\DbxOutlookExpress\DbxOutlookExpress\DigitalZenWorks.Email.DbxOutlookExpress.csproj" />
 		<ProjectReference Include="..\UtilitiesNet\UtilitiesNetLibrary\DigitalZenWorks.Common.Utilities.csproj" />
