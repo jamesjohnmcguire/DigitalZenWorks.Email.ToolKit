@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="Program.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -75,27 +75,6 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					Command command = commandLine.Command;
 
 					DisplayParameters(command, arguments);
-
-					try
-					{
-						OutlookAccount outlookAccount =
-							OutlookAccount.Instance;
-					}
-					catch (COMException exception)
-					{
-						string message = "Unable to Connect to Outlook. " +
-							"Is Outlook Installed?";
-						Log.Error(message);
-
-						message = "Note: This may also happen if this " +
-							"application and Outlook are running at " +
-							"different privilege levels (Such as one of " +
-							"them running as Administrator";
-						Log.Error(message);
-						Log.Error(exception.ToString());
-
-						throw;
-					}
 
 					Encoding.RegisterProvider(
 						CodePagesEncodingProvider.Instance);
@@ -211,15 +190,24 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int AddPst(Command command)
 		{
 			int result = -1;
-
 			string pstLocation = command.Parameters[0];
 
-			OutlookAccount outlookAccount = OutlookAccount.Instance;
-			Store store = outlookAccount.GetStore(pstLocation);
+			OutlookService outlook = OutlookService.Instance;
+			bool connected = outlook.Connect(20);
 
-			if (store != null)
+			if (connected == false)
 			{
-				result = 0;
+				Log.Error("Outlook unavailable.");
+			}
+			else
+			{
+				OutlookSession session = outlook.Session;
+				Store store = session.GetStore(pstLocation);
+
+				if (store != null)
+				{
+					result = 0;
+				}
 			}
 
 			return result;
