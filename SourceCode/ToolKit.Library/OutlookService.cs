@@ -14,9 +14,55 @@ using System.Threading;
 using Microsoft.Win32;
 #endif
 using Outlook = Microsoft.Office.Interop.Outlook;
+using Microsoft.Office.Interop.Outlook;
 
 public class OutlookService : IOutlookService
 {
+	private static readonly OutlookService InternalInstance = new();
+
+	private Application? application;
+	private OutlookSession? session;
+
+	private OutlookService()
+	{
+	}
+
+    public static OutlookService Instance
+    {
+        get { return InternalInstance; }
+    }
+
+	public OutlookSession? Session
+	{
+		get { return session; }
+	}
+
+	public bool Connect(int timeOutSeconds = 10)
+	{
+		bool connected = false;
+
+		if (application != null)
+		{
+			connected = true;
+		}
+		else
+		{
+			TimeSpan timeOutSpan = TimeSpan.FromSeconds(timeOutSeconds);
+
+			application =
+				OutlookFactory.TryCreateOutlookApplication(timeOutSpan);
+
+			if (application != null)
+			{
+				session = new OutlookSession(application);
+
+				connected = true;
+			}
+		}
+
+		return connected;
+	}
+
 	public static bool IsOutlookInstalled()
 	{
 		bool installed = false;
