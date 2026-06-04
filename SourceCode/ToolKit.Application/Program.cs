@@ -193,7 +193,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			string pstLocation = command.Parameters[0];
 
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect(20);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
