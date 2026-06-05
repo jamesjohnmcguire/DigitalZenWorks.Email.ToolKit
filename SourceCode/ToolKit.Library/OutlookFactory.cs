@@ -17,12 +17,14 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 public static class OutlookFactory
 {
 	public static Outlook.Application? TryCreateOutlookApplication(
-		TimeSpan timeout)
+		int timeOutSeconds)
 	{
 		Outlook.Application? application = null;
 		Outlook.Application? tryApplication = null;
 
 		Exception? exception = null;
+
+		TimeSpan timeOutSpan = TimeSpan.FromSeconds(timeOutSeconds);
 
 		using ManualResetEvent completed = new(initialState: false);
 
@@ -47,7 +49,7 @@ public static class OutlookFactory
 		staThread.IsBackground = true;
 		staThread.Start();
 
-		bool finished = completed.WaitOne(timeout);
+		bool finished = completed.WaitOne(timeoutSpan);
 
 		if (finished == true && exception == null)
 		{

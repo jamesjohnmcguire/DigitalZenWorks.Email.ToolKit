@@ -8,6 +8,7 @@ namespace DigitalZenWorks.Email.ToolKit;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 #if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
@@ -21,6 +22,8 @@ public class OutlookService : IOutlookService
 	private static readonly OutlookService InternalInstance = new();
 
 	private Application? application;
+	private bool outlookStartedByThis;
+	private bool attachedToExistingOutlook;
 	private OutlookSession? session;
 
 	private OutlookService()
@@ -41,26 +44,42 @@ public class OutlookService : IOutlookService
 	{
 		bool connected = false;
 
-		if (application != null)
+		if (application == null)
 		{
-			connected = true;
-		}
-		else
-		{
-			TimeSpan timeOutSpan = TimeSpan.FromSeconds(timeOutSeconds);
-
-			application =
-				OutlookFactory.TryCreateOutlookApplication(timeOutSpan);
+			application = ConnectToExistingOutlook();
 
 			if (application != null)
 			{
-				session = new OutlookSession(application);
+				attachedToExistingOutlook = true;
+			}
+			else
+			{
+				application =
+					OutlookFactory.TryCreateOutlookApplication(timeOutSeconds);
 
-				connected = true;
+				if (application != null)
+				{
+					outlookStartedByThis = true;
+				}
 			}
 		}
 
+		if (application != null)
+		{
+			session = new OutlookSession(application);
+
+			connected = true;
+		}
+
 		return connected;
+	}
+
+	public void Disconnect()
+	{
+		if (outlookStartedByThis == true && application != null)
+		{
+			application.Quit();
+		}
 	}
 
 	public static bool IsOutlookInstalled()
@@ -93,5 +112,39 @@ public class OutlookService : IOutlookService
 #endif
 
 		return installed;
+	}
+
+	private bool IsOutlookStarted()
+	{
+		bool started = false;
+
+		if (application == null)
+		{
+			Process[] existing = Process.GetProcessesByName("OUTLOOK");
+			int count = existing.Length;
+
+			if (count == 0)
+			{
+				started = true;
+			}
+		}
+
+		return started;
+	}
+
+	private static Application? ConnectToExistingOutlook()
+	{
+		Application? application = null;
+
+		try
+		{
+			application = Marshal.GetActiveObject("Outlook.Application")
+					as Outlook.Application;
+		}
+		catch
+		{
+		}
+
+		return application;
 	}
 }
