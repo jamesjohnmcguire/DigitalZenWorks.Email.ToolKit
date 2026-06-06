@@ -7,6 +7,7 @@
 namespace DigitalZenWorks.Email.ToolKit;
 
 using System.Diagnostics;
+using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 #if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
 using Microsoft.Win32;
@@ -15,6 +16,9 @@ using Microsoft.VisualBasic;
 
 public class OutlookService : IOutlookService
 {
+	private static readonly ILog Log = LogManager.GetLogger(
+		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 	private static readonly OutlookService InternalInstance = new();
 
 	private Application? application;
@@ -65,6 +69,10 @@ public class OutlookService : IOutlookService
 			session = new OutlookSession(application);
 
 			connected = true;
+		}
+		else
+		{
+			Log.Error("Outlook unavailable.");
 		}
 
 		return connected;
