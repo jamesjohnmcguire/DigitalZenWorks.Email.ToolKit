@@ -49,7 +49,7 @@ public static class OutlookFactory
 		staThread.IsBackground = true;
 		staThread.Start();
 
-		bool finished = completed.WaitOne(timeoutSpan);
+		bool finished = completed.WaitOne(timeOutSpan);
 
 		if (finished == true && exception == null)
 		{
