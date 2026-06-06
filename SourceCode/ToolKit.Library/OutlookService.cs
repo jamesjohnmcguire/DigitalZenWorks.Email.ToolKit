@@ -6,16 +6,12 @@
 
 namespace DigitalZenWorks.Email.ToolKit;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using System.Threading;
+using Microsoft.Office.Interop.Outlook;
 #if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
 using Microsoft.Win32;
 #endif
-using Outlook = Microsoft.Office.Interop.Outlook;
-using Microsoft.Office.Interop.Outlook;
+using Microsoft.VisualBasic;
 
 public class OutlookService : IOutlookService
 {
@@ -138,8 +134,8 @@ public class OutlookService : IOutlookService
 
 		try
 		{
-			application = Marshal.GetActiveObject("Outlook.Application")
-					as Outlook.Application;
+			application = Interaction.GetObject(null, "Outlook.Application")
+					as Application;
 		}
 		catch
 		{
