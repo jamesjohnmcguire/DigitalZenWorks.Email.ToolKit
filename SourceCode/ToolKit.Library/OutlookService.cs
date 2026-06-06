@@ -7,6 +7,7 @@
 namespace DigitalZenWorks.Email.ToolKit;
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 #if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
@@ -142,8 +143,13 @@ public class OutlookService : IOutlookService
 
 		try
 		{
+#if NET5_0_OR_GREATER
 			application = Interaction.GetObject(null, "Outlook.Application")
 					as Application;
+#elif !NETSTANDARD2_0_OR_GREATER
+			application = Marshal.GetActiveObject("Outlook.Application")
+					as Application;
+#endif
 		}
 		catch
 		{
