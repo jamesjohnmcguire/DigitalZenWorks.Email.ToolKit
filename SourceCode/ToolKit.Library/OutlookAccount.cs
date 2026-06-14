@@ -23,6 +23,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static readonly OutlookAccount InternalInstance = new ();
 
 		private readonly Application application;
+		private readonly OutlookSession outlookSession;
 		private readonly NameSpace session;
 
 		// Explicit static constructor to tell C# compiler
@@ -40,6 +41,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			application = new ();
 
 			session = application.Session;
+			outlookSession = new OutlookSession(application);
 		}
 
 		/// <summary>
@@ -56,6 +58,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		/// <value>The Outlook application object.</value>
 		public Application Application { get { return application; } }
+
+		/// <summary>
+		/// Gets the session encapsulation object.
+		/// </summary>
+		/// <value>The session encapsulation object.</value>
+		public OutlookSession OutlookSession { get { return outlookSession; } }
 
 		/// <summary>
 		/// Gets the default session (Outlook namespace).
