@@ -8,6 +8,7 @@ namespace DigitalZenWorks.Email.ToolKit;
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Outlook = Microsoft.Office.Interop.Outlook;
@@ -16,10 +17,9 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 
 public static class OutlookFactory
 {
-	public static Outlook.Application? TryCreateOutlookApplication(
-		int timeOutSeconds)
+	public static bool IsOutlookAvailable(int timeOutSeconds)
 	{
-		Outlook.Application? application = null;
+		bool isAvailable = false;
 		Outlook.Application? tryApplication = null;
 
 		Exception? exception = null;
@@ -28,7 +28,7 @@ public static class OutlookFactory
 
 		using ManualResetEvent completed = new(initialState: false);
 
-		Thread staThread = new(() =>
+		void CreateOutlookApplication()
 		{
 			try
 			{
@@ -39,11 +39,17 @@ public static class OutlookFactory
 				exception = ex;
 			}
 			finally
-
 			{
+				if (tryApplication != null)
+				{
+					Marshal.FinalReleaseComObject(tryApplication);
+				}
+
 				completed.Set();
 			}
-		});
+		}
+
+		Thread staThread = new(CreateOutlookApplication);
 
 		staThread.SetApartmentState(ApartmentState.STA);
 		staThread.IsBackground = true;
@@ -53,9 +59,9 @@ public static class OutlookFactory
 
 		if (finished == true && exception == null)
 		{
-			application = tryApplication;
+			isAvailable = true;
 		}
 
-		return application;
+		return isAvailable;
 	}
 }

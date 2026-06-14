@@ -14,6 +14,7 @@ using Microsoft.Office.Interop.Outlook;
 using Microsoft.Win32;
 #endif
 using Microsoft.VisualBasic;
+using Outlook = Microsoft.Office.Interop.Outlook;
 
 public class OutlookService : IOutlookService
 {
@@ -55,11 +56,12 @@ public class OutlookService : IOutlookService
 			}
 			else
 			{
-				application =
-					OutlookFactory.TryCreateOutlookApplication(timeOutSeconds);
+				bool isAvailable =
+					OutlookFactory.IsOutlookAvailable(timeOutSeconds);
 
-				if (application != null)
+				if (isAvailable == true)
 				{
+					application = new Outlook.Application();
 					outlookStartedByThis = true;
 				}
 			}
