@@ -205,6 +205,48 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Delete duplicate item.
+		/// </summary>
+		/// <param name="session">The Outlook session.</param>
+		/// <param name="duplicateId">The duplicate id.</param>
+		/// <param name="keeperSynopses">The keeper synopses.</param>
+		/// <param name="dryRun">Indicates if this is a dry run or not.</param>
+		public static void DeleteDuplicate(
+			OutlookStore store,
+			string duplicateId,
+			string keeperSynopses,
+			bool dryRun)
+		{
+			if (store != null)
+			{
+				try
+				{
+					object mapiItem = store.GetItemFromEntryId(duplicateId);
+
+					if (mapiItem != null)
+					{
+						bool isValidDuplicate =
+							DoubleCheckDuplicate(keeperSynopses, mapiItem);
+
+						if (isValidDuplicate == true && dryRun == false)
+						{
+							OutlookItem contentItem = new (mapiItem);
+							contentItem.Delete();
+						}
+
+						Marshal.ReleaseComObject(mapiItem);
+					}
+				}
+				catch (System.Exception exception) when
+				(exception is COMException ||
+				exception is InvalidCastException)
+				{
+					Log.Error(exception.ToString());
+				}
+			}
+		}
+
+		/// <summary>
 		/// Format for text an enum value.
 		/// </summary>
 		/// <param name="propertyName">The enum property name.</param>
