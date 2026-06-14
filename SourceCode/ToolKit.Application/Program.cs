@@ -197,7 +197,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 			if (connected == false)
 			{
-				Log.Error("Outlook unavailable.");
+				Log.Error("Unable to Continue");
 			}
 			else
 			{
@@ -216,22 +216,33 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int DbxToPst(Command command)
 		{
 			int result = -1;
-			Encoding encoding = GetEncoding(command);
 
-			string dbxLocation = command.Parameters[0];
-			string pstLocation = dbxLocation;
+			OutlookService outlook = OutlookService.Instance;
+			bool connected = outlook.Connect();
 
-			if (command.Parameters.Count > 1)
+			if (connected == false)
 			{
-				pstLocation = command.Parameters[1];
+				Log.Error("Unable to Continue");
 			}
-
-			bool success =
-				Migrate.DbxToPst(dbxLocation, pstLocation, encoding);
-
-			if (success == true)
+			else
 			{
-				result = 0;
+				Encoding encoding = GetEncoding(command);
+
+				string dbxLocation = command.Parameters[0];
+				string pstLocation = dbxLocation;
+
+				if (command.Parameters.Count > 1)
+				{
+					pstLocation = command.Parameters[1];
+				}
+
+				bool success =
+					Migrate.DbxToPst(dbxLocation, pstLocation, encoding);
+
+				if (success == true)
+				{
+					result = 0;
+				}
 			}
 
 			return result;
@@ -241,23 +252,33 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		{
 			int result = -1;
 
-			string emlLocation = command.Parameters[0];
-			string pstLocation = emlLocation;
+			OutlookService outlook = OutlookService.Instance;
+			bool connected = outlook.Connect();
 
-			if (command.Parameters.Count > 1)
+			if (connected == false)
 			{
-				pstLocation = command.Parameters[1];
+				Log.Error("Unable to Continue");
 			}
-
-			bool adjust = command.DoesOptionExist("a", "adjust");
-			bool closeStore = command.DoesOptionExist("c", "close-store");
-
-			bool success =
-				Migrate.EmlToPst(emlLocation, pstLocation, adjust, closeStore);
-
-			if (success == true)
+			else
 			{
-				result = 0;
+				string emlLocation = command.Parameters[0];
+				string pstLocation = emlLocation;
+
+				if (command.Parameters.Count > 1)
+				{
+					pstLocation = command.Parameters[1];
+				}
+
+				bool adjust = command.DoesOptionExist("a", "adjust");
+				bool closeStore = command.DoesOptionExist("c", "close-store");
+
+				bool success =
+					Migrate.EmlToPst(emlLocation, pstLocation, adjust, closeStore);
+
+				if (success == true)
+				{
+					result = 0;
+				}
 			}
 
 			return result;

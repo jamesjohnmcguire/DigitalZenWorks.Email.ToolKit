@@ -342,8 +342,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
+				OutlookSession outlookSession = pstOutlook.OutlookSession;
+
 				string entryId = mappings[dbxFolder.FolderParentId];
-				parentFolder = pstOutlook.GetFolderFromID(entryId, pstStore);
+				parentFolder = outlookSession.GetFolderFromIdInternal(
+					entryId, pstStore.StoreID);
 			}
 
 			pstFolder = OutlookFolder.AddFolder(

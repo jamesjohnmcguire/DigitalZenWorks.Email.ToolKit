@@ -125,7 +125,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			@"\s*-\s*Copy$", @"^[A-F]{1}_"
 		];
 
+		private readonly MAPIFolder folder;
+
 		private readonly OutlookAccount outlookAccount;
+
+		private readonly OutlookSession outlookSession;
 
 		private readonly Dictionary<string, int> sendersCounts = [];
 
@@ -136,10 +140,31 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Initializes a new instance of the
 		/// <see cref="OutlookFolder"/> class.
 		/// </summary>
+		public OutlookFolder(MAPIFolder folder)
+		{
+			this.folder = folder;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the
+		/// <see cref="OutlookFolder"/> class.
+		/// </summary>
 		/// <param name="outlookAccount">The outlook account object.</param>
 		public OutlookFolder(OutlookAccount outlookAccount)
 		{
 			this.outlookAccount = outlookAccount;
+			outlookSession = outlookAccount.OutlookSession;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the
+		/// <see cref="OutlookFolder"/> class.
+		/// </summary>
+		/// <param name="outlookSession">The outlook session encapsulation
+		/// object.</param>
+		public OutlookFolder(OutlookSession outlookSession)
+		{
+			this.outlookSession = outlookSession;
 		}
 
 		/// <summary>
@@ -200,6 +225,48 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 
 			return pstFolder;
+		}
+
+		/// <summary>
+		/// Add folder in safe context.
+		/// </summary>
+		/// <remarks>If there is a folder already existing with the given
+		/// folder name, this method will return that folder.</remarks>
+		/// <param name="parentFolder">The parent folder.</param>
+		/// <param name="folderName">The new folder name.</param>
+		/// <returns>The added or existing encapsulated folder.</returns>
+		public OutlookFolder AddFolder(string folderName)
+		{
+			OutlookFolder newFolder = null;
+			MAPIFolder pstFolder = null;
+
+			if (folder != null && !string.IsNullOrWhiteSpace(folderName))
+			{
+				pstFolder = GetSubFolder(folder, folderName);
+
+				if (pstFolder == null)
+				{
+					string parentPath = GetFolderPath(folder);
+					Log.Info("At: " + parentPath + " Adding outlook folder: " +
+						folderName);
+
+					try
+					{
+						pstFolder = folder.Folders.Add(folderName);
+					}
+					catch (COMException exception)
+					{
+						Log.Warn(exception.ToString());
+					}
+				}
+
+				if (pstFolder != null)
+				{
+					newFolder = new(pstFolder);
+				}
+			}
+
+			return newFolder;
 		}
 
 		/// <summary>
@@ -432,10 +499,21 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null && sendersCounts != null)
 			{
-				OutlookAccount outlookAccount = OutlookAccount.Instance;
-				OutlookFolder outlookFolder = new (outlookAccount);
+				OutlookService outlook = OutlookService.Instance;
+				bool connected = outlook.Connect();
 
-				sendersCounts = outlookFolder.GetSendersCount(folder);
+				if (connected == false)
+				{
+					Log.Error("Unable to Continue");
+				}
+				else
+				{
+					OutlookSession outlookSession = outlook.Session;
+
+					OutlookFolder outlookFolder = new (outlookSession);
+
+					sendersCounts = outlookFolder.GetSendersCount(folder);
+				}
 			}
 
 			return sendersCounts;
@@ -1030,7 +1108,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>A valid MailItem or null.</returns>
 		public MailItem AddMsgFile(MAPIFolder pstFolder, string filePath)
 		{
-			MailItem item = null;
+			MailItem mailItem = null;
 
 			if (pstFolder != null && !string.IsNullOrWhiteSpace(filePath))
 			{
@@ -1040,14 +1118,17 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					try
 					{
-						NameSpace session = outlookAccount.Session;
+						object rawItem = outlookSession.OpenSharedItem(filePath);
 
-						item = session.OpenSharedItem(filePath);
+						if (rawItem is MailItem item)
+						{
+							mailItem = item;
 
-						item.UnRead = false;
-						item.Save();
+							mailItem.UnRead = false;
+							mailItem.Save();
 
-						item = item.Move(pstFolder);
+							mailItem = mailItem.Move(pstFolder);
+						}
 					}
 					catch (COMException exception)
 					{
@@ -1060,7 +1141,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 			}
 
-			return item;
+			return mailItem;
 		}
 
 		/// <summary>
@@ -1726,7 +1807,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private int DeleteDuplicates(IList<string> duplicateSet, bool dryRun)
+		private int DeleteDuplicates(
+			Store store, IList<string> duplicateSet, bool dryRun)
 		{
 			string keeper = duplicateSet[0];
 			duplicateSet.RemoveAt(0);
@@ -1734,9 +1816,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			// Count only the ones to remove.
 			int removeDuplicates = duplicateSet.Count;
 
-			NameSpace session = outlookAccount.Session;
-
-			object mapiItem = session.GetItemFromID(keeper);
+			object mapiItem = outlookSession.GetItemFromId(keeper);
 
 			OutlookItem outlookItem = new (mapiItem);
 			string keeperSynopses = outlookItem.Synopses;
@@ -1751,10 +1831,12 @@ namespace DigitalZenWorks.Email.ToolKit
 				message,
 				keeperSynopses);
 
+			OutlookStore outlookStore = new(store);
+
 			foreach (string duplicateId in duplicateSet)
 			{
 				OutlookItem.DeleteDuplicate(
-					session, duplicateId, keeperSynopses, dryRun);
+					outlookStore, duplicateId, keeperSynopses, dryRun);
 			}
 
 			return removeDuplicates;
@@ -2253,7 +2335,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				duplicates)
 			{
 				removedDuplicates +=
-					DeleteDuplicates(duplicateSet.Value, dryRun);
+					DeleteDuplicates(folder.Store, duplicateSet.Value, dryRun);
 			}
 
 			Marshal.ReleaseComObject(folder);
@@ -2285,7 +2367,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				duplicates)
 			{
 				duplicateCount +=
-					DeleteDuplicates(duplicateSet.Value, dryRun);
+					DeleteDuplicates(folder.Store, duplicateSet.Value, dryRun);
 			}
 
 			Marshal.ReleaseComObject(folder);

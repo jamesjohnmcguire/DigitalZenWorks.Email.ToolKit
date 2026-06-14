@@ -10,6 +10,7 @@ namespace DigitalZenWorks.Email.ToolKit;
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 
@@ -23,6 +24,34 @@ public class OutlookSession
 	public OutlookSession(Application application)
 	{
 		session = application.Session;
+	}
+
+	public OutlookFolder? GetFolderFromId(string entryId, string storeId)
+	{
+		OutlookFolder? folder = null;
+
+		MAPIFolder? mapiFolder = session.GetFolderFromID(entryId, storeId);
+
+		if (mapiFolder != null)
+		{
+			folder = new(mapiFolder);
+		}
+
+		return folder;
+	}
+
+	internal MAPIFolder? GetFolderFromIdInternal(string entryId, string storeId)
+	{
+		MAPIFolder? mapiFolder = session.GetFolderFromID(entryId, storeId);
+
+		return mapiFolder;
+	}
+
+	public object? GetItemFromId(string entryId)
+	{
+		object? item = session.GetItemFromID(entryId);
+
+		return item;
 	}
 
 	/// <summary>
@@ -88,6 +117,58 @@ public class OutlookSession
 		return newPst;
 	}
 
+	public OutlookMail? OpenMailItemFile(string filePath)
+	{
+		OutlookMail? outlookMailItem = null;
+		object? item = OpenSharedItem(filePath);
+
+		if (item is MailItem mailItem)
+		{
+			outlookMailItem = new(mailItem);
+		}
+		else if (item is not null)
+		{
+			Marshal.ReleaseComObject(item);
+		}
+
+		return outlookMailItem;
+	}
+
+	public object? OpenSharedItem(string filePath)
+	{
+		// session is Namespace
+		object? item = session.OpenSharedItem(filePath);
+
+		return item;
+	}
+
+	/// <summary>
+	/// Removes a store from Outlook.
+	/// </summary>
+	/// <param name="path">The store to remove.</param>
+	/// <returns>remove result.</returns>
+	public bool RemoveStore(Store store)
+	{
+		bool result = false;
+
+		Log.Info("Begin to Removing store: " + store.DisplayName);
+
+		if (store != null)
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			session.RemoveStore(rootFolder);
+
+			Log.Info("Store removed successfully: " + store.DisplayName);
+			result = true;
+		}
+		else
+		{
+			Log.Warn("Store not present");
+		}
+
+		return result;
+	}
+
 	/// <summary>
 	/// Removes a store from Outlook.
 	/// </summary>
@@ -110,18 +191,7 @@ public class OutlookSession
 
 		Store store = GetStore(path);
 
-		if (store != null)
-		{
-			MAPIFolder rootFolder = store.GetRootFolder();
-			session.RemoveStore(rootFolder);
-
-			Log.Info("Store removed successfully: " + path);
-			result = true;
-		}
-		else
-		{
-			Log.Warn("Store not found: " + path);
-		}
+		result = RemoveStore(store);
 
 		return result;
 	}

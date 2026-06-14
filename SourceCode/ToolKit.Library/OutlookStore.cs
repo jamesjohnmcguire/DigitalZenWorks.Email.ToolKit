@@ -25,6 +25,9 @@ namespace DigitalZenWorks.Email.ToolKit
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		private readonly OutlookAccount outlookAccount;
+		private readonly OutlookService outlookService;
+		private readonly OutlookSession outlookSession;
+		private readonly Store store;
 
 		private uint totalFolders;
 
@@ -36,6 +39,28 @@ namespace DigitalZenWorks.Email.ToolKit
 		public OutlookStore(OutlookAccount outlookAccount)
 		{
 			this.outlookAccount = outlookAccount;
+			outlookSession = outlookAccount.OutlookSession;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the
+		/// <see cref="OutlookStore"/> class.
+		/// </summary>
+		/// <param name="OutlookSession">The outlook session encapsulation
+		/// object.</param>
+		public OutlookStore(OutlookSession outlookSession)
+		{
+			this.outlookSession = outlookSession;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the
+		/// <see cref="OutlookStore"/> class.
+		/// </summary>
+		/// <param name="OutlookSession">The Store object.</param>
+		public OutlookStore(Store store)
+		{
+			store = store;
 		}
 
 		/// <summary>
@@ -47,6 +72,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			get { return totalFolders; }
 			set { totalFolders = value; }
 		}
+
+		public OutlookSession OutlookSession { get { return outlookSession; } }
 
 		/// <summary>
 		/// Empty deleted items folder.
@@ -229,7 +256,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="entryId">The entry id of the item to check.</param>
 		public void Details(string pstFilePath, string entryId)
 		{
-			Store store = outlookAccount.GetStore(pstFilePath);
+			Store store = outlookSession.GetStore(pstFilePath);
 
 			if (store != null)
 			{
@@ -261,14 +288,14 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="entryId">The entry id.</param>
 		/// <param name="store">The store to check.</param>
 		/// <returns>The folder.</returns>
-		public MAPIFolder GetFolderFromID(string entryId, Store store)
+		public MAPIFolder GetFolderFromId(string entryId, Store store)
 		{
 			MAPIFolder folder = null;
 
 			if (store != null)
 			{
-				NameSpace session = outlookAccount.Session;
-				folder = session.GetFolderFromID(entryId, store.StoreID);
+				folder = outlookSession.GetFolderFromIdInternal(
+					entryId, store.StoreID);
 			}
 
 			return folder;
@@ -281,8 +308,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The item object.</returns>
 		public object GetItemFromEntryId(string entryId)
 		{
-			NameSpace session = outlookAccount.Session;
-			object item = session.GetItemFromID(entryId);
+			object item = outlookSession.GetItemFromId(entryId);
 
 			return item;
 		}
@@ -296,8 +322,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			"please use OutlookItem.Synopses instead.")]
 		public string GetItemSynopses(string entryId)
 		{
-			NameSpace session = outlookAccount.Session;
-			object mapiItem = session.GetItemFromID(entryId);
+			object mapiItem = outlookSession.GetItemFromId(entryId);
 
 			OutlookItem outlookItem = new (mapiItem);
 			string synopses = outlookItem.Synopses;
@@ -328,12 +353,12 @@ namespace DigitalZenWorks.Email.ToolKit
 			IDictionary<string, IList<string>> hashTable =
 				new Dictionary<string, IList<string>>();
 
-			Store store = outlookAccount.GetStore(pstFilePath);
+			Store store = outlookSession.GetStore(pstFilePath);
 
 			if (store != null)
 			{
 				MAPIFolder rootFolder = store.GetRootFolder();
-				OutlookFolder outlookFolder = new (outlookAccount);
+				OutlookFolder outlookFolder = new (outlookSession);
 
 				hashTable = outlookFolder.GetItemHashes(rootFolder);
 			}
@@ -354,7 +379,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			IList<string> folderNames = [];
 
-			Store store = outlookAccount.GetStore(pstFilePath);
+			Store store = outlookSession.GetStore(pstFilePath);
 
 			if (store != null)
 			{
@@ -384,7 +409,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			IList<string> entryIds = [];
 
-			Store store = outlookAccount.GetStore(pstFilePath);
+			Store store = outlookSession.GetStore(pstFilePath);
 
 			if (store != null)
 			{
@@ -413,11 +438,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			IList<KeyValuePair<string, int>> topSenders = [];
 
-			Store store = outlookAccount.GetStore(pstFilePath);
+			Store store = outlookSession.GetStore(pstFilePath);
 
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new (outlookSession);
 
 			IDictionary<string, int> sendersCounts =
 				outlookFolder.GetSendersCount(rootFolder);
@@ -443,7 +468,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// or not.</param>
 		public void MergeFolders(string pstFilePath, bool dryRun)
 		{
-			Store store = outlookAccount.GetStore(pstFilePath);
+			Store store = outlookSession.GetStore(pstFilePath);
 
 			MergeFolders(store, dryRun);
 
@@ -467,7 +492,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new (outlookAccount);
+				OutlookFolder outlookFolder = new (outlookSession);
 				outlookFolder.MergeFolders(rootFolder, dryRun);
 
 				totalFolders++;
@@ -489,7 +514,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// operation.</returns>
 		public async Task MergeFoldersAsync(string pstFilePath, bool dryRun)
 		{
-			Store store = outlookAccount.GetStore(pstFilePath);
+			Store store = outlookSession.GetStore(pstFilePath);
 
 			await MergeFoldersAsync(store, dryRun).ConfigureAwait(false);
 
@@ -513,7 +538,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new (outlookAccount);
+				OutlookFolder outlookFolder = new (outlookSession);
 				await outlookFolder.MergeFoldersAsync(
 					rootFolder, dryRun).ConfigureAwait(false);
 
@@ -542,8 +567,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				Store source = outlookAccount.GetStore(sourcePstPath);
-				Store destination = outlookAccount.GetStore(destinationPstPath);
+				Store source = outlookSession.GetStore(sourcePstPath);
+				Store destination = outlookSession.GetStore(destinationPstPath);
 
 				MergeStores(source, destination);
 			}
@@ -592,7 +617,7 @@ namespace DigitalZenWorks.Email.ToolKit
 							OutlookFolder.GetSubFolder(
 								destinationRootFolder, folderName);
 
-						OutlookFolder outlookFolder = new (outlookAccount);
+						OutlookFolder outlookFolder = new (outlookSession);
 
 						outlookFolder.MoveFolderContents(
 							subFolder, destinationSubFolder);
@@ -641,8 +666,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				Store source = outlookAccount.GetStore(sourcePstPath);
-				Store destination = outlookAccount.GetStore(destinationPstPath);
+				Store source = outlookSession.GetStore(sourcePstPath);
+				Store destination = outlookSession.GetStore(destinationPstPath);
 
 				await MergeStoresAsync(source, destination).ConfigureAwait(false);
 			}
@@ -693,7 +718,7 @@ namespace DigitalZenWorks.Email.ToolKit
 							OutlookFolder.GetSubFolder(
 								destinationRootFolder, folderName);
 
-						OutlookFolder outlookFolder = new (outlookAccount);
+						OutlookFolder outlookFolder = new (outlookSession);
 
 						await outlookFolder.MoveFolderContentsAsync(
 							subFolder, destinationSubFolder).
@@ -738,7 +763,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string destinationPstPath,
 			string destinationFolderPath)
 		{
-			Store source = outlookAccount.GetStore(sourcePstPath);
+			Store source = outlookSession.GetStore(sourcePstPath);
 			Store destination;
 
 			if (string.IsNullOrWhiteSpace(destinationPstPath) ||
@@ -749,7 +774,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				destination = outlookAccount.GetStore(destinationPstPath);
+				destination = outlookSession.GetStore(destinationPstPath);
 			}
 
 			MoveFolder(
@@ -877,7 +902,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string destinationPstPath,
 			string destinationFolderPath)
 		{
-			Store source = outlookAccount.GetStore(sourcePstPath);
+			Store source = outlookSession.GetStore(sourcePstPath);
 			Store destination;
 
 			if (string.IsNullOrWhiteSpace(destinationPstPath) ||
@@ -888,7 +913,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				destination = outlookAccount.GetStore(destinationPstPath);
+				destination = outlookSession.GetStore(destinationPstPath);
 			}
 
 			await MoveFolderAsync(
@@ -1020,7 +1045,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// folder.</param>
 		public void RemoveDuplicates(string storePath, bool dryRun, bool flush)
 		{
-			Store store = outlookAccount.GetStore(storePath);
+			Store store = outlookSession.GetStore(storePath);
 
 			if (store != null)
 			{
@@ -1046,7 +1071,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new (outlookAccount);
+				OutlookFolder outlookFolder = new (outlookSession);
 				int removedDuplicates =
 					outlookFolder.RemoveDuplicates(rootFolder, dryRun);
 
@@ -1079,7 +1104,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		public async Task RemoveDuplicatesAsync(
 			string storePath, bool dryRun, bool flush)
 		{
-			Store store = outlookAccount.GetStore(storePath);
+			Store store = outlookSession.GetStore(storePath);
 
 			if (store != null)
 			{
@@ -1109,7 +1134,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new (outlookAccount);
+				OutlookFolder outlookFolder = new (outlookSession);
 
 				int removedDuplicates = await
 					outlookFolder.RemoveDuplicatesAsync(
@@ -1137,7 +1162,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The count of removed folders.</returns>
 		public int RemoveEmptyFolders(string pstFilePath)
 		{
-			Store store = outlookAccount.GetStore(pstFilePath);
+			Store store = outlookSession.GetStore(pstFilePath);
 
 			int removedFolders = RemoveEmptyFolders(store);
 
@@ -1151,7 +1176,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>The count of removed folders.</returns>
 		public async Task<int> RemoveEmptyFoldersAsync(string pstFilePath)
 		{
-			Store store = outlookAccount.GetStore(pstFilePath);
+			Store store = outlookSession.GetStore(pstFilePath);
 
 			int removedFolders =
 				await RemoveEmptyFoldersAsync(store).ConfigureAwait(false);
@@ -1160,22 +1185,12 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
-		/// Create a new pst storage file.
+		/// Removes a Outlook Store (PST).
 		/// </summary>
-		/// <param name="store">The store to check.</param>
+		/// <param name="store">The store to remove.</param>
 		public void RemoveStore(Store store)
 		{
-			if (store != null)
-			{
-				NameSpace session = outlookAccount.Session;
-
-				MAPIFolder rootFolder = store.GetRootFolder();
-
-				session.RemoveStore(rootFolder);
-
-				Marshal.ReleaseComObject(rootFolder);
-				Marshal.ReleaseComObject(store);
-			}
+			outlookSession.RemoveStore(store);
 		}
 
 		private static void EmptyDeletedItemsFolder(
@@ -1232,7 +1247,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				OutlookFolder outlookFolder = new (outlookAccount);
+				OutlookFolder outlookFolder = new (outlookSession);
 
 				outlookFolder.MoveFolderContents(
 					sourceFolder, destinationFolder);
@@ -1268,7 +1283,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				OutlookFolder outlookFolder = new (outlookAccount);
+				OutlookFolder outlookFolder = new (outlookSession);
 
 				await outlookFolder.MoveFolderContentsAsync(
 					sourceFolder, destinationFolder).ConfigureAwait(false);
