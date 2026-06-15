@@ -11,12 +11,16 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using global::Common.Logging;
 using Outlook = Microsoft.Office.Interop.Outlook;
 
 #nullable enable
 
 public static class OutlookFactory
 {
+	private static readonly ILog Log = LogManager.GetLogger(
+		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 	public static bool IsOutlookAvailable(int timeOutSeconds)
 	{
 		bool isAvailable = false;
@@ -37,6 +41,7 @@ public static class OutlookFactory
 			catch (Exception ex)
 			{
 				exception = ex;
+				Log.Error(exception.ToString());
 			}
 			finally
 			{
