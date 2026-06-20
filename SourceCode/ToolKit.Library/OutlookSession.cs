@@ -26,6 +26,11 @@ public class OutlookSession
 		session = application.Session;
 	}
 
+	public OutlookSession(NameSpace? session)
+	{
+		this.session = session;
+	}
+
 	public OutlookFolder? GetFolderFromId(string entryId, string storeId)
 	{
 		OutlookFolder? folder = null;

@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookStore.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -57,10 +57,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Initializes a new instance of the
 		/// <see cref="OutlookStore"/> class.
 		/// </summary>
-		/// <param name="OutlookSession">The Store object.</param>
+		/// <param name="store">The Store object.</param>
 		public OutlookStore(Store store)
 		{
 			store = store;
+			this.outlookSession = new(store.Session);
 		}
 
 		/// <summary>
