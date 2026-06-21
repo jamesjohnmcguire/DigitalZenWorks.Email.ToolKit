@@ -846,6 +846,18 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		/// Test for removing empty folder.
 		/// </summary>
 		[Test]
+		public void TestMigrateDbxDirectoryToPst()
+		{
+			bool result =
+				Migrate.DbxDirectoryToPst(testFolder.FullName, storePath);
+
+			Assert.That(result, Is.True);
+		}
+
+		/// <summary>
+		/// Test for removing empty folder.
+		/// </summary>
+		[Test]
 		public void TestRemoveDuplicates()
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
