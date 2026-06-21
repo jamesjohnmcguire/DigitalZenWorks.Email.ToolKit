@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="Migrate.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -34,10 +34,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="dbxFoldersPath">The path to dbx folders to
 		/// migrate.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
-		public static void DbxDirectoryToPst(
+		public static bool DbxDirectoryToPst(
 			string dbxFoldersPath, string pstPath)
 		{
-			DbxDirectoryToPst(dbxFoldersPath, pstPath, null);
+			return DbxDirectoryToPst(dbxFoldersPath, pstPath, null);
 		}
 
 		/// <summary>
@@ -47,9 +47,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// migrate.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		/// <param name="encoding">The optional encoding to use.</param>
-		public static void DbxDirectoryToPst(
+		public static bool DbxDirectoryToPst(
 			string dbxFoldersPath, string pstPath, Encoding encoding)
 		{
+			bool result = false;
+
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 
 			Store pstStore = outlookAccount.GetStore(pstPath);
@@ -60,35 +62,11 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				DbxSet dbxSet = new (dbxFoldersPath, encoding);
-
-				// Order the list, so that parents always come before their
-				// children.
-				dbxSet.SetTreeOrdered();
-
-				DbxFolder dbxFolder;
-				MAPIFolder rootFolder = pstStore.GetRootFolder();
-
-				string baseName = Path.GetFileNameWithoutExtension(pstPath);
-				rootFolder.Name = baseName;
-
-				IDictionary<uint, string> mappings =
-					new Dictionary<uint, string>();
-
-				do
-				{
-					dbxFolder = dbxSet.GetNextFolder();
-
-					CopyFolderToPst(
-						mappings,
-						pstStore,
-						rootFolder,
-						dbxFolder);
-				}
-				while (dbxFolder != null);
-
-				Marshal.ReleaseComObject(rootFolder);
+				result = DbxDirectoryToPstInternal(
+					dbxFoldersPath, pstPath, pstStore, encoding);
 			}
+
+			return result;
 		}
 
 		/// <summary>
@@ -628,6 +606,46 @@ namespace DigitalZenWorks.Email.ToolKit
 			msgFile = Path.ChangeExtension(msgFile, ".msg");
 
 			return msgFile;
+		}
+
+		public static bool DbxDirectoryToPstInternal(
+			string dbxFoldersPath, string pstPath, Store pstStore, Encoding encoding)
+		{
+			bool result = false;
+
+			DbxSet dbxSet = new (dbxFoldersPath, encoding);
+
+			// Order the list, so that parents always come before their
+			// children.
+			dbxSet.SetTreeOrdered();
+
+			MAPIFolder rootFolder = pstStore.GetRootFolder();
+
+			string baseName = Path.GetFileNameWithoutExtension(pstPath);
+			rootFolder.Name = baseName;
+
+			IDictionary<uint, string> mappings =
+				new Dictionary<uint, string>();
+
+			DbxFolder dbxFolder = dbxSet.GetNextFolder();
+
+			while (dbxFolder != null)
+			{
+				// At least, one folder has been found.
+				result = true;
+
+				CopyFolderToPst(
+					mappings,
+					pstStore,
+					rootFolder,
+					dbxFolder);
+
+				dbxFolder = dbxSet.GetNextFolder();
+			}
+
+			Marshal.ReleaseComObject(rootFolder);
+
+			return result;
 		}
 	}
 }
