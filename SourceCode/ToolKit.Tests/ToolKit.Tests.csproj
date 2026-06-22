@@ -46,6 +46,13 @@
 	<ItemGroup>
 		<AdditionalFiles Include="../stylecop.json" />
 		<None Include="../.editorconfig" Link="../.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Folders.dbx" />
+		<EmbeddedResource Include="Inbox.dbx" />
+		<EmbeddedResource Include="Offline.dbx" />
+		<EmbeddedResource Include="Outbox.dbx" />
 		<EmbeddedResource Include="TestEmail.eml" />
 	</ItemGroup>
 

@@ -848,6 +848,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[Test]
 		public void TestMigrateDbxDirectoryToPst()
 		{
+			GetDbxTestFolders();
+
 			bool result =
 				Migrate.DbxDirectoryToPst(testFolder.FullName, storePath);
 
@@ -1059,6 +1061,24 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Marshal.ReleaseComObject(subFolder);
 
 			return mailItem;
+		}
+
+		private void GetDbxTestFolder(string fileName)
+		{
+			string namespacePath =
+				"ToolKit.Tests." + fileName;
+			string path = Path.Combine(testFolder.FullName, fileName);
+			bool result = FileUtils.CreateFileFromEmbeddedResource(
+				namespacePath, path);
+			Assert.That(result, Is.True);
+		}
+
+		private void GetDbxTestFolders()
+		{
+			GetDbxTestFolder("Folders.dbx");
+			GetDbxTestFolder("Inbox.dbx");
+			GetDbxTestFolder("Offline.dbx");
+			GetDbxTestFolder("Outbox.dbx");
 		}
 	}
 }
