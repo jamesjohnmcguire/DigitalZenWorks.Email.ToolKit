@@ -147,7 +147,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int Details(Command command)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -203,7 +204,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			string pstLocation = command.Parameters[0];
 
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -228,7 +230,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			int result = -1;
 
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -263,7 +266,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			int result = -1;
 
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -497,7 +501,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int ListFolders(Command command)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -537,7 +542,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int ListIds(Command command)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -572,7 +578,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int ListTopSenders(Command command)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -614,7 +621,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int ListTotalDuplicates(Command command)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -641,7 +649,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			IDictionary<string, IList<string>> duplicates, bool useLog)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -756,7 +765,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static async Task<int> MergeFolders(Command command)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -791,7 +801,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static async Task<int> MergeStores(Command command)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -815,7 +826,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static async Task<int> MoveFolder(Command command)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -847,7 +859,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static async Task<int> RemoveDuplicates(Command command)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{
@@ -890,7 +903,8 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static async Task<int> RemoveEmptyFolders(Command command)
 		{
 			OutlookService outlook = OutlookService.Instance;
-			bool connected = outlook.Connect();
+			OutlookFactory factory = new();
+			bool connected = outlook.Connect(factory);
 
 			if (connected == false)
 			{

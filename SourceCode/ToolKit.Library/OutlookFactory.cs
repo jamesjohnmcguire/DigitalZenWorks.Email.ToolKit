@@ -16,12 +16,12 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 
 #nullable enable
 
-public static class OutlookFactory
+public class OutlookFactory : IOutlookFactory
 {
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-	public static bool IsOutlookAvailable(int timeOutSeconds)
+	public bool IsOutlookAvailable(int timeOutSeconds)
 	{
 		bool isAvailable = false;
 		Outlook.Application? tryApplication = null;

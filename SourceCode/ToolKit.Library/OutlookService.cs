@@ -42,7 +42,7 @@ public class OutlookService : IOutlookService
 		get { return session; }
 	}
 
-	public bool Connect(int timeOutSeconds = 10)
+	public bool Connect(IOutlookFactory factory, int timeOutSeconds = 10)
 	{
 		bool connected = false;
 
@@ -57,7 +57,7 @@ public class OutlookService : IOutlookService
 			else
 			{
 				bool isAvailable =
-					OutlookFactory.IsOutlookAvailable(timeOutSeconds);
+					factory.IsOutlookAvailable(timeOutSeconds);
 
 				if (isAvailable == true)
 				{
