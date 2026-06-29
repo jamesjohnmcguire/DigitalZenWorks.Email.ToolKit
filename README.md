@@ -38,6 +38,7 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 
 | Commands:             |                                 | options        | parameters                                         |
 | --------------------- | ------------------------------- | -------------- | -------------------------------------------------- |
+| add-pst               | Add given PST to the profile    |                | PST file path                                      |
 | dbx-to-pst            | Migrate dbx files to pst file   | -e, --encoding | dbx files path, PST file path                      |
 | details               | Show details of given item      |                | PST file path, entry id                            |
 | eml-to-pst            | Migrate eml files to pst file   | -a, --adjust   | eml files path, PST file path                      |
