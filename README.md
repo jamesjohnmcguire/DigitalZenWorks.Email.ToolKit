@@ -4,33 +4,26 @@ This is a C# application and library for interacting with email messages and sto
 
 It is a useful utility for converting email storage from Outlook Express, Windows Live Mail and Windows Mail.  It can migrate all .dbx and .eml files to .pst (Outlook) files.
 
-Please :star: star this project!
+## Installation
 
-## Getting Started
-
-### Installation
-
-#### Prerequisites
+### Prerequisites
 
 Outlook Needs to be installed on the same computer as this program.
 
-#### Downloading the Program
+### Download
 
-If you are just interested in using the program, you can download the latest release by the following process:
+If you are just interested in using the program, you can download the latest release for your OS from the Releases page.
 
-1 Go to the releases tab !["GitHub Release Tab"](GitHub1.png "GitHub Release Tab")
-2 Then choose the DigitalZenWorks.Email.ToolKit.zip package !["Packages"](GitHub2.png "Packages")
-3 Unzip the files somewhere accessible on your PATH
+### Nuget
+PM> Install-Package DigitalZenWorks.Email.ToolKit
 
-Refer to 'Usage' section below.
-
-#### Git
-    git clone --recurse-submodules https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
+### Build from source
 
 This project includes the [DbxOutlookExpress project](https://github.com/jamesjohnmcguire/DbxOutlookExpress) as a submodule.  So, be sure to include submodules when retreiving the repository contents.
 
-#### Nuget
-    PM> Install-Package DigitalZenWorks.Email.ToolKit
+git clone --recurse-submodules https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
+
+Refer to DevelopmentTools Build Scripts for specific build examples.
 
 ### Usage:
 
@@ -77,7 +70,7 @@ Det.exe remove-duplicates --dryrun \path\to\some.pst
 Det.exe dbx-to-pst --encoding shift_jis \path\to\some-dbx-files
 Det.exe dbx-to-pst \path\to\some-dbx-files \path\to\some.pst
 Det.exe eml-to-pst --adjust "%USERPROFILE%\AppData\Local\Microsoft\Windows Live Mail\Storage Folders" %USERPROFILE%\Import.pst
-Det.exe move-folder \path\to\some.pst source\folder\path  \path\to\some.pst destination\folder\path
+Det.exe move-folder \path\to\some.pst source\folder\path \path\to\some.pst destination\folder\path
 Det.exe list-folders \path\to\some.pst some\folder\path
 Det.exe list-top-senders \path\to\some.pst
 Det.exe list-total-duplicates \path\to\some.pst
@@ -141,6 +134,7 @@ Please match the current coding style.  Most notably:
 1. One operation per line
 2. Use complete English words in variable and method names
 3. Attempt to declare variable and method names in a self-documenting manner
+4. Add unit tests
 
 
 ## License
@@ -149,6 +143,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-James John McGuire - [@jamesmc](https://twitter.com/jamesmc) - jamesjohnmcguire@gmail.com
+James John McGuire - jamesjohnmcguire@gmail.com [LinkedIn](https://twitter.com/https://www.linkedin.com/in/jamesjohnmcguire) -  [GitHub](https://github.com/jamesjohnmcguire)
 
-Project Link: [https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit](https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)
+Project Link: [Email.ToolKit](https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)
