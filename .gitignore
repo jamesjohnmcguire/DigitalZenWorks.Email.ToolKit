@@ -25,4 +25,4 @@ bld/
 # NUNIT
 TestResult.xml
 
-ToolKit.Application/Properties/launchSettings.json
+SourceCode\ToolKit.Application/Properties/launchSettings.json

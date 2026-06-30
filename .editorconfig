@@ -1,30 +1,65 @@
-﻿[*]
-charset = utf-8
-trim_trailing_whitespace = true
-insert_final_newline = true
-indent_style = tab
-indent_size = 4
+root = true
 
-[*.{cs,vb}]
-charset = utf-8 bom
+[*]
+charset = utf-8
+guidelines = 80
+guidelines_style = 2px solid lime
+indent_size = 4
+indent_style = tab
+insert_final_newline = true
+max_line_length = 80
+trim_trailing_whitespace = true
+
+[*.{bat, cmd}]
+end_of_line = crlf
+
+[*.{cs, csproj, props, resx}]
+end_of_line = lf
+
+[*.cs]
+# Renove require space after 'new' keyword
+dotnet_diagnostic.SA1000.severity = warning
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+
+dotnet_diagnostic.max_line_length.severity = warning
+
+# Set IDE0005 to Warning or Error
+dotnet_diagnostic.IDE0005.severity = warning
 
 # IDE0017: Simplify object initialization
-dotnet_style_object_initializer = false:suggestion
+dotnet_style_object_initializer = false
 
 # IDE0028: Use collection initializers
 # dotnet_style_collection_initializer = false:suggestion
 
+# IDE0161: Convert to file-scoped namespace
+csharp_style_namespace_declarations = file_scoped:warning
+
+# SA1000: The keyword 'new' should be followed by a space
+dotnet_diagnostic.SA1000.severity = none
+
 # SA1010: Opening square brackets should be spaced correctly
 dotnet_diagnostic.SA1010.severity = none
 
-# SA1101: Prefix local calls with this
+# SA1101: Prefix Local Calls With This
 dotnet_diagnostic.SA1101.severity = none
+
+# SA1306: Field Names Must Begin With Lower Case Letter
+dotnet_diagnostic.SA1306.severity = warning
+
+# SA1311: Static Readonly Fields Must Begin With Upper Case Letter
+dotnet_diagnostic.SA1311.severity = warning
+
+# SA1312: Variable Names Must Begin With Lower Case Letter
+dotnet_diagnostic.SA1312.severity = warning
+
+# SA1412: Store files as UTF-8 with byte order mark
+dotnet_diagnostic.SA1412.severity = none
+
+# SA1516: Elements Must Be Separated By Blank Line
+dotnet_diagnostic.SA1516.severity = warning
 
 # SA1413: Use Trailing Commas In MultiLine Initializers
 dotnet_diagnostic.SA1413.severity = none
-
-# Require space after 'new' keyword
-dotnet_diagnostic.SA1000.severity = none
-csharp_space_after_keywords_in_control_flow_statements = true
-csharp_space_between_method_call_empty_parameter_list_parentheses = false
-csharp_space_between_method_call_parameter_list_parentheses = false
