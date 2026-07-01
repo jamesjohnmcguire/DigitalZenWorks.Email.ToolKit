@@ -14,6 +14,9 @@
 	<Project Path="DbxOutlookExpress/DbxOutlookExpressTests/DigitalZenWorks.Email.DbxOutlookExpress.Tests.csproj">
 		<Build Solution="Release|*" Project="false" />
 	</Project>
+	<Project Path="MapiLibrary/MapiLibrary.vcxproj" />
+	<Project Path="MapiLibraryTests/MapiLibraryTests.vcxproj" />
+	<Project Path="MapiLibrary/MAPIStubLibrary/mapistub.vcxproj" />
 	<Project Path="MsgKit/MsgKit/MsgKit.csproj" />
 		<Project Path="TestConsoleApp/TestConsoleApp.csproj">
 		<Build Solution="Release|*" Project="false" />

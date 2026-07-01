@@ -6,8 +6,8 @@
 	path = SourceCode/DbxOutlookExpress
 	url = https://github.com/jamesjohnmcguire/DbxOutlookExpress
 	branch = main
-[submodule "MapiLibrary/MAPIStubLibrary"]
-	path = MapiLibrary/MAPIStubLibrary
+[submodule "SourceCode/MapiLibrary/MAPIStubLibrary"]
+	path = SourceCode/MapiLibrary/MAPIStubLibrary
 	url = https://github.com/jamesjohnmcguire/MAPIStubLibrary
 	branch = master
 [submodule "MsgKit"]
