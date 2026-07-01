@@ -24,7 +24,7 @@
 		<CharacterSet>Unicode</CharacterSet>
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<Keyword>Win32Proj</Keyword>
-		<PlatformToolset>v143</PlatformToolset>
+		<PlatformToolset>v145</PlatformToolset>
 		<ProjectGuid>{7a846964-8a20-46f3-a714-a5fba41ae093}</ProjectGuid>
 		<RootNamespace>MapiLibrary</RootNamespace>
 		<VCProjectVersion>16.0</VCProjectVersion>

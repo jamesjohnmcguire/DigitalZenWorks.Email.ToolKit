@@ -5,7 +5,6 @@
 		<File Path="../README.md" />
 		<File Path="stylecop.json" />
 	</Folder>
-
 	<Project Path="CommandLineCommands/CommandLineCommands.Tests/DigitalZenWorks.CommandLine.Commands.Tests.csproj" />
 	<Project Path="CommandLineCommands/CommandLineCommands/DigitalZenWorks.CommandLine.Commands.csproj" />
 	<Project Path="DbxOutlookExpress/DbxOutlookExpress/DigitalZenWorks.Email.DbxOutlookExpress.csproj">
@@ -14,14 +13,14 @@
 	<Project Path="DbxOutlookExpress/DbxOutlookExpressTests/DigitalZenWorks.Email.DbxOutlookExpress.Tests.csproj">
 		<Build Solution="Release|*" Project="false" />
 	</Project>
-	<Project Path="MapiLibrary/MapiLibrary.vcxproj" />
-	<Project Path="MapiLibraryTests/MapiLibraryTests.vcxproj" />
-	<Project Path="MapiLibrary/MAPIStubLibrary/mapistub.vcxproj" />
+	<Project Path="MapiLibrary/MapiLibrary.vcxproj" Id="7a846964-8a20-46f3-a714-a5fba41ae093" />
+	<Project Path="MapiLibrary/MAPIStubLibrary/mapistub.vcxproj" Id="a7b74d7c-c430-49ab-966a-fffab240edeb" />
+	<Project Path="MapiLibraryTests/MapiLibraryTests.vcxproj" Id="a134f402-f6e6-4b1a-9b5b-91051377a9bf" />
 	<Project Path="MsgKit/MsgKit/MsgKit.csproj" />
-		<Project Path="TestConsoleApp/TestConsoleApp.csproj">
+	<Project Path="TestConsoleApp/TestConsoleApp.csproj">
 		<Build Solution="Release|*" Project="false" />
 	</Project>
-	<Project DefaultStartup="true" Path="ToolKit.Application/ToolKit.Application.csproj" />
+	<Project Path="ToolKit.Application/ToolKit.Application.csproj" />
 	<Project Path="ToolKit.Library/ToolKit.Library.csproj" />
 	<Project Path="ToolKit.Tests/ToolKit.Tests.csproj">
 		<Build Solution="Release|*" Project="false" />
