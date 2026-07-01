@@ -581,6 +581,38 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// EmlFileToPst close store success test.
+		/// </summary>
+		[Test]
+		public void TestEmlFileToPstCloseStoreSuccess()
+		{
+
+			string fileName = Path.GetTempFileName();
+
+			// A 0 byte sized file is created.  Need to remove it.
+			File.Delete(fileName);
+			string temporaryStorePath = Path.ChangeExtension(fileName, ".pst");
+
+			string path = GetTempoaryEmlFilePath();
+			bool result = FileUtils.CreateFileFromEmbeddedResource(
+				"ToolKit.Tests.TestEmail.eml", path);
+
+			Assert.That(result, Is.True);
+
+			MailItem? mailItem =
+				Migrate.EmlFileToPst(path, temporaryStorePath, true);
+
+			Assert.That(mailItem, Is.Not.Null);
+
+			// Clean up
+			if (mailItem != null)
+			{
+				mailItem.Delete();
+				Marshal.ReleaseComObject(mailItem);
+			}
+		}
+
+		/// <summary>
 		/// Test for comparing two MailItems by content.
 		/// </summary>
 		[Test]
