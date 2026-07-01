@@ -5,17 +5,16 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AssemblyName>Det</AssemblyName>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
-		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 		<Company>James John McGuire</Company>
 		<Copyright>Copyright © 2021 - 2026</Copyright>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<FileVersion>1.12.64.0</FileVersion>
+		<FileVersion>1.13.65.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net10.0-windows</TargetFramework>
-		<Version>1.12.64</Version>
+		<Version>1.13.65</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -48,7 +47,7 @@
 		<ProjectReference Include="..\CommandLineCommands\CommandLineCommands\DigitalZenWorks.CommandLine.Commands.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
-		<PackageReference Include="DigitalZenWorks.CommandLine.Commands" Version="1.4.11" />
+		<PackageReference Include="DigitalZenWorks.CommandLine.Commands" Version="1.5.22" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -58,7 +57,6 @@
 	<ItemGroup>
 		<AdditionalFiles Include="../README.md" />
 		<AdditionalFiles Include="../stylecop.json" />
-		<CodeAnalysisDictionary Include="../CodeAnalysis.ruleset" />
 		<None Include="../.editorconfig" Link="../.editorconfig" />
 	</ItemGroup>
 
