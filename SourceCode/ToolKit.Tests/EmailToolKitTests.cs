@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="EmailToolKitTests.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -36,7 +36,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			outlookAccount = OutlookAccount.Instance;
 
-			pstOutlook = new (outlookAccount);
+			pstOutlook = new(outlookAccount);
 
 			testFolder = Directory.CreateDirectory("TestFolder");
 
@@ -211,7 +211,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			string path = Path.Combine(testFolder.FullName, "TestEmail.eml");
+			string path = GetTempoaryEmlFilePath();
 			bool result = FileUtils.CreateFileFromEmbeddedResource(
 				"ToolKit.Tests.TestEmail.eml", path);
 
@@ -242,7 +242,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			string path = Path.Combine(testFolder.FullName, "TestEmail.eml");
+			string path = GetTempoaryEmlFilePath();
 			bool result = FileUtils.CreateFileFromEmbeddedResource(
 				"ToolKit.Tests.TestEmail.eml", path);
 
@@ -273,7 +273,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			string path = Path.Combine(testFolder.FullName, "TestEmail.eml");
+			string path = GetTempoaryEmlFilePath();
 			bool result = FileUtils.CreateFileFromEmbeddedResource(
 				"ToolKit.Tests.TestEmail.eml", path);
 
@@ -424,10 +424,10 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem2 = mailItem2.Move(mainFolder);
 
-			OutlookItem outlookItem = new (mailItem);
+			OutlookItem outlookItem = new(mailItem);
 			string hash = outlookItem.Hash;
 
-			OutlookItem outlookItem2 = new (mailItem2);
+			OutlookItem outlookItem2 = new(mailItem2);
 			string hash2 = outlookItem2.Hash;
 
 			Assert.That(hash2, Is.Not.EqualTo(hash));
@@ -442,6 +442,187 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		}
 
 		/// <summary>
+		/// EmlFileToPst simple fail file not exist test.
+		/// </summary>
+		[Test]
+		public void TestEmlFileToPstSimpleFailFileNotExists()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			string path = GetTempoaryEmlFilePath();
+
+			MailItem? mailItem = Migrate.EmlFileToPst(path, mainFolder);
+
+			Assert.That(mailItem, Is.Null);
+
+			// Clean up
+			if (mailItem != null)
+			{
+				mailItem.Delete();
+				Marshal.ReleaseComObject(mailItem);
+			}
+
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// EmlFileToPst simple fail invalid contents test.
+		/// </summary>
+		[Test]
+		public void TestEmlFileToPstSimpleFailInvalidContents()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			string path = GetTempoaryEmlFilePath();
+			File.WriteAllText(path, "xxxx-xxxx");
+
+			MailItem? mailItem = null;
+
+			Assert.Throws<FormatException>(() =>
+				mailItem = Migrate.EmlFileToPst(path, mainFolder));
+
+			// Clean up
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// EmlFileToPst simple success test.
+		/// </summary>
+		[Test]
+		public void TestEmlFileToPstSimpleSuccess()
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			MAPIFolder mainFolder = OutlookFolder.AddFolder(
+				rootFolder, "Main Test Folder");
+
+			string path = GetTempoaryEmlFilePath();
+			bool result = FileUtils.CreateFileFromEmbeddedResource(
+				"ToolKit.Tests.TestEmail.eml", path);
+
+			Assert.That(result, Is.True);
+
+			MailItem? mailItem = Migrate.EmlFileToPst(path, mainFolder);
+
+			Assert.That(mailItem, Is.Not.Null);
+
+			// Clean up
+			if (mailItem != null)
+			{
+				mailItem.Delete();
+				Marshal.ReleaseComObject(mailItem);
+			}
+
+			Marshal.ReleaseComObject(mainFolder);
+			Marshal.ReleaseComObject(rootFolder);
+		}
+
+		/// <summary>
+		/// EmlFileToPst store fail file not exists test.
+		/// </summary>
+		[Test]
+		public void TestEmlFileToPstStoreFailFileNotExists()
+		{
+			string path = GetTempoaryEmlFilePath();
+
+			MailItem? mailItem =
+				Migrate.EmlFileToPst(path, store, "TestFolder");
+
+			Assert.That(mailItem, Is.Null);
+
+			// Clean up
+			if (mailItem != null)
+			{
+				mailItem.Delete();
+				Marshal.ReleaseComObject(mailItem);
+			}
+		}
+
+		/// <summary>
+		/// EmlFileToPst store fail invalid contents test.
+		/// </summary>
+		[Test]
+		public void TestEmlFileToPstStoreFailInvalidContents()
+		{
+			string path = GetTempoaryEmlFilePath();
+			File.WriteAllText(path, "xxxx-xxxx");
+
+			MailItem? mailItem = null;
+
+			Assert.Throws<FormatException>(() =>
+				mailItem = Migrate.EmlFileToPst(path, store, "TestFolder"));
+
+			// Clean up
+			if (mailItem != null)
+			{
+				mailItem.Delete();
+				Marshal.ReleaseComObject(mailItem);
+			}
+		}
+
+		/// <summary>
+		/// EmlFileToPst store success test.
+		/// </summary>
+		[Test]
+		public void TestEmlFileToPstStoreSuccess()
+		{
+			string path = GetTempoaryEmlFilePath();
+			bool result = FileUtils.CreateFileFromEmbeddedResource(
+				"ToolKit.Tests.TestEmail.eml", path);
+
+			Assert.That(result, Is.True);
+
+			MailItem? mailItem =
+				Migrate.EmlFileToPst(path, store, "TestFolder");
+
+			Assert.That(mailItem, Is.Not.Null);
+
+			// Clean up
+			if (mailItem != null)
+			{
+				mailItem.Delete();
+				Marshal.ReleaseComObject(mailItem);
+			}
+		}
+
+		/// <summary>
+		/// EmlFileToPst close store success test.
+		/// </summary>
+		[Test]
+		public void TestEmlFileToPstCloseStoreSuccess()
+		{
+
+			string fileName = Path.GetTempFileName();
+
+			// A 0 byte sized file is created.  Need to remove it.
+			File.Delete(fileName);
+			string temporaryStorePath = Path.ChangeExtension(fileName, ".pst");
+
+			string path = GetTempoaryEmlFilePath();
+			bool result = FileUtils.CreateFileFromEmbeddedResource(
+				"ToolKit.Tests.TestEmail.eml", path);
+
+			Assert.That(result, Is.True);
+
+			MailItem? mailItem =
+				Migrate.EmlFileToPst(path, temporaryStorePath, true);
+
+			Assert.That(mailItem, Is.Not.Null);
+
+			// Clean up
+			if (mailItem != null)
+			{
+				mailItem.Delete();
+				Marshal.ReleaseComObject(mailItem);
+			}
+		}
+
+		/// <summary>
 		/// Test for comparing two MailItems by content.
 		/// </summary>
 		[Test]
@@ -451,7 +632,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
 
-			string path = Path.Combine(testFolder.FullName, "TestEmail.eml");
+			string path = GetTempoaryEmlFilePath();
 			bool result = FileUtils.CreateFileFromEmbeddedResource(
 				"ToolKit.Tests.TestEmail.eml", path);
 
@@ -460,10 +641,10 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MailItem mailItem = Migrate.EmlFileToPst(path, storePath, false);
 			MailItem mailItem2 = Migrate.EmlFileToPst(path, storePath, false);
 
-			OutlookItem outlookItem = new (mailItem);
+			OutlookItem outlookItem = new(mailItem);
 			string hash = outlookItem.Hash;
 
-			OutlookItem outlookItem2 = new (mailItem2);
+			OutlookItem outlookItem2 = new(mailItem2);
 			string hash2 = outlookItem2.Hash;
 
 			Assert.That(hash2, Is.EqualTo(hash));
@@ -494,10 +675,10 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"This is the message.");
 			mailItem = mailItem.Move(mainFolder);
 
-			OutlookItem outlookItem = new (mailItem);
+			OutlookItem outlookItem = new(mailItem);
 			string hash = outlookItem.Hash;
 
-			OutlookItem outlookItem2 = new (mailItem);
+			OutlookItem outlookItem2 = new(mailItem);
 			string hash2 = outlookItem2.Hash;
 
 			Assert.That(hash2, Is.EqualTo(hash));
@@ -531,7 +712,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Testing (1)",
 				"This is the subject");
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
@@ -571,7 +752,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Testing (1)",
 				"This is the subject");
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
@@ -617,7 +798,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"_Testing",
 				"This is the subject 3");
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
@@ -669,7 +850,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"_Testing",
 				"This is the subject 3");
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
@@ -714,7 +895,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"2023",
 				"This is the subject");
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
@@ -754,7 +935,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"2023",
 				"This is the subject");
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
@@ -794,7 +975,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Main Test Folder",
 				"This is the subject");
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
@@ -834,7 +1015,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Main Test Folder",
 				"This is the subject");
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
@@ -876,7 +1057,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Duplicates Test Folder");
 
-			string path = Path.Combine(testFolder.FullName, "TestEmail.eml");
+			string path = GetTempoaryEmlFilePath();
 			bool result = FileUtils.CreateFileFromEmbeddedResource(
 				"ToolKit.Tests.TestEmail.eml", path);
 
@@ -894,7 +1075,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			mailItem2 = mailItem2.Move(mainFolder);
 			mailItem3 = mailItem3.Move(mainFolder);
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			int removedDuplicates =
 				outlookFolder.RemoveDuplicates(mainFolder, false);
 
@@ -1089,6 +1270,19 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			GetDbxTestFolder("Inbox.dbx");
 			GetDbxTestFolder("Offline.dbx");
 			GetDbxTestFolder("Outbox.dbx");
+		}
+
+		private string GetTempoaryEmlFilePath()
+		{
+			string fileName = Path.GetTempFileName();
+
+			// A 0 byte sized file is created.  Need to remove it.
+			File.Delete(fileName);
+			fileName = Path.ChangeExtension(fileName, ".eml");
+
+			string path = Path.Combine(testFolder.FullName, fileName);
+
+			return path;
 		}
 	}
 }

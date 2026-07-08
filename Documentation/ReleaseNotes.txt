@@ -1,3 +1,3 @@
-Release 1.12.62 includes two new commands:
-	details               Show details of given item (Enhanced)
-	Package Updates and various bug fixes
+Release 1.13.65 Includes the New Command of add-pst - Usage: Det add-pst <PST File>
+
+Also includes	Package Updates and minor code improvements

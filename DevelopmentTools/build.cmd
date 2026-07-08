@@ -1,5 +1,5 @@
 REM %1 - Type of build
-REM %2 - Version (such as 1.0.0.5)
+REM %2 - Version (such as 1.0.5)
 REM %3 - API key
 
 CD %~dp0
@@ -31,11 +31,15 @@ CD ..\..\..
 GOTO end
 
 :release
+
+if "%~2"=="" GOTO error1
+
 msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;OutputPath=Bin\;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true -restore -target:publish;rebuild ToolKit.Application
 
 CD ToolKit.Application\Bin\publish
 7z u DigitalZenWorks.Email.ToolKit.zip
-gh release create v%2 --notes-file ..\..\..\Documentation\ReleaseNotes.txt DigitalZenWorks.Email.ToolKit.zip
+
+gh release create v%2 --notes-file ..\..\..\..\Documentation\ReleaseNotes.txt DigitalZenWorks.Email.ToolKit.zip
 
 CD ..\..\..
 
