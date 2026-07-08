@@ -136,8 +136,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		private IDictionary<string, IList<string>> storeHashTable =
 			new Dictionary<string, IList<string>>();
 
-		private MAPIFolder folder;
-
 		/// <summary>
 		/// Initializes a new instance of the
 		/// <see cref="OutlookFolder"/> class.
