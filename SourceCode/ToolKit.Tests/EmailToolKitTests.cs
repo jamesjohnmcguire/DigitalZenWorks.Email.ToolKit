@@ -94,7 +94,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[Test]
 		public void TestConnectSucceeds()
 		{
-			IOutlookApplicationFactory factory = new SuccessFactory();
+			IOutlookFactory factory = new SuccessFactory();
 
 			bool isAvailable = factory.IsOutlookAvailable(25);
 
