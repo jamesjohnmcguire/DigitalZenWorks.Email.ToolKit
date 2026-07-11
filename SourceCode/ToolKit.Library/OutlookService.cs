@@ -21,21 +21,14 @@ public class OutlookService : IOutlookService
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-	private static readonly OutlookService InternalInstance = new();
-
 	private Application? application;
 	private bool outlookStartedByThis;
 	private bool attachedToExistingOutlook;
 	private OutlookSession? session;
 
-	private OutlookService()
+	public OutlookService()
 	{
 	}
-
-    public static OutlookService Instance
-    {
-        get { return InternalInstance; }
-    }
 
 	public OutlookSession? Session
 	{

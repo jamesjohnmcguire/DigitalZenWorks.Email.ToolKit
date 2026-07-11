@@ -520,7 +520,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			if (folder != null && sendersCounts != null)
 			{
-				OutlookService outlook = OutlookService.Instance;
+				OutlookService outlook = new();
 				OutlookFactory factory = new();
 				bool connected = outlook.Connect(factory);
 
