@@ -1231,6 +1231,62 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Assert.Pass();
 		}
 
+		[Test]
+		public void Connect_CallsFactory_WhenNoExistingOutlook()
+		{
+			var service = new OutlookService();
+
+			var factory = new FakeOutlookFactory
+			{
+				IsAvailable = false
+			};
+
+			service.Connect(factory);
+
+			Assert.That(factory.CallCount, Is.EqualTo(1));
+		}
+
+		[Test]
+		public void Connect_ReturnsFalse_WhenOutlookUnavailable()
+		{
+			var service = new OutlookService();
+
+			var factory = new FakeOutlookFactory
+			{
+				IsAvailable = false
+			};
+
+			bool connected = service.Connect(factory);
+
+			Assert.That(connected, Is.False);
+		}
+
+		[Test]
+		public void Session_IsNull_AfterFailedConnect()
+		{
+			var service = new OutlookService();
+
+			var factory = new FakeOutlookFactory
+			{
+				IsAvailable = false
+			};
+
+			service.Connect(factory);
+
+			Assert.That(service.Session, Is.Null);
+		}
+
+		[Test]
+		public void Disconnect_BeforeConnect_DoesNotThrow()
+		{
+			var service = new OutlookService();
+
+			Assert.DoesNotThrow(() =>
+			{
+				service.Disconnect();
+			});
+		}
+
 		private static MailItem AddFolderAndMessage(
 			OutlookAccount outlookAccount,
 			MAPIFolder parentFolder,
