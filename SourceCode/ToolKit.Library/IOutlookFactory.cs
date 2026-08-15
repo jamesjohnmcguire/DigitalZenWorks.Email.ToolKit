@@ -8,7 +8,11 @@ namespace DigitalZenWorks.Email.ToolKit;
 
 #nullable enable
 
+using Outlook = Microsoft.Office.Interop.Outlook;
+
 public interface IOutlookFactory
 {
+	public Outlook.Application? CreateApplication();
+
 	public bool IsOutlookAvailable(int timeOutSeconds);
 }

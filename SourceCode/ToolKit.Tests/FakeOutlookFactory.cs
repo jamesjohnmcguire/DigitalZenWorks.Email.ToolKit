@@ -12,6 +12,15 @@ public sealed class FakeOutlookFactory : IOutlookFactory
 
 	public int CallCount { get; private set; }
 
+	public Application? CreateApplication()
+	{
+		CreateCallCount++;
+
+		Application? fakeApplication = null;
+
+		return fakeApplication;
+	}
+
 	public bool IsOutlookAvailable(int timeoutSeconds)
 	{
 		CallCount++;

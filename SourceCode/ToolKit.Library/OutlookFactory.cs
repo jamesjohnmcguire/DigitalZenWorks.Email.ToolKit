@@ -21,6 +21,22 @@ public class OutlookFactory : IOutlookFactory
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+		public Outlook.Application? CreateApplication()
+		{
+			Outlook.Application? application = null;
+
+			try
+			{
+				application = new Outlook.Application();
+			}
+			catch (Exception exception)
+			{
+				Log.Error(exception.ToString());
+			}
+
+			return application;
+		}
+
 	public bool IsOutlookAvailable(int timeOutSeconds)
 	{
 		bool isAvailable = false;
