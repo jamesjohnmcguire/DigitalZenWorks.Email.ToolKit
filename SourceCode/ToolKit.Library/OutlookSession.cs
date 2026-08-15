@@ -31,6 +31,13 @@ public class OutlookSession
 		this.session = session;
 	}
 
+	[Obsolete(
+		"GetFolderFromID is deprecated, please use GetFolderFromId instead.")]
+	public OutlookFolder? GetFolderFromID(string entryId, string storeId)
+	{
+		return GetFolderFromId(entryId, storeId);
+	}
+
 	public OutlookFolder? GetFolderFromId(string entryId, string storeId)
 	{
 		OutlookFolder? folder = null;
@@ -45,11 +52,11 @@ public class OutlookSession
 		return folder;
 	}
 
-	internal MAPIFolder? GetFolderFromIdInternal(string entryId, string storeId)
+	[Obsolete(
+		"GetItemFromID is deprecated, please use GetItemFromId instead.")]
+	public object? GetItemFromID(string entryId)
 	{
-		MAPIFolder? mapiFolder = session.GetFolderFromID(entryId, storeId);
-
-		return mapiFolder;
+		return GetItemFromId(entryId);
 	}
 
 	public object? GetItemFromId(string entryId)
@@ -199,5 +206,12 @@ public class OutlookSession
 		result = RemoveStore(store);
 
 		return result;
+	}
+
+	internal MAPIFolder? GetFolderFromIdInternal(string entryId, string storeId)
+	{
+		MAPIFolder? mapiFolder = session.GetFolderFromID(entryId, storeId);
+
+		return mapiFolder;
 	}
 }
