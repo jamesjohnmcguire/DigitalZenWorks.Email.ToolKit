@@ -22,15 +22,16 @@ public class OutlookService : IOutlookService
 		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 	private Application? application;
+	private IOutlookConnection? connection;
 	private bool outlookStartedByThis;
 	private bool attachedToExistingOutlook;
-	private OutlookSession? session;
+	private IOutlookSession? session;
 
 	public OutlookService()
 	{
 	}
 
-	public OutlookSession? Session
+	public IOutlookSession? Session
 	{
 		get { return session; }
 	}
@@ -39,12 +40,13 @@ public class OutlookService : IOutlookService
 	{
 		bool connected = false;
 
-		if (application == null)
+		if (connection == null)
 		{
 			application = ConnectToExistingOutlook();
 
 			if (application != null)
 			{
+				connection = new OutlookConnection(application);
 				attachedToExistingOutlook = true;
 			}
 			else
@@ -54,15 +56,20 @@ public class OutlookService : IOutlookService
 
 				if (isAvailable == true)
 				{
-					application = new Outlook.Application();
-					outlookStartedByThis = true;
+					connection = factory.CreateConnection();
+
+					if (connection != null)
+					{
+						session = connection.Session;
+						outlookStartedByThis = true;
+					}
 				}
 			}
 		}
 
-		if (application != null)
+		if (connection != null)
 		{
-			session = new OutlookSession(application);
+			session = connection.Session;
 
 			connected = true;
 		}
@@ -146,8 +153,11 @@ public class OutlookService : IOutlookService
 					as Application;
 #endif
 		}
-		catch
+		catch (COMException exception)
 		{
+			Log.Debug(
+				"Could not attach to an existing Outlook instance.");
+			Log.Debug(exception.ToString());
 		}
 
 		return application;
