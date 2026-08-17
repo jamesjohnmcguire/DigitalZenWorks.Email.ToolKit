@@ -15,6 +15,7 @@ using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 
 public class OutlookSession
+	: IOutlookSession
 {
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);

@@ -530,7 +530,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 				else
 				{
-					OutlookSession outlookSession = outlook.Session;
+					OutlookSession outlookSession =
+						(OutlookSession)outlook.Session;
 
 					OutlookFolder outlookFolder = new (outlookSession);
 

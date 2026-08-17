@@ -156,7 +156,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				OutlookStore outlookStore = new(session);
 
 				string pstFilePath = command.Parameters[0];
@@ -213,7 +213,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				Store store = session.GetStore(pstLocation);
 
 				if (store != null)
@@ -498,7 +498,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				OutlookStore outlookStore = new(session);
 
 				bool recurse = command.DoesOptionExist("r", "recurse");
@@ -539,7 +539,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				OutlookStore outlookStore = new(session);
 
 				string pstFilePath = command.Parameters[0];
@@ -575,7 +575,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				OutlookStore outlookStore = new(session);
 
 				string pstFilePath = command.Parameters[0];
@@ -618,7 +618,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				OutlookStore outlookStore = new(session);
 
 				string pstFilePath = command.Parameters[0];
@@ -646,7 +646,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				OutlookStore outlookStore = new(session);
 
 				bool duplicatesFound = false;
@@ -762,7 +762,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				OutlookStore outlookStore = new(session);
 
 				bool dryRun = command.DoesOptionExist("n", "dryrun");
@@ -798,7 +798,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				OutlookStore outlookStore = new(session);
 
 				string sourcePst = command.Parameters[0];
@@ -823,7 +823,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				OutlookStore outlookStore = new(session);
 
 				string sourcePst = command.Parameters[0];
@@ -874,7 +874,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			}
 			else
 			{
-				OutlookSession session = outlook.Session;
+				OutlookSession session = (OutlookSession)outlook.Session;
 				OutlookStore outlookStore = new(session);
 
 				bool dryRun = command.DoesOptionExist("n", "dryrun");
