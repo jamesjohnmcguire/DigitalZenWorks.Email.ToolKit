@@ -8,21 +8,13 @@
 
 	<Project Path="CommandLineCommands/CommandLineCommands.Tests/DigitalZenWorks.CommandLine.Commands.Tests.csproj" />
 	<Project Path="CommandLineCommands/CommandLineCommands/DigitalZenWorks.CommandLine.Commands.csproj" />
-	<Project Path="DbxOutlookExpress/DbxOutlookExpress/DigitalZenWorks.Email.DbxOutlookExpress.csproj">
-		<Build Solution="Release|*" Project="false" />
-	</Project>
-	<Project Path="DbxOutlookExpress/DbxOutlookExpressTests/DigitalZenWorks.Email.DbxOutlookExpress.Tests.csproj">
-		<Build Solution="Release|*" Project="false" />
-	</Project>
+	<Project Path="DbxOutlookExpress/DbxOutlookExpress/DigitalZenWorks.Email.DbxOutlookExpress.csproj" />
+	<Project Path="DbxOutlookExpress/DbxOutlookExpressTests/DigitalZenWorks.Email.DbxOutlookExpress.Tests.csproj" />
 	<Project Path="MsgKit/MsgKit/MsgKit.csproj" />
-		<Project Path="TestConsoleApp/TestConsoleApp.csproj">
-		<Build Solution="Release|*" Project="false" />
-	</Project>
-	<Project DefaultStartup="true" Path="ToolKit.Application/ToolKit.Application.csproj" />
+	<Project Path="TestConsoleApp/TestConsoleApp.csproj" />
+	<Project Path="ToolKit.Application/ToolKit.Application.csproj" />
 	<Project Path="ToolKit.Library/ToolKit.Library.csproj" />
-	<Project Path="ToolKit.Tests/ToolKit.Tests.csproj">
-		<Build Solution="Release|*" Project="false" />
-	</Project>
+	<Project Path="ToolKit.Tests/ToolKit.Tests.csproj" />
 	<Project Path="UtilitiesNet/UtilitiesNetLibrary/DigitalZenWorks.Common.Utilities.csproj" />
 	<Project Path="UtilitiesNet/UtilitiesNetTests/DigitalZenWorks.Common.Utilities.Tests.csproj" />
 
