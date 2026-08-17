@@ -1,29 +1,35 @@
 /////////////////////////////////////////////////////////////////////////////
-// <copyright file="EmailToolKitTests.cs" company="James John McGuire">
+// <copyright file="FakeOutlookFactory.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
+using Outlook = Microsoft.Office.Interop.Outlook;
+
+#nullable enable
+
 public sealed class FakeOutlookFactory : IOutlookFactory
 {
 	public bool IsAvailable { get; set; }
 
-	public int CallCount { get; private set; }
+	public IOutlookConnection? Connection { get; set; }
 
-	public Application? CreateApplication()
+	public int CreateConnectionCallCount { get; private set; }
+
+	public int IsOutlookAvailableCallCount { get; private set; }
+
+	public IOutlookConnection? CreateConnection()
 	{
-		CreateCallCount++;
+		CreateConnectionCallCount++;
 
-		Application? fakeApplication = null;
-
-		return fakeApplication;
+		return Connection;
 	}
 
 	public bool IsOutlookAvailable(int timeoutSeconds)
 	{
-		CallCount++;
+		IsOutlookAvailableCallCount++;
 
 		return IsAvailable;
 	}

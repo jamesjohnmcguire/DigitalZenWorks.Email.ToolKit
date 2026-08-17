@@ -1,18 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// <copyright file="OutlookFactory.cs" company="James John McGuire">
+// <copyright file="IOutlookConnection.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
 namespace DigitalZenWorks.Email.ToolKit;
 
-#nullable enable
-
-using Outlook = Microsoft.Office.Interop.Outlook;
-
-public interface IOutlookFactory
+public interface IOutlookConnection
 {
-	public IOutlookConnection? CreateConnection();
-
-	public bool IsOutlookAvailable(int timeOutSeconds);
+	IOutlookSession Session { get; }
 }

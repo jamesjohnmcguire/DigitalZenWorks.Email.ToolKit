@@ -6,8 +6,17 @@
 
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
+using Outlook = Microsoft.Office.Interop.Outlook;
+
+#nullable enable
+
 public sealed class SuccessFactory : IOutlookFactory
 {
+	public IOutlookConnection? CreateConnection()
+	{
+		return null;
+	}
+
 	public bool IsOutlookAvailable(int timeOutSeconds)
 	{
 		return true;

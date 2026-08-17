@@ -21,21 +21,35 @@ public class OutlookFactory : IOutlookFactory
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		public Outlook.Application? CreateApplication()
+	public Outlook.Application? CreateApplication()
+	{
+		Outlook.Application? application = null;
+
+		try
 		{
-			Outlook.Application? application = null;
-
-			try
-			{
-				application = new Outlook.Application();
-			}
-			catch (Exception exception)
-			{
-				Log.Error(exception.ToString());
-			}
-
-			return application;
+			application = new Outlook.Application();
 		}
+		catch (Exception exception)
+		{
+			Log.Error(exception.ToString());
+		}
+
+		return application;
+	}
+
+	public IOutlookConnection? CreateConnection()
+	{
+		OutlookConnection connection = null;
+
+		Outlook.Application? application = CreateApplication();
+
+		if (application != null)
+		{
+			connection = new(application);
+		}
+
+		return connection;
+	}
 
 	public bool IsOutlookAvailable(int timeOutSeconds)
 	{
