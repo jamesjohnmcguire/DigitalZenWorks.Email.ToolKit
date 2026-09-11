@@ -8,36 +8,43 @@ namespace DigitalZenWorks.Email.ToolKit.Tests;
 
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the <see cref="OutlookService"/> class.
+/// </summary>
 internal sealed class OutlookServiceTests
 {
+	/// <summary>
+	/// Tests that the Connect method checks availability when Outlook is not
+	/// already connected.
+	/// </summary>
 	[Test]
-	public void Connect_CallsFactory_WhenNoExistingOutlook()
+	public void ConnectChecksAvailabilityWhenOutlookNotAlreadyConnected()
 	{
-		var service = new OutlookService();
-
-		var factory = new FakeOutlookFactory
-		{
-			IsAvailable = false
-		};
+		OutlookService service = new();
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = false;
 
 		service.Connect(factory);
 
 		Assert.That(factory.CreateConnectionCallCount, Is.EqualTo(0));
 
+		// Ensures Connect actually checks availability rather than
+		// simply returning false.
 		Assert.That(
 			factory.IsOutlookAvailableCallCount,
 			Is.EqualTo(1));
 	}
 
+	/// <summary>
+	/// Tests that the Connect method checks availability when Outlook is
+	/// already connected.
+	/// </summary>
 	[Test]
-	public void Connect_ChecksAvailability()
+	public void ConnectChecksAvailability()
 	{
 		OutlookService service = new();
-
-		FakeOutlookFactory factory = new()
-		{
-			IsAvailable = false
-		};
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = false;
 
 		service.Connect(factory);
 
@@ -46,15 +53,16 @@ internal sealed class OutlookServiceTests
 			Is.EqualTo(1));
 	}
 
+	/// <summary>
+	/// Tests that the Connect method does not create a connection when Outlook
+	/// is unavailable.
+	/// </summary>
 	[Test]
-	public void Connect_DoesNotCreateConnection_WhenUnavailable()
+	public void ConnectDoesNotCreateConnectionWhenUnavailable()
 	{
 		OutlookService service = new();
-
-		FakeOutlookFactory factory = new()
-		{
-			IsAvailable = false
-		};
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = false;
 
 		service.Connect(factory);
 
@@ -63,8 +71,12 @@ internal sealed class OutlookServiceTests
 			Is.EqualTo(0));
 	}
 
+	/// <summary>
+	/// Tests that the Connect method does not create a new connection when
+	/// Outlook is already connected.
+	/// </summary>
 	[Test]
-	public void Connect_DoesNotReconnect_WhenAlreadyConnected()
+	public void ConnectDoesNotReconnectWhenAlreadyConnected()
 	{
 		OutlookService service = new();
 		FakeOutlookSession session = new();
@@ -82,26 +94,23 @@ internal sealed class OutlookServiceTests
 			Is.EqualTo(1));
 	}
 
+	/// <summary>
+	/// Tests that the Connect method ignores the factory when Outlook is
+	/// already connected.
+	/// </summary>
 	[Test]
 	public void Connect_IgnoresFactory_AfterAlreadyConnected()
 	{
 		OutlookService service = new();
-
 		FakeOutlookSession session = new();
+		FakeOutlookConnection connection = new(session);
 
-		FakeOutlookConnection connection =
-			new(session);
+		FakeOutlookFactory firstFactory = new();
+		firstFactory.IsAvailable = true;
+		firstFactory.Connection = connection;
 
-		FakeOutlookFactory firstFactory = new()
-		{
-			IsAvailable = true,
-			Connection = connection
-		};
-
-		FakeOutlookFactory secondFactory = new()
-		{
-			IsAvailable = false
-		};
+		FakeOutlookFactory secondFactory = new();
+		secondFactory.IsAvailable = false;
 
 		Assert.That(
 			service.Connect(firstFactory),
@@ -116,15 +125,15 @@ internal sealed class OutlookServiceTests
 			Is.EqualTo(0));
 	}
 
+	/// <summary>
+	/// Tests that the Connect method returns false when Outlook is unavailable.
+	/// </summary>
 	[Test]
-	public void Connect_ReturnsFalse_WhenOutlookUnavailable()
+	public void ConnectReturnsFalseWhenOutlookUnavailable()
 	{
 		OutlookService service = new();
-
-		FakeOutlookFactory factory = new()
-		{
-			IsAvailable = false
-		};
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = false;
 
 		bool connected = service.Connect(factory);
 
@@ -132,41 +141,39 @@ internal sealed class OutlookServiceTests
 		Assert.That(service.Session, Is.Null);
 	}
 
+	/// <summary>
+	/// Tests that the Connect method returns true when a connection is created.
+	/// </summary>
 	[Test]
-	public void Connect_ReturnsTrue_WhenConnectionCreated()
+	public void ConnectReturnsTrueWhenConnectionCreated()
 	{
 		OutlookService service = new();
-
 		FakeOutlookSession session = new();
-
 		FakeOutlookConnection connection = new(session);
 
-		FakeOutlookFactory factory = new()
-		{
-			IsAvailable = true,
-			Connection = connection
-		};
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = true;
+		factory.Connection = connection;
 
 		bool result = service.Connect(factory);
 
 		Assert.That(result, Is.True);
 	}
 
+	/// <summary>
+	/// Tests that the Connect method sets the Session property when a
+	/// connection is created.
+	/// </summary>
 	[Test]
-	public void Connect_SetsSession_WhenConnectionCreated()
+	public void ConnectSetsSessionWhenConnectionCreated()
 	{
 		OutlookService service = new();
-
 		FakeOutlookSession expectedSession = new();
+		FakeOutlookConnection connection = new(expectedSession);
 
-		FakeOutlookConnection connection =
-			new(expectedSession);
-
-		FakeOutlookFactory factory = new()
-		{
-			IsAvailable = true,
-			Connection = connection
-		};
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = true;
+		factory.Connection = connection;
 
 		bool result = service.Connect(factory);
 
@@ -176,25 +183,30 @@ internal sealed class OutlookServiceTests
 			Is.SameAs(expectedSession));
 	}
 
+	/// <summary>
+	/// Tests that the Session property is null after a failed connection
+	/// attempt.
+	/// </summary>
 	[Test]
-	public void Session_IsNull_AfterFailedConnect()
+	public void SessionIsNullAfterFailedConnect()
 	{
-		var service = new OutlookService();
-
-		var factory = new FakeOutlookFactory
-		{
-			IsAvailable = false
-		};
+		OutlookService service = new();
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = false;
 
 		service.Connect(factory);
 
 		Assert.That(service.Session, Is.Null);
 	}
 
+	/// <summary>
+	/// Tests that calling Disconnect before Connect does not throw
+	/// an exception.
+	/// </summary>
 	[Test]
-	public void Disconnect_BeforeConnect_DoesNotThrow()
+	public void DisconnectBeforeConnectDoesNotThrow()
 	{
-		var service = new OutlookService();
+		OutlookService service = new();
 
 		Assert.DoesNotThrow(() =>
 		{
