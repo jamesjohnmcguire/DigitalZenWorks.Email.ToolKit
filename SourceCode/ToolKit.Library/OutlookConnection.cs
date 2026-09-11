@@ -9,7 +9,7 @@ namespace DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using Outlook = Microsoft.Office.Interop.Outlook;
 
-public class OutlookConnection
+internal class OutlookConnection
 	: IOutlookConnection
 {
 	private readonly Outlook.Application application;
