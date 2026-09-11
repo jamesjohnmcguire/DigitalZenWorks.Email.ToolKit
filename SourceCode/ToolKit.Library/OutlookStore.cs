@@ -46,7 +46,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// Initializes a new instance of the
 		/// <see cref="OutlookStore"/> class.
 		/// </summary>
-		/// <param name="OutlookSession">The outlook session encapsulation
+		/// <param name="outlookSession">The outlook session encapsulation
 		/// object.</param>
 		public OutlookStore(OutlookSession outlookSession)
 		{
