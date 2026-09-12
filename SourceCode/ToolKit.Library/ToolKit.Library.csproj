@@ -72,6 +72,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="ToolKit.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<AdditionalFiles Include="../stylecop.json" />
 		<None Include="../../.editorconfig" Link="../../.editorconfig" />
 		<None Include="../..\LICENSE">
