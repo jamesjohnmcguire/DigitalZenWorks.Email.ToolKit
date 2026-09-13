@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="Program.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -289,7 +289,10 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			OutlookFolder.AddFolder(subFolder, "Testing2");
 			OutlookFolder.AddFolder(subFolder, "Testing2 (1)");
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookService outlook = new();
+			OutlookSession outlookSession = (OutlookSession)outlook.Session;
+
+			OutlookFolder outlookFolder = new(outlookSession);
 			outlookFolder.MergeFolders(rootFolder, true);
 
 			// Clean up
