@@ -497,8 +497,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[Test]
 		public void TestEmlFileToPstSimpleSuccess()
 		{
-			IOutlookSession session = GetRealOutlookSession();
-
 			MAPIFolder rootFolder = store.GetRootFolder();
 			MAPIFolder mainFolder = OutlookFolder.AddFolder(
 				rootFolder, "Main Test Folder");
