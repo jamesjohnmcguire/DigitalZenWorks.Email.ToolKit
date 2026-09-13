@@ -175,7 +175,10 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				try
 				{
-					mailItem = CopyEmlToPst(null, folder, filePath);
+					OutlookAccount outlookAccount = OutlookAccount.Instance;
+					OutlookSession session = outlookAccount.OutlookSession;
+
+					mailItem = CopyEmlToPst(session, folder, filePath);
 				}
 				catch (IOException exception)
 				{
@@ -226,36 +229,11 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static MailItem EmlFileToPst(
 			string filePath, string pstPath, bool closeStore)
 		{
-			MailItem mailItem = null;
-
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 			OutlookSession session = outlookAccount.OutlookSession;
 
-			Store pstStore = outlookAccount.GetStore(pstPath);
-
-			string baseName = Path.GetFileNameWithoutExtension(pstPath);
-
-			MAPIFolder pstFolder =
-				OutlookStore.GetTopLevelFolder(pstStore, baseName);
-
-			if (pstFolder != null)
-			{
-				try
-				{
-					mailItem = CopyEmlToPst(session, pstFolder, filePath);
-				}
-				catch (IOException exception)
-				{
-					Log.Error(exception.ToString());
-				}
-
-				Marshal.ReleaseComObject(pstFolder);
-
-				if (closeStore == true)
-				{
-					outlookAccount.RemoveStore(pstPath);
-				}
-			}
+			MailItem mailItem =
+				EmlFileToPst(session, filePath, pstPath, closeStore);
 
 			return mailItem;
 		}
