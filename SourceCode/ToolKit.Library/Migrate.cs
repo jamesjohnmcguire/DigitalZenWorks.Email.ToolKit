@@ -229,6 +229,8 @@ namespace DigitalZenWorks.Email.ToolKit
 			MailItem mailItem = null;
 
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
+			OutlookSession session = outlookAccount.OutlookSession;
+
 			Store pstStore = outlookAccount.GetStore(pstPath);
 
 			string baseName = Path.GetFileNameWithoutExtension(pstPath);
@@ -240,7 +242,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				try
 				{
-					mailItem = CopyEmlToPst(null, pstFolder, filePath);
+					mailItem = CopyEmlToPst(session, pstFolder, filePath);
 				}
 				catch (IOException exception)
 				{
