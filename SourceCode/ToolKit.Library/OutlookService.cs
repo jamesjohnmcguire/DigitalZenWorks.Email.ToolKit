@@ -6,6 +6,8 @@
 
 namespace DigitalZenWorks.Email.ToolKit;
 
+#nullable enable
+
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using global::Common.Logging;

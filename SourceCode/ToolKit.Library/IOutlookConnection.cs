@@ -6,7 +6,15 @@
 
 namespace DigitalZenWorks.Email.ToolKit;
 
+#nullable enable
+
+/// <summary>
+/// Interface for an Outlook connection.
+/// </summary>
 public interface IOutlookConnection
 {
-	IOutlookSession Session { get; }
+	/// <summary>
+	/// Gets the Outlook session.
+	/// </summary>
+	IOutlookSession? Session { get; }
 }

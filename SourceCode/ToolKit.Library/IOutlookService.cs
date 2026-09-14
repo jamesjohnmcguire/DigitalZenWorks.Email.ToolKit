@@ -6,6 +6,9 @@
 
 namespace DigitalZenWorks.Email.ToolKit;
 
+/// <summary>
+/// Interface for an Outlook service.
+/// </summary>
 internal interface IOutlookService
 {
 }
