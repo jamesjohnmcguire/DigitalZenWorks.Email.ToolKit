@@ -18,6 +18,13 @@ using Microsoft.Win32;
 using Microsoft.VisualBasic;
 using Outlook = Microsoft.Office.Interop.Outlook;
 
+/// <summary>
+/// Public service that manages Outlook startup/attach lifecycle and
+/// exposes an IOutlookSession for performing Outlook operations.
+/// New code should prefer this surface for session acquisition and
+/// lifecycle control. The legacy OutlookAccount singleton remains for
+/// compatibility but new code should avoid using it directly.
+/// </summary>
 public class OutlookService : IOutlookService
 {
 	private static readonly ILog Log = LogManager.GetLogger(
@@ -36,6 +43,11 @@ public class OutlookService : IOutlookService
 	public IOutlookSession? Session
 	{
 		get { return session; }
+	}
+
+	public bool IsConnected
+	{
+		get { return connection != null; }
 	}
 
 	public bool Connect(IOutlookFactory factory, int timeOutSeconds = 10)
