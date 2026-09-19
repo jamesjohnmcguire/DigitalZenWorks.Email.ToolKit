@@ -175,7 +175,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				try
 				{
-					mailItem = CopyEmlToPst(null, folder, filePath);
+					mailItem = CopyEmlToPst(folder, filePath);
 				}
 				catch (IOException exception)
 				{
@@ -240,7 +240,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				try
 				{
-					mailItem = CopyEmlToPst(null, pstFolder, filePath);
+					mailItem = CopyEmlToPst(pstFolder, filePath);
 				}
 				catch (IOException exception)
 				{
@@ -360,55 +360,6 @@ namespace DigitalZenWorks.Email.ToolKit
 			return result;
 		}
 
-		/// <summary>
-		/// Eml file to pst.
-		/// </summary>
-		/// <remarks>The caller is responsible for deleting
-		/// the object.</remarks>
-		/// <param name="session">The Outlook session to use.</param>
-		/// <param name="filePath">The file path to migrate.</param>
-		/// <param name="pstPath">The path to pst file to copy to.</param>
-		/// <param name="closeStore">Indicates whether to close the store after
-		/// processing.</param>
-		/// <returns>A valid MailItem or null.</returns>
-		internal static MailItem EmlFileToPst(
-			IOutlookSession session,
-			string filePath,
-			string pstPath,
-			bool closeStore)
-		{
-			MailItem mailItem = null;
-
-			OutlookSession outlookSession = (OutlookSession)session;
-			Store pstStore = outlookSession.GetStore(pstPath);
-
-			string baseName = Path.GetFileNameWithoutExtension(pstPath);
-
-			MAPIFolder pstFolder =
-				OutlookStore.GetTopLevelFolder(pstStore, baseName);
-
-			if (pstFolder != null)
-			{
-				try
-				{
-					mailItem = CopyEmlToPst(session, pstFolder, filePath);
-				}
-				catch (IOException exception)
-				{
-					Log.Error(exception.ToString());
-				}
-
-				Marshal.ReleaseComObject(pstFolder);
-
-				if (closeStore == true)
-				{
-					outlookSession.RemoveStore(pstPath);
-				}
-			}
-
-			return mailItem;
-		}
-
 		private static void AddMappingSafe(
 			IDictionary<uint, string> mappings,
 			MAPIFolder pstFolder,
@@ -476,7 +427,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					try
 					{
-						CopyEmlToPst(null, pstFolder, file);
+						CopyEmlToPst(pstFolder, file);
 					}
 					catch (IOException exception)
 					{
@@ -486,10 +437,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 		}
 
-		private static MailItem CopyEmlToPst(
-			IOutlookSession session,
-			MAPIFolder mapiFolder,
-			string emlFile)
+		private static MailItem CopyEmlToPst(MAPIFolder mapiFolder, string emlFile)
 		{
 			MailItem mailItem = null;
 
@@ -519,8 +467,8 @@ namespace DigitalZenWorks.Email.ToolKit
 					Log.Error(exception.ToString());
 				}
 
-				OutlookSession outlookSession = (OutlookSession)session;
-				OutlookFolder outlookFolder = new (outlookSession);
+				OutlookAccount outlookAccount = OutlookAccount.Instance;
+				OutlookFolder outlookFolder = new (outlookAccount);
 
 				mailItem = outlookFolder.AddMsgFile(mapiFolder, msgFile);
 

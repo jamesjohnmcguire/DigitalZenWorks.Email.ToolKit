@@ -596,7 +596,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		[Test]
 		public void TestEmlFileToPstCloseStoreSuccess()
 		{
-			IOutlookSession session = GetRealOutlookSession();
 
 			string fileName = Path.GetTempFileName();
 
@@ -610,8 +609,8 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 
 			Assert.That(result, Is.True);
 
-			MailItem? mailItem = Migrate.EmlFileToPst(
-				session, path, temporaryStorePath, true);
+			MailItem? mailItem =
+				Migrate.EmlFileToPst(path, temporaryStorePath, true);
 
 			Assert.That(mailItem, Is.Not.Null);
 
@@ -713,10 +712,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Testing (1)",
 				"This is the subject");
 
-			IOutlookSession session = GetRealOutlookSession();
-			OutlookSession outlookSession = (OutlookSession)session;
-
-			OutlookFolder outlookFolder = new(outlookSession);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
@@ -756,10 +752,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Testing (1)",
 				"This is the subject");
 
-			IOutlookSession session = GetRealOutlookSession();
-			OutlookSession outlookSession = (OutlookSession)session;
-
-			OutlookFolder outlookFolder = new(outlookSession);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
@@ -805,10 +798,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"_Testing",
 				"This is the subject 3");
 
-			IOutlookSession session = GetRealOutlookSession();
-			OutlookSession outlookSession = (OutlookSession)session;
-
-			OutlookFolder outlookFolder = new(outlookSession);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
@@ -860,10 +850,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"_Testing",
 				"This is the subject 3");
 
-			IOutlookSession session = GetRealOutlookSession();
-			OutlookSession outlookSession = (OutlookSession)session;
-
-			OutlookFolder outlookFolder = new(outlookSession);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
@@ -908,10 +895,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"2023",
 				"This is the subject");
 
-			IOutlookSession session = GetRealOutlookSession();
-			OutlookSession outlookSession = (OutlookSession)session;
-
-			OutlookFolder outlookFolder = new(outlookSession);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
@@ -951,10 +935,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"2023",
 				"This is the subject");
 
-			IOutlookSession session = GetRealOutlookSession();
-			OutlookSession outlookSession = (OutlookSession)session;
-
-			OutlookFolder outlookFolder = new(outlookSession);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
@@ -994,10 +975,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Main Test Folder",
 				"This is the subject");
 
-			IOutlookSession session = GetRealOutlookSession();
-			OutlookSession outlookSession = (OutlookSession)session;
-
-			OutlookFolder outlookFolder = new(outlookSession);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			outlookFolder.MergeFolders(rootFolder, false);
 
 			System.Threading.Thread.Sleep(200);
@@ -1037,10 +1015,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 				"Main Test Folder",
 				"This is the subject");
 
-			IOutlookSession session = GetRealOutlookSession();
-			OutlookSession outlookSession = (OutlookSession)session;
-
-			OutlookFolder outlookFolder = new(outlookSession);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			await outlookFolder.MergeFoldersAsync(rootFolder, false).
 				ConfigureAwait(false);
 
@@ -1100,10 +1075,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			mailItem2 = mailItem2.Move(mainFolder);
 			mailItem3 = mailItem3.Move(mainFolder);
 
-			IOutlookSession session = GetRealOutlookSession();
-			OutlookSession outlookSession = (OutlookSession)session;
-
-			OutlookFolder outlookFolder = new(outlookSession);
+			OutlookFolder outlookFolder = new(outlookAccount);
 			int removedDuplicates =
 				outlookFolder.RemoveDuplicates(mainFolder, false);
 
@@ -1280,28 +1252,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Marshal.ReleaseComObject(subFolder);
 
 			return mailItem;
-		}
-
-		private static IOutlookSession GetOutlookSession(
-			IOutlookFactory factory)
-		{
-			OutlookService outlook = new();
-			bool connected = outlook.Connect(factory);
-
-			Assert.That(connected, Is.True);
-
-			IOutlookSession session = outlook.Session!;
-
-			return session;
-		}
-
-		private static IOutlookSession GetRealOutlookSession()
-		{
-			OutlookFactory factory = new();
-
-			IOutlookSession session = GetOutlookSession(factory);
-
-			return session;
 		}
 
 		private void GetDbxTestFolder(string fileName)
