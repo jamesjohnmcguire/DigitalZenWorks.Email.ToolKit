@@ -26,7 +26,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private readonly OutlookAccount outlookAccount;
 		private readonly OutlookService outlookService;
-		private readonly OutlookSession outlookSession;
+		private readonly OutlookSession? outlookSession;
+
 		private readonly Store store;
 
 		private uint totalFolders;
@@ -51,6 +52,30 @@ namespace DigitalZenWorks.Email.ToolKit
 		public OutlookStore(OutlookSession outlookSession)
 		{
 			this.outlookSession = outlookSession;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the
+		/// <see cref="OutlookStore"/> class using the IOutlookSession
+		/// abstraction. If a concrete OutlookSession is supplied it will be
+		/// used directly; otherwise the interface will be used for operations.
+		/// </summary>
+		/// <param name="outlookSession">The outlook session abstraction.
+		/// </param>
+		public OutlookStore(IOutlookSession outlookSession)
+		{
+			if (outlookSession is OutlookSession session)
+			{
+				this.outlookSession = session;
+			}
+			else
+			{
+				string message = "OutlookStore requires a concrete " +
+					"OutlookSession instance. Pass " +
+					"OutlookAccount.OutlookSession or an OutlookSession " +
+					"created from the Outlook.Application.";
+				throw new NotSupportedException(message);
+			}
 		}
 
 		/// <summary>
