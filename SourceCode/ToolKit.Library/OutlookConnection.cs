@@ -9,6 +9,12 @@ namespace DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using Outlook = Microsoft.Office.Interop.Outlook;
 
+/// <summary>
+/// Internal adapter that wraps an Outlook Application and exposes an
+/// IOutlookSession. This class is intentionally internal; consumers
+/// should use IOutlookService and IOutlookSession rather than this
+/// concrete type.
+/// </summary>
 internal class OutlookConnection
 	: IOutlookConnection
 {
