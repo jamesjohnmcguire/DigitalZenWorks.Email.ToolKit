@@ -16,6 +16,7 @@
 - Prefer existing project abstractions before introducing new ones.
 - Follow existing nullable-reference-type conventions.
 - Avoid unnecessary dependencies.
+- Keep `OutlookConnection` internal and maintain `IOutlookConnection.Session` for now, with intent to remove OOM leakage from `IOutlookSession` soon.
 
 ## Error handling
 
