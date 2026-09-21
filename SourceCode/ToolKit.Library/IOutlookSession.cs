@@ -31,13 +31,6 @@ public interface IOutlookSession
 	public object? GetItemFromId(string entryId);
 
 	/// <summary>
-	/// Get or create a PST store for the given path.
-	/// </summary>
-	/// <param name="path">The path to the PST file.</param>
-	/// <returns>The Store object or null if not available.</returns>
-	public Store? GetStore(string path);
-
-	/// <summary>
 	/// Opens a shared item in Outlook.
 	/// </summary>
 	/// <param name="filePath">The path to the file to open.</param>
