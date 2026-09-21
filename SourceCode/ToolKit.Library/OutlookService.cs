@@ -51,7 +51,16 @@ public class OutlookService : IOutlookService
 		get { return connection != null; }
 	}
 
-	public bool Connect(IOutlookFactory factory, int timeOutSeconds = 10)
+	public bool Connect(int timeOutSeconds = 10)
+	{
+		OutlookFactory factory = new();
+
+		bool connected = Connect(factory, timeOutSeconds);
+
+		return connected;
+	}
+
+	internal bool Connect(IOutlookFactory factory, int timeOutSeconds = 10)
 	{
 		bool connected = false;
 

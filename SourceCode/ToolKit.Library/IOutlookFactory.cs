@@ -11,7 +11,7 @@ namespace DigitalZenWorks.Email.ToolKit;
 /// <summary>
 /// Interface for an Outlook factory.
 /// </summary>
-public interface IOutlookFactory
+internal interface IOutlookFactory
 {
 	/// <summary>
 	/// Creates a connection to Outlook.

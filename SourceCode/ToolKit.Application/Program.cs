@@ -147,8 +147,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int Details(Command command)
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -204,8 +203,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			string pstLocation = command.Parameters[0];
 
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -489,8 +487,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int ListFolders(Command command)
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -530,8 +527,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int ListIds(Command command)
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -566,8 +562,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int ListTopSenders(Command command)
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -609,8 +604,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static int ListTotalDuplicates(Command command)
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -637,8 +631,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			IDictionary<string, IList<string>> duplicates, bool useLog)
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -753,8 +746,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static async Task<int> MergeFolders(Command command)
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -789,8 +781,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static async Task<int> MergeStores(Command command)
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -814,8 +805,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static async Task<int> MoveFolder(Command command)
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -847,8 +837,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static bool OutlookConnect()
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
@@ -865,8 +854,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static async Task<int> RemoveDuplicates(Command command)
 		{
 			OutlookService outlook = new();
-			OutlookFactory factory = new();
-			bool connected = outlook.Connect(factory);
+			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{

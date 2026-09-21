@@ -30,10 +30,9 @@ public interface IOutlookService
 	/// to attach to an existing Outlook instance or start a new one via
 	/// the factory implementation.
 	/// </summary>
-	/// <param name="factory">The factory used to start Outlook if required.</param>
 	/// <param name="timeOutSeconds">Timeout for availability checks.</param>
 	/// <returns>True when connected and a session is available.</returns>
-	bool Connect(IOutlookFactory factory, int timeOutSeconds = 10);
+	bool Connect(int timeOutSeconds = 10);
 
 	/// <summary>
 	/// Disconnect from Outlook. If Outlook was started by the service,
