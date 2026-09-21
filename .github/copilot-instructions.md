@@ -21,6 +21,7 @@
 
 - Prefer the repository's existing `Result<T>` pattern where applicable.
 - Do not replace structured error handling with broad exception catching.
+- Prefer catching specific exceptions instead of broad `System.Exception`.
 - Avoid `catch (Exception)` unless specifically justified.
 
 ## Testing
