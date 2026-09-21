@@ -8,6 +8,7 @@ namespace DigitalZenWorks.Email.ToolKit;
 
 #nullable enable
 
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using global::Common.Logging;
@@ -65,18 +66,28 @@ public class OutlookService : IOutlookService
 			}
 			else
 			{
-				bool isAvailable =
-					factory.IsOutlookAvailable(timeOutSeconds);
-
-				if (isAvailable == true)
+				try
 				{
-					connection = factory.CreateConnection();
+					bool isAvailable =
+						factory.IsOutlookAvailable(timeOutSeconds);
 
-					if (connection != null)
+					if (isAvailable == true)
 					{
-						session = connection.Session;
-						outlookStartedByThis = true;
+						connection = factory.CreateConnection();
+
+						if (connection != null)
+						{
+							session = connection.Session;
+							outlookStartedByThis = true;
+						}
 					}
+				}
+				catch (System.Exception exception) when
+					(exception is COMException ||
+					exception is InvalidOperationException)
+				{
+					Log.Error(exception);
+					connection = null;
 				}
 			}
 		}
