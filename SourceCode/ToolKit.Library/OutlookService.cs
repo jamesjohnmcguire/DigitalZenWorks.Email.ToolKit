@@ -13,11 +13,10 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
+using Microsoft.VisualBasic;
 #if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
 using Microsoft.Win32;
 #endif
-using Microsoft.VisualBasic;
-using Outlook = Microsoft.Office.Interop.Outlook;
 
 /// <summary>
 /// Public service that manages Outlook startup/attach lifecycle and
@@ -34,7 +33,6 @@ public class OutlookService : IOutlookService
 	private Application? application;
 	private IOutlookConnection? connection;
 	private bool outlookStartedByThis;
-	private bool attachedToExistingOutlook;
 	private IOutlookSession? session;
 
 	public OutlookService()
@@ -71,7 +69,6 @@ public class OutlookService : IOutlookService
 			if (application != null)
 			{
 				connection = new OutlookConnection(application);
-				attachedToExistingOutlook = true;
 			}
 			else
 			{
