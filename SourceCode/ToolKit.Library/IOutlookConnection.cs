@@ -17,4 +17,10 @@ public interface IOutlookConnection
 	/// Gets the Outlook session.
 	/// </summary>
 	IOutlookSession? Session { get; }
+
+	/// <summary>
+	/// Quits the Outlook application. This should only be called if the
+	/// application was started by this instance.
+	/// </summary>
+	void Quit();
 }

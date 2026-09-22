@@ -18,4 +18,12 @@ internal sealed class FakeOutlookConnection
     {
         Session = session;
     }
+
+	/// <summary>
+	/// Stub implementation of the Quit method. This should only be called by
+	/// testing infrastructure and not by production code.
+	/// </summary>
+	public void Quit()
+	{
+	}
 }

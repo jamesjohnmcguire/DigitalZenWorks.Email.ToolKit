@@ -32,4 +32,16 @@ internal class OutlookConnection
 			return new OutlookSession(application.Session);
 		}
 	}
+
+	/// <summary>
+	/// Quits the Outlook application. This should only be called if the
+	/// application was started by this instance.
+	/// </summary>
+	public void Quit()
+	{
+		if (application != null)
+		{
+			application.Quit();
+		}
+	}
 }

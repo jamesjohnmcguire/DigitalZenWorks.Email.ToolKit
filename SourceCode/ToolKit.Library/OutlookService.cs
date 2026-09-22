@@ -115,11 +115,15 @@ public class OutlookService : IOutlookService
 		return connected;
 	}
 
+	/// <summary>
+	/// Disconnects from Outlook. If Outlook was started by the service,
+	/// it will be quit.
+	/// </summary>
 	public void Disconnect()
 	{
-		if (outlookStartedByThis == true && application != null)
+		if (connection != null)
 		{
-			application.Quit();
+			connection.Quit();
 		}
 	}
 
