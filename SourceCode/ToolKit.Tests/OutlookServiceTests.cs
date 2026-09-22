@@ -87,7 +87,8 @@ internal sealed class OutlookServiceTests
 		factory.IsAvailable = true;
 		factory.Connection = connection;
 
-		Assert.That(service.Connect(factory), Is.True);
+		bool result = service.Connect(factory);
+		Assert.That(result, Is.True);
 
 		Assert.That(
 			factory.CreateConnectionCallCount,
@@ -112,13 +113,11 @@ internal sealed class OutlookServiceTests
 		FakeOutlookFactory secondFactory = new();
 		secondFactory.IsAvailable = false;
 
-		Assert.That(
-			service.Connect(firstFactory),
-			Is.True);
+		bool firstResult = service.Connect(firstFactory);
+		Assert.That(firstResult, Is.True);
 
-		Assert.That(
-			service.Connect(secondFactory),
-			Is.True);
+		bool secondResult = service.Connect(secondFactory);
+		Assert.That(secondResult, Is.True);
 
 		Assert.That(
 			secondFactory.CreateConnectionCallCount,
