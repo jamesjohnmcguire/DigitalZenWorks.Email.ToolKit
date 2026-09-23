@@ -118,7 +118,7 @@ public class OutlookService : IOutlookService
 	/// </summary>
 	public void Disconnect()
 	{
-		if (connection != null)
+		if (connection != null && outlookStartedByThis == true)
 		{
 			connection.Quit();
 		}
