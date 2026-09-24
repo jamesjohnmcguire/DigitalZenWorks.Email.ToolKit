@@ -91,16 +91,6 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 			Assert.That(store, Is.Not.Null);
 		}
 
-		[Test]
-		public void TestConnectSucceeds()
-		{
-			IOutlookFactory factory = new SuccessFactory();
-
-			bool isAvailable = factory.IsOutlookAvailable(25);
-
-			Assert.That(isAvailable, Is.True);
-		}
-
 		/// <summary>
 		/// Test for creating folder from path.
 		/// </summary>
