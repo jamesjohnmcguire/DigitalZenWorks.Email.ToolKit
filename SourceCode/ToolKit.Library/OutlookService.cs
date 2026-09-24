@@ -156,19 +156,16 @@ public class OutlookService : IOutlookService
 		return installed;
 	}
 
-	internal bool IsOutlookStarted()
+	internal static bool IsOutlookStarted()
 	{
 		bool started = false;
 
-		if (application == null)
-		{
-			Process[] existing = Process.GetProcessesByName("OUTLOOK");
-			int count = existing.Length;
+		Process[] existing = Process.GetProcessesByName("OUTLOOK");
+		int count = existing.Length;
 
-			if (count == 0)
-			{
-				started = true;
-			}
+		if (count == 0)
+		{
+			started = true;
 		}
 
 		return started;
