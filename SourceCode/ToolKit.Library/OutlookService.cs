@@ -156,7 +156,7 @@ public class OutlookService : IOutlookService
 		return installed;
 	}
 
-	private bool IsOutlookStarted()
+	internal bool IsOutlookStarted()
 	{
 		bool started = false;
 
