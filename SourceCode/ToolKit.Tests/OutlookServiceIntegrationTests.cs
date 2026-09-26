@@ -8,8 +8,9 @@
 
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
-using System.Threading;
 using NUnit.Framework;
+using System.Diagnostics;
+using System.Threading;
 
 /// <summary>
 /// Integration tests for OutlookService. These tests are explicit/manual and
@@ -21,6 +22,39 @@ using NUnit.Framework;
 [Apartment(ApartmentState.STA)]
 internal sealed class OutlookServiceIntegrationTests
 {
+	private bool isOutlookPreviouslyStarted;
+
+	private OutlookService? service;
+
+	/// <summary>
+	/// One time set up method.
+	/// </summary>
+	[OneTimeSetUp]
+	public void OneTimeSetUp()
+	{
+		isOutlookPreviouslyStarted = OutlookService.IsOutlookStarted();
+
+		if (isOutlookPreviouslyStarted == false)
+		{
+			StartOutlookIfNotRunning();
+		}
+
+		service = new();
+	}
+
+	/// <summary>
+	/// One time tear down method.
+	/// </summary>
+	[OneTimeTearDown]
+	public void OneTimeTearDown()
+	{
+		if (service != null && isOutlookPreviouslyStarted == false)
+		{
+			// Clean up
+			service.Disconnect();
+		}
+	}
+
 	/// <summary>
 	/// Attempts to attach to an existing Outlook instance. Run manually.
 	/// </summary>
@@ -33,14 +67,18 @@ internal sealed class OutlookServiceIntegrationTests
 	{
 		OutlookFactory factory = new();
 
-		OutlookService service = new();
-
-		bool connected = service.Connect(factory, timeOutSeconds: 3);
+		bool connected = service.Connect(factory, timeOutSeconds: 33);
 
 		Assert.That(connected, Is.True);
 		Assert.That(service.Session, Is.Not.Null);
+	}
 
-		// Clean up
-		service.Disconnect();
+	private static void StartOutlookIfNotRunning()
+	{
+		string outlookPath =
+			@"C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE";
+
+		Process.Start(outlookPath);
+		Thread.Sleep(3000);
 	}
 }
