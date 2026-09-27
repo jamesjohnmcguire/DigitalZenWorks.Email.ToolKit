@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookItem.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -659,10 +659,10 @@ namespace DigitalZenWorks.Email.ToolKit
 					switch (mapiItem)
 					{
 						case AppointmentItem appointmentItem:
-							parent = appointmentItem.Parent;
+							parent = (MAPIFolder)appointmentItem.Parent;
 							break;
 						case MailItem mailItem:
-							parent = mailItem.Parent;
+							parent = (MAPIFolder)mailItem.Parent;
 							break;
 						default:
 							string message = "Item is of unsupported type: " +
@@ -871,7 +871,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						Marshal.ReleaseComObject(journalItem);
 						break;
 					case MailItem mailItem:
-						mailItem = mailItem.Move(destination);
+						mailItem = (MailItem)mailItem.Move(destination);
 						Marshal.ReleaseComObject(mailItem);
 						break;
 					case MeetingItem meetingItem:
@@ -983,7 +983,7 @@ namespace DigitalZenWorks.Email.ToolKit
 						break;
 					case MailItem mailItem:
 						await Task.Run(() =>
-							mailItem = mailItem.Move(destination)).
+							mailItem = (MailItem)mailItem.Move(destination)).
 								ConfigureAwait(false);
 						Marshal.ReleaseComObject(mailItem);
 						break;
@@ -1407,7 +1407,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				string typeValue =
 					typeEnum.ToString(CultureInfo.InvariantCulture);
 				string value =
-					propertyValue.ToString(CultureInfo.InvariantCulture);
+					propertyValue.ToString();
 
 				propertyText = string.Format(
 					CultureInfo.InvariantCulture,

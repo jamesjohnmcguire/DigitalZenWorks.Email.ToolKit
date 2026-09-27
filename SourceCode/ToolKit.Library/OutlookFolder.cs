@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookFolder.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -346,11 +346,27 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				for (int index = 1; index <= count; index++)
 				{
-					var item = items[index];
+					object item = items[index];
+
+					Type typeInfo = item.GetType();
+					string name = typeInfo.FullName;
+
+					string errorMessage =
+
+						$"Unsupported Outlook item type: {name}";
+
+					string entryId = item switch
+					{
+						MailItem mailItem => mailItem.EntryID,
+						ContactItem contactItem => contactItem.EntryID,
+						AppointmentItem appointmentItem =>
+							appointmentItem.EntryID,
+						_ => throw new NotSupportedException(errorMessage)
+					};
+
 					OutlookItem contentItem = new (item);
 
 					string synopses = contentItem.Synopses;
-					string entryId = item.EntryId;
 
 					string complete = entryId + " - " + synopses;
 					entryIds.Add(complete);
@@ -419,7 +435,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (folder != null && folder.Parent is not null &&
 				folder.Parent is MAPIFolder)
 			{
-				parent = folder.Parent;
+				parent = (MAPIFolder)folder.Parent;
 			}
 
 			return parent;
@@ -1065,12 +1081,12 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						NameSpace session = outlookAccount.Session;
 
-						item = session.OpenSharedItem(filePath);
+						item = (MailItem)session.OpenSharedItem(filePath);
 
 						item.UnRead = false;
 						item.Save();
 
-						item = item.Move(pstFolder);
+						item = (MailItem)item.Move(pstFolder);
 					}
 					catch (COMException exception)
 					{

@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="Program.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -185,7 +185,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem = mailItem.Move(mainFolder);
+			mailItem = (MailItem)mailItem.Move(mainFolder);
 
 			OutlookItem outlookItem = new (mailItem);
 			string hash = outlookItem.Hash;
@@ -204,7 +204,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem2 = mailItem2.Move(mainFolder);
+			mailItem2 = (MailItem)mailItem2.Move(mainFolder);
 
 			OutlookItem outlookItem2 = new (mailItem2);
 			hash2 = outlookItem2.Hash;
@@ -222,7 +222,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"someone@example.com",
 				"This is aka subject",
 				"This is the message.");
-			mailItem3 = mailItem3.Move(mainFolder);
+			mailItem3 = (MailItem)mailItem3.Move(mainFolder);
 
 			OutlookItem outlookItem3 = new (mailItem3);
 			hash2 = outlookItem3.Hash;
@@ -282,7 +282,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem = mailItem.Move(subFolder);
+			mailItem = (MailItem)mailItem.Move(subFolder);
 
 			subFolder = OutlookFolder.AddFolder(
 				mainFolder, "Testing (1)");
@@ -316,7 +316,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"someone@example.com",
 				"This is the subject",
 				"This is the message.");
-			mailItem = mailItem.Move(mainFolder);
+			mailItem = (MailItem)mailItem.Move(mainFolder);
 
 			string msgPath = basePath + "test.msg";
 			mailItem.SaveAs(msgPath);

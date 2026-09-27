@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="Program.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -621,7 +621,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						mailItem =
 							outlookStore.GetMailItemFromEntryId(entryId);
 
-						MAPIFolder parent = mailItem.Parent;
+						MAPIFolder parent = (MAPIFolder)mailItem.Parent;
 						string path = OutlookFolder.GetFolderPath(parent);
 
 						message = "At: " + path;

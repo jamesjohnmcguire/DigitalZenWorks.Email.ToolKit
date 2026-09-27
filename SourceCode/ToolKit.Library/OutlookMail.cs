@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookMail.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -554,7 +554,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				"FlagRequest", flagRequest, formatText);
 			properties.Add(flagRequest);
 
-			string header = mailItem.PropertyAccessor.GetProperty(
+			string header = (string)mailItem.PropertyAccessor.GetProperty(
 				"http://schemas.microsoft.com/mapi/proptag/0x007D001F");
 
 			if (header != null && strict == false)
