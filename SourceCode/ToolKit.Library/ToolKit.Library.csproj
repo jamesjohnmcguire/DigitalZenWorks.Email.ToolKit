@@ -36,18 +36,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<COMReference Include="Microsoft.Office.Interop.Outlook">
-			<EmbedInteropTypes>true</EmbedInteropTypes>
-			<Guid>00062fff-0000-0000-c000-000000000046</Guid>
-			<VersionMajor>9</VersionMajor>
-			<VersionMinor>6</VersionMinor>
-			<WrapperTool>tlbimp</WrapperTool>
-		</COMReference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Common.Logging" Version="3.4.1" />
 		<PackageReference Include="Common.Logging.Core" Version="3.4.1" />
+		<PackageReference Include="Microsoft.Office.Interop.Outlook" Version="15.0.4797.1004" />
+		<PackageReference Include="MicrosoftOfficeCore16" Version="16.0.16626.20000" />
+		<PackageReference Include="NetOfficeFw.Core" Version="1.9.11" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

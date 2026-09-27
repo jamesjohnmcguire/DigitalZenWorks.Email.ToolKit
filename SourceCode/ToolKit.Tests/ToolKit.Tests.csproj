@@ -10,18 +10,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<COMReference Include="Microsoft.Office.Interop.Outlook">
-			<WrapperTool>tlbimp</WrapperTool>
-			<VersionMinor>6</VersionMinor>
-			<VersionMajor>9</VersionMajor>
-			<Guid>00062fff-0000-0000-c000-000000000046</Guid>
-			<Lcid>0</Lcid>
-			<Isolated>false</Isolated>
-			<EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Coverlet.Collector" Version="10.0.1">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
