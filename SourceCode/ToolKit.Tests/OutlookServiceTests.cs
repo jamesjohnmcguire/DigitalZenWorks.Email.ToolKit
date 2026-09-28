@@ -79,8 +79,7 @@ internal sealed class OutlookServiceTests
 	public void ConnectDoesNotReconnectWhenAlreadyConnected()
 	{
 		OutlookService service = new();
-		FakeOutlookSession session = new();
-		FakeOutlookConnection connection = new(session);
+		FakeOutlookConnection connection = new();
 
 		FakeOutlookFactory factory = new();
 
@@ -103,8 +102,7 @@ internal sealed class OutlookServiceTests
 	public void Connect_IgnoresFactory_AfterAlreadyConnected()
 	{
 		OutlookService service = new();
-		FakeOutlookSession session = new();
-		FakeOutlookConnection connection = new(session);
+		FakeOutlookConnection connection = new();
 
 		FakeOutlookFactory firstFactory = new();
 		firstFactory.IsAvailable = true;
@@ -147,8 +145,7 @@ internal sealed class OutlookServiceTests
 	public void ConnectReturnsTrueWhenConnectionCreated()
 	{
 		OutlookService service = new();
-		FakeOutlookSession session = new();
-		FakeOutlookConnection connection = new(session);
+		FakeOutlookConnection connection = new();
 
 		FakeOutlookFactory factory = new();
 		factory.IsAvailable = true;

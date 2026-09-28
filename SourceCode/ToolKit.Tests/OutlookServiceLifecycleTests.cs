@@ -59,12 +59,11 @@ internal sealed class OutlookServiceLifecycleTests
 	{
 		OutlookService service = new();
 
-		FakeOutlookSession session = new();
-		FakeOutlookConnection connection1 = new(session);
+		FakeOutlookConnection connection = new();
 		FakeOutlookFactory factory = new();
 
 		factory.IsAvailable = true;
-		factory.Connection = connection1;
+		factory.Connection = connection;
 
 		bool first = service.Connect(factory);
 		bool second = service.Connect(factory);

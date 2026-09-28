@@ -13,8 +13,11 @@ internal sealed class FakeOutlookConnection
 {
 	public IOutlookSession Session { get; }
 
-	public FakeOutlookConnection(
-		IOutlookSession session)
+	public FakeOutlookConnection()
+	{
+	}
+
+	public FakeOutlookConnection(IOutlookSession session)
 	{
 		Session = session;
 	}
