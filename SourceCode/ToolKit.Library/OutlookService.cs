@@ -62,7 +62,11 @@ public class OutlookService : IOutlookService
 	{
 		bool connected = false;
 
-		if (connection == null)
+		if (connection != null)
+		{
+			connected = true;
+		}
+		else
 		{
 			application = ConnectToExistingOutlook();
 
@@ -96,17 +100,15 @@ public class OutlookService : IOutlookService
 					connection = null;
 				}
 			}
-		}
 
-		if (connection != null)
-		{
-			session = connection.Session;
-
-			connected = true;
-		}
-		else
-		{
-			Log.Error("Outlook unavailable.");
+			if (connection != null)
+			{
+				connected = true;
+			}
+			else
+			{
+				Log.Error("Outlook unavailable.");
+			}
 		}
 
 		return connected;
