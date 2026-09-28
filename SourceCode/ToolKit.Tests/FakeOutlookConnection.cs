@@ -9,15 +9,15 @@ namespace DigitalZenWorks.Email.ToolKit.Tests;
 using DigitalZenWorks.Email.ToolKit;
 
 internal sealed class FakeOutlookConnection
-    : IOutlookConnection
+	: IOutlookConnection
 {
-    public IOutlookSession Session { get; }
+	public IOutlookSession Session { get; }
 
-    public FakeOutlookConnection(
-        IOutlookSession session)
-    {
-        Session = session;
-    }
+	public FakeOutlookConnection(
+		IOutlookSession session)
+	{
+		Session = session;
+	}
 
 	/// <summary>
 	/// Stub implementation of the Quit method. This should only be called by
