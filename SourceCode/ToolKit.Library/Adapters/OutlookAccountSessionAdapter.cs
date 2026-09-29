@@ -32,7 +32,8 @@ internal sealed class OutlookAccountSessionAdapter : IOutlookSession
 			return null;
 		}
 
-		return session.OpenSharedItem(filePath);
+		object? item = session.OpenSharedItem(filePath);
+		return item;
 	}
 
 	/// <summary>
@@ -42,35 +43,20 @@ internal sealed class OutlookAccountSessionAdapter : IOutlookSession
 	/// <returns>True if removed, false otherwise.</returns>
 	public bool RemoveStore(string path)
 	{
-		return OutlookAccount.Instance.RemoveStore(path);
-	}
-
-	public Store GetStore(string path)
-	{
-		return OutlookAccount.Instance.GetStore(path);
+		bool result = OutlookAccount.Instance.RemoveStore(path);
+		return result;
 	}
 
 	public object? GetItemFromId(string entryId)
 	{
+		object? item = null;
 		NameSpace? session = OutlookAccount.Instance.Session;
 
-		if (session == null)
+		if (session != null)
 		{
-			return null;
+			item = session.GetItemFromID(entryId);
 		}
 
-		return session.GetItemFromID(entryId);
-	}
-
-	public MAPIFolder? GetFolderFromIdInternal(string entryId, string storeId)
-	{
-		NameSpace? session = OutlookAccount.Instance.Session;
-
-		if (session == null)
-		{
-			return null;
-		}
-
-		return session.GetFolderFromID(entryId, storeId);
+		return item;
 	}
 }
