@@ -7,7 +7,6 @@
 using Common.Logging;
 using DigitalZenWorks.CommandLine.Commands;
 using DigitalZenWorks.Common.VersionUtilities;
-using DigitalZenWorks.Email.ToolKit;
 using Microsoft.Office.Interop.Outlook;
 using Serilog;
 using Serilog.Configuration;
@@ -20,7 +19,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using CommonLogging = Common.Logging;

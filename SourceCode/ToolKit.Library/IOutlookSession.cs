@@ -8,8 +8,6 @@
 
 namespace DigitalZenWorks.Email.ToolKit;
 
-using Microsoft.Office.Interop.Outlook;
-
 /// <summary>
 /// Interface for an Outlook session.
 /// </summary>

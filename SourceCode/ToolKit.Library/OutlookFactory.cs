@@ -7,9 +7,7 @@
 namespace DigitalZenWorks.Email.ToolKit;
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using global::Common.Logging;
 using Microsoft.VisualBasic;

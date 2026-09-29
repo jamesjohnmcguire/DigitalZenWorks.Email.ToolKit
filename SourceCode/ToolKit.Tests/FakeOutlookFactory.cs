@@ -6,8 +6,6 @@
 
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
-using Outlook = Microsoft.Office.Interop.Outlook;
-
 #nullable enable
 
 public sealed class FakeOutlookFactory : IOutlookFactory
