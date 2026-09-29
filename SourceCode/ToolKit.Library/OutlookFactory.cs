@@ -20,27 +20,6 @@ public class OutlookFactory : IOutlookFactory
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-	public Outlook.Application? CreateApplication()
-	{
-		Outlook.Application? application = null;
-
-		try
-		{
-			application = ConnectToExistingOutlook();
-
-			if (application == null)
-			{
-				application = new Outlook.Application();
-			}
-		}
-		catch (Exception exception)
-		{
-			Log.Error(exception.ToString());
-		}
-
-		return application;
-	}
-
 	public IOutlookConnection? CreateConnection()
 	{
 		OutlookConnection connection = null;
@@ -123,6 +102,27 @@ public class OutlookFactory : IOutlookFactory
 			Log.Debug(
 				"Could not attach to an existing Outlook instance.");
 			Log.Debug(exception.ToString());
+		}
+
+		return application;
+	}
+
+	private Outlook.Application? CreateApplication()
+	{
+		Outlook.Application? application = null;
+
+		try
+		{
+			application = ConnectToExistingOutlook();
+
+			if (application == null)
+			{
+				application = new Outlook.Application();
+			}
+		}
+		catch (Exception exception)
+		{
+			Log.Error(exception.ToString());
 		}
 
 		return application;
