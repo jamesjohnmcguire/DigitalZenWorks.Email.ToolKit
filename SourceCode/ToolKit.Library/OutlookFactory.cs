@@ -107,7 +107,7 @@ public class OutlookFactory : IOutlookFactory
 		return application;
 	}
 
-	private Outlook.Application? CreateApplication()
+	private static Outlook.Application? CreateApplication()
 	{
 		Outlook.Application? application = null;
 
