@@ -1,4 +1,4 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookAccount.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -41,7 +41,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			application = new ();
 
 			session = application.Session;
-			outlookSession = new OutlookSession(application);
+			outlookSession = new OutlookSession(session);
 		}
 
 		/// <summary>

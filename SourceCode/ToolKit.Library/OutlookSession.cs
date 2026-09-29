@@ -29,15 +29,6 @@ public class OutlookSession
 	/// <summary>
 	/// Initializes a new instance of the <see cref="OutlookSession"/> class.
 	/// </summary>
-	/// <param name="application">The Outlook application.</param>
-	public OutlookSession(Application application)
-	{
-		session = application.Session;
-	}
-
-	/// <summary>
-	/// Initializes a new instance of the <see cref="OutlookSession"/> class.
-	/// </summary>
 	/// <param name="session">The Outlook session.</param>
 	public OutlookSession(NameSpace? session)
 	{
