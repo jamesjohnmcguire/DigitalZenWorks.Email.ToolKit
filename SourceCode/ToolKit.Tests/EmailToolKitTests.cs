@@ -4,14 +4,14 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using DigitalZenWorks.Common.Utilities;
-using Microsoft.Office.Interop.Outlook;
-using NUnit.Framework;
-using NUnit.Framework.Internal;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using DigitalZenWorks.Common.Utilities;
+using Microsoft.Office.Interop.Outlook;
+using NUnit.Framework;
+using NUnit.Framework.Internal;
 
 [assembly: CLSCompliant(true)]
 
