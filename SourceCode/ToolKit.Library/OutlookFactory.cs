@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using global::Common.Logging;
+using Microsoft.VisualBasic;
 using Outlook = Microsoft.Office.Interop.Outlook;
 
 #nullable enable
@@ -27,7 +28,12 @@ public class OutlookFactory : IOutlookFactory
 
 		try
 		{
-			application = new Outlook.Application();
+			application = ConnectToExistingOutlook();
+
+			if (application == null)
+			{
+				application = new Outlook.Application();
+			}
 		}
 		catch (Exception exception)
 		{
@@ -98,5 +104,29 @@ public class OutlookFactory : IOutlookFactory
 		}
 
 		return isAvailable;
+	}
+
+	private static Outlook.Application? ConnectToExistingOutlook()
+	{
+		Outlook.Application? application = null;
+
+		try
+		{
+#if NET5_0_OR_GREATER
+			application = Interaction.GetObject(null, "Outlook.Application")
+					as Outlook.Application;
+#elif !NETSTANDARD2_0_OR_GREATER
+			application = Marshal.GetActiveObject("Outlook.Application")
+					as Application;
+#endif
+		}
+		catch (COMException exception)
+		{
+			Log.Debug(
+				"Could not attach to an existing Outlook instance.");
+			Log.Debug(exception.ToString());
+		}
+
+		return application;
 	}
 }

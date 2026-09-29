@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
-using Microsoft.VisualBasic;
 #if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
 using Microsoft.Win32;
 #endif
@@ -68,47 +67,38 @@ public class OutlookService : IOutlookService
 		}
 		else
 		{
-			application = ConnectToExistingOutlook();
+			try
+			{
+				bool isAvailable =
+					factory.IsOutlookAvailable(timeOutSeconds);
 
-			if (application != null)
-			{
-				connection = new OutlookConnection(application);
-			}
-			else
-			{
-				try
+				if (isAvailable == true)
 				{
-					bool isAvailable =
-						factory.IsOutlookAvailable(timeOutSeconds);
+					connection = factory.CreateConnection();
 
-					if (isAvailable == true)
+					if (connection != null)
 					{
-						connection = factory.CreateConnection();
-
-						if (connection != null)
-						{
-							session = connection.Session;
-							outlookStartedByThis = true;
-						}
+						session = connection.Session;
+						outlookStartedByThis = true;
 					}
 				}
-				catch (System.Exception exception) when
-					(exception is COMException ||
-					exception is InvalidOperationException)
-				{
-					Log.Error(exception);
-					connection = null;
-				}
 			}
+			catch (System.Exception exception) when
+				(exception is COMException ||
+				exception is InvalidOperationException)
+			{
+				Log.Error(exception);
+				connection = null;
+			}
+		}
 
-			if (connection != null)
-			{
-				connected = true;
-			}
-			else
-			{
-				Log.Error("Outlook unavailable.");
-			}
+		if (connection != null)
+		{
+			connected = true;
+		}
+		else
+		{
+			Log.Error("Outlook unavailable.");
 		}
 
 		return connected;
@@ -171,29 +161,5 @@ public class OutlookService : IOutlookService
 		}
 
 		return started;
-	}
-
-	private static Application? ConnectToExistingOutlook()
-	{
-		Application? application = null;
-
-		try
-		{
-#if NET5_0_OR_GREATER
-			application = Interaction.GetObject(null, "Outlook.Application")
-					as Application;
-#elif !NETSTANDARD2_0_OR_GREATER
-			application = Marshal.GetActiveObject("Outlook.Application")
-					as Application;
-#endif
-		}
-		catch (COMException exception)
-		{
-			Log.Debug(
-				"Could not attach to an existing Outlook instance.");
-			Log.Debug(exception.ToString());
-		}
-
-		return application;
 	}
 }
