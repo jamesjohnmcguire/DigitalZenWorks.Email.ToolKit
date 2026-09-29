@@ -14,15 +14,10 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 /// should use IOutlookService and IOutlookSession rather than this
 /// concrete type.
 /// </summary>
-internal class OutlookConnection
-	: IOutlookConnection
+internal class OutlookConnection(Outlook.Application application)
+		: IOutlookConnection
 {
-	private readonly Outlook.Application application;
-
-	public OutlookConnection(Outlook.Application application)
-	{
-		this.application = application;
-	}
+	private readonly Outlook.Application application = application;
 
 	public IOutlookSession Session
 	{

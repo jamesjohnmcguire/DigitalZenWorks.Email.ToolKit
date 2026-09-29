@@ -67,7 +67,7 @@ internal sealed class OutlookServiceIntegrationTests
 	{
 		OutlookFactory factory = new();
 
-		bool connected = service.Connect(factory, timeOutSeconds: 33);
+		bool connected = service!.Connect(factory, timeOutSeconds: 33);
 
 		Assert.That(connected, Is.True);
 		Assert.That(service.Session, Is.Not.Null);

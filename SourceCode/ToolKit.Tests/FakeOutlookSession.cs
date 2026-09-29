@@ -15,7 +15,7 @@ internal sealed class FakeOutlookSession
 	: IOutlookSession
 {
 
-	public Store? GetStore(string path)
+	public static Store? GetStore(string path)
 	{
 		return null;
 	}
@@ -33,10 +33,5 @@ internal sealed class FakeOutlookSession
 	public bool RemoveStore(string path)
 	{
 		return true;
-	}
-
-	public MAPIFolder? GetFolderFromIdInternal(string entryId, string storeId)
-	{
-		return null;
 	}
 }

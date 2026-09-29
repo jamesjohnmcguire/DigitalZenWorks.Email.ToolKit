@@ -26,7 +26,7 @@ using Microsoft.Win32;
 public class OutlookService : IOutlookService
 {
 	private static readonly ILog Log = LogManager.GetLogger(
-		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+		System.Reflection.MethodBase.GetCurrentMethod() !.DeclaringType);
 
 	private IOutlookConnection? connection;
 	private bool outlookStartedByThis;
@@ -46,6 +46,38 @@ public class OutlookService : IOutlookService
 		get { return connection != null; }
 	}
 
+	public static bool IsOutlookInstalled()
+	{
+		bool installed = false;
+
+#if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
+		string registryPath =
+			@"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\OUTLOOK.EXE";
+		using RegistryKey? key =
+			Registry.LocalMachine.OpenSubKey(registryPath);
+
+		if (key != null)
+		{
+			installed = true;
+		}
+		else
+		{
+			// 32-bit Outlook on 64-bit Windows
+			registryPath = @"SOFTWARE\WOW6432Node\Microsoft\Windows\" +
+				@"CurrentVersion\App Paths\OUTLOOK.EXE";
+			using RegistryKey? wowKey =
+				Registry.LocalMachine.OpenSubKey(registryPath);
+
+			if (wowKey != null)
+			{
+				installed = true;
+			}
+		}
+#endif
+
+		return installed;
+	}
+
 	public bool Connect(int timeOutSeconds = 10)
 	{
 		OutlookFactory factory = new();
@@ -53,6 +85,33 @@ public class OutlookService : IOutlookService
 		bool connected = Connect(factory, timeOutSeconds);
 
 		return connected;
+	}
+
+	/// <summary>
+	/// Disconnects from Outlook. If Outlook was started by the service,
+	/// it will be quit.
+	/// </summary>
+	public void Disconnect()
+	{
+		if (connection != null && outlookStartedByThis == true)
+		{
+			connection.Quit();
+		}
+	}
+
+	internal static bool IsOutlookStarted()
+	{
+		bool started = false;
+
+		Process[] existing = Process.GetProcessesByName("OUTLOOK");
+		int count = existing.Length;
+
+		if (count > 0)
+		{
+			started = true;
+		}
+
+		return started;
 	}
 
 	internal bool Connect(IOutlookFactory factory, int timeOutSeconds = 10)
@@ -100,64 +159,5 @@ public class OutlookService : IOutlookService
 		}
 
 		return connected;
-	}
-
-	/// <summary>
-	/// Disconnects from Outlook. If Outlook was started by the service,
-	/// it will be quit.
-	/// </summary>
-	public void Disconnect()
-	{
-		if (connection != null && outlookStartedByThis == true)
-		{
-			connection.Quit();
-		}
-	}
-
-	public static bool IsOutlookInstalled()
-	{
-		bool installed = false;
-
-#if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
-		string registryPath =
-			@"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\OUTLOOK.EXE";
-		using RegistryKey? key =
-			Registry.LocalMachine.OpenSubKey(registryPath);
-
-		if (key != null)
-		{
-			installed = true;
-		}
-		else
-		{
-			// 32-bit Outlook on 64-bit Windows
-			registryPath = @"SOFTWARE\WOW6432Node\Microsoft\Windows\" +
-				@"CurrentVersion\App Paths\OUTLOOK.EXE";
-			using RegistryKey? wowKey =
-				Registry.LocalMachine.OpenSubKey(registryPath);
-
-			if (wowKey != null)
-			{
-				installed = true;
-			}
-		}
-#endif
-
-		return installed;
-	}
-
-	internal static bool IsOutlookStarted()
-	{
-		bool started = false;
-
-		Process[] existing = Process.GetProcessesByName("OUTLOOK");
-		int count = existing.Length;
-
-		if (count > 0)
-		{
-			started = true;
-		}
-
-		return started;
 	}
 }

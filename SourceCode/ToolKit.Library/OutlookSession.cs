@@ -18,7 +18,7 @@ public class OutlookSession
 	: IOutlookSession
 {
 	private static readonly ILog Log = LogManager.GetLogger(
-		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+		System.Reflection.MethodBase.GetCurrentMethod() !.DeclaringType);
 
 	private readonly NameSpace? session;
 
@@ -32,37 +32,31 @@ public class OutlookSession
 		this.session = session;
 	}
 
-	[Obsolete(
-		"GetFolderFromID is deprecated, please use GetFolderFromId instead.")]
-	public OutlookFolder? GetFolderFromID(string entryId, string storeId)
-	{
-		return GetFolderFromId(entryId, storeId);
-	}
-
 	public OutlookFolder? GetFolderFromId(string entryId, string storeId)
 	{
 		OutlookFolder? folder = null;
 
-		MAPIFolder? mapiFolder = session.GetFolderFromID(entryId, storeId);
-
-		if (mapiFolder != null)
+		if (session != null)
 		{
-			folder = new(mapiFolder);
+			MAPIFolder? mapiFolder = session.GetFolderFromID(entryId, storeId);
+
+			if (mapiFolder != null)
+			{
+				folder = new(mapiFolder);
+			}
 		}
 
 		return folder;
 	}
 
-	[Obsolete(
-		"GetItemFromID is deprecated, please use GetItemFromId instead.")]
-	public object? GetItemFromID(string entryId)
-	{
-		return GetItemFromId(entryId);
-	}
-
 	public object? GetItemFromId(string entryId)
 	{
-		object? item = session.GetItemFromID(entryId);
+		object? item = null;
+
+		if (session != null)
+		{
+			item = session.GetItemFromID(entryId);
+		}
 
 		return item;
 	}
@@ -71,63 +65,66 @@ public class OutlookSession
 	/// Create a new pst storage file.
 	/// </summary>
 	/// <param name="path">The path to the pst file.</param>
-	/// <returns>A store object.</returns>
-	public Store GetStore(string path)
+	/// <returns>A store object or null if not found.</returns>
+	public Store? GetStore(string path)
 	{
-		Store newPst = null;
+		Store? store = null;
 
-		path = Path.GetFullPath(path);
-
-		string extension = Path.GetExtension(path);
-
-		if (!extension.Equals(".pst", StringComparison.OrdinalIgnoreCase))
+		if (session != null)
 		{
-			// Attempt to fix mistaken or missing file extension.
-			path += ".pst";
-		}
+			path = Path.GetFullPath(path);
 
-		// If the .pst file does not exist, Microsoft Outlook creates it.
-		session.AddStore(path);
+			string extension = Path.GetExtension(path);
 
-		int total = session.Stores.Count;
-
-		for (int index = 1; index <= total; index++)
-		{
-			Store store = null;
-
-			try
+			if (!extension.Equals(".pst", StringComparison.OrdinalIgnoreCase))
 			{
-				store = session.Stores[index];
+				// Attempt to fix mistaken or missing file extension.
+				path += ".pst";
 			}
-			catch (UnauthorizedAccessException exception)
+
+			// If the .pst file does not exist, Microsoft Outlook creates it.
+			session.AddStore(path);
+
+			int total = session.Stores.Count;
+
+			for (int index = 1; index <= total; index++)
 			{
-				Log.Error(exception.ToString());
+				Store? checkStore = null;
+
+				try
+				{
+					checkStore = session.Stores[index];
+				}
+				catch (UnauthorizedAccessException exception)
+				{
+					Log.Error(exception.ToString());
+				}
+
+				if (checkStore == null)
+				{
+					Log.Warn("Enumerating stores - store is null");
+				}
+				else
+				{
+					string filePath = checkStore.FilePath;
+
+					if (!string.IsNullOrWhiteSpace(filePath) &&
+						filePath.Equals(
+							path, StringComparison.OrdinalIgnoreCase))
+					{
+						store = checkStore;
+						break;
+					}
+				}
 			}
 
 			if (store == null)
 			{
-				Log.Warn("Enumerating stores - store is null");
-			}
-			else
-			{
-				string filePath = store.FilePath;
-
-				if (!string.IsNullOrWhiteSpace(filePath) &&
-					filePath.Equals(
-						path, StringComparison.OrdinalIgnoreCase))
-				{
-					newPst = store;
-					break;
-				}
+				Log.Warn("Store not found: " + path);
 			}
 		}
 
-		if (newPst == null)
-		{
-			Log.Warn("Store not found: " + path);
-		}
-
-		return newPst;
+		return store;
 	}
 
 	public OutlookMail? OpenMailItemFile(string filePath)
@@ -149,8 +146,13 @@ public class OutlookSession
 
 	public object? OpenSharedItem(string filePath)
 	{
-		// session is Namespace
-		object? item = session.OpenSharedItem(filePath);
+		object? item = null;
+
+		if (session != null)
+		{
+			// session is Namespace
+			item = session.OpenSharedItem(filePath);
+		}
 
 		return item;
 	}
@@ -158,21 +160,25 @@ public class OutlookSession
 	/// <summary>
 	/// Removes a store from Outlook.
 	/// </summary>
-	/// <param name="path">The store to remove.</param>
+	/// <param name="store">The store to remove.</param>
 	/// <returns>remove result.</returns>
 	public bool RemoveStore(Store store)
 	{
 		bool result = false;
 
-		Log.Info("Begin to Removing store: " + store.DisplayName);
-
 		if (store != null)
 		{
-			MAPIFolder rootFolder = store.GetRootFolder();
-			session.RemoveStore(rootFolder);
+			Log.Info("Begin to Removing store: " + store.DisplayName);
 
-			Log.Info("Store removed successfully: " + store.DisplayName);
-			result = true;
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			if (session != null)
+			{
+				session.RemoveStore(rootFolder);
+
+				Log.Info("Store removed successfully: " + store.DisplayName);
+				result = true;
+			}
 		}
 		else
 		{
@@ -202,16 +208,28 @@ public class OutlookSession
 			path += ".pst";
 		}
 
-		Store store = GetStore(path);
+		Store? store = GetStore(path);
 
-		result = RemoveStore(store);
+		if (store == null)
+		{
+			Log.Warn("Store not found: " + path);
+		}
+		else
+		{
+			result = RemoveStore(store);
+		}
 
 		return result;
 	}
 
 	internal MAPIFolder? GetFolderFromIdInternal(string entryId, string storeId)
 	{
-		MAPIFolder? mapiFolder = session.GetFolderFromID(entryId, storeId);
+		MAPIFolder? mapiFolder = null;
+
+		if (session != null)
+		{
+			mapiFolder = session.GetFolderFromID(entryId, storeId);
+		}
 
 		return mapiFolder;
 	}

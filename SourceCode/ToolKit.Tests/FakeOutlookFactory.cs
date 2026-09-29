@@ -8,7 +8,7 @@
 
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
-public sealed class FakeOutlookFactory : IOutlookFactory
+internal sealed class FakeOutlookFactory : IOutlookFactory
 {
 	public bool IsAvailable { get; set; }
 
