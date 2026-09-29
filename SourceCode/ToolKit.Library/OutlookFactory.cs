@@ -32,7 +32,7 @@ public class OutlookFactory : IOutlookFactory
 	/// connection could not be established.</returns>
 	public IOutlookConnection? CreateConnection()
 	{
-		OutlookConnection connection = null;
+		OutlookConnection? connection = null;
 
 		Outlook.Application? application = CreateApplication();
 
