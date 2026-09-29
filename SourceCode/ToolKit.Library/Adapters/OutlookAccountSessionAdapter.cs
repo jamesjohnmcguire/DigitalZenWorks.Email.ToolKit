@@ -4,6 +4,8 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+#nullable enable
+
 namespace DigitalZenWorks.Email.ToolKit;
 
 using Microsoft.Office.Interop.Outlook;
