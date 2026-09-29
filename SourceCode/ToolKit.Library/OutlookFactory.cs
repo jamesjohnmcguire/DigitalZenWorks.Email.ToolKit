@@ -51,9 +51,11 @@ public class OutlookFactory : IOutlookFactory
 			{
 				tryApplication = new Outlook.Application();
 			}
-			catch (Exception ex)
+			catch (System.Exception innerException) when
+				(exception is COMException ||
+				exception is InvalidOperationException)
 			{
-				exception = ex;
+				exception = innerException;
 				Log.Error(exception.ToString());
 			}
 			finally
@@ -97,7 +99,9 @@ public class OutlookFactory : IOutlookFactory
 					as Application;
 #endif
 		}
-		catch (COMException exception)
+		catch (Exception exception) when
+			(exception is COMException ||
+			exception is InvalidOperationException)
 		{
 			Log.Debug(
 				"Could not attach to an existing Outlook instance.");
@@ -120,7 +124,9 @@ public class OutlookFactory : IOutlookFactory
 				application = new Outlook.Application();
 			}
 		}
-		catch (Exception exception)
+		catch (Exception exception) when
+			(exception is COMException ||
+			exception is InvalidOperationException)
 		{
 			Log.Error(exception.ToString());
 		}
