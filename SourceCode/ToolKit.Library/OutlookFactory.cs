@@ -15,11 +15,21 @@ using global::Common.Logging;
 using Microsoft.VisualBasic;
 using Outlook = Microsoft.Office.Interop.Outlook;
 
+/// <summary>
+/// Factory class for creating connections to the Outlook application.
+/// </summary>
 public class OutlookFactory : IOutlookFactory
 {
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod() !.DeclaringType);
 
+	/// <summary>
+	/// Creates a connection to the Outlook application. If an existing
+	/// instance of Outlook is running, it will connect to that instance;
+	/// otherwise, it will create a new instance.
+	/// </summary>
+	/// <returns>A connection to the Outlook application, or null if the
+	/// connection could not be established.</returns>
 	public IOutlookConnection? CreateConnection()
 	{
 		OutlookConnection connection = null;
@@ -34,6 +44,12 @@ public class OutlookFactory : IOutlookFactory
 		return connection;
 	}
 
+	/// <summary>
+	/// Checks if Outlook is available by attempting to create an instance of
+	/// the Outlook application within a specified timeout period.
+	/// </summary>
+	/// <param name="timeOutSeconds">The timeout in seconds.</param>
+	/// <returns>True if Outlook is available; otherwise, false.</returns>
 	public bool IsOutlookAvailable(int timeOutSeconds)
 	{
 		bool isAvailable = false;

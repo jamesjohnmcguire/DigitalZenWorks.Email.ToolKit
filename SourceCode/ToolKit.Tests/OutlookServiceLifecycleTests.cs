@@ -10,6 +10,9 @@ namespace DigitalZenWorks.Email.ToolKit.Tests;
 
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the lifecycle of the <see cref="OutlookService"/> class.
+/// </summary>
 internal sealed class OutlookServiceLifecycleTests
 {
 	/// <summary>

@@ -32,20 +32,36 @@ public class OutlookService : IOutlookService
 	private bool outlookStartedByThis;
 	private IOutlookSession? session;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="OutlookService"/> class.
+	/// </summary>
 	public OutlookService()
 	{
 	}
 
+	/// <summary>
+	/// Gets the Outlook session. This property will be null if the service
+	/// is not connected to Outlook.
+	/// </summary>
 	public IOutlookSession? Session
 	{
 		get { return session; }
 	}
 
+	/// <summary>
+	/// Gets a value indicating whether the service is currently connected to
+	/// Outlook.
+	/// </summary>
 	public bool IsConnected
 	{
 		get { return connection != null; }
 	}
 
+	/// <summary>
+	/// Checks if Outlook is installed on the system by looking for the
+	/// installation path in the registry.
+	/// </summary>
+	/// <returns>True if Outlook is installed; otherwise, false.</returns>
 	public static bool IsOutlookInstalled()
 	{
 		bool installed = false;
@@ -78,6 +94,13 @@ public class OutlookService : IOutlookService
 		return installed;
 	}
 
+	/// <summary>
+	/// Connects to Outlook. If Outlook is not available, it will attempt
+	/// to start a new instance.
+	/// </summary>
+	/// <param name="timeOutSeconds">The timeout in seconds.</param>
+	/// <returns>True if the connection was successful; otherwise, false.
+	/// </returns>
 	public bool Connect(int timeOutSeconds = 10)
 	{
 		OutlookFactory factory = new();
@@ -99,6 +122,10 @@ public class OutlookService : IOutlookService
 		}
 	}
 
+	/// <summary>
+	/// Checks if Outlook is currently running in the current user session.
+	/// </summary>
+	/// <returns>A boolean indicating whether Outlook is started.</returns>
 	internal static bool IsOutlookStarted()
 	{
 		bool started = false;
@@ -114,6 +141,15 @@ public class OutlookService : IOutlookService
 		return started;
 	}
 
+	/// <summary>
+	/// Connects to Outlook using the provided factory. If Outlook is not
+	/// available, it will attempt to start a new instance.
+	/// </summary>
+	/// <param name="factory">The Outlook factory to use for creating
+	/// connections.</param>
+	/// <param name="timeOutSeconds">The timeout in seconds.</param>
+	/// <returns>True if the connection was successful; otherwise, false.
+	/// </returns>
 	internal bool Connect(IOutlookFactory factory, int timeOutSeconds = 10)
 	{
 		bool connected = false;

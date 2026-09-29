@@ -14,6 +14,10 @@ using System.Runtime.InteropServices;
 using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 
+/// <summary>
+/// Represents an Outlook session and provides methods to interact with Outlook
+/// folders, items, and stores.
+/// </summary>
 public class OutlookSession
 	: IOutlookSession
 {
@@ -22,16 +26,30 @@ public class OutlookSession
 
 	private readonly NameSpace? session;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="OutlookSession"/> class.
+	/// </summary>
+	/// <param name="application">The Outlook application.</param>
 	public OutlookSession(Application application)
 	{
 		session = application.Session;
 	}
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="OutlookSession"/> class.
+	/// </summary>
+	/// <param name="session">The Outlook session.</param>
 	public OutlookSession(NameSpace? session)
 	{
 		this.session = session;
 	}
 
+	/// <summary>
+	/// Gets a folder from its entry id and store id.
+	/// </summary>
+	/// <param name="entryId">The entry id of the folder.</param>
+	/// <param name="storeId">The store id of the folder.</param>
+	/// <returns>The folder if found; otherwise, null.</returns>
 	public OutlookFolder? GetFolderFromId(string entryId, string storeId)
 	{
 		OutlookFolder? folder = null;
@@ -49,6 +67,11 @@ public class OutlookSession
 		return folder;
 	}
 
+	/// <summary>
+	/// Gets an item from its entry id.
+	/// </summary>
+	/// <param name="entryId">The entry id of the item.</param>
+	/// <returns>The item if found; otherwise, null.</returns>
 	public object? GetItemFromId(string entryId)
 	{
 		object? item = null;
@@ -127,6 +150,11 @@ public class OutlookSession
 		return store;
 	}
 
+	/// <summary>
+	/// Opens a mail item file and returns an OutlookMail object.
+	/// </summary>
+	/// <param name="filePath">The path to the mail item file.</param>
+	/// <returns>The OutlookMail object or null if not found.</returns>
 	public OutlookMail? OpenMailItemFile(string filePath)
 	{
 		OutlookMail? outlookMailItem = null;
@@ -144,6 +172,11 @@ public class OutlookSession
 		return outlookMailItem;
 	}
 
+	/// <summary>
+	/// Opens a shared item in Outlook.
+	/// </summary>
+	/// <param name="filePath">The path to the shared item.</param>
+	/// <returns>The opened item or null if not found.</returns>
 	public object? OpenSharedItem(string filePath)
 	{
 		object? item = null;
@@ -222,6 +255,12 @@ public class OutlookSession
 		return result;
 	}
 
+	/// <summary>
+	/// Gets a folder from its entry id and store id.
+	/// </summary>
+	/// <param name="entryId">The entry id of the folder.</param>
+	/// <param name="storeId">The store id of the folder.</param>
+	/// <returns>The MAPI folder if found; otherwise, null.</returns>
 	internal MAPIFolder? GetFolderFromIdInternal(string entryId, string storeId)
 	{
 		MAPIFolder? mapiFolder = null;

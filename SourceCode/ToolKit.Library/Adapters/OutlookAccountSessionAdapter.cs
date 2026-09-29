@@ -47,6 +47,12 @@ internal sealed class OutlookAccountSessionAdapter : IOutlookSession
 		return result;
 	}
 
+	/// <summary>
+	/// Gets an item from its EntryID by delegating to the OutlookAccount
+	/// session.
+	/// </summary>
+	/// <param name="entryId">The EntryID of the item to retrieve.</param>
+	/// <returns>The retrieved item or null.</returns>
 	public object? GetItemFromId(string entryId)
 	{
 		object? item = null;

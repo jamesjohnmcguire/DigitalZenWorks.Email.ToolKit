@@ -16,7 +16,8 @@ namespace DigitalZenWorks.Email.ToolKit;
 public interface IOutlookService
 {
 	/// <summary>
-	/// Indicates whether there is an active connection/session.
+	/// Gets a value indicating whether indicates whether there is an active
+	/// connection/session.
 	/// </summary>
 	bool IsConnected { get; }
 

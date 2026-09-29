@@ -19,6 +19,9 @@ internal class OutlookConnection(Outlook.Application application)
 {
 	private readonly Outlook.Application application = application;
 
+	/// <summary>
+	/// Gets the Outlook session.
+	/// </summary>
 	public IOutlookSession Session
 	{
 		get

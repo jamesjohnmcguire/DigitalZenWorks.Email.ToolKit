@@ -15,8 +15,7 @@ using System.Threading;
 /// <summary>
 /// Integration tests for OutlookService. These tests are explicit/manual and
 /// should only be run on a developer machine with Outlook installed and an
-/// interactive user session. They are excluded from CI by being marked
-/// [Explicit] and [Category("Integration")].
+/// interactive user session.
 /// </summary>
 [Category("Integration")]
 [Apartment(ApartmentState.STA)]
