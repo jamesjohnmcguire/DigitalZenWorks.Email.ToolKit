@@ -12,7 +12,6 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using global::Common.Logging;
-using Microsoft.Office.Interop.Outlook;
 #if NETFRAMEWORK || NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
 using Microsoft.Win32;
 #endif
@@ -29,7 +28,6 @@ public class OutlookService : IOutlookService
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-	private Application? application;
 	private IOutlookConnection? connection;
 	private bool outlookStartedByThis;
 	private IOutlookSession? session;
