@@ -4,6 +4,8 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+#nullable enable
+
 namespace DigitalZenWorks.Email.ToolKit;
 
 using System;
@@ -12,8 +14,6 @@ using System.Threading;
 using global::Common.Logging;
 using Microsoft.VisualBasic;
 using Outlook = Microsoft.Office.Interop.Outlook;
-
-#nullable enable
 
 public class OutlookFactory : IOutlookFactory
 {

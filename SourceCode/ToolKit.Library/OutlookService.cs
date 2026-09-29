@@ -4,9 +4,9 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-namespace DigitalZenWorks.Email.ToolKit;
-
 #nullable enable
+
+namespace DigitalZenWorks.Email.ToolKit;
 
 using System;
 using System.Diagnostics;

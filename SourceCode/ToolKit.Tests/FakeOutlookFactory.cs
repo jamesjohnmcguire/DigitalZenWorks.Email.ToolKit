@@ -4,9 +4,9 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-namespace DigitalZenWorks.Email.ToolKit.Tests;
-
 #nullable enable
+
+namespace DigitalZenWorks.Email.ToolKit.Tests;
 
 public sealed class FakeOutlookFactory : IOutlookFactory
 {
