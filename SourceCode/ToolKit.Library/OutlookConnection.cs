@@ -14,20 +14,28 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 /// should use IOutlookService and IOutlookSession rather than this
 /// concrete type.
 /// </summary>
-internal class OutlookConnection(Outlook.Application application)
+internal class OutlookConnection
 		: IOutlookConnection
 {
-	private readonly Outlook.Application application = application;
+	private readonly Outlook.Application application;
+	private readonly IOutlookSession session;
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="OutlookConnection"/> class.
+	/// </summary>
+	/// <param name="application">The Outlook application to wrap.</param>
+	public OutlookConnection(Outlook.Application application)
+	{
+		this.application = application;
+		session = new OutlookSession(application.Session);
+	}
 
 	/// <summary>
 	/// Gets the Outlook session.
 	/// </summary>
 	public IOutlookSession Session
 	{
-		get
-		{
-			return new OutlookSession(application.Session);
-		}
+		get { return session; }
 	}
 
 	/// <summary>
