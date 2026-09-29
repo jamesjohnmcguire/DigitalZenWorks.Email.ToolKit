@@ -96,7 +96,7 @@ public class OutlookFactory : IOutlookFactory
 					as Outlook.Application;
 #elif !NETSTANDARD2_0_OR_GREATER
 			application = Marshal.GetActiveObject("Outlook.Application")
-					as Application;
+					as Outlook.Application;
 #endif
 		}
 		catch (Exception exception) when
