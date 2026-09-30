@@ -4,6 +4,8 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+#nullable enable
+
 namespace DigitalZenWorks.Email.ToolKit;
 
 using Outlook = Microsoft.Office.Interop.Outlook;
@@ -17,7 +19,7 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 internal class OutlookConnection
 		: IOutlookConnection
 {
-	private readonly Outlook.Application application;
+	private readonly Outlook.Application? application;
 	private readonly IOutlookSession session;
 
 	/// <summary>
