@@ -25,5 +25,5 @@ internal interface IOutlookFactory
 	/// </summary>
 	/// <param name="timeOutSeconds">The time out period in seconds.</param>
 	/// <returns>true if Outlook is available, false otherwise.</returns>
-	public bool IsOutlookAvailable(int timeOutSeconds);
+	public bool CanCreateApplication(int timeOutSeconds);
 }

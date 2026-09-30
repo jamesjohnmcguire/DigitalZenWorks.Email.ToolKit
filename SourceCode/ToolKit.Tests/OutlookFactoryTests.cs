@@ -25,7 +25,7 @@ internal sealed class OutlookFactoryTests
 		TestOutlookFactory factory = new();
 		factory.CreateApplicationSucceeds = true;
 
-		bool available = factory.IsOutlookAvailable(10);
+		bool available = factory.CanCreateApplication(10);
 
 		Assert.IsTrue(available);
 	}
@@ -43,7 +43,7 @@ internal sealed class OutlookFactoryTests
 		TestOutlookFactory factory = new();
 		factory.DelayMilliseconds = 2000;
 
-		bool available = factory.IsOutlookAvailable(0);
+		bool available = factory.CanCreateApplication(0);
 
 		Assert.IsFalse(available);
 	}

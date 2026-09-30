@@ -50,7 +50,7 @@ public class OutlookFactory : IOutlookFactory
 	/// </summary>
 	/// <param name="timeOutSeconds">The timeout in seconds.</param>
 	/// <returns>True if Outlook is available; otherwise, false.</returns>
-	public bool IsOutlookAvailable(int timeOutSeconds)
+	public bool CanCreateApplication(int timeOutSeconds)
 	{
 		bool isAvailable = false;
 		Exception? exception = null;

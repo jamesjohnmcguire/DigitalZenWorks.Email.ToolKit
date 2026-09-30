@@ -33,7 +33,7 @@ internal class ThrowingFactory : IOutlookFactory
 	/// </summary>
 	/// <param name="timeOutSeconds">The time out period in seconds.</param>
 	/// <returns>true if Outlook is available; otherwise, false.</returns>
-	public bool IsOutlookAvailable(int timeOutSeconds)
+	public bool CanCreateApplication(int timeOutSeconds)
 	{
 		return true;
 	}

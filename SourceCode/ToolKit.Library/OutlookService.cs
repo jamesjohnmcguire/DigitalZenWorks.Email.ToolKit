@@ -163,7 +163,7 @@ public class OutlookService : IOutlookService
 			try
 			{
 				bool isAvailable =
-					factory.IsOutlookAvailable(timeOutSeconds);
+					factory.CanCreateApplication(timeOutSeconds);
 
 				if (isAvailable == true)
 				{
