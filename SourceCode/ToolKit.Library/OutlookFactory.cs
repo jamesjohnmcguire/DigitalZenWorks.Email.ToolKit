@@ -68,8 +68,8 @@ public class OutlookFactory : IOutlookFactory
 				tryApplication = new Outlook.Application();
 			}
 			catch (System.Exception innerException) when
-				(exception is COMException ||
-				exception is InvalidOperationException)
+				(innerException is COMException ||
+				innerException is InvalidOperationException)
 			{
 				exception = innerException;
 				Log.Error(exception.ToString());
