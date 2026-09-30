@@ -53,21 +53,17 @@ public class OutlookFactory : IOutlookFactory
 	public bool IsOutlookAvailable(int timeOutSeconds)
 	{
 		bool isAvailable = false;
-		Outlook.Application? tryApplication = null;
-
 		Exception? exception = null;
-
-		TimeSpan timeOutSpan = TimeSpan.FromSeconds(timeOutSeconds);
-
-		using ManualResetEvent completed = new(initialState: false);
 
 		void CreateOutlookApplication()
 		{
+			Outlook.Application? tryApplication = null;
+
 			try
 			{
 				tryApplication = new Outlook.Application();
 			}
-			catch (System.Exception innerException) when
+			catch (Exception innerException) when
 				(innerException is COMException ||
 				innerException is InvalidOperationException)
 			{
@@ -80,8 +76,6 @@ public class OutlookFactory : IOutlookFactory
 				{
 					Marshal.FinalReleaseComObject(tryApplication);
 				}
-
-				completed.Set();
 			}
 		}
 
@@ -91,7 +85,11 @@ public class OutlookFactory : IOutlookFactory
 		staThread.IsBackground = true;
 		staThread.Start();
 
-		bool finished = completed.WaitOne(timeOutSpan);
+		TimeSpan timeOutSpan =
+			TimeSpan.FromSeconds(timeOutSeconds);
+
+		bool finished =
+			staThread.Join(timeOutSpan);
 
 		if (finished == true && exception == null)
 		{
