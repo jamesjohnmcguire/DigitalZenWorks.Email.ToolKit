@@ -33,6 +33,18 @@ internal class OutlookConnection
 	}
 
 	/// <summary>
+	/// Initializes a new instance of the <see cref="OutlookConnection"/> class.
+	/// </summary>
+	/// <param name="session">The session to expose.</param>
+	/// <remarks>This constructor is intended for testing purposes only.
+	/// </remarks>
+	internal OutlookConnection(IOutlookSession session)
+	{
+		this.application = null;
+		this.session = session;
+	}
+
+	/// <summary>
 	/// Gets the Outlook session.
 	/// </summary>
 	public IOutlookSession Session
