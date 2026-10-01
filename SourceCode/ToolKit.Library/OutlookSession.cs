@@ -207,23 +207,19 @@ public class OutlookSession
 	/// Removes a store from Outlook.
 	/// </summary>
 	/// <param name="path">The path to the pst file.</param>
-	/// <returns>remove result.</returns>
+	/// <returns>Returns true if a store was detached; false if no matching
+	/// store was attached.</returns>
+	/// <remarks>The actual file will not be deleted.  Even after removing the
+	/// store, Outlook may keep the file locked for a short time.</remarks>
 	public bool RemoveStore(string path)
 	{
 		bool result = false;
 
-		Log.Info("Begin to Removing store: " + path);
+		Log.Info("Attempting to remove store: " + path);
 
 		path = Path.GetFullPath(path);
-		string extension = Path.GetExtension(path);
 
-		if (!extension.Equals(".pst", StringComparison.OrdinalIgnoreCase))
-		{
-			// Attempt to fix mistaken or missing file extension.
-			path += ".pst";
-		}
-
-		Store? store = GetStore(path);
+		Store? store = GetStore(path, false);
 
 		if (store == null)
 		{
