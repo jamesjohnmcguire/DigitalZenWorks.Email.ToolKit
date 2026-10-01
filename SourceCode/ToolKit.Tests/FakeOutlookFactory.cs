@@ -8,6 +8,8 @@
 
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
+using System;
+
 /// <summary>
 /// A fake implementation of the IOutlookFactory interface for testing purposes.
 /// </summary>
@@ -17,6 +19,21 @@ internal sealed class FakeOutlookFactory : IOutlookFactory
 	/// Gets or sets a value indicating whether Outlook is available.
 	/// </summary>
 	public bool IsAvailable { get; set; }
+
+	/// <summary>
+	/// Gets or sets the failure to inject into the availability check.
+	/// </summary>
+	public Exception? AvailabilityException { get; set; }
+
+	/// <summary>
+	/// Gets or sets the failure to inject into connection creation.
+	/// </summary>
+	public Exception? ConnectionException { get; set; }
+
+	/// <summary>
+	/// Gets the timeout supplied by the service.
+	/// </summary>
+	public int? LastTimeoutSeconds { get; private set; }
 
 	/// <summary>
 	/// Gets or sets the Outlook connection to be returned by the
@@ -42,6 +59,11 @@ internal sealed class FakeOutlookFactory : IOutlookFactory
 	{
 		CreateConnectionCallCount++;
 
+		if (ConnectionException != null)
+		{
+			throw ConnectionException;
+		}
+
 		return Connection;
 	}
 
@@ -54,6 +76,12 @@ internal sealed class FakeOutlookFactory : IOutlookFactory
 	public bool CanCreateApplication(int timeoutSeconds)
 	{
 		IsOutlookAvailableCallCount++;
+		LastTimeoutSeconds = timeoutSeconds;
+
+		if (AvailabilityException != null)
+		{
+			throw AvailabilityException;
+		}
 
 		return IsAvailable;
 	}

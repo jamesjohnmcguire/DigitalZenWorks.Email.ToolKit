@@ -4,6 +4,8 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+#nullable enable
+
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
 using NUnit.Framework;
@@ -36,8 +38,7 @@ internal sealed class OutlookServiceTests
 	}
 
 	/// <summary>
-	/// Tests that the Connect method checks availability when Outlook is
-	/// already connected.
+	/// Tests that the first connection attempt checks availability.
 	/// </summary>
 	[Test]
 	public void ConnectChecksAvailability()
@@ -86,8 +87,14 @@ internal sealed class OutlookServiceTests
 		factory.IsAvailable = true;
 		factory.Connection = connection;
 
+		bool first = service.Connect(factory);
 		bool result = service.Connect(factory);
+
+		Assert.That(first, Is.True);
 		Assert.That(result, Is.True);
+		Assert.That(service.IsConnected, Is.True);
+		Assert.That(factory.IsOutlookAvailableCallCount, Is.EqualTo(1));
+		Assert.That(connection.SessionAccessCount, Is.EqualTo(1));
 
 		Assert.That(
 			factory.CreateConnectionCallCount,
@@ -114,8 +121,11 @@ internal sealed class OutlookServiceTests
 		bool firstResult = service.Connect(firstFactory);
 		Assert.That(firstResult, Is.True);
 
+		IOutlookSession? firstSession = service.Session;
 		bool secondResult = service.Connect(secondFactory);
 		Assert.That(secondResult, Is.True);
+		Assert.That(service.Session, Is.SameAs(firstSession));
+		Assert.That(secondFactory.IsOutlookAvailableCallCount, Is.Zero);
 
 		Assert.That(
 			secondFactory.CreateConnectionCallCount,

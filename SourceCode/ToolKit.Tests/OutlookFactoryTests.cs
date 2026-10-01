@@ -8,43 +8,60 @@
 
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
+using System.IO;
+using System.Threading;
 using NUnit.Framework;
+using Outlook = Microsoft.Office.Interop.Outlook;
 
+/// <summary>
+/// Exercises the real factory against the available Outlook installation.
+/// </summary>
+[Apartment(ApartmentState.STA)]
+[NonParallelizable]
 internal sealed class OutlookFactoryTests
 {
 	/// <summary>
-	/// Verifies that IsOutlookAvailable returns true when the factory's
-	/// CreateApplication operation succeeds.
+	/// Verifies the availability probe succeeds with Outlook available.
 	/// </summary>
-	/// <remarks>Uses a TestOutlookFactory with CreateApplicationSucceeds set to
-	/// true, calls IsOutlookAvailable with a timeout of 10, and asserts the
-	/// result is true.</remarks>
 	[Test]
-	public void IsOutlookAvailableReturnsTrueWhenCreateApplicationSucceeds()
+	public void CanCreateApplicationWhenOutlookIsAvailable()
 	{
-		TestOutlookFactory factory = new();
-		factory.CreateApplicationSucceeds = true;
+		using OutlookTestContext context = new();
+		OutlookFactory factory = new();
 
-		bool available = factory.CanCreateApplication(10);
-
-		Assert.IsTrue(available);
+		Assert.That(factory.CanCreateApplication(33), Is.True);
+		Outlook.Stores stores = context.Track(context.NameSpace.Stores);
+		Assert.That(stores.Count, Is.GreaterThan(0));
 	}
 
 	/// <summary>
-	/// Verifies that IsOutlookAvailable returns false when the factory's
-	/// startup delay exceeds the provided timeout.
+	/// Verifies factory-created connections expose stable, usable sessions.
 	/// </summary>
-	/// <remarks>Initializes a TestOutlookFactory with DelayMilliseconds set to
-	/// 2000 and calls IsOutlookAvailable(0), asserting a false result.
-	/// </remarks>
 	[Test]
-	public void IsOutlookAvailableReturnsFalseOnTimeout()
+	public void CreateConnectionExposesStableUsableSession()
 	{
-		TestOutlookFactory factory = new();
-		factory.DelayMilliseconds = 2000;
+		using OutlookTestContext context = new();
+		OutlookFactory factory = new();
+		IOutlookConnection? connection = factory.CreateConnection();
 
-		bool available = factory.CanCreateApplication(0);
+		Assert.That(connection, Is.Not.Null);
+		IOutlookSession? first = connection!.Session;
+		Assert.That(first, Is.Not.Null);
+		Assert.That(connection.Session, Is.SameAs(first));
 
-		Assert.IsFalse(available);
+		Outlook.MailItem original = context.Track(
+			(Outlook.MailItem)context.Application.CreateItem(
+				Outlook.OlItemType.olMailItem));
+		original.Subject = "Factory session test";
+		string path = Path.Combine(context.DirectoryPath, "factory.msg");
+		original.SaveAs(path, Outlook.OlSaveAsType.olMSGUnicode);
+
+		object? result = first!.OpenSharedItem(path);
+
+		Assert.That(result, Is.InstanceOf<Outlook.MailItem>());
+		Outlook.MailItem opened = context.Track((Outlook.MailItem)result!);
+		Assert.That(opened.Subject, Is.EqualTo(original.Subject));
+		opened.Close(Outlook.OlInspectorClose.olDiscard);
+		original.Close(Outlook.OlInspectorClose.olDiscard);
 	}
 }

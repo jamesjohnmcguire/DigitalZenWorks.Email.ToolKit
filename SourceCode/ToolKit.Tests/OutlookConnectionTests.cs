@@ -10,6 +10,9 @@ namespace DigitalZenWorks.Email.ToolKit.Tests;
 
 using NUnit.Framework;
 
+/// <summary>
+/// Tests stable session access through the connection wrapper.
+/// </summary>
 internal sealed class OutlookConnectionTests
 {
 	/// <summary>
@@ -38,6 +41,11 @@ internal sealed class OutlookConnectionTests
 		FakeOutlookSession session = new();
 		OutlookConnection connection = new(session);
 
-		Assert.That(connection.Session, Is.EqualTo(session));
+		OutlookConnection abstraction = connection;
+		IOutlookSession? first = abstraction.Session;
+		IOutlookSession? second = abstraction.Session;
+
+		Assert.That(first, Is.SameAs(session));
+		Assert.That(second, Is.SameAs(first));
 	}
 }

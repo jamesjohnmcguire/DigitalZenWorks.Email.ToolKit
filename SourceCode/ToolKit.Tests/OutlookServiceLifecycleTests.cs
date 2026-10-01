@@ -8,6 +8,7 @@
 
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
+using System;
 using NUnit.Framework;
 
 /// <summary>
@@ -30,10 +31,10 @@ internal sealed class OutlookServiceLifecycleTests
 
 		bool result = service.Connect(factory);
 
-		Assert.IsFalse(result);
-		Assert.AreEqual(1, factory.IsOutlookAvailableCallCount);
-		Assert.AreEqual(0, factory.CreateConnectionCallCount);
-		Assert.IsNull(service.Session);
+		Assert.That(result, Is.False);
+		Assert.That(factory.IsOutlookAvailableCallCount, Is.EqualTo(1));
+		Assert.That(factory.CreateConnectionCallCount, Is.Zero);
+		Assert.That(service.Session, Is.Null);
 	}
 
 	/// <summary>
@@ -123,6 +124,10 @@ internal sealed class OutlookServiceLifecycleTests
 
 		service.Disconnect();
 
+		Assert.That(service.IsConnected, Is.False);
+		Assert.That(service.Session, Is.Null);
+		Assert.That(connection1.QuitCallCount, Is.EqualTo(1));
+
 		// Allow reconnect with a new connection
 		FakeOutlookSession session2 = new();
 		FakeOutlookConnection connection2 = new(session2);
@@ -131,6 +136,60 @@ internal sealed class OutlookServiceLifecycleTests
 		bool reconnected = service.Connect(factory);
 
 		Assert.That(reconnected, Is.True);
-		Assert.That(service.Session, Is.Not.Null);
+		Assert.That(service.IsConnected, Is.True);
+		Assert.That(service.Session, Is.SameAs(session2));
+		Assert.That(factory.CreateConnectionCallCount, Is.EqualTo(2));
+		Assert.That(factory.IsOutlookAvailableCallCount, Is.EqualTo(2));
+		Assert.That(connection2.QuitCallCount, Is.Zero);
+	}
+
+	/// <summary>
+	/// Verifies repeated disconnects release the connection only once.
+	/// </summary>
+	[Test]
+	public void DisconnectTwiceQuitsOnlyOnce()
+	{
+		OutlookService service = new();
+		FakeOutlookConnection connection = new();
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = true;
+		factory.Connection = connection;
+		Assert.That(service.Connect(factory), Is.True);
+
+		service.Disconnect();
+		service.Disconnect();
+
+		Assert.That(connection.QuitCallCount, Is.EqualTo(1));
+		Assert.That(service.IsConnected, Is.False);
+		Assert.That(service.Session, Is.Null);
+	}
+
+	/// <summary>
+	/// Verifies a quit failure does not retain an unusable connection.
+	/// </summary>
+	[Test]
+	public void DisconnectClearsStateWhenQuitThrows()
+	{
+		OutlookService service = new();
+		FakeOutlookConnection connection = new();
+		InvalidOperationException failure = new("Quit failed");
+		connection.QuitException = failure;
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = true;
+		factory.Connection = connection;
+		Assert.That(service.Connect(factory), Is.True);
+
+		Assert.That(
+			() => service.Disconnect(), Throws.Exception.SameAs(failure));
+		Assert.That(service.IsConnected, Is.False);
+		Assert.That(service.Session, Is.Null);
+		Assert.That(() => service.Disconnect(), Throws.Nothing);
+		Assert.That(connection.QuitCallCount, Is.EqualTo(1));
+
+		FakeOutlookSession nextSession = new();
+		factory.Connection = new FakeOutlookConnection(nextSession);
+		Assert.That(service.Connect(factory), Is.True);
+		Assert.That(service.Session, Is.SameAs(nextSession));
+		Assert.That(factory.CreateConnectionCallCount, Is.EqualTo(2));
 	}
 }

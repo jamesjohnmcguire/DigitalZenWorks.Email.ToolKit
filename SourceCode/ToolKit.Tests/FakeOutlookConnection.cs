@@ -4,9 +4,11 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+#nullable enable
+
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
-using DigitalZenWorks.Email.ToolKit;
+using System;
 
 /// <summary>
 /// A fake implementation of the IOutlookConnection interface for testing
@@ -15,11 +17,14 @@ using DigitalZenWorks.Email.ToolKit;
 internal sealed class FakeOutlookConnection
 	: IOutlookConnection
 {
+	private readonly IOutlookSession? session;
+
 	/// <summary>
 	/// Initializes a new instance of the <see cref="FakeOutlookConnection"/>
 	/// class.
 	/// </summary>
 	public FakeOutlookConnection()
+		: this(new FakeOutlookSession())
 	{
 	}
 
@@ -28,21 +33,59 @@ internal sealed class FakeOutlookConnection
 	/// class.
 	/// </summary>
 	/// <param name="session">The Outlook session.</param>
-	public FakeOutlookConnection(IOutlookSession session)
+	public FakeOutlookConnection(IOutlookSession? session)
 	{
-		Session = session;
+		this.session = session;
 	}
 
 	/// <summary>
 	/// Gets the Outlook session.
 	/// </summary>
-	public IOutlookSession Session { get; }
+	public IOutlookSession? Session
+	{
+		get
+		{
+			SessionAccessCount++;
+
+			if (SessionException != null)
+			{
+				throw SessionException;
+			}
+
+			return session;
+		}
+	}
 
 	/// <summary>
-	/// Stub implementation of the Quit method. This should only be called by
-	/// testing infrastructure and not by production code.
+	/// Gets the number of session acquisitions.
+	/// </summary>
+	public int SessionAccessCount { get; private set; }
+
+	/// <summary>
+	/// Gets the number of quit requests.
+	/// </summary>
+	public int QuitCallCount { get; private set; }
+
+	/// <summary>
+	/// Gets or sets the failure to inject into session acquisition.
+	/// </summary>
+	public Exception? SessionException { get; set; }
+
+	/// <summary>
+	/// Gets or sets the failure to inject into quitting.
+	/// </summary>
+	public Exception? QuitException { get; set; }
+
+	/// <summary>
+	/// Records a quit request and optionally raises a configured failure.
 	/// </summary>
 	public void Quit()
 	{
+		QuitCallCount++;
+
+		if (QuitException != null)
+		{
+			throw QuitException;
+		}
 	}
 }
