@@ -175,16 +175,24 @@ public class OutlookSession
 
 		if (store != null)
 		{
-			Log.Info("Begin to Removing store: " + store.DisplayName);
+			string displayName = store.DisplayName;
+			Log.Info("Begin to Removing store: " + displayName);
 
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			if (session != null)
+			try
 			{
-				session.RemoveStore(rootFolder);
+				if (session != null)
+				{
+					session.RemoveStore(rootFolder);
 
-				Log.Info("Store removed successfully: " + store.DisplayName);
-				result = true;
+					Log.Info("Store removed successfully: " + displayName);
+					result = true;
+				}
+			}
+			finally
+			{
+				Marshal.ReleaseComObject(rootFolder);
 			}
 		}
 		else
@@ -223,7 +231,14 @@ public class OutlookSession
 		}
 		else
 		{
-			result = RemoveStore(store);
+			try
+			{
+				result = RemoveStore(store);
+			}
+			finally
+			{
+				Marshal.ReleaseComObject(store);
+			}
 		}
 
 		return result;
