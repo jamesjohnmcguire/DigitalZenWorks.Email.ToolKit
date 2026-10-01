@@ -99,43 +99,7 @@ public class OutlookSession
 			// If the .pst file does not exist, Microsoft Outlook creates it.
 			session.AddStore(path);
 
-			int total = session.Stores.Count;
-
-			for (int index = 1; index <= total; index++)
-			{
-				Store? checkStore = null;
-
-				try
-				{
-					checkStore = session.Stores[index];
-				}
-				catch (UnauthorizedAccessException exception)
-				{
-					Log.Error(exception.ToString());
-				}
-
-				if (checkStore == null)
-				{
-					Log.Warn("Enumerating stores - store is null");
-				}
-				else
-				{
-					string filePath = checkStore.FilePath;
-
-					if (!string.IsNullOrWhiteSpace(filePath) &&
-						filePath.Equals(
-							path, StringComparison.OrdinalIgnoreCase))
-					{
-						store = checkStore;
-						break;
-					}
-				}
-			}
-
-			if (store == null)
-			{
-				Log.Warn("Store not found: " + path);
-			}
+			store = FindStore(path);
 		}
 
 		return store;
@@ -262,5 +226,75 @@ public class OutlookSession
 		}
 
 		return mapiFolder;
+	}
+
+	private Store? FindStore(string storePath)
+	{
+		Store? store = null;
+
+		if (session != null)
+		{
+			storePath = Path.GetFullPath(storePath);
+			Stores stores = session.Stores;
+
+			try
+			{
+				int total = stores.Count;
+
+				for (int index = 1; index <= total; index++)
+				{
+					Store? checkStore = null;
+
+					try
+					{
+						checkStore = stores[index];
+					}
+					catch (UnauthorizedAccessException exception)
+					{
+						Log.Error(exception.ToString());
+					}
+
+					if (checkStore == null)
+					{
+						Log.Warn("Enumerating stores - store is null");
+					}
+					else
+					{
+						try
+						{
+							string filePath = checkStore.FilePath;
+
+							if (!string.IsNullOrWhiteSpace(filePath) &&
+								filePath.Equals(
+									storePath, StringComparison.OrdinalIgnoreCase))
+							{
+								// Transfer this reference to the caller.
+								store = checkStore;
+								checkStore = null;
+								break;
+							}
+						}
+						finally
+						{
+							if (checkStore != null)
+							{
+								Marshal.ReleaseComObject(checkStore);
+							}
+						}
+					}
+				}
+			}
+			finally
+			{
+				Marshal.ReleaseComObject(stores);
+			}
+
+			if (store == null)
+			{
+				Log.Warn("Store not found: " + storePath);
+			}
+		}
+
+		return store;
 	}
 }
