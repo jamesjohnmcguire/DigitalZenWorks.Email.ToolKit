@@ -79,27 +79,46 @@ public class OutlookSession
 	/// Create a new pst storage file.
 	/// </summary>
 	/// <param name="path">The path to the pst file.</param>
+	/// <param name="createIfMissing">Whether to create the pst file if it does
+	/// not exist.</param>
 	/// <returns>A store object or null if not found.</returns>
-	public Store? GetStore(string path)
+	public Store? GetStore(string path, bool createIfMissing = true)
 	{
 		Store? store = null;
 
 		if (session != null)
 		{
 			path = Path.GetFullPath(path);
+			bool exists = File.Exists(path);
 
-			string extension = Path.GetExtension(path);
-
-			if (!extension.Equals(".pst", StringComparison.OrdinalIgnoreCase))
+			if (exists == false && createIfMissing == false)
 			{
-				// Attempt to fix mistaken or missing file extension.
-				path += ".pst";
+				Log.Warn("Store file does not exist: " + path);
 			}
+			else
+			{
+				if (createIfMissing == true)
+				{
+					if (exists == false)
+					{
+						Log.Info("Attempting to create store file: " + path);
+					}
 
-			// If the .pst file does not exist, Microsoft Outlook creates it.
-			session.AddStore(path);
+					string extension = Path.GetExtension(path);
 
-			store = FindStore(path);
+					if (!extension.Equals(
+						".pst", StringComparison.OrdinalIgnoreCase))
+					{
+						// Attempt to fix mistaken or missing file extension.
+						path += ".pst";
+					}
+
+					// If the .pst file does not exist, Outlook creates it.
+					session.AddStore(path);
+				}
+
+				store = FindStore(path);
+			}
 		}
 
 		return store;
