@@ -67,30 +67,42 @@ internal sealed class OutlookServiceFailureTests
 	/// <summary>
 	/// Verifies unsuccessful attempts leave the service ready to retry.
 	/// </summary>
-	/// <param name="stage">Unavailable, null connection, or null session.</param>
+	/// <param name="stage">
+	/// 0: Outlook unavailable; 1: null connection; 2: null session.
+	/// </param>
 	[TestCase(0)]
 	[TestCase(1)]
 	[TestCase(2)]
 	public void ConnectRetriesAfterUnsuccessfulAttempt(int stage)
 	{
+		// The fakes select where the first attempt fails without starting
+		// Outlook. The same service is then used for a successful retry.
 		OutlookService service = new();
 		FakeOutlookFactory factory = new();
 		factory.IsAvailable = false;
 		factory.Connection = null;
 
+		// These are cumulative CreateConnection counts after the first
+		// attempt and after the retry. Stages 1 and 2 reach creation twice.
 		int expectedCallCount = 1;
 		int expectedCallCount2 = 2;
 
+		// Stages 1 and 2 pass availability so the attempt can fail later.
 		if (stage != 0)
 		{
 			factory.IsAvailable = true;
 		}
 
+		// Stage 2 supplies a connection whose session is explicitly null.
+		// A connection alone is not sufficient for this test's success
+		// contract: the service must also acquire a usable session.
 		if (stage == 2)
 		{
 			factory.Connection = new FakeOutlookConnection(null);
 		}
 
+		// Stage 0 stops at availability, so only the retry should create
+		// a connection.
 		if (stage == 0)
 		{
 			expectedCallCount = 0;
@@ -98,23 +110,52 @@ internal sealed class OutlookServiceFailureTests
 		}
 
 		bool result = service.Connect(factory);
+
+		// Each configured failure must be reported to the caller. This
+		// includes stage 2, where a non-null connection has no session.
 		Assert.That(result, Is.False);
+
+		// Failed attempts must leave the service disconnected. Retaining
+		// a partial connection could make the retry skip the factory.
 		Assert.That(service.IsConnected, Is.False);
+
+		// Callers must not receive a session from an unsuccessful attempt.
+		// Check the exposed session separately from the connection flag.
 		Assert.That(service.Session, Is.Null);
 
+		// Availability failure must prevent connection creation (stage 0).
+		// Later failures must reach creation exactly once (stages 1 and 2),
+		// showing that the intended failure path was exercised.
 		Assert.That(
 			factory.CreateConnectionCallCount,
 			Is.EqualTo(expectedCallCount));
 
+		// Remove the failure using the same factory and service. A fresh
+		// service would not demonstrate recovery from the earlier attempt.
 		FakeOutlookSession expectedSession = new();
 		factory.IsAvailable = true;
 		factory.Connection = new FakeOutlookConnection(expectedSession);
 
-		Assert.That(service.Connect(factory), Is.True);
+		bool retryResult = service.Connect(factory);
+
+		// Once a usable connection and session are available, the caller
+		// must be able to retry successfully without recreating the service.
+		Assert.That(retryResult, Is.True);
+
+		// Success must also be reflected in the service's public state.
 		Assert.That(service.IsConnected, Is.True);
+
+		// Identity proves that the service exposes the retry's session,
+		// rather than retaining null or substituting another session.
 		Assert.That(service.Session, Is.SameAs(expectedSession));
+
+		// Availability must be checked on both attempts so an earlier
+		// failure does not prevent the service noticing recovery.
 		Assert.That(factory.IsOutlookAvailableCallCount, Is.EqualTo(2));
 
+		// The retry must make one additional creation call. The total is
+		// one for stage 0 and two for stages 1 and 2. This guards against
+		// reusing a failed connection or creating unnecessary connections.
 		Assert.That(
 			factory.CreateConnectionCallCount,
 			Is.EqualTo(expectedCallCount2));
