@@ -54,7 +54,7 @@ public class OutlookService : IOutlookService
 	/// </summary>
 	public bool IsConnected
 	{
-		get { return connection != null; }
+		get { return connection != null && session != null; }
 	}
 
 	/// <summary>
@@ -161,13 +161,9 @@ public class OutlookService : IOutlookService
 	/// </returns>
 	internal bool Connect(IOutlookFactory factory, int timeOutSeconds = 10)
 	{
-		bool connected = false;
+		bool connected = IsConnected;
 
-		if (connection != null)
-		{
-			connected = true;
-		}
-		else
+		if (connected == false)
 		{
 			try
 			{
@@ -190,6 +186,7 @@ public class OutlookService : IOutlookService
 							connection = candidateConnection;
 							session = candidateSession;
 							outlookStartedByThis = true;
+							connected = true;
 						}
 					}
 				}
@@ -199,15 +196,10 @@ public class OutlookService : IOutlookService
 				exception is InvalidOperationException)
 			{
 				Log.Error(exception);
-				connection = null;
 			}
 		}
 
-		if (connection != null)
-		{
-			connected = true;
-		}
-		else
+		if (connected == false)
 		{
 			Log.Error("Outlook unavailable.");
 		}
