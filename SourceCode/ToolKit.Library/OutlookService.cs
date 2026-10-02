@@ -171,17 +171,26 @@ public class OutlookService : IOutlookService
 		{
 			try
 			{
-				bool isAvailable =
-					factory.CanCreateApplication(timeOutSeconds);
+				bool isAvailable = factory.CanCreateApplication(timeOutSeconds);
 
 				if (isAvailable == true)
 				{
-					connection = factory.CreateConnection();
+					IOutlookConnection? candidateConnection =
+						factory.CreateConnection();
 
-					if (connection != null)
+					if (candidateConnection != null)
 					{
-						session = connection.Session;
-						outlookStartedByThis = true;
+						IOutlookSession? candidateSession =
+							candidateConnection.Session;
+
+						// Keep failed attempts from leaving a partial
+						// connection that would prevent a later retry.
+						if (candidateSession != null)
+						{
+							connection = candidateConnection;
+							session = candidateSession;
+							outlookStartedByThis = true;
+						}
 					}
 				}
 			}
