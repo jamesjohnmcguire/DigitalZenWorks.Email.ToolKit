@@ -16,8 +16,7 @@ namespace DigitalZenWorks.Email.ToolKit;
 public interface IOutlookService
 {
 	/// <summary>
-	/// Gets a value indicating whether indicates whether there is an active
-	/// connection/session.
+	/// Gets a value indicating whether there is an active connection/session.
 	/// </summary>
 	bool IsConnected { get; }
 
@@ -27,17 +26,24 @@ public interface IOutlookService
 	IOutlookSession? Session { get; }
 
 	/// <summary>
-	/// Connect to Outlook using the provided factory. This will attempt
-	/// to attach to an existing Outlook instance or start a new one via
-	/// the factory implementation.
+	/// Connects to Outlook by attaching to an existing instance or attempting
+	/// activation. Reuses the connection when already connected.
 	/// </summary>
-	/// <param name="timeOutSeconds">Timeout for availability checks.</param>
+	/// <param name="timeOutSeconds">Maximum requested wait, in seconds, for the
+	/// activation probe to finish,including its cleanup.</param>
 	/// <returns>True when connected and a session is available.</returns>
+	/// <remarks>
+	/// A timeout stops waiting; the probe may still complete later.
+	/// Subsequent application and session acquisition run on the caller's
+	/// thread and have no timeout. This is not a total Connect deadline.
+	/// Reuse this service on the same STA thread for the workflow's lifetime.
+	/// Concurrent Connect and Disconnect calls are not supported.
+	/// </remarks>
 	bool Connect(int timeOutSeconds = 10);
 
 	/// <summary>
-	/// Disconnect from Outlook. If Outlook was started by the service,
-	/// the service may quit the application.
+	/// Clears this service's connection and session without quitting Outlook.
+	/// The connection is disposed if it supports IDisposable.
 	/// </summary>
 	void Disconnect();
 }

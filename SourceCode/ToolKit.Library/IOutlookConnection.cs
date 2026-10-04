@@ -19,8 +19,9 @@ public interface IOutlookConnection
 	IOutlookSession? Session { get; }
 
 	/// <summary>
-	/// Quits the Outlook application. This should only be called if the
-	/// application was started by this instance.
+	/// Explicitly requests Outlook shutdown. The caller must have authority
+	/// to close the application, which may also be in use by other clients.
+	/// Normal service disconnection does not call this method.
 	/// </summary>
 	void Quit();
 }

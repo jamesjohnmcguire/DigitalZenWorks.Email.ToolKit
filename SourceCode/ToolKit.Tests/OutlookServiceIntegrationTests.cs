@@ -11,6 +11,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests;
 using System.Diagnostics;
 using System.Threading;
 using NUnit.Framework;
+using Outlook = Microsoft.Office.Interop.Outlook;
 
 /// <summary>
 /// Tests the public service with Outlook installed and an interactive
@@ -21,8 +22,6 @@ using NUnit.Framework;
 [NonParallelizable]
 internal sealed class OutlookServiceIntegrationTests
 {
-	private bool isOutlookPreviouslyStarted;
-
 	private IOutlookService? service;
 
 	/// <summary>
@@ -31,7 +30,7 @@ internal sealed class OutlookServiceIntegrationTests
 	[OneTimeSetUp]
 	public void OneTimeSetUp()
 	{
-		isOutlookPreviouslyStarted = OutlookService.IsOutlookStarted();
+		bool isOutlookPreviouslyStarted = OutlookService.IsOutlookStarted();
 
 		if (isOutlookPreviouslyStarted == false)
 		{
@@ -47,9 +46,9 @@ internal sealed class OutlookServiceIntegrationTests
 	[OneTimeTearDown]
 	public void OneTimeTearDown()
 	{
-		if (service != null && isOutlookPreviouslyStarted == false)
+		if (service != null)
 		{
-			// Clean up
+			// Detaching is safe even when Outlook predates this fixture.
 			service.Disconnect();
 		}
 	}
@@ -83,6 +82,43 @@ internal sealed class OutlookServiceIntegrationTests
 	public void IsOutlookInstalledReportsAvailableInstallation()
 	{
 		Assert.That(OutlookService.IsOutlookInstalled(), Is.True);
+	}
+
+	/// <summary>
+	/// Verifies disconnect leaves an independently held Outlook application
+	/// usable and permits the service to connect again on the same STA.
+	/// </summary>
+	[Test]
+	public void DisconnectPreservesExistingOutlookAndAllowsReconnect()
+	{
+		using OutlookTestContext context = new();
+		OutlookService localService = new();
+
+		try
+		{
+			Assert.That(localService.Connect(33), Is.True);
+			IOutlookSession? first = localService.Session;
+
+			localService.Disconnect();
+			localService.Disconnect();
+
+			Assert.That(localService.IsConnected, Is.False);
+			Assert.That(localService.Session, Is.Null);
+
+			// Process detection alone would miss a disconnected RCW.
+			// Exercise the independently acquired application and namespace.
+			Assert.That(context.Application.Version, Is.Not.Empty);
+			Outlook.Stores stores = context.Track(context.NameSpace.Stores);
+			Assert.That(stores.Count, Is.GreaterThan(0));
+
+			Assert.That(localService.Connect(33), Is.True);
+			Assert.That(localService.Session, Is.Not.Null);
+			Assert.That(localService.Session, Is.Not.SameAs(first));
+		}
+		finally
+		{
+			localService.Disconnect();
+		}
 	}
 
 	private static void StartOutlookIfNotRunning()

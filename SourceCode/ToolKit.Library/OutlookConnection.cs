@@ -8,6 +8,7 @@
 
 namespace DigitalZenWorks.Email.ToolKit;
 
+using System;
 using Outlook = Microsoft.Office.Interop.Outlook;
 
 /// <summary>
@@ -16,11 +17,11 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 /// should use IOutlookService and IOutlookSession rather than this
 /// concrete type.
 /// </summary>
-internal class OutlookConnection
-		: IOutlookConnection
+internal sealed class OutlookConnection
+		: IOutlookConnection, IDisposable
 {
-	private readonly Outlook.Application? application;
-	private readonly IOutlookSession session;
+	private Outlook.Application? application;
+	private IOutlookSession? session;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="OutlookConnection"/> class.
@@ -45,16 +46,35 @@ internal class OutlookConnection
 	}
 
 	/// <summary>
-	/// Gets the Outlook session.
+	/// Gets the stable session, or null after this connection is disposed.
 	/// </summary>
-	public IOutlookSession Session
+	public IOutlookSession? Session
 	{
 		get { return session; }
 	}
 
 	/// <summary>
-	/// Quits the Outlook application. This should only be called if the
-	/// application was started by this instance.
+	/// Relinquishes this connection's managed references without quitting
+	/// Outlook or invalidating COM wrappers held by another client.
+	/// </summary>
+	/// <remarks>
+	/// Activation, including the temporary probe, cannot establish exclusive
+	/// ownership of Outlook. Treat every connection as shared or unknown.
+	/// Sessions and COM objects can escape through existing public APIs, so
+	/// forcing their RCW counts to zero here could invalidate other callers.
+	/// The runtime releases those wrappers when no managed owners remain.
+	/// This is not deterministic release of every underlying COM reference.
+	/// </remarks>
+	public void Dispose()
+	{
+		session = null;
+		application = null;
+		GC.SuppressFinalize(this);
+	}
+
+	/// <summary>
+	/// Explicitly requests Outlook shutdown. The caller must have authority
+	/// to close the application. Disposal never calls this method.
 	/// </summary>
 	public void Quit()
 	{

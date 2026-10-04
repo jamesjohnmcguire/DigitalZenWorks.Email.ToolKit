@@ -8,6 +8,7 @@
 
 namespace DigitalZenWorks.Email.ToolKit.Tests;
 
+using System;
 using System.IO;
 using System.Threading;
 using NUnit.Framework;
@@ -16,6 +17,7 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 /// <summary>
 /// Exercises the real factory against the available Outlook installation.
 /// </summary>
+[Category("Integration")]
 [Apartment(ApartmentState.STA)]
 [NonParallelizable]
 internal sealed class OutlookFactoryTests
@@ -43,6 +45,8 @@ internal sealed class OutlookFactoryTests
 		using OutlookTestContext context = new();
 		OutlookFactory factory = new();
 		IOutlookConnection? connection = factory.CreateConnection();
+
+		using IDisposable? cleanup = connection as IDisposable;
 
 		Assert.That(connection, Is.Not.Null);
 		IOutlookSession? first = connection!.Session;

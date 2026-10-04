@@ -29,7 +29,6 @@ public class OutlookService : IOutlookService
 		System.Reflection.MethodBase.GetCurrentMethod() !.DeclaringType);
 
 	private IOutlookConnection? connection;
-	private bool outlookStartedByThis;
 	private IOutlookSession? session;
 
 	/// <summary>
@@ -98,7 +97,17 @@ public class OutlookService : IOutlookService
 	/// Connects to Outlook. If Outlook is not available, it will attempt
 	/// to start a new instance.
 	/// </summary>
-	/// <param name="timeOutSeconds">The timeout in seconds.</param>
+	/// <param name="timeOutSeconds">
+	/// Maximum requested wait, in seconds, for the activation probe to finish,
+	/// including its cleanup. Must be between 0 and 2147483.
+	/// </param>
+	/// <remarks>
+	/// A timeout stops waiting; the probe may still complete later.
+	/// Subsequent application and session acquisition run on the caller's
+	/// thread and have no timeout. This is not a total Connect deadline.
+	/// Reuse this service on the same STA thread for the workflow's lifetime.
+	/// Concurrent Connect and Disconnect calls are not supported.
+	/// </remarks>
 	/// <returns>True if the connection was successful; otherwise, false.
 	/// </returns>
 	public bool Connect(int timeOutSeconds = 10)
@@ -111,23 +120,24 @@ public class OutlookService : IOutlookService
 	}
 
 	/// <summary>
-	/// Disconnects from Outlook. If Outlook was started by the service,
-	/// it will be quit.
+	/// Clears the service state and disposes its connection when supported.
+	/// Outlook is not automatically quit, even if activation started it.
 	/// </summary>
 	public void Disconnect()
 	{
 		try
 		{
-			if (connection != null && outlookStartedByThis == true)
+			// Acquiring Outlook does not grant permission to close it.
+			// Older IOutlookConnection implementations need not be disposable.
+			if (connection is IDisposable disposableConnection)
 			{
-				connection.Quit();
+				disposableConnection.Dispose();
 			}
 		}
 		finally
 		{
 			connection = null;
 			session = null;
-			outlookStartedByThis = false;
 		}
 	}
 
@@ -156,7 +166,8 @@ public class OutlookService : IOutlookService
 	/// </summary>
 	/// <param name="factory">The Outlook factory to use for creating
 	/// connections.</param>
-	/// <param name="timeOutSeconds">The timeout in seconds.</param>
+	/// <param name="timeOutSeconds">The activation probe wait in seconds;
+	/// it does not bound subsequent connection or session acquisition.</param>
 	/// <returns>True if the connection was successful; otherwise, false.
 	/// </returns>
 	internal bool Connect(IOutlookFactory factory, int timeOutSeconds = 10)
@@ -185,7 +196,6 @@ public class OutlookService : IOutlookService
 						{
 							connection = candidateConnection;
 							session = candidateSession;
-							outlookStartedByThis = true;
 							connected = true;
 						}
 					}
@@ -201,7 +211,7 @@ public class OutlookService : IOutlookService
 
 		if (connected == false)
 		{
-			Log.Error("Outlook unavailable.");
+			Log.Error("Outlook connection was not established.");
 		}
 
 		return connected;

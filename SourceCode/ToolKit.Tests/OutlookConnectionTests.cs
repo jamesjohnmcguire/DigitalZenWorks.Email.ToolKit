@@ -26,7 +26,7 @@ internal sealed class OutlookConnectionTests
 	{
 		// Use internal test constructor that accepts a session.
 		FakeOutlookSession session = new();
-		OutlookConnection connection = new(session);
+		using OutlookConnection connection = new(session);
 
 		Assert.DoesNotThrow(() => connection.Quit());
 	}
@@ -39,7 +39,7 @@ internal sealed class OutlookConnectionTests
 	public void SessionReturnsProvidedSessionWhenConstructedWithSession()
 	{
 		FakeOutlookSession session = new();
-		OutlookConnection connection = new(session);
+		using OutlookConnection connection = new(session);
 
 		OutlookConnection abstraction = connection;
 		IOutlookSession? first = abstraction.Session;
@@ -47,5 +47,24 @@ internal sealed class OutlookConnectionTests
 
 		Assert.That(first, Is.SameAs(session));
 		Assert.That(second, Is.SameAs(first));
+	}
+
+	/// <summary>
+	/// Verifies disposal relinquishes the connection's session and repeated
+	/// cleanup is harmless. Borrowed session wrappers are not force-released.
+	/// </summary>
+	[Test]
+	public void DisposeClearsSessionAndIsIdempotent()
+	{
+		FakeOutlookSession session = new();
+		using OutlookConnection connection = new(session);
+		IOutlookSession? first = connection.Session;
+
+		connection.Dispose();
+		connection.Dispose();
+
+		Assert.That(connection.Session, Is.Null);
+		Assert.That(first, Is.SameAs(session));
+		Assert.DoesNotThrow(() => connection.Quit());
 	}
 }

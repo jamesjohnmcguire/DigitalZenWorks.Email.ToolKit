@@ -23,7 +23,9 @@ internal interface IOutlookFactory
 	/// <summary>
 	/// Determines if Outlook is available.
 	/// </summary>
-	/// <param name="timeOutSeconds">The time out period in seconds.</param>
+	/// <param name="timeOutSeconds">The requested wait for the activation
+	/// probe, including cleanup, in seconds. Timeout does not cancel the
+	/// probe or bound subsequent connection acquisition.</param>
 	/// <returns>true if Outlook is available, false otherwise.</returns>
 	public bool CanCreateApplication(int timeOutSeconds);
 }

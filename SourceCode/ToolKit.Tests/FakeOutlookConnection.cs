@@ -15,7 +15,7 @@ using System;
 /// purposes.
 /// </summary>
 internal sealed class FakeOutlookConnection
-	: IOutlookConnection
+	: IOutlookConnection, IDisposable
 {
 	private readonly IOutlookSession? session;
 
@@ -72,20 +72,34 @@ internal sealed class FakeOutlookConnection
 	public Exception? SessionException { get; set; }
 
 	/// <summary>
-	/// Gets or sets the failure to inject into quitting.
+	/// Gets or sets the failure to inject into disposal.
 	/// </summary>
-	public Exception? QuitException { get; set; }
+	public Exception? DisposeException { get; set; }
 
 	/// <summary>
-	/// Records a quit request and optionally raises a configured failure.
+	/// Gets the number of disposal requests.
+	/// </summary>
+	public int DisposeCallCount { get; private set; }
+
+	/// <summary>
+	/// Records cleanup separately from explicit application shutdown.
+	/// </summary>
+	public void Dispose()
+	{
+		GC.SuppressFinalize(this);
+		DisposeCallCount++;
+
+		if (DisposeException != null)
+		{
+			throw DisposeException;
+		}
+	}
+
+	/// <summary>
+	/// Records an explicit application shutdown request.
 	/// </summary>
 	public void Quit()
 	{
 		QuitCallCount++;
-
-		if (QuitException != null)
-		{
-			throw QuitException;
-		}
 	}
 }

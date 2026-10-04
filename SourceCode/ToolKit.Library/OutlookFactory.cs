@@ -10,7 +10,6 @@ namespace DigitalZenWorks.Email.ToolKit;
 
 using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 using global::Common.Logging;
 using Microsoft.VisualBasic;
 using Outlook = Microsoft.Office.Interop.Outlook;
@@ -23,10 +22,38 @@ public class OutlookFactory : IOutlookFactory
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod() !.DeclaringType);
 
+	// This coordinates only temporary probes. No Outlook COM object is
+	// cached here or shared across caller threads. A static coordinator is
+	// needed because public Connect creates a new factory on every call.
+	private static readonly OutlookApplicationProbe ApplicationProbe =
+		new(ProbeApplication);
+
+	private readonly OutlookApplicationProbe applicationProbe;
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="OutlookFactory"/> class.
+	/// </summary>
+	public OutlookFactory()
+		: this(ApplicationProbe)
+	{
+	}
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="OutlookFactory"/> class
+	/// with the supplied probe coordinator.
+	/// </summary>
+	/// <param name="applicationProbe">The activation probe coordinator.</param>
+	internal OutlookFactory(OutlookApplicationProbe applicationProbe)
+	{
+		this.applicationProbe = applicationProbe;
+	}
+
 	/// <summary>
 	/// Creates a connection to the Outlook application. If an existing
 	/// instance of Outlook is running, it will connect to that instance;
-	/// otherwise, it will create a new instance.
+	/// otherwise, it will attempt activation. The returned connection has no
+	/// exclusive shutdown ownership, including when the probe started Outlook.
+	/// Acquisition runs on the caller's thread and has no timeout.
 	/// </summary>
 	/// <returns>A connection to the Outlook application, or null if the
 	/// connection could not be established.</returns>
@@ -45,58 +72,45 @@ public class OutlookFactory : IOutlookFactory
 	}
 
 	/// <summary>
-	/// Checks if Outlook is available by attempting to create an instance of
-	/// the Outlook application within a specified timeout period.
+	/// Waits for a temporary STA activation probe. Overlapping calls share
+	/// the outstanding probe, including one that previously timed out.
 	/// </summary>
-	/// <param name="timeOutSeconds">The timeout in seconds.</param>
-	/// <returns>True if Outlook is available; otherwise, false.</returns>
+	/// <param name="timeOutSeconds">The maximum requested wait in seconds
+	/// for activation and cleanup. Must be between 0 and 2147483.</param>
+	/// <returns>True if the probe completed successfully; false if it failed
+	/// with a handled activation error or the caller stopped waiting.</returns>
+	/// <remarks>
+	/// Timeout does not cancel the worker. It may activate Outlook later.
+	/// A completed probe is not cached as proof of future availability.
+	/// Application and session acquisition by CreateConnection are separate,
+	/// run on the caller's thread, and are not covered by this timeout.
+	/// The probe's COM reference must never escape its temporary apartment.
+	/// </remarks>
 	public bool CanCreateApplication(int timeOutSeconds)
 	{
-		bool isAvailable = false;
-		Exception? exception = null;
-
-		void CreateOutlookApplication()
-		{
-			Outlook.Application? tryApplication = null;
-
-			try
-			{
-				tryApplication = new Outlook.Application();
-			}
-			catch (Exception innerException) when
-				(innerException is COMException ||
-				innerException is InvalidOperationException)
-			{
-				exception = innerException;
-				Log.Error(exception.ToString());
-			}
-			finally
-			{
-				if (tryApplication != null)
-				{
-					Marshal.FinalReleaseComObject(tryApplication);
-				}
-			}
-		}
-
-		Thread staThread = new(CreateOutlookApplication);
-
-		staThread.SetApartmentState(ApartmentState.STA);
-		staThread.IsBackground = true;
-		staThread.Start();
-
-		TimeSpan timeOutSpan =
-			TimeSpan.FromSeconds(timeOutSeconds);
-
-		bool finished =
-			staThread.Join(timeOutSpan);
-
-		if (finished == true && exception == null)
-		{
-			isAvailable = true;
-		}
+		bool isAvailable =
+			applicationProbe.CanCreateApplication(timeOutSeconds);
 
 		return isAvailable;
+	}
+
+	private static void ProbeApplication()
+	{
+		Outlook.Application? tryApplication = null;
+
+		try
+		{
+			tryApplication = new Outlook.Application();
+		}
+		finally
+		{
+			if (tryApplication != null)
+			{
+				// Balance this acquisition on its STA. Do not force all
+				// references to a potentially shared RCW to be released.
+				Marshal.ReleaseComObject(tryApplication);
+			}
+		}
 	}
 
 	private static Outlook.Application? ConnectToExistingOutlook()
