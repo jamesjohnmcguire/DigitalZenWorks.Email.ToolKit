@@ -61,11 +61,15 @@ public class OutlookFactory : IOutlookFactory
 	{
 		OutlookConnection? connection = null;
 
+		Log.Debug("Outlook caller-thread application acquisition started.");
 		Outlook.Application? application = CreateApplication();
+		Log.Debug("Outlook caller-thread application acquisition completed.");
 
 		if (application != null)
 		{
+			Log.Debug("Outlook caller-thread session acquisition started.");
 			connection = new(application);
+			Log.Debug("Outlook caller-thread session acquisition completed.");
 		}
 
 		return connection;
@@ -96,11 +100,15 @@ public class OutlookFactory : IOutlookFactory
 
 	private static void ProbeApplication()
 	{
+		// ProbeAttempt.Run captures and logs activation or cleanup failures.
+		// Let them propagate so a failed operation cannot report success.
 		Outlook.Application? tryApplication = null;
 
 		try
 		{
+			Log.Debug("Outlook probe application activation started.");
 			tryApplication = new Outlook.Application();
+			Log.Debug("Outlook probe application activation completed.");
 		}
 		finally
 		{
@@ -108,7 +116,9 @@ public class OutlookFactory : IOutlookFactory
 			{
 				// Balance this acquisition on its STA. Do not force all
 				// references to a potentially shared RCW to be released.
+				Log.Debug("Outlook probe COM cleanup started.");
 				Marshal.ReleaseComObject(tryApplication);
+				Log.Debug("Outlook probe COM cleanup completed.");
 			}
 		}
 	}

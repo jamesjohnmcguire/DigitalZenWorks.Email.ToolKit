@@ -55,6 +55,7 @@ internal sealed class ProbeAttempt
 	{
 		try
 		{
+			Log.Debug("Outlook activation probe started.");
 			probeApplication();
 			Log.Debug("Outlook activation probe and cleanup completed.");
 		}
