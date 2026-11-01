@@ -32,7 +32,8 @@ internal sealed class OutlookFactoryTests
 		OutlookFactory factory = new();
 
 		Assert.That(factory.CanCreateApplication(33), Is.True);
-		Outlook.Stores stores = context.Track(context.NameSpace.Stores);
+		Outlook.Stores stores = context.NameSpace.Stores;
+		context.Track(stores);
 		Assert.That(stores.Count, Is.GreaterThan(0));
 	}
 
@@ -53,9 +54,10 @@ internal sealed class OutlookFactoryTests
 		Assert.That(first, Is.Not.Null);
 		Assert.That(connection.Session, Is.SameAs(first));
 
-		Outlook.MailItem original = context.Track(
-			(Outlook.MailItem)context.Application.CreateItem(
-				Outlook.OlItemType.olMailItem));
+		Outlook.MailItem original = (Outlook.MailItem)
+			context.Application.CreateItem(
+				Outlook.OlItemType.olMailItem);
+		context.Track(original);
 		original.Subject = "Factory session test";
 		string path = Path.Combine(context.DirectoryPath, "factory.msg");
 		original.SaveAs(path, Outlook.OlSaveAsType.olMSGUnicode);
@@ -63,7 +65,8 @@ internal sealed class OutlookFactoryTests
 		object? result = first!.OpenSharedItem(path);
 
 		Assert.That(result, Is.InstanceOf<Outlook.MailItem>());
-		Outlook.MailItem opened = context.Track((Outlook.MailItem)result!);
+		Outlook.MailItem opened = (Outlook.MailItem)result!;
+		context.Track(opened);
 		Assert.That(opened.Subject, Is.EqualTo(original.Subject));
 		opened.Close(Outlook.OlInspectorClose.olDiscard);
 		original.Close(Outlook.OlInspectorClose.olDiscard);

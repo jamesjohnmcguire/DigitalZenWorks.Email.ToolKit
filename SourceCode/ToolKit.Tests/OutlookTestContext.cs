@@ -37,8 +37,10 @@ internal sealed class OutlookTestContext : IDisposable
 	{
 		DirectoryPath =
 			Directory.CreateTempSubdirectory("Email.ToolKit.Outlook.").FullName;
-		Application = Track(new Outlook.Application());
-		NameSpace = Track(Application.Session);
+		Application = new Outlook.Application();
+		Track(Application);
+		NameSpace = Application.Session;
+		Track(NameSpace);
 	}
 
 	/// <summary>
@@ -61,12 +63,10 @@ internal sealed class OutlookTestContext : IDisposable
 	/// </summary>
 	/// <typeparam name="T">The acquired COM interface.</typeparam>
 	/// <param name="reference">The reference to retain.</param>
-	/// <returns>The supplied reference.</returns>
-	public T Track<T>(T reference)
+	public void Track<T>(T reference)
 		where T : class
 	{
 		references.Add(reference);
-		return reference;
 	}
 
 	/// <summary>
@@ -74,16 +74,13 @@ internal sealed class OutlookTestContext : IDisposable
 	/// </summary>
 	/// <typeparam name="T">The acquired COM interface.</typeparam>
 	/// <param name="reference">The optional reference to retain.</param>
-	/// <returns>The supplied reference, or null.</returns>
-	public T? TrackIfNotNull<T>(T? reference)
+	public void TrackIfNotNull<T>(T? reference)
 		where T : class
 	{
 		if (reference != null)
 		{
 			Track(reference);
 		}
-
-		return reference;
 	}
 
 	/// <summary>

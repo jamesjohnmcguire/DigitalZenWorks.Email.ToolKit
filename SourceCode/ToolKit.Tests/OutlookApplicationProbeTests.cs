@@ -285,13 +285,14 @@ internal sealed class OutlookApplicationProbeTests
 		OutlookFactory firstFactory = new(probe);
 		OutlookFactory retryFactory = new(probe);
 		OutlookService service = new();
+		TimeSpan cleanupWait = TimeSpan.FromSeconds(5);
 
 		try
 		{
 			// Zero is a supported nonblocking wait. The gate prevents a
 			// scheduling race from turning this into a successful probe.
 			Assert.That(service.Connect(firstFactory, 0), Is.False);
-			Assert.That(cleanupStarted.Wait(TimeSpan.FromSeconds(5)), Is.True);
+			Assert.That(cleanupStarted.Wait(cleanupWait), Is.True);
 
 			Assert.That(retryFactory.CanCreateApplication(0), Is.False);
 			Assert.That(firstFactory.CanCreateApplication(0), Is.False);
@@ -305,9 +306,9 @@ internal sealed class OutlookApplicationProbeTests
 			allowCleanup.Set();
 
 			// Drain the worker before disposing the gates, even on failure.
-			bool started = cleanupStarted.Wait(TimeSpan.FromSeconds(5));
+			bool started = cleanupStarted.Wait(cleanupWait);
 			Assert.That(started, Is.True);
-			Assert.That(firstWorker!.Join(TimeSpan.FromSeconds(5)), Is.True);
+			Assert.That(firstWorker!.Join(cleanupWait), Is.True);
 		}
 
 		// Late completion must not publish a connection into a timed-out

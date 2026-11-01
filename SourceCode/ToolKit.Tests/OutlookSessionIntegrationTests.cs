@@ -30,14 +30,19 @@ internal sealed class OutlookSessionIntegrationTests
 	{
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
-		Outlook.Store store = context.Track(
-			session.GetStore(context.StorePath("folders.pst"))!);
-		Outlook.MAPIFolder root = context.Track(store.GetRootFolder());
-		Outlook.Folders folders = context.Track(root.Folders);
-		Outlook.MAPIFolder original = context.Track(folders.Add("Lookup"));
+		string path = context.StorePath("folders.pst");
+		Outlook.Store store = session.GetStore(path)!;
+		context.Track(store);
+		Outlook.MAPIFolder root = store.GetRootFolder();
+		context.Track(root);
+		Outlook.Folders folders = root.Folders;
+		context.Track(folders);
+		Outlook.MAPIFolder original = folders.Add("Lookup");
+		context.Track(original);
 
-		Outlook.MAPIFolder? retrieved = context.TrackIfNotNull(
-			session.GetFolderFromIdInternal(original.EntryID, store.StoreID));
+		Outlook.MAPIFolder? retrieved =
+			session.GetFolderFromIdInternal(original.EntryID, store.StoreID);
+		context.TrackIfNotNull(retrieved);
 
 		Assert.That(retrieved, Is.Not.Null);
 		Assert.That(retrieved!.EntryID, Is.EqualTo(original.EntryID));
@@ -48,7 +53,8 @@ internal sealed class OutlookSessionIntegrationTests
 		Assert.That(wrapped, Is.Not.Null);
 		OutlookFolder child = wrapped!.AddFolder("Child");
 		Assert.That(child, Is.Not.Null);
-		Outlook.Folders children = context.Track(original.Folders);
+		Outlook.Folders children = original.Folders;
+		context.Track(children);
 		Assert.That(children.Count, Is.EqualTo(1));
 	}
 
@@ -75,11 +81,14 @@ internal sealed class OutlookSessionIntegrationTests
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
 		string path = context.StorePath("items.pst");
-		Outlook.Store store = context.Track(session.GetStore(path)!);
-		Outlook.MAPIFolder root = context.Track(store.GetRootFolder());
-		Outlook.Items items = context.Track(root.Items);
-		Outlook.MailItem original =
-			context.Track((Outlook.MailItem)items.Add("IPM.Note"));
+		Outlook.Store store = session.GetStore(path)!;
+		context.Track(store);
+		Outlook.MAPIFolder root = store.GetRootFolder();
+		context.Track(root);
+		Outlook.Items items = root.Items;
+		context.Track(items);
+		Outlook.MailItem original = (Outlook.MailItem)items.Add("IPM.Note");
+		context.Track(original);
 		original.Subject = "Email.ToolKit lookup " + Guid.NewGuid();
 		original.Body = "Saved in a test-owned PST.";
 		original.Save();
@@ -87,8 +96,8 @@ internal sealed class OutlookSessionIntegrationTests
 		object? result = session.GetItemFromId(original.EntryID);
 
 		Assert.That(result, Is.InstanceOf<Outlook.MailItem>());
-		Outlook.MailItem retrieved =
-			context.Track((Outlook.MailItem)result!);
+		Outlook.MailItem retrieved = (Outlook.MailItem)result!;
+		context.Track(retrieved);
 		Assert.That(retrieved.EntryID, Is.EqualTo(original.EntryID));
 		Assert.That(retrieved.Subject, Is.EqualTo(original.Subject));
 		Assert.That(retrieved.Body, Does.Contain("test-owned PST"));
@@ -110,8 +119,8 @@ internal sealed class OutlookSessionIntegrationTests
 		Assert.That(File.Exists(path), Is.True);
 		Assert.That(context.CountStores(path), Is.Zero);
 
-		Outlook.Store? store = context.TrackIfNotNull(
-			session.GetStore(path, createIfMissing));
+		Outlook.Store? store = session.GetStore(path, createIfMissing);
+		context.TrackIfNotNull(store);
 
 		using (Assert.EnterMultipleScope())
 		{
@@ -147,8 +156,8 @@ internal sealed class OutlookSessionIntegrationTests
 		string expectedPath = context.StorePath(expectedName);
 		string suppliedPath = Path.Combine(context.DirectoryPath, fileName);
 
-		Outlook.Store? store =
-			context.TrackIfNotNull(session.GetStore(suppliedPath));
+		Outlook.Store? store = session.GetStore(suppliedPath);
+		context.TrackIfNotNull(store);
 
 		Assert.That(store, Is.Not.Null);
 		Assert.That(store!.FilePath, Is.EqualTo(expectedPath).IgnoreCase);
@@ -170,8 +179,8 @@ internal sealed class OutlookSessionIntegrationTests
 		Assert.That(File.Exists(path), Is.False);
 		Assert.That(context.CountStores(path), Is.Zero);
 
-		Outlook.Store? store = context.TrackIfNotNull(
-			session.GetStore(path, createIfMissing));
+		Outlook.Store? store = session.GetStore(path, createIfMissing);
+		context.TrackIfNotNull(store);
 
 		using (Assert.EnterMultipleScope())
 		{
@@ -201,17 +210,19 @@ internal sealed class OutlookSessionIntegrationTests
 		OutlookSession session = new(context.NameSpace);
 		string firstPath = context.StorePath("first.pst");
 		string secondPath = context.StorePath("second.pst");
-		Outlook.Store first = context.Track(session.GetStore(firstPath)!);
+		Outlook.Store first = session.GetStore(firstPath)!;
+		context.Track(first);
 		string firstId = first.StoreID;
-		Outlook.Store second = context.Track(session.GetStore(secondPath)!);
+		Outlook.Store second = session.GetStore(secondPath)!;
+		context.Track(second);
 		string secondId = second.StoreID;
 
-		Outlook.Store? firstLookup =
-			context.TrackIfNotNull(session.GetStore(firstPath, false));
+		Outlook.Store? firstLookup = session.GetStore(firstPath, false);
+		context.TrackIfNotNull(firstLookup);
 
 		Assert.That(firstLookup, Is.Not.Null);
-		Outlook.Store? secondLookup =
-			context.TrackIfNotNull(session.GetStore(secondPath, false));
+		Outlook.Store? secondLookup = session.GetStore(secondPath, false);
+		context.TrackIfNotNull(secondLookup);
 
 		Assert.That(secondLookup, Is.Not.Null);
 
@@ -238,13 +249,16 @@ internal sealed class OutlookSessionIntegrationTests
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
 		string path = context.StorePath("existing.pst");
-		Outlook.Store first = context.Track(session.GetStore(path) !);
+		Outlook.Store first = session.GetStore(path)!;
+		context.Track(first);
 		string expectedId = first.StoreID;
 		Assert.That(File.Exists(path), Is.True);
 		Assert.That(context.CountStores(path), Is.EqualTo(1));
 
-		Outlook.Store? second = context.TrackIfNotNull(
-			session.GetStore(path.ToUpperInvariant(), createIfMissing));
+		string uppercasePath = path.ToUpperInvariant();
+		Outlook.Store? second =
+			session.GetStore(uppercasePath, createIfMissing);
+		context.TrackIfNotNull(second);
 
 		Assert.That(second, Is.Not.Null);
 		Assert.That(second!.StoreID, Is.EqualTo(expectedId));
@@ -259,9 +273,10 @@ internal sealed class OutlookSessionIntegrationTests
 	{
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
-		Outlook.AppointmentItem original = context.Track(
-			(Outlook.AppointmentItem)context.Application.CreateItem(
-				Outlook.OlItemType.olAppointmentItem));
+		Outlook.AppointmentItem original = (Outlook.AppointmentItem)
+			context.Application.CreateItem(
+				Outlook.OlItemType.olAppointmentItem);
+		context.Track(original);
 		original.Subject = "Email.ToolKit appointment";
 		string path = Path.Combine(context.DirectoryPath, "appointment.msg");
 		original.SaveAs(path, Outlook.OlSaveAsType.olMSGUnicode);
@@ -320,7 +335,8 @@ internal sealed class OutlookSessionIntegrationTests
 		object? result = session.OpenSharedItem(path);
 
 		Assert.That(result, Is.InstanceOf<Outlook.MailItem>());
-		Outlook.MailItem opened = context.Track((Outlook.MailItem)result!);
+		Outlook.MailItem opened = (Outlook.MailItem)result!;
+		context.Track(opened);
 		Assert.That(opened.Subject, Is.EqualTo(original.Subject));
 		Assert.That(opened.Body, Does.Contain("saved MSG"));
 		opened.Close(Outlook.OlInspectorClose.olDiscard);
@@ -392,7 +408,8 @@ internal sealed class OutlookSessionIntegrationTests
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
 		string path = context.StorePath("remove.pst");
-		Outlook.Store store = context.Track(session.GetStore(path)!);
+		Outlook.Store store = session.GetStore(path)!;
+		context.Track(store);
 		Assert.That(context.CountStores(path), Is.EqualTo(1));
 
 		bool removed;
@@ -433,8 +450,10 @@ internal sealed class OutlookSessionIntegrationTests
 		using OutlookTestContext context = new();
 		OutlookSession connectedSession = new(context.NameSpace);
 		string path = context.StorePath("retained.pst");
-		Outlook.Store store = context.Track(connectedSession.GetStore(path) !);
-		Outlook.MAPIFolder root = context.Track(store.GetRootFolder());
+		Outlook.Store store = connectedSession.GetStore(path)!;
+		context.Track(store);
+		Outlook.MAPIFolder root = store.GetRootFolder();
+		context.Track(root);
 		string storeId = store.StoreID;
 		string rootId = root.EntryID;
 		OutlookSession session = new(null);
@@ -454,8 +473,10 @@ internal sealed class OutlookSessionIntegrationTests
 		OutlookTestContext context, OutlookSession session, string fileName)
 	{
 		string path = context.StorePath(fileName);
-		Outlook.Store store = context.Track(session.GetStore(path)!);
-		Outlook.MAPIFolder root = context.Track(store.GetRootFolder());
+		Outlook.Store store = session.GetStore(path)!;
+		context.Track(store);
+		Outlook.MAPIFolder root = store.GetRootFolder();
+		context.Track(root);
 		context.NameSpace.RemoveStore(root);
 		return path;
 	}
@@ -464,9 +485,10 @@ internal sealed class OutlookSessionIntegrationTests
 		OutlookTestContext context, string path, string subject,
 		string? body = null)
 	{
-		Outlook.MailItem item = context.Track(
-			(Outlook.MailItem)context.Application.CreateItem(
-				Outlook.OlItemType.olMailItem));
+		Outlook.MailItem item = (Outlook.MailItem)
+			context.Application.CreateItem(
+				Outlook.OlItemType.olMailItem);
+		context.Track(item);
 		item.Subject = subject;
 
 		if (body != null)

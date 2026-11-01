@@ -99,7 +99,8 @@ internal sealed class OutlookServiceIntegrationTests
 			// Process detection alone would miss a disconnected RCW.
 			// Exercise the independently acquired application and namespace.
 			Assert.That(context.Application.Version, Is.Not.Empty);
-			Outlook.Stores stores = context.Track(context.NameSpace.Stores);
+			Outlook.Stores stores = context.NameSpace.Stores;
+			context.Track(stores);
 			Assert.That(stores.Count, Is.GreaterThan(0));
 
 			Assert.That(localService.Connect(33), Is.True);
