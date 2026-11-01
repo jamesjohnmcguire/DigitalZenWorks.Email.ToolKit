@@ -328,6 +328,19 @@ namespace DigitalZenWorks.Email.ToolKit
 		}
 
 		/// <summary>
+		/// Gets a folder by entry ID using the released method name.
+		/// </summary>
+		/// <param name="entryId">The folder entry ID.</param>
+		/// <param name="store">The store containing the folder.</param>
+		/// <returns>The matching folder, if found.</returns>
+		[Obsolete("GetFolderFromIDis deprecated, " +
+			"please use GetFolderFromId instead.")]
+		public MAPIFolder GetFolderFromID(string entryId, Store store)
+		{
+			return GetFolderFromId(entryId, store);
+		}
+
+		/// <summary>
 		/// Get the item by its entry id.
 		/// </summary>
 		/// <param name="entryId">The entryId of the item.</param>
