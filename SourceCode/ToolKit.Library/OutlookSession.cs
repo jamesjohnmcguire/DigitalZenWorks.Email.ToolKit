@@ -168,7 +168,8 @@ public class OutlookSession
 	/// Removes a store from Outlook.
 	/// </summary>
 	/// <param name="store">The store to remove.</param>
-	/// <returns>remove result.</returns>
+	/// <returns>Returns true if a store was detached; false if no matching
+	/// store was attached.</returns>
 	public bool RemoveStore(Store store)
 	{
 		bool result = false;
