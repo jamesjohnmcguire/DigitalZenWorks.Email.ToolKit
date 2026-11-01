@@ -37,12 +37,14 @@ internal sealed class OutlookApplicationProbeTests
 		TaskCompletionSource<bool> allowCompletion = new(
 			TaskCreationOptions.RunContinuationsAsynchronously);
 		Thread? worker = null;
+
 		OutlookApplicationProbe probe = new(() =>
 		{
 			worker = Thread.CurrentThread;
 			workerStarted.SetResult(true);
 			allowCompletion.Task.GetAwaiter().GetResult();
 		});
+
 		Stopwatch elapsed = new();
 		Task<bool> caller = Task.Run(() =>
 		{
@@ -63,7 +65,8 @@ internal sealed class OutlookApplicationProbeTests
 
 			// Catch an accidental zero-wait implementation. Allow timer
 			// granularity without imposing a tight upper scheduling limit.
-			Assert.That(elapsed.ElapsedMilliseconds, Is.GreaterThanOrEqualTo(900));
+			Assert.That(
+				elapsed.ElapsedMilliseconds, Is.GreaterThanOrEqualTo(900));
 
 			// A timeout must not abort the operation or its owning apartment.
 			Assert.That(worker!.IsAlive, Is.True);
@@ -137,6 +140,7 @@ internal sealed class OutlookApplicationProbeTests
 		ConcurrentBag<Thread> workers = new();
 		List<Task<bool>> callers = new();
 		int calls = 0;
+
 		OutlookApplicationProbe probe = new(() =>
 		{
 			workers.Add(Thread.CurrentThread);
@@ -189,6 +193,7 @@ internal sealed class OutlookApplicationProbeTests
 			}
 		}
 	}
+
 	/// <summary>
 	/// Verifies invalid waits cannot leave an unobserved activation running.
 	/// </summary>
@@ -282,6 +287,7 @@ internal sealed class OutlookApplicationProbeTests
 				}
 			}
 		});
+
 		OutlookFactory firstFactory = new(probe);
 		OutlookFactory retryFactory = new(probe);
 		OutlookService service = new();
