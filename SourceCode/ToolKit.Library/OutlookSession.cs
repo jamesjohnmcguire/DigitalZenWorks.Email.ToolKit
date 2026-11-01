@@ -89,7 +89,21 @@ public class OutlookSession
 		if (session != null)
 		{
 			path = Path.GetFullPath(path);
+
 			bool exists = File.Exists(path);
+
+			if (exists == false || createIfMissing == true)
+			{
+				string extension = Path.GetExtension(path);
+
+				if (!extension.Equals(
+					".pst", StringComparison.OrdinalIgnoreCase))
+				{
+					path += ".pst";
+				}
+			}
+
+			exists = File.Exists(path);
 
 			if (exists == false && createIfMissing == false)
 			{
@@ -102,15 +116,6 @@ public class OutlookSession
 					if (exists == false)
 					{
 						Log.Info("Attempting to create store file: " + path);
-					}
-
-					string extension = Path.GetExtension(path);
-
-					if (!extension.Equals(
-						".pst", StringComparison.OrdinalIgnoreCase))
-					{
-						// Attempt to fix mistaken or missing file extension.
-						path += ".pst";
 					}
 
 					// If the .pst file does not exist, Outlook creates it.
