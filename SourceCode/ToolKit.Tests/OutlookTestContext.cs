@@ -70,6 +70,23 @@ internal sealed class OutlookTestContext : IDisposable
 	}
 
 	/// <summary>
+	/// Tracks an acquired COM reference if it is present.
+	/// </summary>
+	/// <typeparam name="T">The acquired COM interface.</typeparam>
+	/// <param name="reference">The optional reference to retain.</param>
+	/// <returns>The supplied reference, or null.</returns>
+	public T? TrackIfNotNull<T>(T? reference)
+		where T : class
+	{
+		if (reference != null)
+		{
+			Track(reference);
+		}
+
+		return reference;
+	}
+
+	/// <summary>
 	/// Registers a test-owned PST path before attempting to attach it.
 	/// </summary>
 	/// <param name="fileName">The PST file name.</param>
