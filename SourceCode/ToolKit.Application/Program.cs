@@ -112,7 +112,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 								MergeStores(command).ConfigureAwait(false);
 							break;
 						case "move-folder":
-							await MoveFolder(command).ConfigureAwait(false);
+							result = await MoveFolder(command).ConfigureAwait(false);
 							break;
 						case "remove-duplicates":
 							result = await RemoveDuplicates(command).
