@@ -16,6 +16,23 @@ using NUnit.Framework;
 internal sealed class OutlookServiceTests
 {
 	/// <summary>
+	/// Tests that the first connection attempt checks availability.
+	/// </summary>
+	[Test]
+	public void ConnectChecksAvailability()
+	{
+		OutlookService service = new();
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = false;
+
+		service.Connect(factory);
+
+		Assert.That(
+			factory.IsOutlookAvailableCallCount,
+			Is.EqualTo(1));
+	}
+
+	/// <summary>
 	/// Tests that the Connect method checks availability when Outlook is not
 	/// already connected.
 	/// </summary>
@@ -32,23 +49,6 @@ internal sealed class OutlookServiceTests
 
 		// Ensures Connect actually checks availability rather than
 		// simply returning false.
-		Assert.That(
-			factory.IsOutlookAvailableCallCount,
-			Is.EqualTo(1));
-	}
-
-	/// <summary>
-	/// Tests that the first connection attempt checks availability.
-	/// </summary>
-	[Test]
-	public void ConnectChecksAvailability()
-	{
-		OutlookService service = new();
-		FakeOutlookFactory factory = new();
-		factory.IsAvailable = false;
-
-		service.Connect(factory);
-
 		Assert.That(
 			factory.IsOutlookAvailableCallCount,
 			Is.EqualTo(1));
@@ -190,6 +190,20 @@ internal sealed class OutlookServiceTests
 	}
 
 	/// <summary>
+	/// Tests that calling Disconnect before Connect does not throw
+	/// an exception.
+	/// </summary>
+	[Test]
+	public void DisconnectBeforeConnectDoesNotThrow()
+	{
+		OutlookService service = new();
+
+		Assert.DoesNotThrow(() =>
+		{
+			service.Disconnect();
+		});
+	}
+	/// <summary>
 	/// Tests that the Session property is null after a failed connection
 	/// attempt.
 	/// </summary>
@@ -205,18 +219,4 @@ internal sealed class OutlookServiceTests
 		Assert.That(service.Session, Is.Null);
 	}
 
-	/// <summary>
-	/// Tests that calling Disconnect before Connect does not throw
-	/// an exception.
-	/// </summary>
-	[Test]
-	public void DisconnectBeforeConnectDoesNotThrow()
-	{
-		OutlookService service = new();
-
-		Assert.DoesNotThrow(() =>
-		{
-			service.Disconnect();
-		});
-	}
 }

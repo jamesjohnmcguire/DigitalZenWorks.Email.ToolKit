@@ -102,6 +102,59 @@ internal sealed class OutlookServiceLifecycleTests
 	}
 
 	/// <summary>
+	/// Verifies a cleanup failure does not retain an unusable connection.
+	/// </summary>
+	[Test]
+	public void DisconnectClearsStateWhenDisposeThrows()
+	{
+		OutlookService service = new();
+		FakeOutlookConnection connection = new();
+		InvalidOperationException failure = new("Cleanup failed");
+		connection.DisposeException = failure;
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = true;
+		factory.Connection = connection;
+		Assert.That(service.Connect(factory), Is.True);
+
+		Assert.That(
+			() => service.Disconnect(), Throws.Exception.SameAs(failure));
+		Assert.That(service.IsConnected, Is.False);
+		Assert.That(service.Session, Is.Null);
+		Assert.That(() => service.Disconnect(), Throws.Nothing);
+		Assert.That(connection.DisposeCallCount, Is.EqualTo(1));
+		Assert.That(connection.QuitCallCount, Is.Zero);
+
+		FakeOutlookSession nextSession = new();
+		factory.Connection = new FakeOutlookConnection(nextSession);
+		Assert.That(service.Connect(factory), Is.True);
+		Assert.That(service.Session, Is.SameAs(nextSession));
+		Assert.That(factory.CreateConnectionCallCount, Is.EqualTo(2));
+	}
+
+	/// <summary>
+	/// Verifies older connections can be detached without shutdown authority
+	/// or a new requirement to implement IDisposable.
+	/// </summary>
+	[Test]
+	public void DisconnectDoesNotQuitNonDisposableConnection()
+	{
+		OutlookService service = new();
+		NonDisposableOutlookConnection connection = new();
+		FakeOutlookFactory factory = new();
+		factory.IsAvailable = true;
+		factory.Connection = connection;
+
+		bool connected = service.Connect(factory);
+		Assert.That(connected, Is.True);
+
+		service.Disconnect();
+		service.Disconnect();
+
+		Assert.That(connection.QuitCallCount, Is.Zero);
+		Assert.That(service.IsConnected, Is.False);
+		Assert.That(service.Session, Is.Null);
+	}
+	/// <summary>
 	/// Tests that Disconnect releases the session and allows a subsequent
 	/// connection.
 	/// </summary>
@@ -166,57 +219,4 @@ internal sealed class OutlookServiceLifecycleTests
 		Assert.That(service.Session, Is.Null);
 	}
 
-	/// <summary>
-	/// Verifies a cleanup failure does not retain an unusable connection.
-	/// </summary>
-	[Test]
-	public void DisconnectClearsStateWhenDisposeThrows()
-	{
-		OutlookService service = new();
-		FakeOutlookConnection connection = new();
-		InvalidOperationException failure = new("Cleanup failed");
-		connection.DisposeException = failure;
-		FakeOutlookFactory factory = new();
-		factory.IsAvailable = true;
-		factory.Connection = connection;
-		Assert.That(service.Connect(factory), Is.True);
-
-		Assert.That(
-			() => service.Disconnect(), Throws.Exception.SameAs(failure));
-		Assert.That(service.IsConnected, Is.False);
-		Assert.That(service.Session, Is.Null);
-		Assert.That(() => service.Disconnect(), Throws.Nothing);
-		Assert.That(connection.DisposeCallCount, Is.EqualTo(1));
-		Assert.That(connection.QuitCallCount, Is.Zero);
-
-		FakeOutlookSession nextSession = new();
-		factory.Connection = new FakeOutlookConnection(nextSession);
-		Assert.That(service.Connect(factory), Is.True);
-		Assert.That(service.Session, Is.SameAs(nextSession));
-		Assert.That(factory.CreateConnectionCallCount, Is.EqualTo(2));
-	}
-
-	/// <summary>
-	/// Verifies older connections can be detached without shutdown authority
-	/// or a new requirement to implement IDisposable.
-	/// </summary>
-	[Test]
-	public void DisconnectDoesNotQuitNonDisposableConnection()
-	{
-		OutlookService service = new();
-		NonDisposableOutlookConnection connection = new();
-		FakeOutlookFactory factory = new();
-		factory.IsAvailable = true;
-		factory.Connection = connection;
-
-		bool connected = service.Connect(factory);
-		Assert.That(connected, Is.True);
-
-		service.Disconnect();
-		service.Disconnect();
-
-		Assert.That(connection.QuitCallCount, Is.Zero);
-		Assert.That(service.IsConnected, Is.False);
-		Assert.That(service.Session, Is.Null);
-	}
 }

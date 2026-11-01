@@ -17,6 +17,29 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 internal sealed class OutlookSessionTests
 {
 	/// <summary>
+	/// Verifies raw folder lookup is absent without a namespace.
+	/// </summary>
+	[Test]
+	public void GetFolderFromIdInternalReturnsNullWhenSessionIsNull()
+	{
+		OutlookSession session = new(null);
+
+		Assert.That(
+			session.GetFolderFromIdInternal("entry", "store"), Is.Null);
+	}
+
+	/// <summary>
+	/// Verifies folder wrappers are absent without a namespace.
+	/// </summary>
+	[Test]
+	public void GetFolderFromIdReturnsNullWhenSessionIsNull()
+	{
+		OutlookSession session = new(null);
+
+		Assert.That(session.GetFolderFromId("entry", "store"), Is.Null);
+	}
+
+	/// <summary>
 	/// Verifies GetItemFromId returns null when the OutlookSession has a null
 	/// underlying session.
 	/// </summary>
@@ -28,22 +51,6 @@ internal sealed class OutlookSessionTests
 		OutlookSession session = new(null);
 
 		object? item = session.GetItemFromId("nonexistent");
-
-		Assert.That(item, Is.Null);
-	}
-
-	/// <summary>
-	/// Verifies that OutlookSession.OpenSharedItem returns null when the
-	/// underlying session is null.
-	/// </summary>
-	/// <remarks>Creates an OutlookSession with a null underlying session and
-	/// attempts to open a shared item, expecting a null result.</remarks>
-	[Test]
-	public void OpenSharedItemReturnsNullWhenSessionIsNull()
-	{
-		OutlookSession session = new(null);
-
-		object? item = session.OpenSharedItem("nonexistent.eml");
 
 		Assert.That(item, Is.Null);
 	}
@@ -64,29 +71,6 @@ internal sealed class OutlookSessionTests
 	}
 
 	/// <summary>
-	/// Verifies folder wrappers are absent without a namespace.
-	/// </summary>
-	[Test]
-	public void GetFolderFromIdReturnsNullWhenSessionIsNull()
-	{
-		OutlookSession session = new(null);
-
-		Assert.That(session.GetFolderFromId("entry", "store"), Is.Null);
-	}
-
-	/// <summary>
-	/// Verifies raw folder lookup is absent without a namespace.
-	/// </summary>
-	[Test]
-	public void GetFolderFromIdInternalReturnsNullWhenSessionIsNull()
-	{
-		OutlookSession session = new(null);
-
-		Assert.That(
-			session.GetFolderFromIdInternal("entry", "store"), Is.Null);
-	}
-
-	/// <summary>
 	/// Verifies mail wrapping is absent without a namespace.
 	/// </summary>
 	[Test]
@@ -95,6 +79,22 @@ internal sealed class OutlookSessionTests
 		OutlookSession session = new(null);
 
 		Assert.That(session.OpenMailItemFile("missing.msg"), Is.Null);
+	}
+
+	/// <summary>
+	/// Verifies that OutlookSession.OpenSharedItem returns null when the
+	/// underlying session is null.
+	/// </summary>
+	/// <remarks>Creates an OutlookSession with a null underlying session and
+	/// attempts to open a shared item, expecting a null result.</remarks>
+	[Test]
+	public void OpenSharedItemReturnsNullWhenSessionIsNull()
+	{
+		OutlookSession session = new(null);
+
+		object? item = session.OpenSharedItem("nonexistent.eml");
+
+		Assert.That(item, Is.Null);
 	}
 
 	/// <summary>

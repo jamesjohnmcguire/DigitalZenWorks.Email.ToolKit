@@ -16,6 +16,24 @@ using NUnit.Framework;
 internal sealed class OutlookConnectionTests
 {
 	/// <summary>
+	/// Verifies disposal relinquishes the connection's session and repeated
+	/// cleanup is harmless. Borrowed session wrappers are not force-released.
+	/// </summary>
+	[Test]
+	public void DisposeClearsSessionAndIsIdempotent()
+	{
+		FakeOutlookSession session = new();
+		using OutlookConnection connection = new(session);
+		IOutlookSession? first = connection.Session;
+
+		connection.Dispose();
+		connection.Dispose();
+
+		Assert.That(connection.Session, Is.Null);
+		Assert.That(first, Is.SameAs(session));
+		Assert.DoesNotThrow(() => connection.Quit());
+	}
+	/// <summary>
 	/// Verifies that calling Quit on an OutlookConnection does not throw when
 	/// no Outlook application instance is present.
 	/// </summary>
@@ -49,22 +67,4 @@ internal sealed class OutlookConnectionTests
 		Assert.That(second, Is.SameAs(first));
 	}
 
-	/// <summary>
-	/// Verifies disposal relinquishes the connection's session and repeated
-	/// cleanup is harmless. Borrowed session wrappers are not force-released.
-	/// </summary>
-	[Test]
-	public void DisposeClearsSessionAndIsIdempotent()
-	{
-		FakeOutlookSession session = new();
-		using OutlookConnection connection = new(session);
-		IOutlookSession? first = connection.Session;
-
-		connection.Dispose();
-		connection.Dispose();
-
-		Assert.That(connection.Session, Is.Null);
-		Assert.That(first, Is.SameAs(session));
-		Assert.DoesNotThrow(() => connection.Quit());
-	}
 }

@@ -76,15 +76,6 @@ internal sealed class OutlookServiceIntegrationTests
 	}
 
 	/// <summary>
-	/// Verifies installation detection on the configured test machine.
-	/// </summary>
-	[Test]
-	public void IsOutlookInstalledReportsAvailableInstallation()
-	{
-		Assert.That(OutlookService.IsOutlookInstalled(), Is.True);
-	}
-
-	/// <summary>
 	/// Verifies disconnect leaves an independently held Outlook application
 	/// usable and permits the service to connect again on the same STA.
 	/// </summary>
@@ -119,6 +110,15 @@ internal sealed class OutlookServiceIntegrationTests
 		{
 			localService.Disconnect();
 		}
+	}
+
+	/// <summary>
+	/// Verifies installation detection on the configured test machine.
+	/// </summary>
+	[Test]
+	public void IsOutlookInstalledReportsAvailableInstallation()
+	{
+		Assert.That(OutlookService.IsOutlookInstalled(), Is.True);
 	}
 
 	private static void StartOutlookIfNotRunning()
