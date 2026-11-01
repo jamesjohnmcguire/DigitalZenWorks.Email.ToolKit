@@ -34,7 +34,7 @@ GOTO end
 
 if "%~2"=="" GOTO error1
 
-msbuild -property:Configuration=Release;IncludeAllContentForSelfExtract=true;OutputPath=Bin\;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true -restore -target:publish;rebuild ToolKit.Application
+msbuild -property:Configuration=Release;DebugType=embedded;IncludeAllContentForSelfExtract=true;OutputPath=Bin\;Platform="Any CPU";PublishReadyToRun=true;PublishSingleFile=true;Runtimeidentifier=win-x64;SelfContained=true -restore -target:publish;rebuild ToolKit.Application
 
 CD ToolKit.Application\Bin\publish
 7z u DigitalZenWorks.Email.ToolKit.zip

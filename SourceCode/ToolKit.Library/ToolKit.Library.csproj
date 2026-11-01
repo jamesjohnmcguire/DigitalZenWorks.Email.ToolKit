@@ -41,7 +41,7 @@
 			<Guid>00062fff-0000-0000-c000-000000000046</Guid>
 			<VersionMajor>9</VersionMajor>
 			<VersionMinor>6</VersionMinor>
-			<WrapperTool>tlbimp</WrapperTool>
+			<WrapperTool>primary</WrapperTool>
 		</COMReference>
 	</ItemGroup>
 

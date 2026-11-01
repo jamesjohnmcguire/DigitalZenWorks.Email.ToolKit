@@ -2,22 +2,17 @@
 
 	<PropertyGroup>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<CodeAnalysisRuleSet>../CodeAnalysis.ruleset</CodeAnalysisRuleSet>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<NoWarn>NU1701</NoWarn>
 		<Nullable>enable</Nullable>
-		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net10.0-windows</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<COMReference Include="Microsoft.Office.Interop.Outlook">
-			<WrapperTool>tlbimp</WrapperTool>
+			<WrapperTool>primary</WrapperTool>
 			<VersionMinor>6</VersionMinor>
 			<VersionMajor>9</VersionMajor>
 			<Guid>00062fff-0000-0000-c000-000000000046</Guid>
@@ -31,7 +26,7 @@
 		<PackageReference Include="Common.Logging" Version="3.4.1" />
 		<PackageReference Include="Common.Logging.Core" Version="3.4.1" />
 		<PackageReference Include="Common.Logging.Serilog" Version="5.1.0" />
-		<PackageReference Include="Serilog" Version="4.3.1" />
+		<PackageReference Include="Serilog" Version="4.4.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
@@ -46,7 +41,6 @@
 
 	<ItemGroup>
 		<AdditionalFiles Include="../stylecop.json" />
-		<CodeAnalysisDictionary Include="../CodeAnalysis.ruleset" />
 		<None Include="../.editorconfig" Link="../.editorconfig" />
 	</ItemGroup>
 
