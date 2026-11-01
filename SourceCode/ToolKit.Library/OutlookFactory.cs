@@ -17,7 +17,7 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 /// <summary>
 /// Factory class for creating connections to the Outlook application.
 /// </summary>
-public class OutlookFactory : IOutlookFactory
+internal class OutlookFactory : IOutlookFactory
 {
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod() !.DeclaringType);
