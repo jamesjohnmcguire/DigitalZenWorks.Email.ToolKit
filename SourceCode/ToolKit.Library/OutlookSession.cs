@@ -268,6 +268,52 @@ public class OutlookSession
 		return mapiFolder;
 	}
 
+	private static Store? CheckStore(
+		Stores stores, string? storePath, int index)
+	{
+		Store? store = null;
+		Store? checkStore = null;
+
+		try
+		{
+			checkStore = stores[index];
+		}
+		catch (UnauthorizedAccessException exception)
+		{
+			Log.Error(exception.ToString());
+		}
+
+		if (checkStore == null)
+		{
+			Log.Warn("Enumerating stores - store is null");
+		}
+		else
+		{
+			try
+			{
+				string filePath = checkStore.FilePath;
+
+				if (!string.IsNullOrWhiteSpace(filePath) &&
+					filePath.Equals(
+						storePath, StringComparison.OrdinalIgnoreCase))
+				{
+					// Transfer this reference to the caller.
+					store = checkStore;
+					checkStore = null;
+				}
+			}
+			finally
+			{
+				if (checkStore != null)
+				{
+					Marshal.ReleaseComObject(checkStore);
+				}
+			}
+		}
+
+		return store;
+	}
+
 	private Store? FindStore(string storePath)
 	{
 		Store? store = null;
@@ -283,44 +329,12 @@ public class OutlookSession
 
 				for (int index = 1; index <= total; index++)
 				{
-					Store? checkStore = null;
+					Store? checkStore = CheckStore(stores, storePath, index);
 
-					try
+					if (checkStore != null)
 					{
-						checkStore = stores[index];
-					}
-					catch (UnauthorizedAccessException exception)
-					{
-						Log.Error(exception.ToString());
-					}
-
-					if (checkStore == null)
-					{
-						Log.Warn("Enumerating stores - store is null");
-					}
-					else
-					{
-						try
-						{
-							string filePath = checkStore.FilePath;
-
-							if (!string.IsNullOrWhiteSpace(filePath) &&
-								filePath.Equals(
-									storePath, StringComparison.OrdinalIgnoreCase))
-							{
-								// Transfer this reference to the caller.
-								store = checkStore;
-								checkStore = null;
-								break;
-							}
-						}
-						finally
-						{
-							if (checkStore != null)
-							{
-								Marshal.ReleaseComObject(checkStore);
-							}
-						}
+						store = checkStore;
+						break;
 					}
 				}
 			}
