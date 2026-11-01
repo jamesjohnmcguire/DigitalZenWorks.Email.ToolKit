@@ -150,6 +150,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
+				return -1;
 			}
 			else
 			{
@@ -490,6 +491,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
+				return -1;
 			}
 			else
 			{
@@ -530,6 +532,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
+				return -1;
 			}
 			else
 			{
@@ -565,6 +568,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
+				return -1;
 			}
 			else
 			{
@@ -607,6 +611,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
+				return -1;
 			}
 			else
 			{
@@ -618,18 +623,19 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				IDictionary<string, IList<string>> duplicates =
 					outlookStore.GetTotalDuplicates(pstFilePath);
 
-				ListTotalDuplicatesOutput(duplicates, true);
-				ListTotalDuplicatesOutput(duplicates, false);
+				ListTotalDuplicatesOutput(duplicates, true, outlook);
+				ListTotalDuplicatesOutput(duplicates, false, outlook);
 			}
 
 			return 0;
 		}
 
 		private static void ListTotalDuplicatesOutput(
-			IDictionary<string, IList<string>> duplicates, bool useLog)
+			IDictionary<string, IList<string>> duplicates,
+			bool useLog,
+			OutlookService outlook)
 		{
-			OutlookService outlook = new();
-			bool connected = outlook.Connect();
+			bool connected = outlook.IsConnected;
 
 			if (connected == false)
 			{
@@ -749,6 +755,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
+				return -1;
 			}
 			else
 			{
@@ -784,6 +791,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
+				return -1;
 			}
 			else
 			{
@@ -808,6 +816,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
+				return -1;
 			}
 			else
 			{
@@ -857,6 +866,7 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
+				return -1;
 			}
 			else
 			{
@@ -895,6 +905,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 		private static async Task<int> RemoveEmptyFolders(Command command)
 		{
 			bool connected = OutlookConnect();
+
+			if (connected == false)
+			{
+				return -1;
+			}
 
 			if (connected == true)
 			{
