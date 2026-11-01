@@ -268,14 +268,24 @@ internal sealed class OutlookSessionIntegrationTests
 	/// <summary>
 	/// Verifies removal accepts the same extensionless path used to create a PST.
 	/// </summary>
-	[Test]
-	public void GetStoreThenRemoveStoreAcceptsExtensionlessPath()
+	/// <param name="withCollidingFile">Whether a file without the PST suffix
+	/// also exists at the supplied path.</param>
+	[TestCase(false)]
+	[TestCase(true)]
+	public void GetStoreThenRemoveStoreAcceptsExtensionlessPath(
+		bool withCollidingFile)
 	{
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
 		string path = context.StorePath("round-trip.pst");
 		string extensionlessPath = Path.Combine(
 			context.DirectoryPath, "round-trip");
+
+		if (withCollidingFile)
+		{
+			File.WriteAllText(extensionlessPath, "Not a PST file.");
+		}
+
 		Outlook.Store? store = session.GetStore(extensionlessPath);
 		context.TrackIfNotNull(store);
 
@@ -286,6 +296,13 @@ internal sealed class OutlookSessionIntegrationTests
 
 		Assert.That(removed, Is.True);
 		Assert.That(context.CountStores(path), Is.Zero);
+
+		if (withCollidingFile)
+		{
+			Assert.That(
+				File.ReadAllText(extensionlessPath),
+				Is.EqualTo("Not a PST file."));
+		}
 	}
 
 	/// <summary>

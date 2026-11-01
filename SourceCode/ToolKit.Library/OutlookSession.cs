@@ -91,15 +91,19 @@ public class OutlookSession
 			path = Path.GetFullPath(path);
 
 			bool exists = File.Exists(path);
+			string extension = Path.GetExtension(path);
 
-			if (exists == false || createIfMissing == true)
+			if (!extension.Equals(
+				".pst", StringComparison.OrdinalIgnoreCase))
 			{
-				string extension = Path.GetExtension(path);
+				string pstPath = path + ".pst";
 
-				if (!extension.Equals(
-					".pst", StringComparison.OrdinalIgnoreCase))
+				bool newExists = File.Exists(path);
+
+				if (exists == false || newExists == true ||
+					createIfMissing == true)
 				{
-					path += ".pst";
+					path = pstPath;
 				}
 			}
 
