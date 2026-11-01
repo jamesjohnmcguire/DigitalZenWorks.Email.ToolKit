@@ -33,10 +33,10 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="dbxFoldersPath">The path to dbx folders to
 		/// migrate.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
-		public static bool DbxDirectoryToPst(
+		public static void DbxDirectoryToPst(
 			string dbxFoldersPath, string pstPath)
 		{
-			return DbxDirectoryToPst(dbxFoldersPath, pstPath, null);
+			DbxDirectoryToPst(dbxFoldersPath, pstPath, null);
 		}
 
 		/// <summary>
@@ -46,7 +46,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// migrate.</param>
 		/// <param name="pstPath">The path to pst file to copy to.</param>
 		/// <param name="encoding">The optional encoding to use.</param>
-		public static bool DbxDirectoryToPst(
+		public static void DbxDirectoryToPst(
 			string dbxFoldersPath, string pstPath, Encoding encoding)
 		{
 			bool result = false;
@@ -64,8 +64,6 @@ namespace DigitalZenWorks.Email.ToolKit
 				result = DbxDirectoryToPstInternal(
 					dbxFoldersPath, pstPath, pstStore, encoding);
 			}
-
-			return result;
 		}
 
 		/// <summary>

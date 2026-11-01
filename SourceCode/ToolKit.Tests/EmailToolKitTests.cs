@@ -1033,10 +1033,23 @@ namespace DigitalZenWorks.Email.ToolKit.Tests
 		{
 			GetDbxTestFolders();
 
-			bool result =
+			MAPIFolder rootFolder = store.GetRootFolder();
+			Folders folders = rootFolder.Folders;
+
+			try
+			{
+				int initialFolderCount = folders.Count;
+
 				Migrate.DbxDirectoryToPst(testFolder.FullName, storePath);
 
-			Assert.That(result, Is.True);
+				Assert.That(
+					folders.Count, Is.GreaterThan(initialFolderCount));
+			}
+			finally
+			{
+				Marshal.ReleaseComObject(folders);
+				Marshal.ReleaseComObject(rootFolder);
+			}
 		}
 
 		/// <summary>
