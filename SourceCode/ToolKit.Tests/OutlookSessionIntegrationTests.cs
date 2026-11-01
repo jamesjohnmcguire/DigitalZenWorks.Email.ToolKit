@@ -266,6 +266,29 @@ internal sealed class OutlookSessionIntegrationTests
 	}
 
 	/// <summary>
+	/// Verifies removal accepts the same extensionless path used to create a PST.
+	/// </summary>
+	[Test]
+	public void GetStoreThenRemoveStoreAcceptsExtensionlessPath()
+	{
+		using OutlookTestContext context = new();
+		OutlookSession session = new(context.NameSpace);
+		string path = context.StorePath("round-trip.pst");
+		string extensionlessPath = Path.Combine(
+			context.DirectoryPath, "round-trip");
+		Outlook.Store? store = session.GetStore(extensionlessPath);
+		context.TrackIfNotNull(store);
+
+		Assert.That(store, Is.Not.Null);
+		Assert.That(context.CountStores(path), Is.EqualTo(1));
+
+		bool removed = session.RemoveStore(extensionlessPath);
+
+		Assert.That(removed, Is.True);
+		Assert.That(context.CountStores(path), Is.Zero);
+	}
+
+	/// <summary>
 	/// Verifies a non-mail shared item is rejected by the mail wrapper.
 	/// </summary>
 	[Test]
