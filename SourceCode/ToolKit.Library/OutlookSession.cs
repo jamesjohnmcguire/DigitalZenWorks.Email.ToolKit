@@ -88,26 +88,9 @@ public class OutlookSession
 
 		if (session != null)
 		{
-			path = Path.GetFullPath(path);
+			path = GetAdjustedPstPath(path, createIfMissing);
 
 			bool exists = File.Exists(path);
-			string extension = Path.GetExtension(path);
-
-			if (!extension.Equals(
-				".pst", StringComparison.OrdinalIgnoreCase))
-			{
-				string pstPath = path + ".pst";
-
-				bool newExists = File.Exists(path);
-
-				if (exists == false || newExists == true ||
-					createIfMissing == true)
-				{
-					path = pstPath;
-				}
-			}
-
-			exists = File.Exists(path);
 
 			if (exists == false && createIfMissing == false)
 			{
@@ -312,6 +295,30 @@ public class OutlookSession
 		}
 
 		return store;
+	}
+
+	private static string GetAdjustedPstPath(string? path, bool createIfMissing)
+	{
+		path = Path.GetFullPath(path);
+
+		bool exists = File.Exists(path);
+		string extension = Path.GetExtension(path);
+
+		if (!extension.Equals(
+			".pst", StringComparison.OrdinalIgnoreCase))
+		{
+			string newPath = path + ".pst";
+
+			bool newExists = File.Exists(path);
+
+			if (exists == false || newExists == true ||
+				createIfMissing == true)
+			{
+				path = newPath;
+			}
+		}
+
+		return path;
 	}
 
 	private Store? FindStore(string storePath)
