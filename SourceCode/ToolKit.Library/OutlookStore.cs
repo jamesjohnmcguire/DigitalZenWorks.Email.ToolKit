@@ -26,6 +26,8 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private readonly OutlookAccount outlookAccount;
 		private readonly OutlookSession? outlookSession;
+
+		private readonly Store store;
 		private uint totalFolders;
 
 		/// <summary>
@@ -81,7 +83,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="store">The Store object.</param>
 		public OutlookStore(Store store)
 		{
-			store = store;
+			this.store = store;
 			this.outlookSession = new(store.Session);
 		}
 
