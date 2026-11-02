@@ -76,40 +76,49 @@ public class OutlookSession
 	}
 
 	/// <summary>
-	/// Create a new pst storage file.
+	/// Gets a PST store, creating the file if requested.
 	/// </summary>
-	/// <param name="path">The path to the pst file.</param>
-	/// <param name="createIfMissing">Whether to create the pst file if it does
+	/// <param name="path">The PST file path, or null.</param>
+	/// <param name="createIfMissing">Whether to create the PST file if it does
 	/// not exist.</param>
-	/// <returns>A store object or null if not found.</returns>
-	public Store? GetStore(string path, bool createIfMissing = true)
+	/// <returns>The store, or null if the path is null, the session is
+	/// unavailable, or the store is not found.</returns>
+	public Store? GetStore(string? path, bool createIfMissing = true)
 	{
 		Store? store = null;
 
 		if (session != null)
 		{
-			path = GetAdjustedPstPath(path, createIfMissing);
-
-			bool exists = File.Exists(path);
-
-			if (exists == false && createIfMissing == false)
+			if (path == null)
 			{
-				Log.Warn("Store file does not exist: " + path);
+				Log.Error("GetStore called with null path");
 			}
 			else
 			{
-				if (createIfMissing == true)
+				path = GetAdjustedPstPath(path, createIfMissing);
+
+				bool exists = File.Exists(path);
+
+				if (exists == false && createIfMissing == false)
 				{
-					if (exists == false)
+					Log.Warn("Store file does not exist: " + path);
+				}
+				else
+				{
+					if (createIfMissing == true)
 					{
-						Log.Info("Attempting to create store file: " + path);
+						if (exists == false)
+						{
+							Log.Info(
+								"Attempting to create store file: " + path);
+						}
+
+						// If the .pst file does not exist, Outlook creates it.
+						session.AddStore(path);
 					}
 
-					// If the .pst file does not exist, Outlook creates it.
-					session.AddStore(path);
+					store = FindStore(path);
 				}
-
-				store = FindStore(path);
 			}
 		}
 
@@ -199,34 +208,41 @@ public class OutlookSession
 	/// <summary>
 	/// Removes a store from Outlook.
 	/// </summary>
-	/// <param name="path">The path to the pst file.</param>
-	/// <returns>Returns true if a store was detached; false if no matching
-	/// store was attached.</returns>
+	/// <param name="path">The PST file path, or null.</param>
+	/// <returns>True if a store was detached; false if the path is null or
+	/// no matching store was attached.</returns>
 	/// <remarks>The actual file will not be deleted.  Even after removing the
 	/// store, Outlook may keep the file locked for a short time.</remarks>
-	public bool RemoveStore(string path)
+	public bool RemoveStore(string? path)
 	{
 		bool result = false;
 
-		Log.Info("Attempting to remove store: " + path);
-
-		path = Path.GetFullPath(path);
-
-		Store? store = GetStore(path, false);
-
-		if (store == null)
+		if (path == null)
 		{
-			Log.Warn("Store not found: " + path);
+			Log.Error("RemoveStore called with null path");
 		}
 		else
 		{
-			try
+			Log.Info("Attempting to remove store: " + path);
+
+			path = Path.GetFullPath(path);
+
+			Store? store = GetStore(path, false);
+
+			if (store == null)
 			{
-				result = RemoveStore(store);
+				Log.Warn("Store not found: " + path);
 			}
-			finally
+			else
 			{
-				Marshal.ReleaseComObject(store);
+				try
+				{
+					result = RemoveStore(store);
+				}
+				finally
+				{
+					Marshal.ReleaseComObject(store);
+				}
 			}
 		}
 
@@ -297,7 +313,7 @@ public class OutlookSession
 		return store;
 	}
 
-	private static string GetAdjustedPstPath(string? path, bool createIfMissing)
+	private static string GetAdjustedPstPath(string path, bool createIfMissing)
 	{
 		path = Path.GetFullPath(path);
 

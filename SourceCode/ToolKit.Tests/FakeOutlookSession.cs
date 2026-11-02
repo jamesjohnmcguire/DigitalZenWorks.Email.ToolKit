@@ -53,7 +53,7 @@ internal sealed class FakeOutlookSession
 	/// <param name="path">The path of the store to remove.</param>
 	/// <returns>A boolean value indicating whether the store was removed.
 	/// </returns>
-	public bool RemoveStore(string path)
+	public bool RemoveStore(string? path)
 	{
 		return true;
 	}

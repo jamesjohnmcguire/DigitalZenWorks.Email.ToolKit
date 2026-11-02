@@ -39,7 +39,8 @@ public interface IOutlookSession
 	/// <summary>
 	/// Removes a store from the Outlook session.
 	/// </summary>
-	/// <param name="path">The path to the store to remove.</param>
-	/// <returns>true if the store was removed, false otherwise.</returns>
-	public bool RemoveStore(string path);
+	/// <param name="path">The path to the store, or null.</param>
+	/// <returns>True if a store was removed; false if the path is null or
+	/// no matching store was attached.</returns>
+	public bool RemoveStore(string? path);
 }

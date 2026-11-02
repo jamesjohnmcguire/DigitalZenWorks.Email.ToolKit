@@ -253,6 +253,20 @@ internal sealed class OutlookSessionIntegrationTests
 	}
 
 	/// <summary>
+	/// Verifies a null path returns no store with a connected Outlook session.
+	/// </summary>
+	/// <param name="createIfMissing">Whether creation is allowed.</param>
+	[TestCase(false)]
+	[TestCase(true)]
+	public void GetStoreReturnsNullForNullPath(bool createIfMissing)
+	{
+		using OutlookTestContext context = new();
+		OutlookSession session = new(context.NameSpace);
+
+		Assert.That(session.GetStore(null!, createIfMissing), Is.Null);
+	}
+
+	/// <summary>
 	/// Verifies either creation option finds the attached PST with different
 	/// path casing and does not attach a duplicate.
 	/// </summary>

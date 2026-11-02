@@ -98,6 +98,17 @@ internal sealed class OutlookSessionTests
 	}
 
 	/// <summary>
+	/// Verifies a null path cannot remove a store.
+	/// </summary>
+	[Test]
+	public void RemoveStoreReturnsFalseForNullPath()
+	{
+		OutlookSession session = new(null);
+
+		Assert.That(session.RemoveStore((string)null!), Is.False);
+	}
+
+	/// <summary>
 	/// Verifies store removal fails without a namespace.
 	/// </summary>
 	/// <param name="path">A path accepted by the path normalizer.</param>
