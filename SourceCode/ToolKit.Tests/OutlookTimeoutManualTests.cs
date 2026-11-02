@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookTimeoutManualTests.cs" company="James John McGuire">
-// Copyright c 2021 - 2026 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 

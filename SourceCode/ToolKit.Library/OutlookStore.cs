@@ -104,6 +104,9 @@ public class OutlookStore
 		set { totalFolders = value; }
 	}
 
+	/// <summary>
+	/// Gets the Outlook session associated with this store.
+	/// </summary>
 	public OutlookSession OutlookSession { get { return outlookSession; } }
 
 	/// <summary>

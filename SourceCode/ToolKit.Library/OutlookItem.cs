@@ -207,7 +207,7 @@ public class OutlookItem : IContentItem
 	/// <summary>
 	/// Delete duplicate item.
 	/// </summary>
-	/// <param name="session">The Outlook session.</param>
+	/// <param name="store">The store containing the item.</param>
 	/// <param name="duplicateId">The duplicate id.</param>
 	/// <param name="keeperSynopses">The keeper synopses.</param>
 	/// <param name="dryRun">Indicates if this is a dry run or not.</param>

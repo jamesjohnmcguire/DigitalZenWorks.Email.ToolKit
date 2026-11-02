@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // <copyright file="PublicApiCompatibilityTests.cs" company="James John McGuire">
-// Copyright c 2021 - 2026 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -19,6 +19,12 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 /// </summary>
 internal sealed class PublicApiCompatibilityTests
 {
+	/// <summary>
+	/// Verifies that both migration overloads retain a void return type.
+	/// </summary>
+	/// <param name="includeEncoding">
+	/// Whether to check the overload with an encoding parameter.
+	/// </param>
 	[TestCase(false)]
 	[TestCase(true)]
 	public void DbxDirectoryToPstRetainsVoidReturn(bool includeEncoding)
@@ -42,6 +48,9 @@ internal sealed class PublicApiCompatibilityTests
 		Assert.That(method!.ReturnType, Is.EqualTo(typeof(void)));
 	}
 
+	/// <summary>
+	/// Verifies that the legacy folder lookup method remains available.
+	/// </summary>
 	[Test]
 	public void OutlookStoreRetainsLegacyGetFolderFromID()
 	{

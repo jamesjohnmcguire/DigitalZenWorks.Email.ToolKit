@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // <copyright file="CommandExitCodeManualTests.cs" company="James John McGuire">
-// Copyright c 2021 - 2026 James John McGuire. All Rights Reserved.
+// Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
@@ -24,6 +24,7 @@ internal sealed class CommandExitCodeManualTests
 	/// Outlook activation fails. No real PST paths are needed: connection must
 	/// fail before the merge starts.
 	/// </summary>
+	/// <returns>A task that completes after the exit code is checked.</returns>
 	[Test]
 	[Explicit("Requires Det.exe on a host where Outlook cannot activate.")]
 	public async Task MergeStoresReturnsFailureWhenOutlookCannotConnect()

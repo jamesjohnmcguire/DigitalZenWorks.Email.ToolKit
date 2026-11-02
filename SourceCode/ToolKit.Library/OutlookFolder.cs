@@ -138,6 +138,7 @@ public class OutlookFolder
 	/// Initializes a new instance of the
 	/// <see cref="OutlookFolder"/> class.
 	/// </summary>
+	/// <param name="folder">The Outlook folder to wrap.</param>
 	public OutlookFolder(MAPIFolder folder)
 	{
 		this.folder = folder;
@@ -253,7 +254,6 @@ public class OutlookFolder
 	/// </summary>
 	/// <remarks>If there is a folder already existing with the given
 	/// folder name, this method will return that folder.</remarks>
-	/// <param name="parentFolder">The parent folder.</param>
 	/// <param name="folderName">The new folder name.</param>
 	/// <returns>The added or existing encapsulated folder.</returns>
 	public OutlookFolder AddFolder(string folderName)
