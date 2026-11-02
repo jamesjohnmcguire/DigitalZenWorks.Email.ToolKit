@@ -25,11 +25,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		private readonly OutlookAccount outlookAccount;
-		private readonly OutlookService outlookService;
 		private readonly OutlookSession? outlookSession;
-
-		private readonly Store store;
-
 		private uint totalFolders;
 
 		/// <summary>
