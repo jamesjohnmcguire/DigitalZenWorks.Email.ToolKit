@@ -4,9 +4,9 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Office.Interop.Outlook;
 
 namespace DigitalZenWorks.Email.ToolKit;
 

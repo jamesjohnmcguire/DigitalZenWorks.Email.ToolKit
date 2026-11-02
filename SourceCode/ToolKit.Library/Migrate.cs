@@ -4,16 +4,16 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Common.Logging;
-using DigitalZenWorks.Email.DbxOutlookExpress;
-using Microsoft.Office.Interop.Outlook;
-using MsgKit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using Common.Logging;
+using DigitalZenWorks.Email.DbxOutlookExpress;
+using Microsoft.Office.Interop.Outlook;
+using MsgKit;
 
 [assembly: CLSCompliant(false)]
 

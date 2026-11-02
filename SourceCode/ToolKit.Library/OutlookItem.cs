@@ -4,9 +4,6 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Common.Logging;
-using DigitalZenWorks.Common.Utilities;
-using Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,6 +15,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Logging;
+using DigitalZenWorks.Common.Utilities;
+using Microsoft.Office.Interop.Outlook;
 
 namespace DigitalZenWorks.Email.ToolKit;
 

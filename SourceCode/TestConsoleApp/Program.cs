@@ -4,14 +4,6 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Common.Logging;
-using DigitalZenWorks.Email.DbxOutlookExpress;
-using DigitalZenWorks.Email.ToolKit;
-using Microsoft.Office.Interop.Outlook;
-using MsgKit;
-using Serilog;
-using Serilog.Configuration;
-using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -20,7 +12,14 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using Common.Logging;
+using DigitalZenWorks.Email.DbxOutlookExpress;
+using DigitalZenWorks.Email.ToolKit;
+using Microsoft.Office.Interop.Outlook;
+using MsgKit;
+using Serilog;
+using Serilog.Configuration;
+using Serilog.Events;
 using CommonLogging = Common.Logging;
 
 [assembly: CLSCompliant(true)]

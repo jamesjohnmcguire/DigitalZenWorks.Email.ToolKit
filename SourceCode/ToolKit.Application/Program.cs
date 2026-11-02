@@ -4,13 +4,6 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Common.Logging;
-using DigitalZenWorks.CommandLine.Commands;
-using DigitalZenWorks.Common.VersionUtilities;
-using Microsoft.Office.Interop.Outlook;
-using Serilog;
-using Serilog.Configuration;
-using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,6 +14,13 @@ using System.Reflection;
 using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Logging;
+using DigitalZenWorks.CommandLine.Commands;
+using DigitalZenWorks.Common.VersionUtilities;
+using Microsoft.Office.Interop.Outlook;
+using Serilog;
+using Serilog.Configuration;
+using Serilog.Events;
 using CommonLogging = Common.Logging;
 
 [assembly: CLSCompliant(true)]

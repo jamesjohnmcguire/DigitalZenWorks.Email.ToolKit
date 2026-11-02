@@ -4,11 +4,11 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Common.Logging;
-using Microsoft.Office.Interop.Outlook;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Common.Logging;
+using Microsoft.Office.Interop.Outlook;
 
 namespace DigitalZenWorks.Email.ToolKit;
 

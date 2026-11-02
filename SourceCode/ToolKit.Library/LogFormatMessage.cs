@@ -4,8 +4,8 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Common.Logging;
 using System.Globalization;
+using Common.Logging;
 
 namespace DigitalZenWorks.Email.ToolKit;
 
