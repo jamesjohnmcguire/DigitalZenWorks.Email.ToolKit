@@ -33,6 +33,7 @@ internal sealed class OutlookConnectionTests
 		Assert.That(first, Is.SameAs(session));
 		Assert.DoesNotThrow(() => connection.Quit());
 	}
+
 	/// <summary>
 	/// Verifies that calling Quit on an OutlookConnection does not throw when
 	/// no Outlook application instance is present.

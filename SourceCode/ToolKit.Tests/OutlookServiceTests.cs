@@ -203,6 +203,7 @@ internal sealed class OutlookServiceTests
 			service.Disconnect();
 		});
 	}
+
 	/// <summary>
 	/// Tests that the Session property is null after a failed connection
 	/// attempt.

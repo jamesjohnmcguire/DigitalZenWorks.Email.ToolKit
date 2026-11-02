@@ -114,6 +114,7 @@ internal sealed class OutlookServiceFailureTests
 		Assert.That(service.IsConnected, Is.False);
 		Assert.That(service.Session, Is.Null);
 	}
+
 	/// <summary>
 	/// Verifies unsuccessful attempts leave the service ready to retry.
 	/// </summary>
