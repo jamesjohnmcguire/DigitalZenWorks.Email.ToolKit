@@ -4,6 +4,8 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+namespace DigitalZenWorks.Email.ToolKit;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,8 +14,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
-
-namespace DigitalZenWorks.Email.ToolKit;
 
 /// <summary>
 /// OutlookContact Class.

@@ -4,9 +4,9 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Microsoft.Office.Interop.Outlook;
-
 namespace DigitalZenWorks.Email.ToolKit;
+
+using Microsoft.Office.Interop.Outlook;
 
 /// <summary>
 /// Content Item Interface.

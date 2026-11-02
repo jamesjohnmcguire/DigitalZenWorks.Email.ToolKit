@@ -4,10 +4,10 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using System.Globalization;
-using Common.Logging;
-
 namespace DigitalZenWorks.Email.ToolKit;
+
+using System.Globalization;
+using global::Common.Logging;
 
 /// <summary>
 /// Provides support for compiling a formatted message and

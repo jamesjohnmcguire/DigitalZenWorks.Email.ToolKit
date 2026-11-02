@@ -4,10 +4,10 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+namespace DigitalZenWorks.Email.ToolKit;
+
 using System;
 using System.Text.RegularExpressions;
-
-namespace DigitalZenWorks.Email.ToolKit;
 
 /// <summary>
 /// Represents a RTF email body.
