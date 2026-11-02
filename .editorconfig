@@ -17,8 +17,8 @@ end_of_line = crlf
 end_of_line = lf
 
 [*.cs]
-# Renove require space after 'new' keyword
-dotnet_diagnostic.SA1000.severity = warning
+# Control-flow and method-call spacing
+csharp_space_after_cast = false
 csharp_space_after_keywords_in_control_flow_statements = true
 csharp_space_between_method_call_empty_parameter_list_parentheses = false
 csharp_space_between_method_call_parameter_list_parentheses = false
@@ -37,13 +37,13 @@ dotnet_style_object_initializer = false
 # IDE0161: Convert to file-scoped namespace
 csharp_style_namespace_declarations = file_scoped:warning
 
-# SA1000: The keyword 'new' should be followed by a space
-dotnet_diagnostic.SA1000.severity = none
+# SA1000: Check keyword spacing; target-typed new() has no space.
+dotnet_diagnostic.SA1000.severity = warning
 
 # SA1010: Opening square brackets should be spaced correctly
 dotnet_diagnostic.SA1010.severity = none
 
-# SA1101: Prefix Local Calls With This
+# SA1101: Prefix local calls with this
 dotnet_diagnostic.SA1101.severity = none
 
 # SA1306: Field Names Must Begin With Lower Case Letter
