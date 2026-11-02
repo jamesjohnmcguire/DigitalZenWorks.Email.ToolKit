@@ -171,7 +171,7 @@ public class OutlookSession
 	/// <param name="store">The store to remove.</param>
 	/// <returns>Returns true if a store was detached; false if no matching
 	/// store was attached.</returns>
-	public bool RemoveStore(Store store)
+	public bool RemoveStore(Store? store)
 	{
 		bool result = false;
 

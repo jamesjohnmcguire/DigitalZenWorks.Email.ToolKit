@@ -523,6 +523,7 @@ internal sealed class OutlookSessionIntegrationTests
 		string path = context.StorePath("retained.pst");
 		Outlook.Store store = connectedSession.GetStore(path)!;
 		context.Track(store);
+
 		Outlook.MAPIFolder root = store.GetRootFolder();
 		context.Track(root);
 		string storeId = store.StoreID;

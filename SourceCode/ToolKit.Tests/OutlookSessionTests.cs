@@ -130,6 +130,7 @@ internal sealed class OutlookSessionTests
 	{
 		OutlookSession session = new(null);
 
-		Assert.That(session.RemoveStore((Outlook.Store)null!), Is.False);
+		bool result = session.RemoveStore((Outlook.Store?)null);
+		Assert.That(result, Is.False);
 	}
 }
