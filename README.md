@@ -25,6 +25,18 @@ git clone --recurse-submodules https://github.com/jamesjohnmcguire/DigitalZenWor
 
 Refer to DevelopmentTools Build Scripts for specific build examples.
 
+### Outlook service lifetime
+
+Reuse one `OutlookService` on the same STA thread for a workflow. Repeated
+successful `Connect()` calls reuse its connection and session.
+`Disconnect()` detaches without quitting a potentially shared Outlook.
+The timeout bounds the requested activation-probe wait, including cleanup;
+it neither cancels COM activation nor limits the whole `Connect()` call.
+
+See [Outlook lifetime and timeout design](Documentation/OutlookLifecycle.md)
+for ownership, retry behavior, compatibility, and the reasons for keeping
+the temporary STA probe separate from the real connection.
+
 ### Usage:
 
 NOTE: Always back up any data you might be modifying.  This package has been tested with hundreds of thousands of messages,
