@@ -85,7 +85,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static void DbxFileToPst(
 			string filePath, string pstPath, Encoding encoding)
 		{
-			FileInfo fileInfo = new (filePath);
+			FileInfo fileInfo = new(filePath);
 
 			if (fileInfo.Name.Equals(
 				"Folders.dbx", StringComparison.OrdinalIgnoreCase))
@@ -102,7 +102,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				string baseName = Path.GetFileNameWithoutExtension(pstPath);
 				rootFolder.Name = baseName;
 
-				DbxFolder dbxFolder = new (filePath, baseName, encoding);
+				DbxFolder dbxFolder = new(filePath, baseName, encoding);
 
 				MAPIFolder pstFolder = OutlookFolder.AddFolder(
 					rootFolder, rootFolder.Name);
@@ -466,7 +466,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				}
 
 				OutlookAccount outlookAccount = OutlookAccount.Instance;
-				OutlookFolder outlookFolder = new (outlookAccount);
+				OutlookFolder outlookFolder = new(outlookAccount);
 
 				mailItem = outlookFolder.AddMsgFile(mapiFolder, msgFile);
 
@@ -521,7 +521,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					{
 						OutlookAccount outlookAccount =
 							OutlookAccount.Instance;
-						OutlookStore store = new (outlookAccount);
+						OutlookStore store = new(outlookAccount);
 
 						pstFolder = CopyChildFolderToPst(
 							mappings,
@@ -581,7 +581,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					OutlookAccount outlookAccount = OutlookAccount.Instance;
 					OutlookFolder outlookFolder =
-						new (outlookAccount, mapiFolder);
+						new(outlookAccount, mapiFolder);
 					outlookFolder.AddMsgFile(mapiFolder, msgFile);
 
 					File.Delete(msgFile);
@@ -600,8 +600,8 @@ namespace DigitalZenWorks.Email.ToolKit
 				{
 					Log.Error(exception.ToString());
 				}
-				}
 			}
+		}
 
 		private static void EmlDirectoryToPst(
 			MAPIFolder pstParent, string emlFolderFilePath, bool adjust)
@@ -615,7 +615,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				try
 				{
-					DirectoryInfo directoryInfo = new (emlFolderFilePath);
+					DirectoryInfo directoryInfo = new(emlFolderFilePath);
 					string directoryName = directoryInfo.Name;
 
 					MAPIFolder thisFolder = pstParent;
@@ -693,7 +693,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			bool result = false;
 
-			DbxSet dbxSet = new (dbxFoldersPath, encoding);
+			DbxSet dbxSet = new(dbxFoldersPath, encoding);
 
 			// Order the list, so that parents always come before their
 			// children.

@@ -23,7 +23,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <returns>a list of eml and text files.</returns>
 		public static IEnumerable<string> GetFiles(string location)
 		{
-			List<string> extensions = new () { ".eml", ".txt" };
+			List<string> extensions = new() { ".eml", ".txt" };
 			IEnumerable<string> allFiles =
 				Directory.EnumerateFiles(location, "*.*");
 

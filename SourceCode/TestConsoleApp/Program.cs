@@ -99,7 +99,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] " +
 				"{Message:lj}{NewLine}{Exception}";
 
-			LoggerConfiguration configuration = new ();
+			LoggerConfiguration configuration = new();
 			LoggerSinkConfiguration sinkConfiguration = configuration.WriteTo;
 			sinkConfiguration.Console(
 				LogEventLevel.Verbose,
@@ -119,7 +119,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 		private static void TestConvertToMsgFile(
 			string path, Encoding encoding)
 		{
-			DbxMessagesFile messagesFile = new (path, encoding);
+			DbxMessagesFile messagesFile = new(path, encoding);
 
 			DbxMessage message = messagesFile.GetMessage(79);
 
@@ -166,7 +166,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 		private static void TestFolder(string path, Encoding encoding)
 		{
-			DbxFolder dbxFolder = new (path, "TmpHold", encoding);
+			DbxFolder dbxFolder = new(path, "TmpHold", encoding);
 		}
 
 		private static void TestGetHash(OutlookAccount outlookAccount)
@@ -189,7 +189,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem = mailItem.Move(mainFolder);
 
-			OutlookItem outlookItem = new (mailItem);
+			OutlookItem outlookItem = new(mailItem);
 			string hash = outlookItem.Hash;
 			string hash2 = outlookItem.Hash;
 
@@ -208,7 +208,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem2 = mailItem2.Move(mainFolder);
 
-			OutlookItem outlookItem2 = new (mailItem2);
+			OutlookItem outlookItem2 = new(mailItem2);
 			hash2 = outlookItem2.Hash;
 
 			if (hash.Equals(hash2, StringComparison.Ordinal))
@@ -226,7 +226,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				"This is the message.");
 			mailItem3 = mailItem3.Move(mainFolder);
 
-			OutlookItem outlookItem3 = new (mailItem3);
+			OutlookItem outlookItem3 = new(mailItem3);
 			hash2 = outlookItem3.Hash;
 
 			if (hash.Equals(hash2, StringComparison.Ordinal))
@@ -248,14 +248,14 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 		private static void TestListMessagesFile(
 			string path, Encoding encoding)
 		{
-			DbxMessagesFile messagesFile = new (path, encoding);
+			DbxMessagesFile messagesFile = new(path, encoding);
 
 			messagesFile.List();
 		}
 
 		private static void TestListSet(string path, Encoding encoding)
 		{
-			DbxSet set = new (path, encoding);
+			DbxSet set = new(path, encoding);
 
 			set.List();
 		}
@@ -375,7 +375,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 		private static void TestSetTree(string path, Encoding encoding)
 		{
 			path += @"\Folders.dbx";
-			DbxFoldersFile foldersFile = new (path, encoding);
+			DbxFoldersFile foldersFile = new(path, encoding);
 
 			foldersFile.SetTreeOrdered();
 			foldersFile.List();
@@ -386,14 +386,14 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 			string test = "Testing 1-2-3";
 
 			byte[] byteArray = Encoding.UTF8.GetBytes(test);
-			MemoryStream stream = new (byteArray);
+			MemoryStream stream = new(byteArray);
 
 			TestStream(stream);
 		}
 
 		private static void TestStream(Stream stream)
 		{
-			using StreamReader reader = new (stream);
+			using StreamReader reader = new(stream);
 			string text = reader.ReadToEnd();
 			Log.Info(text);
 		}
@@ -416,11 +416,11 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 
 		private static void TestTree()
 		{
-			DbxFolder folder1 = new (1, 0, "A", null);
-			DbxFolder folder2 = new (2, 4, "B", null);
-			DbxFolder folder3 = new (3, 0, "C", null);
-			DbxFolder folder4 = new (4, 5, "D", null);
-			DbxFolder folder5 = new (5, 0, "E", null);
+			DbxFolder folder1 = new(1, 0, "A", null);
+			DbxFolder folder2 = new(2, 4, "B", null);
+			DbxFolder folder3 = new(3, 0, "C", null);
+			DbxFolder folder4 = new(4, 5, "D", null);
+			DbxFolder folder5 = new(5, 0, "E", null);
 
 			IList<DbxFolder> folders =
 			[
@@ -431,7 +431,7 @@ namespace DigitalZenWorks.Email.ToolKit.Test
 				folder5
 			];
 
-			DbxFolder folder = new (0, 0, "root", null);
+			DbxFolder folder = new(0, 0, "root", null);
 
 			folder.GetChildren(folders);
 

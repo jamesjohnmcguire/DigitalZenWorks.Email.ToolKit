@@ -696,7 +696,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			buffer = contactItem.YomiLastName;
 			buffers.Add(buffer);
 
-			StringBuilder builder = new ();
+			StringBuilder builder = new();
 
 			foreach (string item in buffers)
 			{

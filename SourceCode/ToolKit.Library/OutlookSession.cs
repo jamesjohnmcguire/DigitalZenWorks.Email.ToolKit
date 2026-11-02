@@ -22,7 +22,7 @@ public class OutlookSession
 	: IOutlookSession
 {
 	private static readonly ILog Log = LogManager.GetLogger(
-		System.Reflection.MethodBase.GetCurrentMethod() !.DeclaringType);
+		System.Reflection.MethodBase.GetCurrentMethod()!.DeclaringType);
 
 	private readonly NameSpace? session;
 

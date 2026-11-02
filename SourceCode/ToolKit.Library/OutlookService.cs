@@ -26,7 +26,7 @@ using Microsoft.Win32;
 public class OutlookService : IOutlookService
 {
 	private static readonly ILog Log = LogManager.GetLogger(
-		System.Reflection.MethodBase.GetCurrentMethod() !.DeclaringType);
+		System.Reflection.MethodBase.GetCurrentMethod()!.DeclaringType);
 
 	private IOutlookConnection? connection;
 	private IOutlookSession? session;

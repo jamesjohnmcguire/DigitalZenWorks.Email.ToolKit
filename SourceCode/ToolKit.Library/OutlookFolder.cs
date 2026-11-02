@@ -412,7 +412,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				for (int index = 1; index <= count; index++)
 				{
 					var item = items[index];
-					OutlookItem contentItem = new (item);
+					OutlookItem contentItem = new(item);
 
 					string synopses = contentItem.Synopses;
 					string entryId = item.EntryId;
@@ -466,7 +466,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			"please use OutlookItem.Synopses instead.")]
 		public static string GetMailItemSynopses(MailItem mailItem)
 		{
-			OutlookItem outlookItem = new (mailItem);
+			OutlookItem outlookItem = new(mailItem);
 			string synopses = outlookItem.Synopses;
 
 			return synopses;
@@ -533,7 +533,7 @@ namespace DigitalZenWorks.Email.ToolKit
 					OutlookSession outlookSession =
 						(OutlookSession)outlook.Session;
 
-					OutlookFolder outlookFolder = new (outlookSession);
+					OutlookFolder outlookFolder = new(outlookSession);
 
 					sendersCounts = outlookFolder.GetSendersCount(folder);
 				}
@@ -1500,7 +1500,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 					LogItemCount(messageTemplate, ascendingCount);
 
-					OutlookItem contentItem = new (item);
+					OutlookItem contentItem = new(item);
 					itemAction(item);
 
 					ascendingCount++;
@@ -1722,7 +1722,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (entryId != null)
 			{
-				OutlookItem outlookItem = new (item);
+				OutlookItem outlookItem = new(item);
 
 				string hash = outlookItem.Hash;
 
@@ -1755,7 +1755,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (entryId != null)
 			{
-				OutlookItem outlookItem = new (item);
+				OutlookItem outlookItem = new(item);
 
 				string hash = outlookItem.Hash;
 				await OutlookItem.GetHashAsync(item).
@@ -1841,7 +1841,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			object mapiItem = outlookSession.GetItemFromId(keeper);
 
-			OutlookItem outlookItem = new (mapiItem);
+			OutlookItem outlookItem = new(mapiItem);
 			string keeperSynopses = outlookItem.Synopses;
 
 			string message = string.Format(

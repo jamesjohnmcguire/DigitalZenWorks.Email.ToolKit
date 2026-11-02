@@ -384,7 +384,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				"mailItem.TaskStartDate"
 			];
 
-			ReadOnlyCollection<string> labels = new (labelsRaw);
+			ReadOnlyCollection<string> labels = new(labelsRaw);
 
 			string dateTimesText =
 				OutlookItem.GetDateTimesText(times, labels);
@@ -691,7 +691,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				properties.Add(receivedOnBehalfOfName);
 			}
 
-			StringBuilder builder = new ();
+			StringBuilder builder = new();
 
 			foreach (string item in properties)
 			{

@@ -288,7 +288,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				object mapiItem = GetItemFromEntryId(entryId);
 
-				OutlookItem outlookItem = new (mapiItem);
+				OutlookItem outlookItem = new(mapiItem);
 
 				string details = OutlookItem.GetDetails(mapiItem);
 
@@ -363,7 +363,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		{
 			object mapiItem = outlookSession.GetItemFromId(entryId);
 
-			OutlookItem outlookItem = new (mapiItem);
+			OutlookItem outlookItem = new(mapiItem);
 			string synopses = outlookItem.Synopses;
 
 			return synopses;
@@ -397,7 +397,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			if (store != null)
 			{
 				MAPIFolder rootFolder = store.GetRootFolder();
-				OutlookFolder outlookFolder = new (outlookSession);
+				OutlookFolder outlookFolder = new(outlookSession);
 
 				hashTable = outlookFolder.GetItemHashes(rootFolder);
 			}
@@ -481,7 +481,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			OutlookFolder outlookFolder = new (outlookSession);
+			OutlookFolder outlookFolder = new(outlookSession);
 
 			IDictionary<string, int> sendersCounts =
 				outlookFolder.GetSendersCount(rootFolder);
@@ -531,7 +531,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new (outlookSession);
+				OutlookFolder outlookFolder = new(outlookSession);
 				outlookFolder.MergeFolders(rootFolder, dryRun);
 
 				totalFolders++;
@@ -577,7 +577,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new (outlookSession);
+				OutlookFolder outlookFolder = new(outlookSession);
 				await outlookFolder.MergeFoldersAsync(
 					rootFolder, dryRun).ConfigureAwait(false);
 
@@ -656,7 +656,7 @@ namespace DigitalZenWorks.Email.ToolKit
 							OutlookFolder.GetSubFolder(
 								destinationRootFolder, folderName);
 
-						OutlookFolder outlookFolder = new (outlookSession);
+						OutlookFolder outlookFolder = new(outlookSession);
 
 						outlookFolder.MoveFolderContents(
 							subFolder, destinationSubFolder);
@@ -757,7 +757,7 @@ namespace DigitalZenWorks.Email.ToolKit
 							OutlookFolder.GetSubFolder(
 								destinationRootFolder, folderName);
 
-						OutlookFolder outlookFolder = new (outlookSession);
+						OutlookFolder outlookFolder = new(outlookSession);
 
 						await outlookFolder.MoveFolderContentsAsync(
 							subFolder, destinationSubFolder).
@@ -1110,7 +1110,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new (outlookSession);
+				OutlookFolder outlookFolder = new(outlookSession);
 				int removedDuplicates =
 					outlookFolder.RemoveDuplicates(rootFolder, dryRun);
 
@@ -1173,7 +1173,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				OutlookFolder outlookFolder = new (outlookSession);
+				OutlookFolder outlookFolder = new(outlookSession);
 
 				int removedDuplicates = await
 					outlookFolder.RemoveDuplicatesAsync(
@@ -1255,7 +1255,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			{
 				object item = items[index];
 
-				OutlookItem contentItem = new (item);
+				OutlookItem contentItem = new(item);
 				contentItem.Delete();
 			}
 		}
@@ -1286,7 +1286,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				OutlookFolder outlookFolder = new (outlookSession);
+				OutlookFolder outlookFolder = new(outlookSession);
 
 				outlookFolder.MoveFolderContents(
 					sourceFolder, destinationFolder);
@@ -1322,7 +1322,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				OutlookFolder outlookFolder = new (outlookSession);
+				OutlookFolder outlookFolder = new(outlookSession);
 
 				await outlookFolder.MoveFolderContentsAsync(
 					sourceFolder, destinationFolder).ConfigureAwait(false);

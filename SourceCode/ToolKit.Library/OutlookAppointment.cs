@@ -367,7 +367,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			string resources = appointmentItem.Resources;
 			string subject = appointmentItem.Subject;
 
-			StringBuilder builder = new ();
+			StringBuilder builder = new();
 			builder.Append(billingInformation);
 			builder.Append(body);
 			builder.Append(categories);

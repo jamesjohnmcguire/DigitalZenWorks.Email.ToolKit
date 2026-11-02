@@ -54,7 +54,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			"please use OutlookItem.Hash instead.")]
 		public static string GetItemHash(object mapiItem)
 		{
-			OutlookItem outlookItem = new (mapiItem);
+			OutlookItem outlookItem = new(mapiItem);
 
 			string hashBase64 = outlookItem.Hash;
 
@@ -85,7 +85,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			"please use OutlookItem.Synopses instead.")]
 		public static string GetItemSynopses(object mapiItem)
 		{
-			OutlookItem outlookItem = new (mapiItem);
+			OutlookItem outlookItem = new(mapiItem);
 			string synopses = outlookItem.Synopses;
 
 			return synopses;
@@ -114,7 +114,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			"please use OutlookItem.Move instead.")]
 		public static void MoveItem(object item, MAPIFolder destination)
 		{
-			OutlookItem outlookItem = new (item);
+			OutlookItem outlookItem = new(item);
 
 			outlookItem.Move(destination);
 		}

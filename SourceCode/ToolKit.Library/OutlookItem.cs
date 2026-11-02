@@ -188,7 +188,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (isValidDuplicate == true && dryRun == false)
 						{
-							OutlookItem contentItem = new (mapiItem);
+							OutlookItem contentItem = new(mapiItem);
 							contentItem.Delete();
 						}
 
@@ -230,7 +230,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 						if (isValidDuplicate == true && dryRun == false)
 						{
-							OutlookItem contentItem = new (mapiItem);
+							OutlookItem contentItem = new(mapiItem);
 							contentItem.Delete();
 						}
 
@@ -475,7 +475,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (times != null)
 			{
-				ReadOnlyCollection<DateTime> timesReadOnly = new (times);
+				ReadOnlyCollection<DateTime> timesReadOnly = new(times);
 				string buffer = GetDateTimesText(timesReadOnly);
 
 				Encoding encoding = Encoding.UTF8;
@@ -522,7 +522,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static string GetDateTimesText(
 			List<DateTime> times, ReadOnlyCollection<string> labels = null)
 		{
-			ReadOnlyCollection<DateTime> timesReadOnly = new (times);
+			ReadOnlyCollection<DateTime> timesReadOnly = new(times);
 			string dateTimesText = GetDateTimesText(timesReadOnly, labels);
 
 			return dateTimesText;
@@ -542,7 +542,7 @@ namespace DigitalZenWorks.Email.ToolKit
 
 			if (times != null)
 			{
-				StringBuilder builder = new ();
+				StringBuilder builder = new();
 
 				for (int index = 0; index < times.Count; index++)
 				{
@@ -586,15 +586,15 @@ namespace DigitalZenWorks.Email.ToolKit
 					switch (mapiItem)
 					{
 						case AppointmentItem appointmentItem:
-							OutlookAppointment appointment = new (mapiItem);
+							OutlookAppointment appointment = new(mapiItem);
 							details = appointment.GetPropertiesText(strict);
 							break;
 						case ContactItem contact:
-							OutlookContact outlookContact = new (mapiItem);
+							OutlookContact outlookContact = new(mapiItem);
 							details = outlookContact.GetPropertiesText(strict);
 							break;
 						case MailItem mailItem:
-							OutlookMail mail = new (mapiItem);
+							OutlookMail mail = new(mapiItem);
 							details = mail.GetPropertiesText(strict, true);
 							break;
 						default:
@@ -812,7 +812,7 @@ namespace DigitalZenWorks.Email.ToolKit
 				ccList.Sort();
 				bccList.Sort();
 
-				StringBuilder builder = new ();
+				StringBuilder builder = new();
 
 				foreach (string formattedRecipient in toList)
 				{
@@ -985,7 +985,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static async Task MoveAsync(
 			object mapiItem, MAPIFolder destination)
 		{
-			CancellationTokenSource source = new ();
+			CancellationTokenSource source = new();
 
 			try
 			{
@@ -1356,15 +1356,15 @@ namespace DigitalZenWorks.Email.ToolKit
 					switch (mapiItem)
 					{
 						case AppointmentItem appointmentItem:
-							OutlookAppointment appointment = new (mapiItem);
+							OutlookAppointment appointment = new(mapiItem);
 							buffers = appointment.GetProperties(strict);
 							break;
 						case ContactItem contact:
-							OutlookContact outlookContact = new (mapiItem);
+							OutlookContact outlookContact = new(mapiItem);
 							buffers = outlookContact.GetProperties(strict);
 							break;
 						case MailItem mailItem:
-							OutlookMail mail = new (mapiItem);
+							OutlookMail mail = new(mapiItem);
 							buffers = mail.GetProperties(strict);
 							break;
 						default:

@@ -20,7 +20,7 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 internal class OutlookFactory : IOutlookFactory
 {
 	private static readonly ILog Log = LogManager.GetLogger(
-		System.Reflection.MethodBase.GetCurrentMethod() !.DeclaringType);
+		System.Reflection.MethodBase.GetCurrentMethod()!.DeclaringType);
 
 	// This coordinates only temporary probes. No Outlook COM object is
 	// cached here or shared across caller threads. A static coordinator is

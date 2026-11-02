@@ -20,7 +20,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		private static readonly ILog Log = LogManager.GetLogger(
 			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		private static readonly OutlookAccount InternalInstance = new ();
+		private static readonly OutlookAccount InternalInstance = new();
 
 		private readonly Application application;
 		private readonly OutlookSession outlookSession;
@@ -38,7 +38,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// </summary>
 		private OutlookAccount()
 		{
-			application = new ();
+			application = new();
 
 			session = application.Session;
 			outlookSession = new OutlookSession(session);
@@ -134,7 +134,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// or not.</param>
 		public void MergeFolders(bool dryRun)
 		{
-			OutlookStore outlookStorage = new (this);
+			OutlookStore outlookStorage = new(this);
 			uint totalFolders = 0;
 			int totalStores = session.Stores.Count;
 
@@ -158,7 +158,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// operation.</returns>
 		public async Task MergeFoldersAsync(bool dryRun)
 		{
-			OutlookStore outlookStorage = new (this);
+			OutlookStore outlookStorage = new(this);
 			uint totalFolders = 0;
 			int totalStores = session.Stores.Count;
 
@@ -183,7 +183,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// folder.</param>
 		public void RemoveDuplicates(bool dryRun, bool flush)
 		{
-			OutlookStore outlookStorage = new (this);
+			OutlookStore outlookStorage = new(this);
 			int total = session.Stores.Count;
 
 			for (int index = 1; index <= total; index++)
@@ -205,7 +205,7 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// operation.</returns>
 		public async Task RemoveDuplicatesAsync(bool dryRun, bool flush)
 		{
-			OutlookStore outlookStorage = new (this);
+			OutlookStore outlookStorage = new(this);
 			int total = session.Stores.Count;
 
 			for (int index = 1; index <= total; index++)
