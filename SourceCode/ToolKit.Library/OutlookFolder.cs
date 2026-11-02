@@ -150,7 +150,10 @@ public class OutlookFolder
 	/// <param name="outlookAccount">The outlook account object.</param>
 	public OutlookFolder(OutlookAccount outlookAccount)
 	{
-		outlookSession = outlookAccount.OutlookSession;
+		if (outlookAccount != null)
+		{
+			outlookSession = outlookAccount.OutlookSession;
+		}
 	}
 
 	/// <summary>

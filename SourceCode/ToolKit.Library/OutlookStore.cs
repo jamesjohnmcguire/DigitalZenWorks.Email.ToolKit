@@ -38,7 +38,11 @@ public class OutlookStore
 	public OutlookStore(OutlookAccount outlookAccount)
 	{
 		this.outlookAccount = outlookAccount;
-		outlookSession = outlookAccount.OutlookSession;
+
+		if (outlookAccount != null)
+		{
+			outlookSession = outlookAccount.OutlookSession;
+		}
 	}
 
 	/// <summary>
@@ -84,7 +88,10 @@ public class OutlookStore
 	public OutlookStore(Store store)
 	{
 		this.store = store;
-		this.outlookSession = new(store.Session);
+		if (store != null)
+		{
+			this.outlookSession = new(store.Session);
+		}
 	}
 
 	/// <summary>
