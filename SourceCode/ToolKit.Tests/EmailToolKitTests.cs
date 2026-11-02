@@ -78,7 +78,7 @@ internal sealed class EmailToolKitTests
 
 		bool result = Directory.Exists(testFolder.FullName);
 
-		if (true == result)
+		if (result == true)
 		{
 			Directory.Delete(testFolder.FullName, true);
 		}
