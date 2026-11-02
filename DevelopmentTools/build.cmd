@@ -8,7 +8,7 @@ CD ..\SourceCode
 IF "%1"=="publish" GOTO publish
 
 :default
-msbuild -property:Configuration=Release;OutputPath=Bin\;Platform="Any CPU" -restore -target:rebuild DigitalZenWorks.Email.ToolKit.slnx
+msbuild -property:Configuration=Debug;OutputPath=Bin\;Platform="Any CPU" -restore -target:rebuild DigitalZenWorks.Email.ToolKit.slnx
 
 IF "%1"=="release" GOTO release
 
