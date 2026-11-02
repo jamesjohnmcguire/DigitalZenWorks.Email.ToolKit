@@ -61,10 +61,11 @@ internal sealed class ProbeAttempt
 		}
 		catch (Exception exception)
 		{
+			string message =
+				"Outlook activation probe failed during activation or cleanup.";
+
 			Failure = ExceptionDispatchInfo.Capture(exception);
-			Log.Error(
-				"Outlook activation probe failed during activation or " +
-				"cleanup.", exception);
+			Log.Error(message, exception);
 		}
 	}
 }
