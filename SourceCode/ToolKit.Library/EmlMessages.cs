@@ -4,12 +4,12 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+namespace DigitalZenWorks.Email.ToolKit;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
-namespace DigitalZenWorks.Email.ToolKit;
 
 /// <summary>
 /// Eml messages class.

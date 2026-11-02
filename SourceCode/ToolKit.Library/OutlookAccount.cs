@@ -4,13 +4,11 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Common.Logging;
-using Microsoft.Office.Interop.Outlook;
-
 namespace DigitalZenWorks.Email.ToolKit;
+
+using System.Threading.Tasks;
+using global::Common.Logging;
+using Microsoft.Office.Interop.Outlook;
 
 /// <summary>
 /// Represents an Outlook account.
