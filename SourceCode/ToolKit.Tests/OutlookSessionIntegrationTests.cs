@@ -30,13 +30,17 @@ internal sealed class OutlookSessionIntegrationTests
 	{
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
+
 		string path = context.StorePath("folders.pst");
 		Outlook.Store store = session.GetStore(path)!;
 		context.Track(store);
+
 		Outlook.MAPIFolder root = store.GetRootFolder();
 		context.Track(root);
+
 		Outlook.Folders folders = root.Folders;
 		context.Track(folders);
+
 		Outlook.MAPIFolder original = folders.Add("Lookup");
 		context.Track(original);
 
@@ -51,8 +55,10 @@ internal sealed class OutlookSessionIntegrationTests
 		OutlookFolder? wrapped =
 			session.GetFolderFromId(original.EntryID, store.StoreID);
 		Assert.That(wrapped, Is.Not.Null);
+
 		OutlookFolder child = wrapped!.AddFolder("Child");
 		Assert.That(child, Is.Not.Null);
+
 		Outlook.Folders children = original.Folders;
 		context.Track(children);
 		Assert.That(children.Count, Is.EqualTo(1));
@@ -80,15 +86,20 @@ internal sealed class OutlookSessionIntegrationTests
 	{
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
+
 		string path = context.StorePath("items.pst");
 		Outlook.Store store = session.GetStore(path)!;
 		context.Track(store);
+
 		Outlook.MAPIFolder root = store.GetRootFolder();
 		context.Track(root);
+
 		Outlook.Items items = root.Items;
 		context.Track(items);
+
 		Outlook.MailItem original = (Outlook.MailItem)items.Add("IPM.Note");
 		context.Track(original);
+
 		original.Subject = "Email.ToolKit lookup " + Guid.NewGuid();
 		original.Body = "Saved in a test-owned PST.";
 		original.Save();
@@ -96,8 +107,10 @@ internal sealed class OutlookSessionIntegrationTests
 		object? result = session.GetItemFromId(original.EntryID);
 
 		Assert.That(result, Is.InstanceOf<Outlook.MailItem>());
+
 		Outlook.MailItem retrieved = (Outlook.MailItem)result!;
 		context.Track(retrieved);
+
 		Assert.That(retrieved.EntryID, Is.EqualTo(original.EntryID));
 		Assert.That(retrieved.Subject, Is.EqualTo(original.Subject));
 		Assert.That(retrieved.Body, Does.Contain("test-owned PST"));
@@ -115,6 +128,7 @@ internal sealed class OutlookSessionIntegrationTests
 	{
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
+
 		string path = CreateDetachedPst(context, session, "detached.pst");
 		Assert.That(File.Exists(path), Is.True);
 		Assert.That(context.CountStores(path), Is.Zero);
@@ -153,6 +167,7 @@ internal sealed class OutlookSessionIntegrationTests
 	{
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
+
 		string expectedPath = context.StorePath(expectedName);
 		string suppliedPath = Path.Combine(context.DirectoryPath, fileName);
 

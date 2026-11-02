@@ -35,10 +35,13 @@ internal sealed class OutlookTestContext : IDisposable
 	/// </summary>
 	public OutlookTestContext()
 	{
-		DirectoryPath =
-			Directory.CreateTempSubdirectory("Email.ToolKit.Outlook.").FullName;
+		DirectoryInfo directory =
+			Directory.CreateTempSubdirectory("Email.ToolKit.Outlook.");
+		DirectoryPath = directory.FullName;
+
 		Application = new Outlook.Application();
 		Track(Application);
+
 		NameSpace = Application.Session;
 		Track(NameSpace);
 	}
@@ -92,6 +95,7 @@ internal sealed class OutlookTestContext : IDisposable
 	{
 		string path = Path.Combine(DirectoryPath, fileName);
 		storePaths.Add(path);
+
 		return path;
 	}
 
@@ -113,8 +117,12 @@ internal sealed class OutlookTestContext : IDisposable
 
 				try
 				{
-					if (string.Equals(
-						store.FilePath, path, StringComparison.OrdinalIgnoreCase))
+					bool equals = string.Equals(
+						store.FilePath,
+						path,
+						StringComparison.OrdinalIgnoreCase);
+
+					if (equals == true)
 					{
 						count++;
 					}
