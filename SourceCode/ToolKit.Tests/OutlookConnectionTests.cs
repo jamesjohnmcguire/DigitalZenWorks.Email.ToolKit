@@ -66,5 +66,4 @@ internal sealed class OutlookConnectionTests
 		Assert.That(first, Is.SameAs(session));
 		Assert.That(second, Is.SameAs(first));
 	}
-
 }

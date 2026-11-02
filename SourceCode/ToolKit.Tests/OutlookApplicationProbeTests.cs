@@ -338,5 +338,4 @@ internal sealed class OutlookApplicationProbeTests
 			() => probe.CanCreateApplication(5),
 			Throws.Exception.SameAs(failure));
 	}
-
 }

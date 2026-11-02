@@ -218,5 +218,4 @@ internal sealed class OutlookServiceLifecycleTests
 		Assert.That(service.IsConnected, Is.False);
 		Assert.That(service.Session, Is.Null);
 	}
-
 }

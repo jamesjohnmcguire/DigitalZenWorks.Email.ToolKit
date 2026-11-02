@@ -218,5 +218,4 @@ internal sealed class OutlookServiceTests
 
 		Assert.That(service.Session, Is.Null);
 	}
-
 }

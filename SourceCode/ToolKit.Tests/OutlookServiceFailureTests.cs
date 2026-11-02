@@ -239,5 +239,4 @@ internal sealed class OutlookServiceFailureTests
 		Assert.That(service.IsConnected, Is.False);
 		Assert.That(service.Session, Is.Null);
 	}
-
 }

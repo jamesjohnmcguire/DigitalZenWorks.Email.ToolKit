@@ -201,7 +201,6 @@ internal sealed class EmailToolKitTests
 	[Test]
 	public void TestEmlFileToPstCloseStoreSuccess()
 	{
-
 		string fileName = Path.GetTempFileName();
 
 		// A 0 byte sized file is created.  Need to remove it.
