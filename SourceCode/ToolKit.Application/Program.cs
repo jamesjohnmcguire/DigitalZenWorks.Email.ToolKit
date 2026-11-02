@@ -904,12 +904,9 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static async Task<int> RemoveEmptyFolders(Command command)
 		{
-			bool connected = OutlookConnect();
+			int result = -1;
 
-			if (connected == false)
-			{
-				return -1;
-			}
+			bool connected = OutlookConnect();
 
 			if (connected == true)
 			{
@@ -935,9 +932,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				Console.WriteLine("Folder removed: " +
 					removedFolders.ToString(CultureInfo.InvariantCulture));
+
+				result = 0;
 			}
 
-			return 0;
+			return result;
 		}
 	}
 }
