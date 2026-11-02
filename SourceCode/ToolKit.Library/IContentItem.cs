@@ -6,34 +6,33 @@
 
 using Microsoft.Office.Interop.Outlook;
 
-namespace DigitalZenWorks.Email.ToolKit
+namespace DigitalZenWorks.Email.ToolKit;
+
+/// <summary>
+/// Content Item Interface.
+/// </summary>
+public interface IContentItem
 {
 	/// <summary>
-	/// Content Item Interface.
+	/// Gets the item's hash text.
 	/// </summary>
-	public interface IContentItem
-	{
-		/// <summary>
-		/// Gets the item's hash text.
-		/// </summary>
-		/// <value>The item's hash stext.</value>
-		string Hash { get; }
+	/// <value>The item's hash stext.</value>
+	string Hash { get; }
 
-		/// <summary>
-		/// Gets the item's synopses text.
-		/// </summary>
-		/// <value>The item's synopses text.</value>
-		string Synopses { get; }
+	/// <summary>
+	/// Gets the item's synopses text.
+	/// </summary>
+	/// <value>The item's synopses text.</value>
+	string Synopses { get; }
 
-		/// <summary>
-		/// Deletes the given item.
-		/// </summary>
-		public void Delete();
+	/// <summary>
+	/// Deletes the given item.
+	/// </summary>
+	public void Delete();
 
-		/// <summary>
-		/// Moves the given item.
-		/// </summary>
-		/// <param name="destination">The destination folder.</param>
-		public void Move(MAPIFolder destination);
-	}
+	/// <summary>
+	/// Moves the given item.
+	/// </summary>
+	/// <param name="destination">The destination folder.</param>
+	public void Move(MAPIFolder destination);
 }
