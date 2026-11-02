@@ -127,8 +127,6 @@ namespace DigitalZenWorks.Email.ToolKit
 
 		private readonly MAPIFolder folder;
 
-		private readonly OutlookAccount outlookAccount;
-
 		private readonly OutlookSession outlookSession;
 
 		private readonly Dictionary<string, int> sendersCounts = [];
@@ -152,7 +150,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		/// <param name="outlookAccount">The outlook account object.</param>
 		public OutlookFolder(OutlookAccount outlookAccount)
 		{
-			this.outlookAccount = outlookAccount;
 			outlookSession = outlookAccount.OutlookSession;
 		}
 
