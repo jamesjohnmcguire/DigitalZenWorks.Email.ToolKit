@@ -7,7 +7,6 @@
 namespace DigitalZenWorks.Email.ToolKit;
 
 using System;
-using System.Text.RegularExpressions;
 
 /// <summary>
 /// Represents a RTF email body.

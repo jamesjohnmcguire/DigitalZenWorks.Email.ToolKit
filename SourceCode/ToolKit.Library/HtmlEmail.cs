@@ -6,12 +6,7 @@
 
 namespace DigitalZenWorks.Email.ToolKit;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Represents a HTML email body.
