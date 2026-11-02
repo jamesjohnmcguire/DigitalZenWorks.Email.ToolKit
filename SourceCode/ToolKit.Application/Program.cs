@@ -144,13 +144,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static int Details(Command command)
 		{
+			int result = -1;
+
 			OutlookService outlook = new();
 			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
-				return -1;
 			}
 			else
 			{
@@ -161,9 +162,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				string entryId = command.Parameters[1];
 
 				outlookStore.Details(pstFilePath, entryId);
+
+				result = 0;
 			}
 
-			return 0;
+			return result;
 		}
 
 		private static void DisplayParameters(
@@ -485,13 +488,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static int ListFolders(Command command)
 		{
+			int result = -1;
+
 			OutlookService outlook = new();
 			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
-				return -1;
 			}
 			else
 			{
@@ -519,20 +523,23 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				{
 					Console.WriteLine(folderName);
 				}
+
+				result = 0;
 			}
 
-			return 0;
+			return result;
 		}
 
 		private static int ListIds(Command command)
 		{
+			int result = -1;
+
 			OutlookService outlook = new();
 			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
-				return -1;
 			}
 			else
 			{
@@ -555,20 +562,23 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 				{
 					Console.WriteLine(entryId);
 				}
+
+				result = 0;
 			}
 
-			return 0;
+			return result;
 		}
 
 		private static int ListTopSenders(Command command)
 		{
+			int result = -1;
+
 			OutlookService outlook = new();
 			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
-				return -1;
 			}
 			else
 			{
@@ -598,20 +608,23 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 						sender.Value.ToString(CultureInfo.InvariantCulture));
 					Console.WriteLine(message);
 				}
+
+				result = 0;
 			}
 
-			return 0;
+			return result;
 		}
 
 		private static int ListTotalDuplicates(Command command)
 		{
+			int result = -1;
+
 			OutlookService outlook = new();
 			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
-				return -1;
 			}
 			else
 			{
@@ -625,9 +638,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				ListTotalDuplicatesOutput(duplicates, true, outlook);
 				ListTotalDuplicatesOutput(duplicates, false, outlook);
+
+				result = 0;
 			}
 
-			return 0;
+			return result;
 		}
 
 		private static void ListTotalDuplicatesOutput(
@@ -749,13 +764,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static async Task<int> MergeFolders(Command command)
 		{
+			int result = -1;
+
 			OutlookService outlook = new();
 			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
-				return -1;
 			}
 			else
 			{
@@ -778,20 +794,23 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					await outlookAccount.MergeFoldersAsync(dryRun).
 						ConfigureAwait(false);
 				}
+
+				result = 0;
 			}
 
-			return 0;
+			return result;
 		}
 
 		private static async Task<int> MergeStores(Command command)
 		{
+			int result = -1;
+
 			OutlookService outlook = new();
 			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
-				return -1;
 			}
 			else
 			{
@@ -803,20 +822,23 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 				await outlookStore.MergeStoresAsync(sourcePst, destinationPst).
 					ConfigureAwait(false);
+
+				result = 0;
 			}
 
-			return 0;
+			return result;
 		}
 
 		private static async Task<int> MoveFolder(Command command)
 		{
+			int result = -1;
+
 			OutlookService outlook = new();
 			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
-				return -1;
 			}
 			else
 			{
@@ -836,9 +858,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					sourcePath,
 					destinationPst,
 					destinationPath).ConfigureAwait(false);
+
+				result = 0;
 			}
 
-			return 0;
+			return result;
 		}
 
 		private static bool OutlookConnect()
@@ -860,13 +884,14 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 
 		private static async Task<int> RemoveDuplicates(Command command)
 		{
+			int result = -1;
+
 			OutlookService outlook = new();
 			bool connected = outlook.Connect();
 
 			if (connected == false)
 			{
 				Log.Error("Unable to Continue");
-				return -1;
 			}
 			else
 			{
@@ -897,9 +922,11 @@ namespace DigitalZenWorks.Email.ToolKit.Application
 					await outlookAccount.RemoveDuplicatesAsync(dryRun, flush).
 						ConfigureAwait(false);
 				}
+
+				result = 0;
 			}
 
-			return 0;
+			return result;
 		}
 
 		private static async Task<int> RemoveEmptyFolders(Command command)
