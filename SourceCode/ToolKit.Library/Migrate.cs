@@ -667,27 +667,11 @@ public static class Migrate
 		return interimFolder;
 	}
 
-	private static string GetTemporaryFileName(string extension)
-	{
-		string filePath = Path.GetTempFileName();
-
-		// A 0 byte sized file is created.  Need to remove it.
-		File.Delete(filePath);
-
-		filePath = Path.ChangeExtension(filePath, extension);
-
-		return filePath;
-	}
-
-	private static Stream GetTemporaryMsgFileStream(string msgFile)
-	{
-		Stream msgStream = new FileStream(msgFile, FileMode.Create);
-
-		return msgStream;
-	}
-
-	public static bool DbxDirectoryToPstInternal(
-		string dbxFoldersPath, string pstPath, Store pstStore, Encoding encoding)
+	private static bool DbxDirectoryToPstInternal(
+		string dbxFoldersPath,
+		string pstPath,
+		Store pstStore,
+		Encoding encoding)
 	{
 		bool result = false;
 
@@ -724,5 +708,24 @@ public static class Migrate
 		Marshal.ReleaseComObject(rootFolder);
 
 		return result;
+	}
+
+	private static string GetTemporaryFileName(string extension)
+	{
+		string filePath = Path.GetTempFileName();
+
+		// A 0 byte sized file is created.  Need to remove it.
+		File.Delete(filePath);
+
+		filePath = Path.ChangeExtension(filePath, extension);
+
+		return filePath;
+	}
+
+	private static Stream GetTemporaryMsgFileStream(string msgFile)
+	{
+		Stream msgStream = new FileStream(msgFile, FileMode.Create);
+
+		return msgStream;
 	}
 }
