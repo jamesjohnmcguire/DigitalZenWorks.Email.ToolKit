@@ -4,6 +4,8 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+namespace DigitalZenWorks.Email.ToolKit;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -11,10 +13,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Common.Logging;
+using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
-
-namespace DigitalZenWorks.Email.ToolKit;
 
 /// <summary>
 /// Provides support for interacting with an Outlook PST file.
