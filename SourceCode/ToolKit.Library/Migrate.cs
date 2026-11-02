@@ -49,8 +49,6 @@ namespace DigitalZenWorks.Email.ToolKit
 		public static void DbxDirectoryToPst(
 			string dbxFoldersPath, string pstPath, Encoding encoding)
 		{
-			bool result = false;
-
 			OutlookAccount outlookAccount = OutlookAccount.Instance;
 
 			Store pstStore = outlookAccount.GetStore(pstPath);
@@ -61,7 +59,7 @@ namespace DigitalZenWorks.Email.ToolKit
 			}
 			else
 			{
-				result = DbxDirectoryToPstInternal(
+				DbxDirectoryToPstInternal(
 					dbxFoldersPath, pstPath, pstStore, encoding);
 			}
 		}
