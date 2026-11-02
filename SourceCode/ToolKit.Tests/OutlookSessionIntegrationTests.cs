@@ -384,7 +384,9 @@ internal sealed class OutlookSessionIntegrationTests
 		OutlookSession session = new(context.NameSpace);
 		string path = Path.Combine(context.DirectoryPath, "mail.msg");
 		Outlook.MailItem original = SaveMailItemAsMsg(
-			context, path, "Email.ToolKit shared mail",
+			context,
+			path,
+			"Email.ToolKit shared mail",
 			"Contents from the saved MSG.");
 
 		object? result = session.OpenSharedItem(path);
@@ -537,7 +539,9 @@ internal sealed class OutlookSessionIntegrationTests
 	}
 
 	private static Outlook.MailItem SaveMailItemAsMsg(
-		OutlookTestContext context, string path, string subject,
+		OutlookTestContext context,
+		string path,
+		string subject,
 		string? body = null)
 	{
 		Outlook.MailItem item = (Outlook.MailItem)
