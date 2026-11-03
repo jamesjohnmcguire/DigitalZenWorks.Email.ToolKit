@@ -153,7 +153,7 @@ public class OutlookAppointment
 	/// <summary>
 	/// Get the item's synopses.
 	/// </summary>
-	/// <returns>The synoses of the item.</returns>
+	/// <returns>The synopses of the item.</returns>
 	public string GetSynopses()
 	{
 		string synopses = GetSynopses(appointmentItem);

@@ -366,7 +366,7 @@ public class OutlookStore
 	/// Get the item's synopses.
 	/// </summary>
 	/// <param name="entryId">The entryId of the MailItem to check.</param>
-	/// <returns>The synoses of the item.</returns>
+	/// <returns>The synopses of the item.</returns>
 	[Obsolete("GetMailItemSynopses is deprecated, " +
 		"please use OutlookItem.Synopses instead.")]
 	public string GetItemSynopses(string entryId)
