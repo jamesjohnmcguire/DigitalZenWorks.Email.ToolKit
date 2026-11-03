@@ -36,7 +36,8 @@ internal sealed class OutlookSessionTests
 	{
 		OutlookSession session = new(null);
 
-		Assert.That(session.GetFolderFromId("entry", "store"), Is.Null);
+		OutlookFolder? folder = session.GetFolderFromId("entry", "store");
+		Assert.That(folder, Is.Null);
 	}
 
 	/// <summary>
