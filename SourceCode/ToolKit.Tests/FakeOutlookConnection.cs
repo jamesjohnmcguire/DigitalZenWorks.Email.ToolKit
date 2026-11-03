@@ -14,8 +14,7 @@ using System;
 /// A fake implementation of the IOutlookConnection interface for testing
 /// purposes.
 /// </summary>
-internal sealed class FakeOutlookConnection
-	: IOutlookConnection, IDisposable
+internal sealed class FakeOutlookConnection : IOutlookConnection, IDisposable
 {
 	private readonly IOutlookSession? session;
 

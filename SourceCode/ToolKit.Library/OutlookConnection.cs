@@ -17,8 +17,7 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 /// should use IOutlookService and IOutlookSession rather than this
 /// concrete type.
 /// </summary>
-internal sealed class OutlookConnection
-		: IOutlookConnection, IDisposable
+internal sealed class OutlookConnection : IOutlookConnection, IDisposable
 {
 	private Outlook.Application? application;
 	private IOutlookSession? session;

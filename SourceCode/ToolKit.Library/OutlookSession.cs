@@ -18,8 +18,7 @@ using Microsoft.Office.Interop.Outlook;
 /// Represents an Outlook session and provides methods to interact with Outlook
 /// folders, items, and stores.
 /// </summary>
-public class OutlookSession
-	: IOutlookSession
+public class OutlookSession : IOutlookSession
 {
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod()!.DeclaringType);

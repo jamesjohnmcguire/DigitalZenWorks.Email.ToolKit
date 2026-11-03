@@ -14,8 +14,7 @@ using Microsoft.Office.Interop.Outlook;
 /// <summary>
 /// A fake implementation of the IOutlookSession interface for testing purposes.
 /// </summary>
-internal sealed class FakeOutlookSession
-	: IOutlookSession
+internal sealed class FakeOutlookSession : IOutlookSession
 {
 	/// <summary>
 	/// Gets a store from the Outlook session by its path.
