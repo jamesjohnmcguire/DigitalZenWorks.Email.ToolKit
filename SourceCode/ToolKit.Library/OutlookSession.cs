@@ -129,7 +129,9 @@ public class OutlookSession
 	/// Opens a mail item file and returns an OutlookMail object.
 	/// </summary>
 	/// <param name="filePath">The path to the mail item file.</param>
-	/// <returns>The OutlookMail object or null if not found.</returns>
+	/// <returns>The wrapped mail item, or null if Outlook is unavailable
+	/// or the opened item is not a mail item.</returns>
+	/// <remarks>Errors opening the file are propagated to the caller.</remarks>
 	public OutlookMail? OpenMailItemFile(string filePath)
 	{
 		OutlookMail? outlookMailItem = null;
@@ -150,8 +152,9 @@ public class OutlookSession
 	/// <summary>
 	/// Opens a shared item in Outlook.
 	/// </summary>
-	/// <param name="filePath">The path to the shared item.</param>
-	/// <returns>The opened item or null if not found.</returns>
+	/// <param name="filePath">The path or URL of the shared item.</param>
+	/// <returns>The opened item, or null if Outlook is unavailable.</returns>
+	/// <remarks>Errors opening the item are propagated to the caller.</remarks>
 	public object? OpenSharedItem(string filePath)
 	{
 		object? item = null;

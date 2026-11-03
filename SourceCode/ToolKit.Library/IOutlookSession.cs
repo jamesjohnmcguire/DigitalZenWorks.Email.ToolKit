@@ -31,9 +31,9 @@ public interface IOutlookSession
 	/// <summary>
 	/// Opens a shared item in Outlook.
 	/// </summary>
-	/// <param name="filePath">The path to the file to open.</param>
-	/// <returns>The opened item, or null if the item could not be opened.
-	/// </returns>
+	/// <param name="filePath">The path or URL of the shared item.</param>
+	/// <returns>The opened item, or null if Outlook is unavailable.</returns>
+	/// <remarks>Errors opening the item are propagated to the caller.</remarks>
 	public object? OpenSharedItem(string filePath);
 
 	/// <summary>
