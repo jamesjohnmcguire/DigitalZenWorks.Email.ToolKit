@@ -54,8 +54,8 @@ internal sealed class OutlookFactoryTests
 		Assert.That(first, Is.Not.Null);
 		Assert.That(connection.Session, Is.SameAs(first));
 
-		Outlook.MailItem original = (Outlook.MailItem)
-			context.Application.CreateItem(
+		Outlook.MailItem original =
+			(Outlook.MailItem)context.Application.CreateItem(
 				Outlook.OlItemType.olMailItem);
 		context.Track(original);
 		original.Subject = "Factory session test";

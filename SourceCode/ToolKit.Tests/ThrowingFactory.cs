@@ -14,7 +14,7 @@ using System;
 /// A factory that simulates Outlook being available but CreateConnection
 /// throwing an exception.
 /// </summary>
-internal class ThrowingFactory : IOutlookFactory
+internal sealed class ThrowingFactory : IOutlookFactory
 {
 	/// <summary>
 	/// Simulates Outlook being available but CreateConnection throwing an

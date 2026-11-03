@@ -19,6 +19,10 @@ using Microsoft.Office.Interop.Outlook;
 /// <summary>
 /// Provides support for interacting with an Outlook PST file.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+	"Naming",
+	"CA1708:Identifiers should differ by more than case",
+	Justification = "The Obsolete Versions Are Needed Until the Next Version")]
 public class OutlookStore
 {
 	private static readonly ILog Log = LogManager.GetLogger(

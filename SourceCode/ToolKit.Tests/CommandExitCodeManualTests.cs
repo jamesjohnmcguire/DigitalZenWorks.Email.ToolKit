@@ -10,6 +10,7 @@ namespace DigitalZenWorks.Email.ToolKit.Tests;
 
 using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
@@ -44,11 +45,20 @@ internal sealed class CommandExitCodeManualTests
 		using Process process = Process.Start(startInfo)!;
 		Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
 		Task<string> errorTask = process.StandardError.ReadToEndAsync();
-		bool exited = process.WaitForExit(30000);
+		using CancellationTokenSource timeout = new(TimeSpan.FromSeconds(30));
 
-		if (exited == false)
+		try
 		{
-			process.Kill();
+			await process.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
+		}
+		catch (OperationCanceledException) when (timeout.IsCancellationRequested)
+		{
+			if (process.HasExited == false)
+			{
+				process.Kill();
+			}
+
+			await process.WaitForExitAsync().ConfigureAwait(false);
 			Assert.Fail("Det did not exit within 30 seconds.");
 		}
 

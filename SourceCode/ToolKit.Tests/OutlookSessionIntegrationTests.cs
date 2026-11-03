@@ -370,10 +370,11 @@ internal sealed class OutlookSessionIntegrationTests
 	{
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
-		Outlook.AppointmentItem original = (Outlook.AppointmentItem)
-			context.Application.CreateItem(
+		Outlook.AppointmentItem original =
+			(Outlook.AppointmentItem)context.Application.CreateItem(
 				Outlook.OlItemType.olAppointmentItem);
 		context.Track(original);
+
 		original.Subject = "Email.ToolKit appointment";
 		string path = Path.Combine(context.DirectoryPath, "appointment.msg");
 		original.SaveAs(path, Outlook.OlSaveAsType.olMSGUnicode);
