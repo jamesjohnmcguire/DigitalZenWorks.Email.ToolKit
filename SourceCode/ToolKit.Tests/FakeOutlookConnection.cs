@@ -38,6 +38,16 @@ internal sealed class FakeOutlookConnection : IOutlookConnection, IDisposable
 	}
 
 	/// <summary>
+	/// Gets or sets the operation before disposal completes.
+	/// </summary>
+	public Action? BeforeDispose { get; set; }
+
+	/// <summary>
+	/// Gets or sets the operation before session acquisition completes.
+	/// </summary>
+	public Action? BeforeGetSession { get; set; }
+
+	/// <summary>
 	/// Gets the Outlook session.
 	/// </summary>
 	public IOutlookSession? Session
@@ -45,6 +55,7 @@ internal sealed class FakeOutlookConnection : IOutlookConnection, IDisposable
 		get
 		{
 			SessionAccessCount++;
+			BeforeGetSession?.Invoke();
 
 			if (SessionException != null)
 			{
@@ -87,6 +98,7 @@ internal sealed class FakeOutlookConnection : IOutlookConnection, IDisposable
 	{
 		GC.SuppressFinalize(this);
 		DisposeCallCount++;
+		BeforeDispose?.Invoke();
 
 		if (DisposeException != null)
 		{

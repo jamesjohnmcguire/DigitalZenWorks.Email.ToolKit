@@ -16,6 +16,16 @@ using System;
 internal sealed class FakeOutlookFactory : IOutlookFactory
 {
 	/// <summary>
+	/// Gets or sets the operation before the availability result is returned.
+	/// </summary>
+	public Action? BeforeAvailabilityCheck { get; set; }
+
+	/// <summary>
+	/// Gets or sets the operation before a connection is returned.
+	/// </summary>
+	public Action? BeforeCreateConnection { get; set; }
+
+	/// <summary>
 	/// Gets or sets a value indicating whether Outlook is available.
 	/// </summary>
 	public bool IsAvailable { get; set; }
@@ -58,6 +68,7 @@ internal sealed class FakeOutlookFactory : IOutlookFactory
 	public IOutlookConnection? CreateConnection()
 	{
 		CreateConnectionCallCount++;
+		BeforeCreateConnection?.Invoke();
 
 		if (ConnectionException != null)
 		{
@@ -77,6 +88,7 @@ internal sealed class FakeOutlookFactory : IOutlookFactory
 	{
 		IsOutlookAvailableCallCount++;
 		LastTimeoutSeconds = timeoutSeconds;
+		BeforeAvailabilityCheck?.Invoke();
 
 		if (AvailabilityException != null)
 		{
