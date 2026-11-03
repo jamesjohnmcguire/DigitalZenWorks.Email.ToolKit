@@ -45,14 +45,11 @@ public class OutlookSession
 	{
 		OutlookFolder? folder = null;
 
-		if (session != null)
-		{
-			MAPIFolder? mapiFolder = session.GetFolderFromID(entryId, storeId);
+		MAPIFolder? mapiFolder = GetFolderFromIdInternal(entryId, storeId);
 
-			if (mapiFolder != null)
-			{
-				folder = new(mapiFolder);
-			}
+		if (mapiFolder != null)
+		{
+			folder = new(mapiFolder);
 		}
 
 		return folder;
