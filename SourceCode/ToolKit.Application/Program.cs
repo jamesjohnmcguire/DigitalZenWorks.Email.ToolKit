@@ -24,7 +24,6 @@ using Microsoft.Office.Interop.Outlook;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
-using CommonLogging = global::Common.Logging;
 
 /// <summary>
 /// Dbx to pst program class.
@@ -753,7 +752,7 @@ internal static class Program
 		Serilog.Log.Logger = configuration.CreateLogger();
 
 		LogManager.Adapter =
-			new CommonLogging.Serilog.SerilogFactoryAdapter();
+			new global::Common.Logging.Serilog.SerilogFactoryAdapter();
 	}
 
 	private static async Task<int> MergeFolders(Command command)
