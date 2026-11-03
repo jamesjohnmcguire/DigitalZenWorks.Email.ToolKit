@@ -6,6 +6,10 @@
 
 #nullable enable
 
+[assembly: global::System.CLSCompliant(true)]
+
+namespace DigitalZenWorks.Email.ToolKit.Tests;
+
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -14,10 +18,6 @@ using DigitalZenWorks.Common.Utilities;
 using Microsoft.Office.Interop.Outlook;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
-
-[assembly: CLSCompliant(true)]
-
-namespace DigitalZenWorks.Email.ToolKit.Tests;
 
 /// <summary>
 /// Test class.

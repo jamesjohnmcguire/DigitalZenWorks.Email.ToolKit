@@ -4,20 +4,18 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+namespace DigitalZenWorks.Email.ToolKit;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using Common.Logging;
 using DigitalZenWorks.Email.DbxOutlookExpress;
+using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using MsgKit;
-
-[assembly: CLSCompliant(false)]
-
-namespace DigitalZenWorks.Email.ToolKit;
 
 /// <summary>
 /// Migrate Dbx to Pst class.

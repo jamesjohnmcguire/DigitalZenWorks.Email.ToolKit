@@ -4,6 +4,10 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+[assembly: global::System.CLSCompliant(true)]
+
+namespace DigitalZenWorks.Email.ToolKit.Application;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,18 +17,14 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Common.Logging;
 using DigitalZenWorks.CommandLine.Commands;
 using DigitalZenWorks.Common.VersionUtilities;
+using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
-using CommonLogging = Common.Logging;
-
-[assembly: CLSCompliant(true)]
-
-namespace DigitalZenWorks.Email.ToolKit.Application;
+using CommonLogging = global::Common.Logging;
 
 /// <summary>
 /// Dbx to pst program class.

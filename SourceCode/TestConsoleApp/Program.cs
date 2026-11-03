@@ -4,6 +4,12 @@
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
+[assembly: global::System.CLSCompliant(true)]
+#pragma warning disable IDE0051
+#pragma warning disable IDE0059
+
+namespace DigitalZenWorks.Email.ToolKit.Test;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -12,21 +18,15 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using Common.Logging;
 using DigitalZenWorks.Email.DbxOutlookExpress;
 using DigitalZenWorks.Email.ToolKit;
+using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 using MsgKit;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
-using CommonLogging = Common.Logging;
-
-[assembly: CLSCompliant(true)]
-#pragma warning disable IDE0051
-#pragma warning disable IDE0059
-
-namespace DigitalZenWorks.Email.ToolKit.Test;
+using CommonLogging = global::Common.Logging;
 
 /// <summary>
 /// Dbx to pst test program class.
