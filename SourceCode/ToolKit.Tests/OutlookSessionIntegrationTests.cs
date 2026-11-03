@@ -23,6 +23,34 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 internal sealed class OutlookSessionIntegrationTests
 {
 	/// <summary>
+	/// Verifies null folder identifiers reach the Outlook COM error path.
+	/// </summary>
+	[Test]
+	public void GetFolderFromIdInternalNullIdsThrowsComException()
+	{
+		using OutlookTestContext context = new();
+		OutlookSession session = new(context.NameSpace);
+
+		Assert.That(
+			() => session.GetFolderFromIdInternal(null!, null!),
+			Throws.TypeOf<COMException>());
+	}
+
+	/// <summary>
+	/// Verifies null folder identifiers reach the Outlook COM error path.
+	/// </summary>
+	[Test]
+	public void GetFolderFromIdNullIdsThrowsComException()
+	{
+		using OutlookTestContext context = new();
+		OutlookSession session = new(context.NameSpace);
+
+		Assert.That(
+			() => session.GetFolderFromId(null!, null!),
+			Throws.TypeOf<COMException>());
+	}
+
+	/// <summary>
 	/// Verifies both folder lookup paths address the requested store and folder.
 	/// </summary>
 	[Test]
