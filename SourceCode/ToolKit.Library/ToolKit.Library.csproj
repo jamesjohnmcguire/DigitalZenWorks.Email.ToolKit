@@ -59,8 +59,8 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='Debug'">
-		<ProjectReference Include="..\DbxOutlookExpress\DbxOutlookExpress\DigitalZenWorks.Email.DbxOutlookExpress.csproj" />
-		<ProjectReference Include="..\UtilitiesNet\UtilitiesNetLibrary\DigitalZenWorks.Common.Utilities.csproj" />
+		<ProjectReference Include="../DbxOutlookExpress/DbxOutlookExpress/DigitalZenWorks.Email.DbxOutlookExpress.csproj" />
+		<ProjectReference Include="../UtilitiesNet/UtilitiesNetLibrary/DigitalZenWorks.Common.Utilities.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
 		<PackageReference Include="DigitalZenWorks.Common.Utilities" Version="1.4.75" />
@@ -68,7 +68,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\MsgKit\MsgKit\MsgKit.csproj" />
+		<ProjectReference Include="../MsgKit/MsgKit/MsgKit.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -77,14 +77,13 @@
 
 	<ItemGroup>
 		<AdditionalFiles Include="../stylecop.json" />
-		<None Include="../../.editorconfig" Link="../../.editorconfig" />
-		<None Include="../..\LICENSE">
+		<None Include="../../LICENSE">
 			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
+			<PackagePath>/</PackagePath>
 		</None>
 		<None Include="../../README.md">
 			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
+			<PackagePath>/</PackagePath>
 		</None>
 	</ItemGroup>
 
