@@ -322,6 +322,8 @@ public class OutlookStore
 	/// <param name="entryId">The entry id.</param>
 	/// <param name="store">The store to check.</param>
 	/// <returns>The folder.</returns>
+	[Obsolete("GetFolderFromIDis deprecated, " +
+		"please use OutlookSession.GetFolderFromId instead.")]
 	public MAPIFolder GetFolderFromId(string entryId, Store store)
 	{
 		MAPIFolder folder = null;
@@ -342,7 +344,7 @@ public class OutlookStore
 	/// <param name="store">The store containing the folder.</param>
 	/// <returns>The matching folder, if found.</returns>
 	[Obsolete("GetFolderFromIDis deprecated, " +
-		"please use GetFolderFromId instead.")]
+		"please use OutlookSession.GetFolderFromId instead.")]
 	public MAPIFolder GetFolderFromID(string entryId, Store store)
 	{
 		return GetFolderFromId(entryId, store);
