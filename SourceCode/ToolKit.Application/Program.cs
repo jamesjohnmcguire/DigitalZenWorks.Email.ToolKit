@@ -11,7 +11,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Logging;
@@ -34,10 +33,6 @@ internal static class Program
 {
 	private static readonly ILog Log = LogManager.GetLogger(
 		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-	private static readonly ResourceManager StringTable =
-		new("DigitalZenWorks.Email.ToolKit.Application.Resources",
-			Assembly.GetExecutingAssembly());
 
 	/// <summary>
 	/// The program's main entry point.
@@ -717,9 +712,8 @@ internal static class Program
 
 			if (duplicatesFound == false)
 			{
-				string message = StringTable.GetString(
-					"NO_DUPLICATES_FOUND",
-					CultureInfo.InvariantCulture);
+				string message =
+					global::ToolKit.Application.Resources.NO_DUPLICATES_FOUND;
 
 				if (useLog == true)
 				{
