@@ -53,6 +53,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="ToolKit.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<AdditionalFiles Include="../README.md" />
 		<AdditionalFiles Include="../stylecop.json" />
 		<None Update="Stackify.json">
