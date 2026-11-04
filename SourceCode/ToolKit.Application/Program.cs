@@ -45,86 +45,9 @@ internal static class Program
 		try
 		{
 			LogInitialization();
-			string version = VersionSupport.GetVersion();
 
-			List<Command> commands = GetCommands();
-
-			CommandLineInstance commandLine =
-				new(commands, arguments, InferCommand);
-
-			commandLine.UseLog = true;
-			commandLine.UsageStatement =
-				"Det command <options> <path.to.source> <path.to.pst>";
-
-			if (commandLine.ValidArguments == false)
-			{
-				Log.Error(commandLine.ErrorMessage);
-
-				commandLine.ShowHelp();
-			}
-			else
-			{
-				Command command = commandLine.Command;
-
-				DisplayParameters(command, arguments);
-
-				Encoding.RegisterProvider(
-					CodePagesEncodingProvider.Instance);
-
-				switch (command.Name)
-				{
-					case "add-pst":
-						result = AddPst(command);
-						break;
-					case "dbx-to-pst":
-						result = DbxToPst(command);
-						break;
-					case "details":
-						result = Details(command);
-						break;
-					case "eml-to-pst":
-						result = EmlToPst(command);
-						break;
-					case "list-folders":
-						result = ListFolders(command);
-						break;
-					case "list-ids":
-						result = ListIds(command);
-						break;
-					case "list-top-senders":
-						result = ListTopSenders(command);
-						break;
-					case "list-total-duplicates":
-						result = ListTotalDuplicates(command);
-						break;
-					case "merge-folders":
-						result = await
-							MergeFolders(command).ConfigureAwait(false);
-						break;
-					case "merge-stores":
-						result = await
-							MergeStores(command).ConfigureAwait(false);
-						break;
-					case "move-folder":
-						result = await MoveFolder(command).ConfigureAwait(false);
-						break;
-					case "remove-duplicates":
-						result = await RemoveDuplicates(command).
-							ConfigureAwait(false);
-						break;
-					case "remove-empty-folders":
-						result = await RemoveEmptyFolders(command).
-							ConfigureAwait(false);
-						break;
-					default:
-					case "help":
-						string title = GetTitle();
-						commandLine.UseLog = false;
-						commandLine.ShowHelp(title);
-						result = 0;
-						break;
-				}
-			}
+			OutlookService outlook = new();
+			result = await RunAsync(arguments, outlook).ConfigureAwait(false);
 		}
 		catch (System.Exception exception)
 		{
@@ -136,11 +59,105 @@ internal static class Program
 		return result;
 	}
 
-	private static int Details(Command command)
+	/// <summary>
+	/// Parses and executes a command using the supplied Outlook service.
+	/// </summary>
+	/// <param name="arguments">The arguments given to the program.</param>
+	/// <param name="outlook">The service used by the selected command.</param>
+	/// <returns>Zero for success; a nonzero value for failure.</returns>
+	internal static async Task<int> RunAsync(
+		string[] arguments, IOutlookService outlook)
 	{
 		int result = -1;
 
-		OutlookService outlook = new();
+		List<Command> commands = GetCommands();
+
+		CommandLineInstance commandLine =
+			new(commands, arguments, InferCommand);
+
+		commandLine.UseLog = true;
+		commandLine.UsageStatement =
+			"Det command <options> <path.to.source> <path.to.pst>";
+
+		if (commandLine.ValidArguments == false)
+		{
+			Log.Error(commandLine.ErrorMessage);
+
+			commandLine.ShowHelp();
+		}
+		else
+		{
+			Command command = commandLine.Command;
+
+			DisplayParameters(command, arguments);
+
+			Encoding.RegisterProvider(
+				CodePagesEncodingProvider.Instance);
+
+			switch (command.Name)
+			{
+				case "add-pst":
+					result = AddPst(command, outlook);
+					break;
+				case "dbx-to-pst":
+					result = DbxToPst(command, outlook);
+					break;
+				case "details":
+					result = Details(command, outlook);
+					break;
+				case "eml-to-pst":
+					result = EmlToPst(command, outlook);
+					break;
+				case "list-folders":
+					result = ListFolders(command, outlook);
+					break;
+				case "list-ids":
+					result = ListIds(command, outlook);
+					break;
+				case "list-top-senders":
+					result = ListTopSenders(command, outlook);
+					break;
+				case "list-total-duplicates":
+					result = ListTotalDuplicates(command, outlook);
+					break;
+				case "merge-folders":
+					result = await MergeFolders(command, outlook).
+						ConfigureAwait(false);
+					break;
+				case "merge-stores":
+					result = await MergeStores(command, outlook).
+						ConfigureAwait(false);
+					break;
+				case "move-folder":
+					result = await MoveFolder(command, outlook).
+						ConfigureAwait(false);
+					break;
+				case "remove-duplicates":
+					result = await RemoveDuplicates(command, outlook).
+						ConfigureAwait(false);
+					break;
+				case "remove-empty-folders":
+					result = await RemoveEmptyFolders(command, outlook).
+						ConfigureAwait(false);
+					break;
+				default:
+				case "help":
+					string title = GetTitle();
+					commandLine.UseLog = false;
+					commandLine.ShowHelp(title);
+
+					result = 0;
+					break;
+			}
+		}
+
+		return result;
+	}
+
+	private static int Details(Command command, IOutlookService outlook)
+	{
+		int result = -1;
+
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -193,12 +210,11 @@ internal static class Program
 		}
 	}
 
-	private static int AddPst(Command command)
+	private static int AddPst(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 		string pstLocation = command.Parameters[0];
 
-		OutlookService outlook = new();
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -219,11 +235,11 @@ internal static class Program
 		return result;
 	}
 
-	private static int DbxToPst(Command command)
+	private static int DbxToPst(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect();
+		bool connected = OutlookConnect(outlook);
 
 		if (connected == true)
 		{
@@ -249,11 +265,11 @@ internal static class Program
 		return result;
 	}
 
-	private static int EmlToPst(Command command)
+	private static int EmlToPst(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect();
+		bool connected = OutlookConnect(outlook);
 
 		if (connected == true)
 		{
@@ -480,11 +496,10 @@ internal static class Program
 		return inferredCommand;
 	}
 
-	private static int ListFolders(Command command)
+	private static int ListFolders(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		OutlookService outlook = new();
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -524,11 +539,10 @@ internal static class Program
 		return result;
 	}
 
-	private static int ListIds(Command command)
+	private static int ListIds(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		OutlookService outlook = new();
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -563,11 +577,10 @@ internal static class Program
 		return result;
 	}
 
-	private static int ListTopSenders(Command command)
+	private static int ListTopSenders(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		OutlookService outlook = new();
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -609,11 +622,11 @@ internal static class Program
 		return result;
 	}
 
-	private static int ListTotalDuplicates(Command command)
+	private static int ListTotalDuplicates(
+		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		OutlookService outlook = new();
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -642,7 +655,7 @@ internal static class Program
 	private static void ListTotalDuplicatesOutput(
 		IDictionary<string, IList<string>> duplicates,
 		bool useLog,
-		OutlookService outlook)
+		IOutlookService outlook)
 	{
 		bool connected = outlook.IsConnected;
 
@@ -755,11 +768,11 @@ internal static class Program
 			new global::Common.Logging.Serilog.SerilogFactoryAdapter();
 	}
 
-	private static async Task<int> MergeFolders(Command command)
+	private static async Task<int> MergeFolders(
+		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		OutlookService outlook = new();
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -794,11 +807,11 @@ internal static class Program
 		return result;
 	}
 
-	private static async Task<int> MergeStores(Command command)
+	private static async Task<int> MergeStores(
+		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		OutlookService outlook = new();
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -822,11 +835,11 @@ internal static class Program
 		return result;
 	}
 
-	private static async Task<int> MoveFolder(Command command)
+	private static async Task<int> MoveFolder(
+		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		OutlookService outlook = new();
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -858,9 +871,8 @@ internal static class Program
 		return result;
 	}
 
-	private static bool OutlookConnect()
+	private static bool OutlookConnect(IOutlookService outlook)
 	{
-		OutlookService outlook = new();
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -875,11 +887,11 @@ internal static class Program
 		return connected;
 	}
 
-	private static async Task<int> RemoveDuplicates(Command command)
+	private static async Task<int> RemoveDuplicates(
+		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		OutlookService outlook = new();
 		bool connected = outlook.Connect();
 
 		if (connected == false)
@@ -922,11 +934,12 @@ internal static class Program
 		return result;
 	}
 
-	private static async Task<int> RemoveEmptyFolders(Command command)
+	private static async Task<int> RemoveEmptyFolders(
+		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect();
+		bool connected = OutlookConnect(outlook);
 
 		if (connected == true)
 		{
