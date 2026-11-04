@@ -58,6 +58,9 @@ dotnet_diagnostic.SA1312.severity = warning
 # SA1412: Store files as UTF-8 with byte order mark
 dotnet_diagnostic.SA1412.severity = none
 
+# SA1502: Element should not be on a single line
+dotnet_diagnostic.SA1502.severity = none
+
 # SA1516: Elements Must Be Separated By Blank Line
 dotnet_diagnostic.SA1516.severity = warning
 
