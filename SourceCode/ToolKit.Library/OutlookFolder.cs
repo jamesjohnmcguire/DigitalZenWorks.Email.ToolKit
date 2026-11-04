@@ -211,7 +211,7 @@ public class OutlookFolder
 	/// <param name="parentFolder">The parent folder.</param>
 	/// <param name="folderName">The new folder name.</param>
 	/// <param name="normalizeFolderName">Indicates whether to attempt the
-	/// forlder name or not.</param>
+	/// folder name or not.</param>
 	/// <returns>The added or existing folder.</returns>
 	public static MAPIFolder AddFolder(
 		MAPIFolder parentFolder,
@@ -247,47 +247,6 @@ public class OutlookFolder
 		}
 
 		return pstFolder;
-	}
-
-	/// <summary>
-	/// Add folder in safe context.
-	/// </summary>
-	/// <remarks>If there is a folder already existing with the given
-	/// folder name, this method will return that folder.</remarks>
-	/// <param name="folderName">The new folder name.</param>
-	/// <returns>The added or existing encapsulated folder.</returns>
-	public OutlookFolder AddFolder(string folderName)
-	{
-		OutlookFolder newFolder = null;
-		MAPIFolder pstFolder = null;
-
-		if (folder != null && !string.IsNullOrWhiteSpace(folderName))
-		{
-			pstFolder = GetSubFolder(folder, folderName);
-
-			if (pstFolder == null)
-			{
-				string parentPath = GetFolderPath(folder);
-				Log.Info("At: " + parentPath + " Adding outlook folder: " +
-					folderName);
-
-				try
-				{
-					pstFolder = folder.Folders.Add(folderName);
-				}
-				catch (COMException exception)
-				{
-					Log.Warn(exception.ToString());
-				}
-			}
-
-			if (pstFolder != null)
-			{
-				newFolder = new(pstFolder);
-			}
-		}
-
-		return newFolder;
 	}
 
 	/// <summary>
@@ -1119,6 +1078,47 @@ public class OutlookFolder
 		}
 
 		return isDeleted;
+	}
+
+	/// <summary>
+	/// Add folder in safe context.
+	/// </summary>
+	/// <remarks>If there is a folder already existing with the given
+	/// folder name, this method will return that folder.</remarks>
+	/// <param name="folderName">The new folder name.</param>
+	/// <returns>The added or existing encapsulated folder.</returns>
+	public OutlookFolder AddFolder(string folderName)
+	{
+		OutlookFolder newFolder = null;
+		MAPIFolder pstFolder = null;
+
+		if (folder != null && !string.IsNullOrWhiteSpace(folderName))
+		{
+			pstFolder = GetSubFolder(folder, folderName);
+
+			if (pstFolder == null)
+			{
+				string parentPath = GetFolderPath(folder);
+				Log.Info("At: " + parentPath + " Adding outlook folder: " +
+					folderName);
+
+				try
+				{
+					pstFolder = folder.Folders.Add(folderName);
+				}
+				catch (COMException exception)
+				{
+					Log.Warn(exception.ToString());
+				}
+			}
+
+			if (pstFolder != null)
+			{
+				newFolder = new(pstFolder);
+			}
+		}
+
+		return newFolder;
 	}
 
 	/// <summary>
