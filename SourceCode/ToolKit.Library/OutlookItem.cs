@@ -17,8 +17,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using global::Common.Logging;
 using DigitalZenWorks.Common.Utilities;
+using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
 
 /// <summary>
