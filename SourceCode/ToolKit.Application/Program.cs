@@ -20,7 +20,6 @@ using System.Threading.Tasks;
 using DigitalZenWorks.CommandLine.Commands;
 using DigitalZenWorks.Common.VersionUtilities;
 using global::Common.Logging;
-using Microsoft.Office.Interop.Outlook;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
