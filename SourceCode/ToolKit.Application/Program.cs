@@ -60,7 +60,8 @@ internal static class Program
 	}
 
 	/// <summary>
-	/// Parses and executes a command using the supplied Outlook service.
+	/// Validates arguments and connects once before executing an Outlook
+	/// command.
 	/// </summary>
 	/// <param name="arguments">The arguments given to the program.</param>
 	/// <param name="outlook">The service used by the selected command.</param>
@@ -91,90 +92,72 @@ internal static class Program
 
 			DisplayParameters(command, arguments);
 
+			if (command.Name == "help")
+			{
+				string title = GetTitle();
+				commandLine.UseLog = false;
+				commandLine.ShowHelp(title);
+				return 0;
+			}
+
+			bool connected = outlook.Connect();
+
+			if (connected == false)
+			{
+				Log.Error("Unable to Continue");
+				return result;
+			}
+
 			Encoding.RegisterProvider(
 				CodePagesEncodingProvider.Instance);
 
 			switch (command.Name)
 			{
 				case "add-pst":
-					result = AddPst(command, outlook);
+					result = Commands.AddPst(command, outlook);
 					break;
 				case "dbx-to-pst":
-					result = DbxToPst(command, outlook);
+					result = Commands.DbxToPst(command);
 					break;
 				case "details":
-					result = Details(command, outlook);
+					result = Commands.Details(command, outlook);
 					break;
 				case "eml-to-pst":
-					result = EmlToPst(command, outlook);
+					result = Commands.EmlToPst(command);
 					break;
 				case "list-folders":
-					result = ListFolders(command, outlook);
+					result = Commands.ListFolders(command, outlook);
 					break;
 				case "list-ids":
-					result = ListIds(command, outlook);
+					result = Commands.ListIds(command, outlook);
 					break;
 				case "list-top-senders":
-					result = ListTopSenders(command, outlook);
+					result = Commands.ListTopSenders(command, outlook);
 					break;
 				case "list-total-duplicates":
-					result = ListTotalDuplicates(command, outlook);
+					result = Commands.ListTotalDuplicates(command, outlook);
 					break;
 				case "merge-folders":
-					result = await MergeFolders(command, outlook).
+					result = await Commands.MergeFolders(command, outlook).
 						ConfigureAwait(false);
 					break;
 				case "merge-stores":
-					result = await MergeStores(command, outlook).
+					result = await Commands.MergeStores(command, outlook).
 						ConfigureAwait(false);
 					break;
 				case "move-folder":
-					result = await MoveFolder(command, outlook).
+					result = await Commands.MoveFolder(command, outlook).
 						ConfigureAwait(false);
 					break;
 				case "remove-duplicates":
-					result = await RemoveDuplicates(command, outlook).
+					result = await Commands.RemoveDuplicates(command, outlook).
 						ConfigureAwait(false);
 					break;
 				case "remove-empty-folders":
-					result = await RemoveEmptyFolders(command, outlook).
+					result = await Commands.RemoveEmptyFolders(command).
 						ConfigureAwait(false);
 					break;
-				default:
-				case "help":
-					string title = GetTitle();
-					commandLine.UseLog = false;
-					commandLine.ShowHelp(title);
-
-					result = 0;
-					break;
 			}
-		}
-
-		return result;
-	}
-
-	private static int Details(Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
-
-			string pstFilePath = command.Parameters[0];
-			string entryId = command.Parameters[1];
-
-			outlookStore.Details(pstFilePath, entryId);
-
-			result = 0;
 		}
 
 		return result;
@@ -208,92 +191,6 @@ internal static class Program
 				Log.Info(message);
 			}
 		}
-	}
-
-	private static int AddPst(Command command, IOutlookService outlook)
-	{
-		int result = -1;
-		string pstLocation = command.Parameters[0];
-
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			Store store = session.GetStore(pstLocation);
-
-			if (store != null)
-			{
-				result = 0;
-			}
-		}
-
-		return result;
-	}
-
-	private static int DbxToPst(Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = OutlookConnect(outlook);
-
-		if (connected == true)
-		{
-			Encoding encoding = GetEncoding(command);
-
-			string dbxLocation = command.Parameters[0];
-			string pstLocation = dbxLocation;
-
-			if (command.Parameters.Count > 1)
-			{
-				pstLocation = command.Parameters[1];
-			}
-
-			bool success =
-				Migrate.DbxToPst(dbxLocation, pstLocation, encoding);
-
-			if (success == true)
-			{
-				result = 0;
-			}
-		}
-
-		return result;
-	}
-
-	private static int EmlToPst(Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = OutlookConnect(outlook);
-
-		if (connected == true)
-		{
-			string emlLocation = command.Parameters[0];
-			string pstLocation = emlLocation;
-
-			if (command.Parameters.Count > 1)
-			{
-				pstLocation = command.Parameters[1];
-			}
-
-			bool adjust = command.DoesOptionExist("a", "adjust");
-			bool closeStore = command.DoesOptionExist("c", "close-store");
-
-			bool success =
-				Migrate.EmlToPst(emlLocation, pstLocation, adjust, closeStore);
-
-			if (success == true)
-			{
-				result = 0;
-			}
-		}
-
-		return result;
 	}
 
 	private static List<Command> GetCommands()
@@ -412,22 +309,6 @@ internal static class Program
 		return query;
 	}
 
-	private static Encoding GetEncoding(Command command)
-	{
-		Encoding encoding = null;
-
-		CommandOption optionFound = command.GetOption("e", "encoding");
-
-		if (optionFound != null)
-		{
-			string encodingName = optionFound.Parameter;
-
-			encoding = Encoding.GetEncoding(encodingName);
-		}
-
-		return encoding;
-	}
-
 	private static string GetTitle()
 	{
 		Assembly assembly = Assembly.GetExecutingAssembly();
@@ -496,249 +377,6 @@ internal static class Program
 		return inferredCommand;
 	}
 
-	private static int ListFolders(Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
-
-			bool recurse = command.DoesOptionExist("r", "recurse");
-
-			string pstFilePath = command.Parameters[0];
-			string folderPath = null;
-
-			if (command.Parameters.Count > 1)
-			{
-				folderPath = command.Parameters[1];
-				folderPath = OutlookFolder.NormalizePath(folderPath);
-			}
-
-			IList<string> folderNames =
-				outlookStore.ListFolders(pstFilePath, folderPath, recurse);
-
-			IOrderedEnumerable<string> sortedFolderName =
-				folderNames.OrderBy(x => x);
-
-			foreach (string folderName in sortedFolderName)
-			{
-				Console.WriteLine(folderName);
-			}
-
-			result = 0;
-		}
-
-		return result;
-	}
-
-	private static int ListIds(Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
-
-			string pstFilePath = command.Parameters[0];
-			string folderPath = null;
-
-			if (command.Parameters.Count > 1)
-			{
-				folderPath = command.Parameters[1];
-				folderPath = OutlookFolder.NormalizePath(folderPath);
-			}
-
-			IList<string> entryIds =
-				outlookStore.GetIds(pstFilePath, folderPath);
-
-			foreach (string entryId in entryIds)
-			{
-				Console.WriteLine(entryId);
-			}
-
-			result = 0;
-		}
-
-		return result;
-	}
-
-	private static int ListTopSenders(Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
-
-			string pstFilePath = command.Parameters[0];
-			int count = 25;
-
-			CommandOption optionFound = command.GetOption("c", "count");
-
-			if (optionFound != null)
-			{
-				count = Convert.ToInt32(
-					optionFound.Parameter, CultureInfo.InvariantCulture);
-			}
-
-			IList<KeyValuePair<string, int>> topSenders =
-				outlookStore.ListTopSenders(pstFilePath, count);
-
-			foreach (KeyValuePair<string, int> sender in topSenders)
-			{
-				string message = string.Format(
-					CultureInfo.InvariantCulture,
-					"{0}: {1}",
-					sender.Key,
-					sender.Value.ToString(CultureInfo.InvariantCulture));
-				Console.WriteLine(message);
-			}
-
-			result = 0;
-		}
-
-		return result;
-	}
-
-	private static int ListTotalDuplicates(
-		Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
-
-			string pstFilePath = command.Parameters[0];
-
-			IDictionary<string, IList<string>> duplicates =
-				outlookStore.GetTotalDuplicates(pstFilePath);
-
-			ListTotalDuplicatesOutput(duplicates, true, outlook);
-			ListTotalDuplicatesOutput(duplicates, false, outlook);
-
-			result = 0;
-		}
-
-		return result;
-	}
-
-	private static void ListTotalDuplicatesOutput(
-		IDictionary<string, IList<string>> duplicates,
-		bool useLog,
-		IOutlookService outlook)
-	{
-		bool connected = outlook.IsConnected;
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
-
-			bool duplicatesFound = false;
-
-			foreach (KeyValuePair<string, IList<string>> item in
-				duplicates)
-			{
-				IList<string> duplicateSet = item.Value;
-
-				if (duplicateSet.Count > 1)
-				{
-					duplicatesFound = true;
-					string entryId1 = duplicateSet[0];
-
-					MailItem mailItem =
-						outlookStore.GetMailItemFromEntryId(entryId1);
-
-					OutlookItem outlookItem = new(mailItem);
-					string synopses = outlookItem.Synopses;
-
-					string message = string.Format(
-						CultureInfo.InvariantCulture,
-						"Duplicates Found for: {0}",
-						synopses);
-
-					if (useLog == true)
-					{
-						Log.Info(message);
-					}
-					else
-					{
-						Console.WriteLine(message);
-					}
-
-					foreach (string entryId in duplicateSet)
-					{
-						mailItem =
-							outlookStore.GetMailItemFromEntryId(entryId);
-
-						MAPIFolder parent = mailItem.Parent;
-						string path = OutlookFolder.GetFolderPath(parent);
-
-						message = "At: " + path;
-
-						if (useLog == true)
-						{
-							Log.Info(message);
-						}
-						else
-						{
-							Console.WriteLine(message);
-						}
-					}
-				}
-			}
-
-			if (duplicatesFound == false)
-			{
-				string message =
-					global::ToolKit.Application.Resources.NO_DUPLICATES_FOUND;
-
-				if (useLog == true)
-				{
-					Log.Info(message);
-				}
-				else
-				{
-					Console.WriteLine(message);
-				}
-			}
-		}
-	}
-
 	private static void LogInitialization()
 	{
 		string baseDataDirectory = Environment.GetFolderPath(
@@ -766,209 +404,5 @@ internal static class Program
 
 		LogManager.Adapter =
 			new global::Common.Logging.Serilog.SerilogFactoryAdapter();
-	}
-
-	private static async Task<int> MergeFolders(
-		Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
-
-			bool dryRun = command.DoesOptionExist("n", "dryrun");
-
-			if (command.Parameters.Count > 0)
-			{
-				string pstFile = command.Parameters[0];
-
-				await outlookStore.MergeFoldersAsync(pstFile, dryRun).
-					ConfigureAwait(false);
-			}
-			else
-			{
-				OutlookAccount outlookAccount = OutlookAccount.Instance;
-
-				await outlookAccount.MergeFoldersAsync(dryRun).
-					ConfigureAwait(false);
-			}
-
-			result = 0;
-		}
-
-		return result;
-	}
-
-	private static async Task<int> MergeStores(
-		Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
-
-			string sourcePst = command.Parameters[0];
-			string destinationPst = command.Parameters[1];
-
-			await outlookStore.MergeStoresAsync(sourcePst, destinationPst).
-				ConfigureAwait(false);
-
-			result = 0;
-		}
-
-		return result;
-	}
-
-	private static async Task<int> MoveFolder(
-		Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
-
-			string sourcePst = command.Parameters[0];
-			string sourcePath = command.Parameters[1];
-			sourcePath = OutlookFolder.NormalizePath(sourcePath);
-
-			string destinationPst = command.Parameters[2];
-			string destinationPath = command.Parameters[3];
-			destinationPath = OutlookFolder.NormalizePath(destinationPath);
-
-			await outlookStore.MoveFolderAsync(
-				sourcePst,
-				sourcePath,
-				destinationPst,
-				destinationPath).ConfigureAwait(false);
-
-			result = 0;
-		}
-
-		return result;
-	}
-
-	private static bool OutlookConnect(IOutlookService outlook)
-	{
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			connected = true;
-		}
-
-		return connected;
-	}
-
-	private static async Task<int> RemoveDuplicates(
-		Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = outlook.Connect();
-
-		if (connected == false)
-		{
-			Log.Error("Unable to Continue");
-		}
-		else
-		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
-
-			bool dryRun = command.DoesOptionExist("n", "dryrun");
-			bool flush = command.DoesOptionExist("s", "flush");
-
-			if (dryRun == true && flush == true)
-			{
-				// Obviously, ignore flush if dryRun is set.
-				Log.Warn("Ignoring flush option as dryRun is set");
-				flush = false;
-			}
-
-			if (command.Parameters.Count > 0)
-			{
-				string pstFilePath = command.Parameters[0];
-
-				await outlookStore.RemoveDuplicatesAsync(
-					pstFilePath, dryRun, flush).ConfigureAwait(false);
-			}
-			else
-			{
-				OutlookAccount outlookAccount = OutlookAccount.Instance;
-
-				await outlookAccount.RemoveDuplicatesAsync(dryRun, flush).
-					ConfigureAwait(false);
-			}
-
-			result = 0;
-		}
-
-		return result;
-	}
-
-	private static async Task<int> RemoveEmptyFolders(
-		Command command, IOutlookService outlook)
-	{
-		int result = -1;
-
-		bool connected = OutlookConnect(outlook);
-
-		if (connected == true)
-		{
-			OutlookAccount outlookAccount = OutlookAccount.Instance;
-
-			int removedFolders;
-
-			if (command.Parameters.Count > 0)
-			{
-				OutlookStore outlookStore = new(outlookAccount);
-				string pstFilePath = command.Parameters[0];
-
-				removedFolders =
-					await outlookStore.RemoveEmptyFoldersAsync(
-						pstFilePath).ConfigureAwait(false);
-			}
-			else
-			{
-				removedFolders =
-					await outlookAccount.RemoveEmptyFoldersAsync().
-						ConfigureAwait(false);
-			}
-
-			Console.WriteLine("Folder removed: " +
-				removedFolders.ToString(CultureInfo.InvariantCulture));
-
-			result = 0;
-		}
-
-		return result;
 	}
 }
