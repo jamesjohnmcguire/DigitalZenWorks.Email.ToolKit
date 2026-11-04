@@ -588,10 +588,11 @@ internal sealed class OutlookSessionIntegrationTests
 		string subject,
 		string? body = null)
 	{
-		Outlook.MailItem item = (Outlook.MailItem)
-			context.Application.CreateItem(
+		Outlook.MailItem item =
+			(Outlook.MailItem)context.Application.CreateItem(
 				Outlook.OlItemType.olMailItem);
 		context.Track(item);
+
 		item.Subject = subject;
 
 		if (body != null)
