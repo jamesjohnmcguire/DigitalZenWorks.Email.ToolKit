@@ -1,5 +1,12 @@
 # DigitalZenWorks.Email.ToolKit
 
+[![License](https://img.shields.io/github/license/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](../../releases)
+[![Last Commit](https://img.shields.io/github/last-commit/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](../../commits)
+[![Open Issues](https://img.shields.io/github/issues/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](../../issues)
+[![.NET](https://img.shields.io/badge/.NET-blueviolet)](https://dotnet.microsoft.com/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](#contributing)
+
 This is a C# application and library for interacting with email messages and storage.
 
 It is a useful utility for converting email storage from Outlook Express, Windows Live Mail and Windows Mail.  It can migrate all .dbx and .eml files to .pst (Outlook) files.
@@ -12,7 +19,8 @@ Outlook Needs to be installed on the same computer as this program.
 
 ### Download
 
-If you are just interested in using the program, you can download the latest release for your OS from the Releases page.
+If you are just interested in using the program, you can download the latest release for your OS from the Releases page. Unzip the EXE and place somewhere accessible on your PATH.
+
 
 ### Nuget
 PM> Install-Package DigitalZenWorks.Email.ToolKit
