@@ -97,48 +97,48 @@ internal static class Program
 			switch (command.Name)
 			{
 				case "add-pst":
-					result = Commands.AddPst(command, outlook);
+					result = Commands.AddPst(outlook, command);
 					break;
 				case "dbx-to-pst":
-					result = Commands.DbxToPst(command, outlook);
+					result = Commands.DbxToPst(outlook, command);
 					break;
 				case "details":
-					result = Commands.Details(command, outlook);
+					result = Commands.Details(outlook, command);
 					break;
 				case "eml-to-pst":
-					result = Commands.EmlToPst(command, outlook);
+					result = Commands.EmlToPst(outlook, command);
 					break;
 				case "list-folders":
-					result = Commands.ListFolders(command, outlook);
+					result = Commands.ListFolders(outlook, command);
 					break;
 				case "list-ids":
-					result = Commands.ListIds(command, outlook);
+					result = Commands.ListIds(outlook, command);
 					break;
 				case "list-top-senders":
-					result = Commands.ListTopSenders(command, outlook);
+					result = Commands.ListTopSenders(outlook, command);
 					break;
 				case "list-total-duplicates":
-					result = Commands.ListTotalDuplicates(command, outlook);
+					result = Commands.ListTotalDuplicates(outlook, command);
 					break;
 				case "merge-folders":
-					result = await Commands.MergeFolders(command, outlook).
+					result = await Commands.MergeFolders(outlook, command).
 						ConfigureAwait(false);
 					break;
 				case "merge-stores":
-					result = await Commands.MergeStores(command, outlook).
+					result = await Commands.MergeStores(outlook, command).
 						ConfigureAwait(false);
 					break;
 				case "move-folder":
-					result = await Commands.MoveFolder(command, outlook).
+					result = await Commands.MoveFolder(outlook, command).
 						ConfigureAwait(false);
 					break;
 				case "remove-duplicates":
-					result = await Commands.RemoveDuplicates(command, outlook).
+					result = await Commands.RemoveDuplicates(outlook, command).
 						ConfigureAwait(false);
 					break;
 				case "remove-empty-folders":
 					result = await Commands.RemoveEmptyFolders(
-						command, outlook).ConfigureAwait(false);
+						outlook, command).ConfigureAwait(false);
 					break;
 				default:
 				case "help":

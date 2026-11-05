@@ -31,14 +31,14 @@ internal static class Commands
 	/// <summary>
 	/// Opens or creates the PST store specified by the command.
 	/// </summary>
-	/// <param name="command">The command containing the PST file path.</param>
 	/// <param name="outlook">The service used to connect to Outlook.</param>
+	/// <param name="command">The command containing the PST file path.</param>
 	/// <returns>Zero if the store is available; otherwise, -1.</returns>
-	internal static int AddPst(Command command, IOutlookService outlook)
+	internal static int AddPst(IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == true)
 		{
@@ -59,14 +59,14 @@ internal static class Commands
 	/// <summary>
 	/// Migrates DBX email data to a PST file.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing the DBX source, optional
 	/// PST destination, and optional source encoding.</param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero if migration succeeds; otherwise, -1.</returns>
 	internal static int DbxToPst(
-		Command command, IOutlookService outlook)
+		IOutlookService outlook, Command command)
 	{
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == false)
 		{
@@ -99,15 +99,15 @@ internal static class Commands
 	/// <summary>
 	/// Displays details of an Outlook item identified by its entry ID.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing the PST file path and
 	/// item entry ID.</param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero when the command completes.</returns>
-	internal static int Details(Command command, IOutlookService outlook)
+	internal static int Details(IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == true)
 		{
@@ -128,14 +128,14 @@ internal static class Commands
 	/// <summary>
 	/// Migrates EML email data to a PST file.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing the EML source, PST
 	/// destination, and migration options.</param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero if migration succeeds; otherwise, -1.</returns>
 	internal static int EmlToPst(
-		Command command, IOutlookService outlook)
+		IOutlookService outlook, Command command)
 	{
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == false)
 		{
@@ -169,15 +169,15 @@ internal static class Commands
 	/// <summary>
 	/// Writes folder names in alphabetical order to the console.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing the PST file path,
 	/// optional folder path, and recursion option.</param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero when the command completes.</returns>
-	internal static int ListFolders(Command command, IOutlookService outlook)
+	internal static int ListFolders(IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == true)
 		{
@@ -215,15 +215,15 @@ internal static class Commands
 	/// <summary>
 	/// Writes item entry IDs from a store or folder to the console.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing the PST file path and
 	/// optional folder path.</param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero when the command completes.</returns>
-	internal static int ListIds(Command command, IOutlookService outlook)
+	internal static int ListIds(IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == true)
 		{
@@ -256,15 +256,15 @@ internal static class Commands
 	/// <summary>
 	/// Writes a store's top senders and their message counts to the console.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing the PST file path and
 	/// optional sender count, which defaults to 25.</param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero when the command completes.</returns>
-	internal static int ListTopSenders(Command command, IOutlookService outlook)
+	internal static int ListTopSenders(IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == true)
 		{
@@ -304,15 +304,15 @@ internal static class Commands
 	/// <summary>
 	/// Reports a store's duplicate items to the log and console.
 	/// </summary>
-	/// <param name="command">The command containing the PST file path.</param>
 	/// <param name="outlook">The service used to connect to Outlook.</param>
+	/// <param name="command">The command containing the PST file path.</param>
 	/// <returns>Zero when the command completes.</returns>
 	internal static int ListTotalDuplicates(
-		Command command, IOutlookService outlook)
+		IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == true)
 		{
@@ -324,8 +324,8 @@ internal static class Commands
 			IDictionary<string, IList<string>> duplicates =
 				outlookStore.GetTotalDuplicates(pstFilePath);
 
-			ListTotalDuplicatesOutput(duplicates, true, outlook);
-			ListTotalDuplicatesOutput(duplicates, false, outlook);
+			ListTotalDuplicatesOutput(outlook, duplicates, true);
+			ListTotalDuplicatesOutput(outlook, duplicates, false);
 
 			result = 0;
 		}
@@ -337,14 +337,14 @@ internal static class Commands
 	/// Reports duplicate item summaries and the folder paths of each copy.
 	/// Reports when no group contains duplicate items.
 	/// </summary>
+	/// <param name="outlook">The connected Outlook service.</param>
 	/// <param name="duplicates">The groups of matching item entry IDs.</param>
 	/// <param name="useLog">True to write to the log; false to use the console.
 	/// </param>
-	/// <param name="outlook">The connected Outlook service.</param>
 	internal static void ListTotalDuplicatesOutput(
+		IOutlookService outlook,
 		IDictionary<string, IList<string>> duplicates,
-		bool useLog,
-		IOutlookService outlook)
+		bool useLog)
 	{
 		OutlookSession session = (OutlookSession)outlook.Session;
 		OutlookStore outlookStore = new(session);
@@ -422,16 +422,16 @@ internal static class Commands
 	/// <summary>
 	/// Merges duplicate folders in a specified store or all connected stores.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing an optional PST file path
 	/// and the dry-run option.</param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>A task returning zero when the command completes.</returns>
 	internal static async Task<int> MergeFolders(
-		Command command, IOutlookService outlook)
+		IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == true)
 		{
@@ -464,16 +464,16 @@ internal static class Commands
 	/// <summary>
 	/// Merges a source PST store into a destination PST store.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing the source and destination
 	/// PST file paths, in that order.</param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>A task returning zero when the command completes.</returns>
 	internal static async Task<int> MergeStores(
-		Command command, IOutlookService outlook)
+		IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == true)
 		{
@@ -495,17 +495,17 @@ internal static class Commands
 	/// <summary>
 	/// Moves a folder between the specified Outlook stores and folder paths.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing the source PST path,
 	/// source folder path, destination PST path, and destination folder path.
 	/// </param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>A task returning zero when the command completes.</returns>
 	internal static async Task<int> MoveFolder(
-		Command command, IOutlookService outlook)
+		IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == true)
 		{
@@ -535,17 +535,17 @@ internal static class Commands
 	/// <summary>
 	/// Removes duplicate items from a specified store or all connected stores.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing an optional PST file path
 	/// and the dry-run and flush options. Dry-run takes precedence over flush.
 	/// </param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>A task returning zero when the command completes.</returns>
 	internal static async Task<int> RemoveDuplicates(
-		Command command, IOutlookService outlook)
+		IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == true)
 		{
@@ -586,14 +586,14 @@ internal static class Commands
 	/// <summary>
 	/// Removes empty folders and writes the number removed to the console.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command containing an optional PST file path.
 	/// When omitted, all connected stores are processed.</param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>A task returning zero when the command completes.</returns>
 	internal static async Task<int> RemoveEmptyFolders(
-		Command command, IOutlookService outlook)
+		IOutlookService outlook, Command command)
 	{
-		bool connected = OutlookConnect(command, outlook);
+		bool connected = OutlookConnect(outlook, command);
 
 		if (connected == false)
 		{
@@ -679,13 +679,13 @@ internal static class Commands
 	/// <summary>
 	/// Validates the optional probe timeout and connects to Outlook.
 	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The command with the optional timeout value.
 	/// </param>
-	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>True when the timeout is valid and connection succeeds.
 	/// </returns>
 	private static bool OutlookConnect(
-		Command command, IOutlookService outlook)
+		IOutlookService outlook, Command command)
 	{
 		bool connected = false;
 
