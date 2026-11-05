@@ -91,22 +91,6 @@ internal static class Program
 
 			DisplayParameters(command, arguments);
 
-			if (command.Name == "help")
-			{
-				string title = GetTitle();
-				commandLine.UseLog = false;
-				commandLine.ShowHelp(title);
-				return 0;
-			}
-
-			bool connected = outlook.Connect();
-
-			if (connected == false)
-			{
-				Log.Error("Unable to Continue");
-				return result;
-			}
-
 			Encoding.RegisterProvider(
 				CodePagesEncodingProvider.Instance);
 
@@ -155,6 +139,14 @@ internal static class Program
 				case "remove-empty-folders":
 					result = await Commands.RemoveEmptyFolders(command).
 						ConfigureAwait(false);
+					break;
+				default:
+				case "help":
+					string title = GetTitle();
+					commandLine.UseLog = false;
+					commandLine.ShowHelp(title);
+
+					result = 0;
 					break;
 			}
 		}
