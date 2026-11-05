@@ -13,7 +13,11 @@ trim_trailing_whitespace = true
 [*.{bat, cmd}]
 end_of_line = crlf
 
-[*.{cs, csproj, props, resx}]
+# Development commands stay on one line, regardless of length.
+[*.{cmd,bat,sh,ps1,yml,yaml}]
+max_line_length = off
+
+[*.{cs,csproj,props,md,resx,slnx,yaml,yml}]
 end_of_line = lf
 
 [*.cs]
@@ -57,6 +61,9 @@ dotnet_diagnostic.SA1312.severity = warning
 
 # SA1412: Store files as UTF-8 with byte order mark
 dotnet_diagnostic.SA1412.severity = none
+
+# Trailing commas in multiline lists are optional.
+dotnet_diagnostic.SA1413.severity = none
 
 # SA1502: Element should not be on a single line
 dotnet_diagnostic.SA1502.severity = none
