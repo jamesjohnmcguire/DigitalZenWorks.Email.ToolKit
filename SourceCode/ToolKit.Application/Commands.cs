@@ -20,8 +20,8 @@ using Microsoft.Office.Interop.Outlook;
 /// Implements the Outlook command-line operations.
 /// </summary>
 /// <remarks>
-/// The dispatcher validates arguments and establishes an Outlook connection
-/// before invoking the command handlers.
+/// The dispatcher validates command syntax. Each handler validates its
+/// timeout option before attempting an Outlook connection.
 /// </remarks>
 internal static class Commands
 {
@@ -32,13 +32,13 @@ internal static class Commands
 	/// Opens or creates the PST store specified by the command.
 	/// </summary>
 	/// <param name="command">The command containing the PST file path.</param>
-	/// <param name="outlook">The connected Outlook service.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero if the store is available; otherwise, -1.</returns>
 	internal static int AddPst(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(outlook);
+		bool connected = OutlookConnect(command, outlook);
 
 		if (connected == true)
 		{
@@ -61,9 +61,18 @@ internal static class Commands
 	/// </summary>
 	/// <param name="command">The command containing the DBX source, optional
 	/// PST destination, and optional source encoding.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero if migration succeeds; otherwise, -1.</returns>
-	internal static int DbxToPst(Command command)
+	internal static int DbxToPst(
+		Command command, IOutlookService outlook)
 	{
+		bool connected = OutlookConnect(command, outlook);
+
+		if (connected == false)
+		{
+			return -1;
+		}
+
 		int result = -1;
 
 		Encoding encoding = GetEncoding(command);
@@ -92,13 +101,13 @@ internal static class Commands
 	/// </summary>
 	/// <param name="command">The command containing the PST file path and
 	/// item entry ID.</param>
-	/// <param name="outlook">The connected Outlook service.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero when the command completes.</returns>
 	internal static int Details(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(outlook);
+		bool connected = OutlookConnect(command, outlook);
 
 		if (connected == true)
 		{
@@ -121,9 +130,18 @@ internal static class Commands
 	/// </summary>
 	/// <param name="command">The command containing the EML source, PST
 	/// destination, and migration options.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero if migration succeeds; otherwise, -1.</returns>
-	internal static int EmlToPst(Command command)
+	internal static int EmlToPst(
+		Command command, IOutlookService outlook)
 	{
+		bool connected = OutlookConnect(command, outlook);
+
+		if (connected == false)
+		{
+			return -1;
+		}
+
 		int result = -1;
 
 		string emlLocation = command.Parameters[0];
@@ -153,13 +171,13 @@ internal static class Commands
 	/// </summary>
 	/// <param name="command">The command containing the PST file path,
 	/// optional folder path, and recursion option.</param>
-	/// <param name="outlook">The connected Outlook service.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero when the command completes.</returns>
 	internal static int ListFolders(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(outlook);
+		bool connected = OutlookConnect(command, outlook);
 
 		if (connected == true)
 		{
@@ -199,13 +217,13 @@ internal static class Commands
 	/// </summary>
 	/// <param name="command">The command containing the PST file path and
 	/// optional folder path.</param>
-	/// <param name="outlook">The connected Outlook service.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero when the command completes.</returns>
 	internal static int ListIds(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(outlook);
+		bool connected = OutlookConnect(command, outlook);
 
 		if (connected == true)
 		{
@@ -240,13 +258,13 @@ internal static class Commands
 	/// </summary>
 	/// <param name="command">The command containing the PST file path and
 	/// optional sender count, which defaults to 25.</param>
-	/// <param name="outlook">The connected Outlook service.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero when the command completes.</returns>
 	internal static int ListTopSenders(Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(outlook);
+		bool connected = OutlookConnect(command, outlook);
 
 		if (connected == true)
 		{
@@ -287,14 +305,14 @@ internal static class Commands
 	/// Reports a store's duplicate items to the log and console.
 	/// </summary>
 	/// <param name="command">The command containing the PST file path.</param>
-	/// <param name="outlook">The connected Outlook service.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>Zero when the command completes.</returns>
 	internal static int ListTotalDuplicates(
 		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(outlook);
+		bool connected = OutlookConnect(command, outlook);
 
 		if (connected == true)
 		{
@@ -406,14 +424,14 @@ internal static class Commands
 	/// </summary>
 	/// <param name="command">The command containing an optional PST file path
 	/// and the dry-run option.</param>
-	/// <param name="outlook">The connected Outlook service.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>A task returning zero when the command completes.</returns>
 	internal static async Task<int> MergeFolders(
 		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(outlook);
+		bool connected = OutlookConnect(command, outlook);
 
 		if (connected == true)
 		{
@@ -448,14 +466,14 @@ internal static class Commands
 	/// </summary>
 	/// <param name="command">The command containing the source and destination
 	/// PST file paths, in that order.</param>
-	/// <param name="outlook">The connected Outlook service.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>A task returning zero when the command completes.</returns>
 	internal static async Task<int> MergeStores(
 		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(outlook);
+		bool connected = OutlookConnect(command, outlook);
 
 		if (connected == true)
 		{
@@ -480,14 +498,14 @@ internal static class Commands
 	/// <param name="command">The command containing the source PST path,
 	/// source folder path, destination PST path, and destination folder path.
 	/// </param>
-	/// <param name="outlook">The connected Outlook service.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>A task returning zero when the command completes.</returns>
 	internal static async Task<int> MoveFolder(
 		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(outlook);
+		bool connected = OutlookConnect(command, outlook);
 
 		if (connected == true)
 		{
@@ -520,14 +538,14 @@ internal static class Commands
 	/// <param name="command">The command containing an optional PST file path
 	/// and the dry-run and flush options. Dry-run takes precedence over flush.
 	/// </param>
-	/// <param name="outlook">The connected Outlook service.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>A task returning zero when the command completes.</returns>
 	internal static async Task<int> RemoveDuplicates(
 		Command command, IOutlookService outlook)
 	{
 		int result = -1;
 
-		bool connected = OutlookConnect(outlook);
+		bool connected = OutlookConnect(command, outlook);
 
 		if (connected == true)
 		{
@@ -570,9 +588,18 @@ internal static class Commands
 	/// </summary>
 	/// <param name="command">The command containing an optional PST file path.
 	/// When omitted, all connected stores are processed.</param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <returns>A task returning zero when the command completes.</returns>
-	internal static async Task<int> RemoveEmptyFolders(Command command)
+	internal static async Task<int> RemoveEmptyFolders(
+		Command command, IOutlookService outlook)
 	{
+		bool connected = OutlookConnect(command, outlook);
+
+		if (connected == false)
+		{
+			return -1;
+		}
+
 		OutlookAccount outlookAccount = OutlookAccount.Instance;
 
 		int removedFolders;
@@ -621,17 +648,57 @@ internal static class Commands
 		return encoding;
 	}
 
-	private static bool OutlookConnect(IOutlookService outlook)
+	private static int GetTimeOutSeconds(Command command)
 	{
-		bool connected = outlook.Connect();
+		int timeoutSeconds = 10;
+		CommandOption optionFound = command.GetOption("t", "timeout");
 
-		if (connected == false)
+		if (optionFound != null)
 		{
-			Log.Error("Unable to Continue");
+			int maxTimeoutSeconds = int.MaxValue / 1000;
+
+			bool validTimeout = int.TryParse(
+				optionFound.Parameter,
+				NumberStyles.Integer,
+				CultureInfo.InvariantCulture,
+				out timeoutSeconds);
+
+			if (validTimeout == false || timeoutSeconds < 0 ||
+				timeoutSeconds > maxTimeoutSeconds)
+			{
+				Log.Error("The --timeout (-t) value must be an integer " +
+					"between 0 and 2147483 seconds.");
+
+				timeoutSeconds = -1;
+			}
 		}
-		else
+
+		return timeoutSeconds;
+	}
+
+	/// <summary>
+	/// Validates the optional probe timeout and connects to Outlook.
+	/// </summary>
+	/// <param name="command">The command with the optional timeout value.
+	/// </param>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
+	/// <returns>True when the timeout is valid and connection succeeds.
+	/// </returns>
+	private static bool OutlookConnect(
+		Command command, IOutlookService outlook)
+	{
+		bool connected = false;
+
+		int timeoutSeconds = GetTimeOutSeconds(command);
+
+		if (timeoutSeconds >= 0)
 		{
-			connected = true;
+			connected = outlook.Connect(timeoutSeconds);
+
+			if (connected == false)
+			{
+				Log.Error("Unable to Continue");
+			}
 		}
 
 		return connected;

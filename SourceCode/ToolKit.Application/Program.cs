@@ -59,8 +59,8 @@ internal static class Program
 	}
 
 	/// <summary>
-	/// Validates arguments and connects once before executing an Outlook
-	/// command.
+	/// Validates arguments and dispatches the selected command. Outlook
+	/// commands establish their connection after processing options.
 	/// </summary>
 	/// <param name="arguments">The arguments given to the program.</param>
 	/// <param name="outlook">The service used by the selected command.</param>
@@ -100,13 +100,13 @@ internal static class Program
 					result = Commands.AddPst(command, outlook);
 					break;
 				case "dbx-to-pst":
-					result = Commands.DbxToPst(command);
+					result = Commands.DbxToPst(command, outlook);
 					break;
 				case "details":
 					result = Commands.Details(command, outlook);
 					break;
 				case "eml-to-pst":
-					result = Commands.EmlToPst(command);
+					result = Commands.EmlToPst(command, outlook);
 					break;
 				case "list-folders":
 					result = Commands.ListFolders(command, outlook);
@@ -137,8 +137,8 @@ internal static class Program
 						ConfigureAwait(false);
 					break;
 				case "remove-empty-folders":
-					result = await Commands.RemoveEmptyFolders(command).
-						ConfigureAwait(false);
+					result = await Commands.RemoveEmptyFolders(
+						command, outlook).ConfigureAwait(false);
 					break;
 				default:
 				case "help":
@@ -280,6 +280,16 @@ internal static class Program
 		Command details = new(
 			"details", null, 2, "Show details of given item");
 		commands.Add(details);
+
+		foreach (Command command in commands)
+		{
+			if (command.Name != "help")
+			{
+				command.Options ??= [];
+				CommandOption timeout = new("t", "timeout", true);
+				command.Options.Add(timeout);
+			}
+		}
 
 		return commands;
 	}

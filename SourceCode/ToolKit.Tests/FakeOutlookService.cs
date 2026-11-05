@@ -22,7 +22,7 @@ internal sealed class FakeOutlookService : IOutlookService
 	public bool IsConnected => false;
 
 	/// <summary>
-	/// Gets the timeout supplied by the command dispatcher.
+	/// Gets the timeout supplied by the command handler.
 	/// </summary>
 	public int? LastTimeoutSeconds { get; private set; }
 

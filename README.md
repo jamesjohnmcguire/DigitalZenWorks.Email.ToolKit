@@ -86,6 +86,22 @@ The command is optional if the command can be inferred from the source-path.  Fo
 If the source-path is a directory, the command will attempt to process the files in directory.  If the source-path is a file, it will process that file directly.
 If the output file is specified, it must include the extension '.pst'.
 
+###### Outlook connection timeout
+
+All Outlook commands accept `--timeout <seconds>` or `-t <seconds>`. The
+value must be an integer from `0` to `2147483`; the default is `10` seconds.
+Invalid values fail before an Outlook connection is attempted. A value of
+`0` starts or joins the activation probe without waiting for it to finish.
+
+This option bounds the activation-probe wait, including cleanup. It does
+not cancel COM activation or set a deadline for subsequent connection,
+migration, or other Outlook operations. Help does not connect to Outlook.
+
+```shell
+Det.exe merge-stores --timeout 30 source.pst destination.pst
+Det.exe list-folders -t 30 archive.pst
+```
+
 ###### Examples
 Det.exe remove-duplicates --dryrun \path\to\some.pst
 Det.exe dbx-to-pst --encoding shift_jis \path\to\some-dbx-files

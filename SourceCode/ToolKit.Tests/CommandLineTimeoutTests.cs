@@ -38,6 +38,20 @@ internal sealed class CommandLineTimeoutTests
 		new("remove-empty-folders", new[] { "archive.pst" })
 	];
 
+	private static readonly TestCaseData[] OutlookCommandsWithOptions =
+	[
+		new("dbx-to-pst", new[] { "Inbox.dbx", "--encoding", "utf-8" }),
+		new(
+			"eml-to-pst",
+			new[]
+			{
+				"message.eml", "archive.pst", "--adjust", "--close-store"
+			}),
+		new("list-folders", new[] { "archive.pst", "--recurse" }),
+		new("merge-folders", new[] { "--dryrun" }),
+		new("remove-duplicates", new[] { "--dryrun", "--flush" })
+	];
+
 	/// <summary>
 	/// Verifies help is available without attempting an Outlook connection.
 	/// </summary>
@@ -83,6 +97,30 @@ internal sealed class CommandLineTimeoutTests
 	}
 
 	/// <summary>
+	/// Verifies the timeout option can accompany existing command options.
+	/// </summary>
+	/// <param name="command">The Outlook command to execute.</param>
+	/// <param name="parameters">The positional arguments and other options.
+	/// </param>
+	/// <returns>A task representing the asynchronous test.</returns>
+	[TestCaseSource(nameof(OutlookCommandsWithOptions))]
+	public async Task OutlookTimeoutAcceptsOtherOptions(
+		string command, string[] parameters)
+	{
+		FakeOutlookService outlook = new();
+		string[] arguments =
+			[command, .. parameters, "--timeout", "37"];
+
+		int result = await Program.RunAsync(arguments, outlook).
+			ConfigureAwait(false);
+
+		Assert.That(outlook.ConnectCallCount, Is.EqualTo(1));
+		Assert.That(outlook.LastTimeoutSeconds, Is.EqualTo(37));
+		Assert.That(result, Is.Not.Zero);
+		Assert.That(outlook.SessionAccessCount, Is.Zero);
+	}
+
+	/// <summary>
 	/// Verifies both option forms accept the supported timeout boundaries.
 	/// Zero means no wait for the probe, not an infinite timeout.
 	/// </summary>
@@ -103,6 +141,30 @@ internal sealed class CommandLineTimeoutTests
 
 		Assert.That(outlook.ConnectCallCount, Is.EqualTo(1));
 		Assert.That(outlook.LastTimeoutSeconds, Is.EqualTo(seconds));
+		Assert.That(result, Is.Not.Zero);
+		Assert.That(outlook.SessionAccessCount, Is.Zero);
+	}
+
+	/// <summary>
+	/// Verifies every Outlook command accepts the short timeout option before
+	/// its positional arguments.
+	/// </summary>
+	/// <param name="command">The Outlook command to execute.</param>
+	/// <param name="parameters">Valid positional arguments for the command.
+	/// </param>
+	/// <returns>A task representing the asynchronous test.</returns>
+	[TestCaseSource(nameof(OutlookCommands))]
+	public async Task OutlookTimeoutCanPrecedePositionalParameters(
+		string command, string[] parameters)
+	{
+		FakeOutlookService outlook = new();
+		string[] arguments = [command, "-t", "37", .. parameters];
+
+		int result = await Program.RunAsync(arguments, outlook).
+			ConfigureAwait(false);
+
+		Assert.That(outlook.ConnectCallCount, Is.EqualTo(1));
+		Assert.That(outlook.LastTimeoutSeconds, Is.EqualTo(37));
 		Assert.That(result, Is.Not.Zero);
 		Assert.That(outlook.SessionAccessCount, Is.Zero);
 	}
@@ -218,7 +280,7 @@ internal sealed class CommandLineTimeoutTests
 
 	/// <summary>
 	/// Verifies omitting the option preserves the ten-second probe timeout for
-	/// every Outlook command through the shared connection step.
+	/// every Outlook command through its connection handler.
 	/// </summary>
 	/// <param name="command">The Outlook command to execute.</param>
 	/// <param name="parameters">Valid positional arguments for the command.
