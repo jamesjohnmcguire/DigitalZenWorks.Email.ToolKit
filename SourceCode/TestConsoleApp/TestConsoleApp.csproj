@@ -36,12 +36,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\ToolKit.Library\ToolKit.Library.csproj" />
+		<ProjectReference Include="../ToolKit.Library/ToolKit.Library.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<AdditionalFiles Include="../stylecop.json" />
-		<None Include="../.editorconfig" Link="../.editorconfig" />
 	</ItemGroup>
 
 </Project>
