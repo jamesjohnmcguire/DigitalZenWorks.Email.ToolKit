@@ -47,6 +47,20 @@ packs all Release library targets, then publishes the NuGet package through
 GitHub Actions. These commands are independent; neither requires the other
 artifact. Run `DevelopmentTools\clean.cmd` directly for cleanup.
 
+Run the same solution-wide test scope as Visual Studio Test Explorer:
+
+```shell
+DevelopmentTools\test.cmd
+```
+
+The script builds Debug with Visual Studio MSBuild, then runs all four test
+projects in the solution through their NUnit adapters, including Outlook
+integration tests. A working Outlook installation and profile are required
+for those integration tests. NUnit `[Explicit]` and `[Ignore]` tests retain
+their normal exclusion rules. TRX results are under `artifacts/TestResults`.
+Extra `dotnet test` arguments are forwarded; for example,
+`test.cmd --list-tests` lists discovered tests without running them.
+
 The application and library embed PDB symbols in their Release assemblies.
 The library XML documentation remains in the NuGet package for consumer
 IntelliSense; it is not required to run the application.
