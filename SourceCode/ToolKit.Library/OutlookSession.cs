@@ -324,7 +324,7 @@ public class OutlookSession : IOutlookSession
 		{
 			string newPath = path + ".pst";
 
-			bool newExists = File.Exists(path);
+			bool newExists = File.Exists(newPath);
 
 			if (exists == false || newExists == true ||
 				createIfMissing == true)
