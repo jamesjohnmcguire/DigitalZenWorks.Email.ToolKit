@@ -107,8 +107,8 @@ DevelopmentTools\build.cmd pack
 Extract the ZIP to a separate directory and smoke-test it. Inspect the NuGet
 package's dependencies and target frameworks and test it from a consumer
 project. The library uses public MsgKit 3.0.6. Verify the packaged conversion
-adapter preserves read-receipt fields; it must not rely on the unused fork
-checkout. See [MsgKit compatibility](#msgkit-mime-compatibility).
+adapter preserves read-receipt fields using the public package. The fork is
+no longer a submodule. See [MsgKit compatibility](#msgkit-mime-compatibility).
 
 ## Outlook verification
 

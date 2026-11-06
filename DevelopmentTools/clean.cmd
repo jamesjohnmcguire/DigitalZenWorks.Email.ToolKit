@@ -30,8 +30,6 @@ IF EXIST DbxOutlookExpress\DbxOutlookExpressTests\bin\NUL RD /S /Q DbxOutlookExp
 IF EXIST DbxOutlookExpress\DbxOutlookExpressTests\obj\NUL RD /S /Q DbxOutlookExpress\DbxOutlookExpressTests\obj
 IF EXIST MapiLibrary\x64\NUL RD /S /Q MapiLibrary\x64
 IF EXIST MapiLibraryTests\x64\NUL RD /S /Q MapiLibraryTests\x64
-IF EXIST MsgKit\MsgKit\Bin\NUL RD /S /Q MsgKit\MsgKit\Bin
-IF EXIST MsgKit\MsgKit\obj\NUL RD /S /Q MsgKit\MsgKit\obj
 IF EXIST UtilitiesNet\UtilitiesNetLibrary\bin\NUL RD /S /Q UtilitiesNet\UtilitiesNetLibrary\bin
 IF EXIST UtilitiesNet\UtilitiesNetLibrary\obj\NUL RD /S /Q UtilitiesNet\UtilitiesNetLibrary\obj
 IF EXIST UtilitiesNet\UtilitiesNetTests\bin\NUL RD /S /Q UtilitiesNet\UtilitiesNetTests\bin
