@@ -15,7 +15,6 @@ using System.Text;
 using DigitalZenWorks.Email.DbxOutlookExpress;
 using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
-using MsgKit;
 
 /// <summary>
 /// Migrate Dbx to Pst class.
@@ -441,7 +440,7 @@ public static class Migrate
 
 			try
 			{
-				Converter.ConvertEmlToMsg(emlFile, msgFile);
+				EmlConverter.ConvertEmlToMsg(emlFile, msgFile);
 			}
 			catch (IOException exception)
 			{
@@ -449,7 +448,7 @@ public static class Migrate
 
 				// Hmmmn, try one more time.
 				msgFile = GetTemporaryFileName(".msg");
-				Converter.ConvertEmlToMsg(emlFile, msgFile);
+				EmlConverter.ConvertEmlToMsg(emlFile, msgFile);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -571,7 +570,7 @@ public static class Migrate
 
 				string msgFile = GetTemporaryFileName(".msg");
 
-				Converter.ConvertEmlToMsg(filePath, msgFile);
+				EmlConverter.ConvertEmlToMsg(filePath, msgFile);
 
 				File.Delete(filePath);
 
