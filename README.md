@@ -11,6 +11,17 @@ This is a C# application and library for interacting with email messages and sto
 
 It is a useful utility for converting email storage from Outlook Express, Windows Live Mail and Windows Mail.  It can migrate all .dbx and .eml files to .pst (Outlook) files.
 
+## Documentation
+
+| Purpose | Start here |
+| --- | --- |
+| Using the NuGet library | [API overview](#library-and-api-usage) |
+| Connection behavior | [Outlook lifecycle](Documentation/OutlookLifecycle.md) |
+| Maintaining this repository | [Maintainer notes][maintainer-notes] |
+| Release changes | [Release notes](Documentation/ReleaseNotes.txt) |
+
+[maintainer-notes]: Documentation/DevelopmentNotes.md
+
 ## Installation
 
 ### Prerequisites
@@ -31,7 +42,8 @@ This project includes the [DbxOutlookExpress project](https://github.com/jamesjo
 
 git clone --recurse-submodules https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
 
-Refer to DevelopmentTools Build Scripts for specific build examples.
+See [Maintainer notes](Documentation/DevelopmentNotes.md) for local builds,
+release preparation, and explicit publishing commands.
 
 ### Outlook service lifetime
 
@@ -137,22 +149,95 @@ Use the --dryrun option to see which messages WOULD be deleted.
 Use --flush to empty the deleted items folder at the end.
 For large stores, this can take some time.
 
-#### Library and API usage:
-Except for command line argument processing, all of the functionality is located in the main library project.  The main APIs match the command line commands.
+## Library and API usage
 
-The main classes are Migrate, OutlookFolder, OutlookItem and OutlookStore.
-Migrate is for migrating messages in other formats into Outlook.  Some examples:
-```c#
+For new Outlook functionality, start with `OutlookService` through
+`IOutlookService`. A successful connection provides a stable
+`IOutlookSession` for the workflow. Store and folder helpers perform more
+specific operations using that session.
+
+| API | Responsibility |
+| --- | --- |
+| `OutlookService` / `IOutlookService` | Connect, expose a session, disconnect |
+| `OutlookSession` / `IOutlookSession` | Wrap Outlook session operations |
+| `OutlookStore` | Work with PST files and stores |
+| `OutlookFolder` | Work with folders and their items |
+| `OutlookItem` | Inspect and compare message content |
+| `Migrate` | Import DBX and EML messages into PST files |
+| `OutlookAccount` | Legacy singleton retained for existing clients |
+
+This synchronous console example establishes the required STA context and
+shows how the service, session, and store helper fit together:
+
+```csharp
+namespace EmailToolKitExample;
+
+using System;
+using DigitalZenWorks.Email.ToolKit;
+
+internal static class Program
+{
+	[STAThread]
+	private static int Main()
+	{
+		IOutlookService outlook = new OutlookService();
+
+		try
+		{
+			bool connected = outlook.Connect(timeOutSeconds: 30);
+
+			if (connected == false)
+			{
+				Console.Error.WriteLine("Outlook is unavailable.");
+				return 1;
+			}
+
+			IOutlookSession? session = outlook.Session;
+
+			if (session == null)
+			{
+				return 1;
+			}
+
+			OutlookStore stores = new(session);
+			// Use stores and session for this workflow's operations.
+			return 0;
+		}
+		finally
+		{
+			outlook.Disconnect();
+		}
+	}
+}
+```
+
+Keep the workflow on the same STA thread. Normal callers do not need to
+create factories or connection objects. See [Outlook lifecycle][lifecycle]
+for the timeout boundary, ownership rules, and connection diagnostics.
+The NuGet package includes XML documentation for member details through
+IntelliSense and IDE API browsing.
+
+### Existing migration APIs
+
+The static migration entry points remain available:
+
+```csharp
 Migrate.DbxToPst(dbxPath, pstPath);
-Migrate.EmlToPst(dbxPath, pstPath);
+Migrate.EmlToPst(emlPath, pstPath);
 ```
-OutlookAccount acts on the entire default or current Outlook account.  OutlookStore acts on a specific store (PST file).  OutlookFolder acts on a specific folder.
-For cleaning up Outlook, you could use the following:
-```c#
-OutlookAccount outlookAccont = new ();
-outlookAccont.MergeFolders();
-outlookAccont.RemoveDuplicates();
-```
+
+`Migrate` currently obtains Outlook through the legacy
+`OutlookAccount.Instance` infrastructure. Its connection is independent of
+a separately created `OutlookService`. The singleton also remains available
+to existing clients; new Outlook functionality should prefer the service
+and session interfaces.
+
+Read-receipt fields are preserved as ordinary attachments, defaulting to
+`read-receipt.txt`. Conversion leaves the archived EML unchanged and does not
+generate Content-IDs or infer missing HTML relationships. This preserves the
+notification data without creating a native Outlook read-receipt object.
+
+[lifecycle]: Documentation/OutlookLifecycle.md
 
 ## Contributing
 
@@ -161,17 +246,17 @@ If you have found a bug or have a suggestion that would make this better, please
 ### Process:
 
 1. Fork the Project
-2. Create your Bug / Feature Branch (`git checkout -b feature/amazing-feature`)
-3. Commit your Changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the Branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create your Bug / Feature Branch
+3. Commit your Changes
+4. Push to the Branch
+5. Open a Pull Request - Explain the why the request and how the changes are beneficial. Explicitly mention the unit tests used in supporting this change.
 
 ### Coding style
 Please match the current coding style.  Most notably:
 1. One operation per line
 2. Use complete English words in variable and method names
 3. Attempt to declare variable and method names in a self-documenting manner
-4. Add unit tests
+4. Use 4 column tabs and Allman style braces
 
 
 ## License
