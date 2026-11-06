@@ -55,7 +55,7 @@ public class OutlookStore
 	/// </summary>
 	/// <param name="outlookSession">The outlook session encapsulation
 	/// object.</param>
-	public OutlookStore(OutlookSession outlookSession)
+	internal OutlookStore(OutlookSession outlookSession)
 	{
 		this.outlookSession = outlookSession;
 	}
@@ -70,7 +70,7 @@ public class OutlookStore
 	/// <paramref name="outlookSession"/> is null or is not an
 	/// <see cref="OutlookSession"/> instance.
 	/// </exception>
-	public OutlookStore(IOutlookSession outlookSession)
+	internal OutlookStore(IOutlookSession outlookSession)
 	{
 		if (outlookSession is OutlookSession session)
 		{
@@ -79,9 +79,8 @@ public class OutlookStore
 		else
 		{
 			string message = "OutlookStore requires a concrete " +
-				"OutlookSession instance. Pass " +
-				"OutlookAccount.OutlookSession or an OutlookSession " +
-				"created from the Outlook.Application.";
+				"OutlookSession instance. Use the session supplied " +
+				"by OutlookService.";
 			throw new NotSupportedException(message);
 		}
 	}
@@ -91,7 +90,7 @@ public class OutlookStore
 	/// <see cref="OutlookStore"/> class.
 	/// </summary>
 	/// <param name="store">The Store object.</param>
-	public OutlookStore(Store store)
+	internal OutlookStore(Store store)
 	{
 		this.store = store;
 		if (store != null)
@@ -114,6 +113,27 @@ public class OutlookStore
 	/// Gets the Outlook session associated with this store.
 	/// </summary>
 	public OutlookSession OutlookSession { get { return outlookSession; } }
+
+	/// <summary>
+	/// Creates an Outlook store helper from the supplied session.
+	/// </summary>
+	/// <param name="outlookSession">The session reference, which must be an
+	/// <see cref="OutlookSession"/> instance.</param>
+	/// <returns>A helper that uses the supplied session.</returns>
+	/// <exception cref="NotSupportedException">
+	/// <paramref name="outlookSession"/> is null or is not an
+	/// <see cref="OutlookSession"/> instance.
+	/// </exception>
+	/// <remarks>
+	/// The current implementation requires operations not yet exposed by
+	/// <see cref="IOutlookSession"/>. Sessions provided by
+	/// <see cref="OutlookService"/> satisfy this requirement.
+	/// </remarks>
+	public static OutlookStore FromSession(IOutlookSession outlookSession)
+	{
+		OutlookStore result = new(outlookSession);
+		return result;
+	}
 
 	/// <summary>
 	/// Empty deleted items folder.

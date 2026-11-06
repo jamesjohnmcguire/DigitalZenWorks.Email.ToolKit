@@ -49,6 +49,27 @@ internal sealed class PublicApiCompatibilityTests
 	}
 
 	/// <summary>
+	/// Verifies new folder creation paths do not add public constructor
+	/// overloads that make released null-argument calls ambiguous.
+	/// </summary>
+	[Test]
+	public void OutlookFolderRetainsReleasedPublicConstructors()
+	{
+		Type type = typeof(OutlookFolder);
+
+		using (Assert.EnterMultipleScope())
+		{
+			Assert.That(type.GetConstructors(), Has.Length.EqualTo(2));
+			Assert.That(
+				type.GetConstructor([typeof(OutlookAccount)]), Is.Not.Null);
+			Assert.That(
+				type.GetConstructor(
+					[typeof(OutlookAccount), typeof(Outlook.MAPIFolder)]),
+				Is.Not.Null);
+		}
+	}
+
+	/// <summary>
 	/// Verifies that the legacy folder lookup method remains available.
 	/// </summary>
 	[Test]
@@ -61,5 +82,22 @@ internal sealed class PublicApiCompatibilityTests
 		Assert.That(
 			method!.ReturnType.FullName,
 			Is.EqualTo(typeof(Outlook.MAPIFolder).FullName));
+	}
+
+	/// <summary>
+	/// Verifies new store creation paths preserve the released public
+	/// constructor set and its null-argument overload resolution.
+	/// </summary>
+	[Test]
+	public void OutlookStoreRetainsReleasedPublicConstructors()
+	{
+		Type type = typeof(OutlookStore);
+
+		using (Assert.EnterMultipleScope())
+		{
+			Assert.That(type.GetConstructors(), Has.Length.EqualTo(1));
+			Assert.That(
+				type.GetConstructor([typeof(OutlookAccount)]), Is.Not.Null);
+		}
 	}
 }

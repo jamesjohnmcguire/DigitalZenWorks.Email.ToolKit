@@ -289,10 +289,9 @@ internal static class Program
 		OutlookFolder.AddFolder(subFolder, "Testing2");
 		OutlookFolder.AddFolder(subFolder, "Testing2 (1)");
 
-		OutlookService outlook = new();
-		OutlookSession? outlookSession = (OutlookSession?)outlook.Session;
+		IOutlookSession outlookSession = outlookAccount.OutlookSession;
 
-		OutlookFolder outlookFolder = new(outlookSession);
+		OutlookFolder outlookFolder = OutlookFolder.FromSession(outlookSession);
 		outlookFolder.MergeFolders(rootFolder, true);
 
 		// Clean up

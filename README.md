@@ -199,7 +199,7 @@ internal static class Program
 				return 1;
 			}
 
-			OutlookStore stores = new(session);
+			OutlookStore stores = OutlookStore.FromSession(session);
 			// Use stores and session for this workflow's operations.
 			return 0;
 		}

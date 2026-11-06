@@ -111,8 +111,8 @@ internal static class Commands
 
 		if (connected == true)
 		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
+			IOutlookSession session = outlook.Session;
+			OutlookStore outlookStore = OutlookStore.FromSession(session);
 
 			string pstFilePath = command.Parameters[0];
 			string entryId = command.Parameters[1];
@@ -181,8 +181,8 @@ internal static class Commands
 
 		if (connected == true)
 		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
+			IOutlookSession session = outlook.Session;
+			OutlookStore outlookStore = OutlookStore.FromSession(session);
 
 			bool recurse = command.DoesOptionExist("r", "recurse");
 
@@ -227,8 +227,8 @@ internal static class Commands
 
 		if (connected == true)
 		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
+			IOutlookSession session = outlook.Session;
+			OutlookStore outlookStore = OutlookStore.FromSession(session);
 
 			string pstFilePath = command.Parameters[0];
 			string folderPath = null;
@@ -268,8 +268,8 @@ internal static class Commands
 
 		if (connected == true)
 		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
+			IOutlookSession session = outlook.Session;
+			OutlookStore outlookStore = OutlookStore.FromSession(session);
 
 			string pstFilePath = command.Parameters[0];
 			int count = 25;
@@ -316,8 +316,8 @@ internal static class Commands
 
 		if (connected == true)
 		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
+			IOutlookSession session = outlook.Session;
+			OutlookStore outlookStore = OutlookStore.FromSession(session);
 
 			string pstFilePath = command.Parameters[0];
 
@@ -346,8 +346,8 @@ internal static class Commands
 		IDictionary<string, IList<string>> duplicates,
 		bool useLog)
 	{
-		OutlookSession session = (OutlookSession)outlook.Session;
-		OutlookStore outlookStore = new(session);
+		IOutlookSession session = outlook.Session;
+		OutlookStore outlookStore = OutlookStore.FromSession(session);
 
 		bool duplicatesFound = false;
 
@@ -435,8 +435,8 @@ internal static class Commands
 
 		if (connected == true)
 		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
+			IOutlookSession session = outlook.Session;
+			OutlookStore outlookStore = OutlookStore.FromSession(session);
 
 			bool dryRun = command.DoesOptionExist("n", "dryrun");
 
@@ -477,8 +477,8 @@ internal static class Commands
 
 		if (connected == true)
 		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
+			IOutlookSession session = outlook.Session;
+			OutlookStore outlookStore = OutlookStore.FromSession(session);
 
 			string sourcePst = command.Parameters[0];
 			string destinationPst = command.Parameters[1];
@@ -509,8 +509,8 @@ internal static class Commands
 
 		if (connected == true)
 		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
+			IOutlookSession session = outlook.Session;
+			OutlookStore outlookStore = OutlookStore.FromSession(session);
 
 			string sourcePst = command.Parameters[0];
 			string sourcePath = command.Parameters[1];
@@ -549,8 +549,8 @@ internal static class Commands
 
 		if (connected == true)
 		{
-			OutlookSession session = (OutlookSession)outlook.Session;
-			OutlookStore outlookStore = new(session);
+			IOutlookSession session = outlook.Session;
+			OutlookStore outlookStore = OutlookStore.FromSession(session);
 
 			bool dryRun = command.DoesOptionExist("n", "dryrun");
 			bool flush = command.DoesOptionExist("s", "flush");

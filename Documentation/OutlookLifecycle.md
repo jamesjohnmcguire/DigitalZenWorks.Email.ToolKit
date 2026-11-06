@@ -14,9 +14,15 @@ singleton throughout the library.
 
 Applications normally connect through `IOutlookService`, implemented by
 `OutlookService`, then obtain its `IOutlookSession`. `OutlookSession` is the
-default session wrapper. `OutlookStore` and `OutlookFolder` provide store and
-folder operations; some older helpers still accept concrete session or COM
-types. Factory and connection infrastructure are implementation details.
+default session wrapper. Create store and folder helpers with
+`OutlookStore.FromSession(session)` and `OutlookFolder.FromSession(session)`.
+Both factories accept `IOutlookSession` but currently require a concrete
+`OutlookSession`, as supplied by `OutlookService`. Other implementations
+are rejected with `NotSupportedException`.
+
+The released account-based constructors remain public. New session and raw
+COM constructors are internal. Some older methods still expose COM types
+for compatibility. Connection infrastructure remains an implementation detail.
 
 `Migrate` and `OutlookAccount.Instance` remain separate legacy entry points
 for compatibility. Creating or configuring a service does not replace the

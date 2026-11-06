@@ -138,16 +138,6 @@ public class OutlookFolder
 	/// Initializes a new instance of the
 	/// <see cref="OutlookFolder"/> class.
 	/// </summary>
-	/// <param name="folder">The Outlook folder to wrap.</param>
-	public OutlookFolder(MAPIFolder folder)
-	{
-		this.folder = folder;
-	}
-
-	/// <summary>
-	/// Initializes a new instance of the
-	/// <see cref="OutlookFolder"/> class.
-	/// </summary>
 	/// <param name="outlookAccount">The outlook account object.</param>
 	public OutlookFolder(OutlookAccount outlookAccount)
 	{
@@ -161,23 +151,33 @@ public class OutlookFolder
 	/// Initializes a new instance of the
 	/// <see cref="OutlookFolder"/> class.
 	/// </summary>
-	/// <param name="outlookSession">The outlook session encapsulation
-	/// object.</param>
-	public OutlookFolder(OutlookSession outlookSession)
-	{
-		this.outlookSession = outlookSession;
-	}
-
-	/// <summary>
-	/// Initializes a new instance of the
-	/// <see cref="OutlookFolder"/> class.
-	/// </summary>
 	/// <param name="outlookAccount">The outlook account object.</param>
 	/// <param name="folder">The folder object.</param>
 	public OutlookFolder(OutlookAccount outlookAccount, MAPIFolder folder)
 		: this(outlookAccount)
 	{
 		this.folder = folder;
+	}
+
+	/// <summary>
+	/// Initializes a new instance of the
+	/// <see cref="OutlookFolder"/> class.
+	/// </summary>
+	/// <param name="folder">The Outlook folder to wrap.</param>
+	internal OutlookFolder(MAPIFolder folder)
+	{
+		this.folder = folder;
+	}
+
+	/// <summary>
+	/// Initializes a new instance of the
+	/// <see cref="OutlookFolder"/> class.
+	/// </summary>
+	/// <param name="outlookSession">The outlook session encapsulation
+	/// object.</param>
+	internal OutlookFolder(OutlookSession outlookSession)
+	{
+		this.outlookSession = outlookSession;
 	}
 
 	/// <summary>
@@ -329,6 +329,40 @@ public class OutlookFolder
 		}
 
 		return folderExists;
+	}
+
+	/// <summary>
+	/// Creates an Outlook folder helper from the supplied session.
+	/// </summary>
+	/// <param name="outlookSession">The session reference, which must be an
+	/// <see cref="OutlookSession"/> instance.</param>
+	/// <returns>A helper that uses the supplied session.</returns>
+	/// <exception cref="NotSupportedException">
+	/// <paramref name="outlookSession"/> is null or is not an
+	/// <see cref="OutlookSession"/> instance.
+	/// </exception>
+	/// <remarks>
+	/// The current implementation requires operations not yet exposed by
+	/// <see cref="IOutlookSession"/>. Sessions provided by
+	/// <see cref="OutlookService"/> satisfy this requirement.
+	/// </remarks>
+	public static OutlookFolder FromSession(IOutlookSession outlookSession)
+	{
+		OutlookFolder result;
+
+		if (outlookSession is OutlookSession session)
+		{
+			result = new(session);
+		}
+		else
+		{
+			string message = "OutlookFolder requires a concrete " +
+				"OutlookSession instance. Use the session supplied " +
+				"by OutlookService.";
+			throw new NotSupportedException(message);
+		}
+
+		return result;
 	}
 
 	/// <summary>
