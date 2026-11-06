@@ -10,7 +10,7 @@ The filename remains `DevelopmentNotes.md` to preserve existing links.
 [api-overview]: ../README.md#library-and-api-usage
 
 Run commands from a Visual Studio Developer Command Prompt with .NET 10,
-Git, and 7-Zip available. The build uses Visual Studio MSBuild because the
+Git, and `zip.exe` available. The build uses Visual Studio MSBuild because the
 Outlook COM references require it. Run commands from the repository root;
 the script also works from another directory and restores that directory.
 
@@ -38,13 +38,14 @@ Please match the current coding style.  Most notably:
 ```shell
 DevelopmentTools\build.cmd
 DevelopmentTools\build.cmd release
-DevelopmentTools\build.cmd pack
 ```
 
 The default command rebuilds Debug. `release` publishes a self-contained,
-single-file Windows x64 application and creates a fresh ZIP. `pack` builds
-all Release library targets and prepares the NuGet package. These commands
-do not upload or publish anything.
+single-file Windows x64 application, creates a fresh ZIP with `zip.exe`,
+and uploads only that ZIP to a GitHub draft release. `publish` builds and
+packs all Release library targets, then publishes the NuGet package through
+GitHub Actions. These commands are independent; neither requires the other
+artifact. Run `DevelopmentTools\clean.cmd` directly for cleanup.
 
 The application and library embed PDB symbols in their Release assemblies.
 The library XML documentation remains in the NuGet package for consumer
@@ -97,16 +98,17 @@ data. See [Outlook verification](#outlook-verification).
 
 Update `Documentation/ReleaseNotes.txt` for the selected version. Commit and
 push submodule changes before committing their references in this repository.
-After merging and pushing `main`, rebuild both artifacts from that commit:
+After merging and pushing `main`, run each applicable release command:
 
 ```shell
 DevelopmentTools\build.cmd release
-DevelopmentTools\build.cmd pack
+DevelopmentTools\build.cmd publish
 ```
 
-Extract the ZIP to a separate directory and smoke-test it. Inspect the NuGet
-package's dependencies and target frameworks and test it from a consumer
-project. The library uses public MsgKit 3.0.6. Verify the packaged conversion
+Test the release candidate before invoking either command. Extract the ZIP
+to a separate directory and smoke-test it. Inspect the NuGet package's
+dependencies and target frameworks and test it from a consumer project.
+The library uses public MsgKit 3.0.6. Verify the packaged conversion
 adapter preserves read-receipt fields using the public package. The fork is
 no longer a submodule. See [MsgKit compatibility](#msgkit-mime-compatibility).
 
@@ -399,31 +401,62 @@ that workaround be retired once a fixed package is available and tested.
 - [MsgKit package](https://www.nuget.org/packages/MsgKit/3.0.6)
 - [Current converter source](https://github.com/Sicos1977/MsgKit/blob/master/MsgKit/Converter.cs)
 
-## Explicit GitHub upload
+## Explicit publication
+
+Configure a NuGet.org trusted-publishing policy with these values:
+
+- Repository owner: `jamesjohnmcguire`
+- Repository: `DigitalZenWorks.Email.ToolKit`
+- Workflow filename: `build.yml`
+- Environment: leave empty (the workflow does not declare one)
+
+Commit and push the workflow and release changes to `main`. Complete the
+release checks first, using Visual Studio MSBuild and the working Outlook
+installation. The two distribution commands are independent:
 
 ```shell
-DevelopmentTools\build.cmd upload
-```
-
-This requires GitHub CLI authentication. It creates a **draft** release and
-uploads the prepared ZIP, using the current commit as the target for a new
-version tag. It does not rebuild the executable. Check that any existing
-version tag identifies the same commit. Review the draft and publish it
-separately when ready.
-
-## Explicit NuGet publication
-
-```shell
+DevelopmentTools\build.cmd release
 DevelopmentTools\build.cmd publish
 ```
 
-This pushes the prepared package to NuGet.org using the `NUGET_API_KEY`
-environment variable. The legacy form `build.cmd publish <version> <key>`
-is also supported. It does not rebuild or repack. This repository still uses
-local API-key publication; the submodules' trusted-publishing workflows are
-independent and do not publish Email.ToolKit.
+`release` builds the application, creates the executable ZIP with `zip.exe`,
+and uploads only that ZIP to a draft GitHub release. Review and publish the
+GitHub draft separately when ready. It does not pack the library or request
+NuGet publication.
 
-Both external commands require `main`, a clean working tree including
-submodules, and the corresponding artifact's recorded commit matching HEAD.
-They return a nonzero exit code on failure. These checks do not establish
-that tests passed: complete the release checks before invoking them.
+`publish` builds and packs the library locally. It uploads the NuGet package
+and `package.commit` to the matching GitHub release, creating a draft if
+needed. No executable build or ZIP is required. The GitHub release serves
+as the package transfer location for the publishing workflow.
+
+An existing draft must target the same commit. Each command replaces only
+its own assets on retry, preserving the other distribution's artifacts.
+For a published GitHub release, `publish` may add missing package assets
+without replacing existing assets; the version tag must match the source
+commit. Existing package assets are reused and verified by the workflow.
+`release` refuses to replace an executable on a published GitHub release.
+
+After uploading the package, the script dispatches `build.yml` from `main`
+with the local package's SHA-256 and follows that specific run. The Ubuntu
+job downloads the package and verifies the source commit, release target
+or tag, package ID, version, and SHA-256 before obtaining a short-lived key
+with `NuGet/login@v1` and pushing the exact package. No Office installation
+or COM build occurs on the publishing runner. API-key arguments are no
+longer supported.
+
+The workflow runs only on explicit dispatch with `publish=true` from
+`main`. Commit pushes, tags, and GitHub release events do not trigger it.
+Its `contents: write` permission permits draft-release discovery; its steps
+do not create, edit, or publish GitHub releases. Publication requests are
+serialized. The workflow does not rerun tests or prove build provenance.
+
+Both commands require `main` and a clean working tree including submodules.
+They build their own artifact and verify its source commit before upload.
+A build or upload failure stops the command before NuGet dispatch. If the
+source commit changes, rebuild from the intended release commit and review
+any existing draft target and version tag. Do not retarget a published
+version.
+
+Commands return a nonzero exit code on failure. If dispatch succeeds but
+status tracking fails, inspect that run before retrying. Publication failure
+details are available with `gh run view <run-id> --log-failed`.

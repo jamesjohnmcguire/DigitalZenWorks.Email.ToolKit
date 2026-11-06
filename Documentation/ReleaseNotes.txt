@@ -1,3 +1,32 @@
-Release 1.13.65 Includes the New Command of add-pst - Usage: Det add-pst <PST File>
+Release 1.14.0
 
-Also includes	Package Updates and minor code improvements
+Versioning
+- Adopt major.minor.patch numbering. The third component is now a patch
+  version rather than a build counter.
+- Compatible fixes will use 1.14.1, 1.14.2, and so on. Compatible feature
+  releases increment the minor version; breaking API releases increment
+  the major version.
+
+Outlook connection handling
+- Add --timeout / -t to configure the activation-probe wait for Outlook
+  commands. The default remains 10 seconds.
+- Validate timeout options before connecting. Help does not connect to
+  Outlook, and a failed connection returns a nonzero command exit status.
+- The timeout limits the probe wait; it does not cancel COM activation or
+  impose a deadline on the entire migration or connection operation.
+
+Message conversion and dependencies
+- Use public MsgKit 3.0.6 instead of building the forked project.
+- Preserve read-receipt fields as ordinary attachments, using
+  read-receipt.txt when no filename is supplied. Original EML files remain
+  unchanged, and no Content-IDs are invented.
+- Retain attachment bytes for the tested missing-ID and unnamed MIME cases.
+- Require patched OpenMcdf and cryptography package dependencies.
+
+Diagnostics and release preparation
+- Embed Release debugging symbols in the application and library assemblies.
+  Keep library XML documentation for NuGet consumer IntelliSense.
+- Prepare executable archives and NuGet packages locally. Uploading a draft
+  GitHub release and publishing a package are separate explicit commands.
+
+See Documentation/DevelopmentNotes.md for versioning and release commands.
