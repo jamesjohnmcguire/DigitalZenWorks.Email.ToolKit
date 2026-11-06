@@ -1,13 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 		<AssemblyName>Det</AssemblyName>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
-		<Company>James John McGuire</Company>
-		<Copyright>Copyright © 2021 - 2026</Copyright>
 		<DebugType>embedded</DebugType>
-		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<FileVersion>1.13.65.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NeutralLanguage>en-US</NeutralLanguage>
