@@ -61,13 +61,15 @@ public class OutlookStore
 	}
 
 	/// <summary>
-	/// Initializes a new instance of the
-	/// <see cref="OutlookStore"/> class using the IOutlookSession
-	/// abstraction. If a concrete OutlookSession is supplied it will be
-	/// used directly; otherwise the interface will be used for operations.
+	/// Initializes a new instance of the <see cref="OutlookStore"/> class
+	/// using a concrete session supplied through its interface.
 	/// </summary>
-	/// <param name="outlookSession">The outlook session abstraction.
-	/// </param>
+	/// <param name="outlookSession">The session reference, which must be an
+	/// <see cref="OutlookSession"/> instance.</param>
+	/// <exception cref="NotSupportedException">
+	/// <paramref name="outlookSession"/> is null or is not an
+	/// <see cref="OutlookSession"/> instance.
+	/// </exception>
 	public OutlookStore(IOutlookSession outlookSession)
 	{
 		if (outlookSession is OutlookSession session)
