@@ -173,6 +173,33 @@ work and cleanup. A deadline still would not make a hung COM call safely
 cancellable. That redesign, deterministic lifetime management of all
 borrowed wrappers, and any verified exclusive-shutdown policy are deferred.
 
+## Future STA ownership design
+
+The earlier `OutlookApplicationModulize.txt` sketches a replacement for the
+probe design. Its useful direction is retained here; its sample code is
+historical and must not be copied as a working design.
+
+A long-lived STA would own the application, namespace, and COM-backed
+wrappers. A request queue would dispatch operations onto that apartment.
+Public callers would continue using library abstractions rather than
+requiring raw COM objects or arbitrary COM delegates.
+
+Returning COM objects from a temporary worker is not an intermediate step:
+the caller must not depend on an apartment that has already exited. A
+future dispatch API must define which results can leave the owner STA.
+
+Before implementation, decide how message pumping, reentrancy, queued versus
+running work, late completion, shutdown, and outstanding references behave.
+A caller deadline cannot safely cancel an already-running COM call. A
+separate worker process is a possible later isolation boundary, not an
+existing feature or a promise to cancel Outlook side effects.
+
+Use fakes at established factory/connection/session boundaries for unit
+tests; do not manufacture fake Outlook COM objects. Validate apartment and
+lifetime behavior with real Outlook integration tests. Keep this redesign
+separate from 1.x compatibility repairs; track it in the
+[version 2 backlog](Email.ToolKit.Tasks.md#version-2-design-candidates).
+
 ## Connection diagnostics
 
 Debug logs distinguish probe activation, probe cleanup, caller-thread

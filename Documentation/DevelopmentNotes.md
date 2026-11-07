@@ -7,6 +7,16 @@ library usage and an API preview, start with the [README][api-overview] and
 
 The filename remains `DevelopmentNotes.md` to preserve existing links.
 
+The [historical NuGet API audit](ApiCompatibilityAudit.md) records published
+API changes from 1.4.22 through 1.14.0 and their compatibility implications.
+
+The active backlog is [Email.ToolKit.Tasks.md](Email.ToolKit.Tasks.md).
+Client-visible hash inputs and initial MAPI mappings are documented in
+[duplicate comparison](Email.ToolKit.DuplicateComparison.md).
+Historical research remains in the adjacent Email repository; architectural
+conclusions and release procedures are maintained here rather than in the
+older Support text files.
+
 [api-overview]: ../README.md#library-and-api-usage
 
 Run commands from a Visual Studio Developer Command Prompt with .NET 10,
@@ -123,6 +133,26 @@ dependencies and target frameworks and test it from a consumer project.
 The library uses public MsgKit 3.0.6. Verify the packaged conversion
 adapter preserves read-receipt fields using the public package. The fork is
 no longer a submodule. See [MsgKit compatibility](#msgkit-mime-compatibility).
+
+### Release checklist
+
+This replaces the separate `Email/Support/ReleaseProcess.txt` checklist.
+Repeat it for each release; earlier completion does not retire these checks.
+
+1. Select scope and review dependency updates. Publish any required upstream
+   or submodule packages before depending on their released versions.
+2. Review APIs against the last published NuGet package and any explicitly
+   supported older baseline. Add tests before changing legacy signatures.
+3. Complete candidate builds, tests, consumer checks, and release notes as
+   described above. Update project versions together near the end.
+4. Let the maintainer commit, merge, and push. Check the scripts' clean-tree
+   and branch requirements before distribution.
+5. Run `build.cmd release` for the executable ZIP and `build.cmd publish` for
+   NuGet, as applicable. Verify the release/tag and workflow result;
+   accepting a dispatch request alone is not publication success.
+6. Close completed issues and update the backlog after recording validation.
+   Historical release timing does not establish whether a release addressed
+   a bug or an API incompatibility.
 
 ## Outlook verification
 
