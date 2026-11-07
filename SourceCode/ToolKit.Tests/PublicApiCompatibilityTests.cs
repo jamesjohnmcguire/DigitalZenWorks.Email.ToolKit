@@ -17,6 +17,7 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 /// <summary>
 /// Guards released public signatures used by existing NuGet consumers.
 /// </summary>
+[Category("Compatibility")]
 internal sealed class PublicApiCompatibilityTests
 {
 	/// <summary>
@@ -46,6 +47,71 @@ internal sealed class PublicApiCompatibilityTests
 
 		Assert.That(method, Is.Not.Null);
 		Assert.That(method!.ReturnType, Is.EqualTo(typeof(void)));
+	}
+
+	/// <summary>
+	/// Verifies the released file/path migration overload remains available
+	/// without requiring the newer close-store argument.
+	/// </summary>
+	[Test]
+	public void EmlFileToPstRetainsReleasedPathOverload()
+	{
+		MethodInfo? method = typeof(Migrate).GetMethod(
+			nameof(Migrate.EmlFileToPst),
+			BindingFlags.Public | BindingFlags.Static,
+			[typeof(string), typeof(string)]);
+
+		Assert.That(
+			method,
+			Is.Not.Null,
+			"Restore the released EmlFileToPst(string, string) overload.");
+		Assert.That(
+			method!.ReturnType.FullName,
+			Is.EqualTo(typeof(Outlook.MailItem).FullName));
+	}
+
+	/// <summary>
+	/// Verifies the released migration overload accepting the adjust option
+	/// remains available without requiring a close-store argument.
+	/// </summary>
+	[Test]
+	public void EmlToPstRetainsReleasedAdjustOverload()
+	{
+		MethodInfo? method = typeof(Migrate).GetMethod(
+			nameof(Migrate.EmlToPst),
+			BindingFlags.Public | BindingFlags.Static,
+			[typeof(string), typeof(string), typeof(bool)]);
+
+		Assert.That(
+			method,
+			Is.Not.Null,
+			"Restore the released EmlToPst(string, string, bool) overload.");
+		Assert.That(method!.ReturnType, Is.EqualTo(typeof(bool)));
+	}
+
+	/// <summary>
+	/// Verifies the released two-argument folder overload remains supported.
+	/// An optional third argument does not retain its binary signature.
+	/// </summary>
+	[Test]
+	public void OutlookFolderAddFolderRetainsReleasedTwoParameterOverload()
+	{
+		MethodInfo? method = typeof(OutlookFolder).GetMethod(
+			nameof(OutlookFolder.AddFolder),
+			BindingFlags.Public | BindingFlags.Static,
+			[typeof(Outlook.MAPIFolder), typeof(string)]);
+
+		Assert.That(
+			method,
+			Is.Not.Null,
+			"Restore the released AddFolder(MAPIFolder, string) overload.");
+		Assert.That(
+			method!.ReturnType.FullName,
+			Is.EqualTo(typeof(Outlook.MAPIFolder).FullName));
+		Assert.That(
+			method.IsDefined(typeof(ObsoleteAttribute)),
+			Is.False,
+			"Keep the two-argument convenience overload supported.");
 	}
 
 	/// <summary>
