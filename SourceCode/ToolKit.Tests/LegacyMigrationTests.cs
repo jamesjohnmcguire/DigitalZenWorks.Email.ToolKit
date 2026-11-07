@@ -57,7 +57,9 @@ internal sealed class LegacyMigrationTests
 			"ToolKit.Tests.TestEmail.eml", source);
 		Assert.That(extracted, Is.True);
 
+#pragma warning disable CS0618 // Exercise the released compatibility API.
 		Outlook.MailItem item = Migrate.EmlFileToPst(source, path);
+#pragma warning restore CS0618
 		context.TrackIfNotNull(item);
 
 		Assert.That(item, Is.Not.Null);
@@ -81,7 +83,9 @@ internal sealed class LegacyMigrationTests
 			"ToolKit.Tests.TestEmail.eml", emlPath);
 		Assert.That(extracted, Is.True);
 
+#pragma warning disable CS0618 // Exercise the released compatibility API.
 		bool result = Migrate.EmlToPst(source, path, adjust);
+#pragma warning restore CS0618
 
 		Assert.That(result, Is.True);
 		Assert.That(context.CountStores(path), Is.EqualTo(1));

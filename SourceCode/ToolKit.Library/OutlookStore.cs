@@ -348,8 +348,8 @@ public class OutlookStore
 	/// <param name="entryId">The entry id.</param>
 	/// <param name="store">The store to check.</param>
 	/// <returns>The folder.</returns>
-	[Obsolete("GetFolderFromIDis deprecated, " +
-		"please use OutlookSession.GetFolderFromId instead.")]
+	[Obsolete("Use OutlookSession.GetFolderFromId(entryId, " +
+		"store.StoreID). It returns an OutlookFolder wrapper.")]
 	public MAPIFolder GetFolderFromId(string entryId, Store store)
 	{
 		MAPIFolder folder = null;
@@ -369,8 +369,8 @@ public class OutlookStore
 	/// <param name="entryId">The folder entry ID.</param>
 	/// <param name="store">The store containing the folder.</param>
 	/// <returns>The matching folder, if found.</returns>
-	[Obsolete("GetFolderFromIDis deprecated, " +
-		"please use OutlookSession.GetFolderFromId instead.")]
+	[Obsolete("Use OutlookSession.GetFolderFromId(entryId, " +
+		"store.StoreID). It returns an OutlookFolder wrapper.")]
 	public MAPIFolder GetFolderFromID(string entryId, Store store)
 	{
 		return GetFolderFromId(entryId, store);
@@ -393,8 +393,8 @@ public class OutlookStore
 	/// </summary>
 	/// <param name="entryId">The entryId of the MailItem to check.</param>
 	/// <returns>The synopses of the item.</returns>
-	[Obsolete("GetMailItemSynopses is deprecated, " +
-		"please use OutlookItem.Synopses instead.")]
+	[Obsolete("Use OutlookSession.GetItemFromId(entryId), then new " +
+		"OutlookItem(item).Synopses.")]
 	public string GetItemSynopses(string entryId)
 	{
 		object mapiItem = outlookSession.GetItemFromId(entryId);

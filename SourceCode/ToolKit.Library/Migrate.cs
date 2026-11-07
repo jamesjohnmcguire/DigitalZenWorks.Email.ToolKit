@@ -214,6 +214,8 @@ public static class Migrate
 	/// <returns>The imported mail item, or null if import fails.</returns>
 	/// <remarks>Retains the released two-argument signature. The caller is
 	/// responsible for releasing the returned COM reference.</remarks>
+	[Obsolete("Use EmlFileToPst(filePath, pstPath, closeStore) instead. " +
+		"Pass false to leave the store attached.")]
 	public static MailItem EmlFileToPst(string filePath, string pstPath)
 	{
 		MailItem mailItem = EmlFileToPst(filePath, pstPath, false);
@@ -318,6 +320,8 @@ public static class Migrate
 	/// <returns>A value indicating whether migration succeeded.</returns>
 	/// <remarks>Retains the released three-argument signature. Use the
 	/// four-argument overload to request detaching the store.</remarks>
+	[Obsolete("Use EmlToPst(path, pstPath, adjust, closeStore) instead. " +
+		"Pass false to leave the store attached.")]
 	public static bool EmlToPst(string path, string pstPath, bool adjust)
 	{
 		bool result = EmlToPst(path, pstPath, adjust, false);

@@ -463,8 +463,8 @@ public class OutlookItem : IContentItem
 	/// </summary>
 	/// <param name="times">The DataTime properties data.</param>
 	/// <returns>The DataTime properties data in bytes.</returns>
-	[Obsolete("GetDateTimesBytes(List<DateTime> is Deprecated. " +
-		"Use the overload accepting ReadOnlyCollection<DateTime> instead.")]
+	[Obsolete("Use GetDateTimesBytes(ReadOnlyCollection<DateTime>) " +
+		"instead.")]
 	[System.Diagnostics.CodeAnalysis.SuppressMessage(
 		"Microsoft.Design",
 		"CA1002:AvoidExcessiveList",
@@ -512,9 +512,8 @@ public class OutlookItem : IContentItem
 	/// <param name="times">The DataTime properties data.</param>
 	/// <param name="labels">A list of lables.</param>
 	/// <returns>The DataTime properties data as text.</returns>
-	[Obsolete("GetDateTimesText(List<DateTime>, " +
-		"ReadOnlyCollection<string> is Deprecated." +
-		"Use the overload accepting ReadOnlyCollection<DateTime> instead.")]
+	[Obsolete("Use GetDateTimesText(ReadOnlyCollection<DateTime>, " +
+		"ReadOnlyCollection<string>) instead.")]
 	[System.Diagnostics.CodeAnalysis.SuppressMessage(
 		"Microsoft.Design",
 		"CA1002:AvoidExcessiveList",

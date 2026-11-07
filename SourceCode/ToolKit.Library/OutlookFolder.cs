@@ -470,8 +470,7 @@ public class OutlookFolder
 	/// </summary>
 	/// <param name="mailItem">The MailItem to check.</param>
 	/// <returns>The synoses of the item.</returns>
-	[Obsolete("GetMailItemSynopses is deprecated, " +
-		"please use OutlookItem.Synopses instead.")]
+	[Obsolete("Use new OutlookItem(mailItem).Synopses instead.")]
 	public static string GetMailItemSynopses(MailItem mailItem)
 	{
 		OutlookItem outlookItem = new(mailItem);
@@ -518,9 +517,8 @@ public class OutlookFolder
 	/// <param name="folder">The folder to check.</param>
 	/// <param name="sendersCounts">The current counts of senders.</param>
 	/// <returns>The count of each sender.</returns>
-	[Obsolete("GetSendersCount(string, int, MAPIFolder, " +
-		"IDictionary<string, int>) is deprecated, " +
-		"please use GetSendersCount(MAPIFolder) instead.")]
+	[Obsolete("Use GetSendersCount(folder) on an OutlookFolder instance " +
+		"instead.")]
 	public static IDictionary<string, int> GetSendersCount(
 		string path,
 		MAPIFolder folder,
@@ -1085,8 +1083,8 @@ public class OutlookFolder
 	/// <param name="subFolderIndex">The index of the sub-folder.</param>
 	/// <param name="subFolder">The sub-folder.</param>
 	/// <param name="force">Whether to force the removal.</param>
-	[Obsolete("RemoveFolder(string, int, MAPIFolder, bool) is deprecated," +
-		" please use RemoveFolder(MAPIFolder, int, bool) instead.")]
+	[Obsolete("Use RemoveFolder(subFolder, subFolderIndex, force) " +
+		"instead.")]
 	public static void RemoveFolder(
 		string path,
 		int subFolderIndex,
@@ -1269,8 +1267,7 @@ public class OutlookFolder
 	/// <param name="folder">The current folder.</param>
 	/// <param name="dryRun">Indicates whether this is a 'dry run'
 	/// or not.</param>
-	[Obsolete("MergeFolders(string, MAPIFolder, bool) is deprecated, " +
-		"please use MergeFolders(MAPIFolder, bool) instead.")]
+	[Obsolete("Use MergeFolders(folder, dryRun) instead.")]
 	public void MergeFolders(string path, MAPIFolder folder, bool dryRun)
 	{
 		if (folder != null)
@@ -1333,9 +1330,7 @@ public class OutlookFolder
 	/// <param name="path">Path of parent folder.</param>
 	/// <param name="source">The source folder.</param>
 	/// <param name="destination">The destination folder.</param>
-	[Obsolete("MoveFolderContents(string, MAPIFolder, MAPIFolder) " +
-		"is deprecated, please use " +
-		"MoveFolderContents(MAPIFolder, MAPIFolder) instead.")]
+	[Obsolete("Use MoveFolderContents(source, destination) instead.")]
 	public void MoveFolderContents(
 		string path, MAPIFolder source, MAPIFolder destination)
 	{
@@ -1403,8 +1398,7 @@ public class OutlookFolder
 	/// <param name="dryRun">Indicates whether this is a 'dry run'
 	/// or not.</param>
 	/// <returns>The total count of duplicates removed.</returns>
-	[Obsolete("RemoveDuplicates(string, MAPIFolder, bool) is deprecated," +
-		" please use RemoveDuplicates(MAPIFolder, bool) instead.")]
+	[Obsolete("Use RemoveDuplicates(folder, dryRun) instead.")]
 	public int RemoveDuplicates(
 		string path, MAPIFolder folder, bool dryRun)
 	{
