@@ -204,14 +204,29 @@ public class OutlookFolder
 	public int DuplicatesSets { get; set; }
 
 	/// <summary>
+	/// Adds or retrieves a folder without normalizing its name.
+	/// </summary>
+	/// <param name="parentFolder">The parent folder.</param>
+	/// <param name="folderName">The folder name to preserve.</param>
+	/// <returns>The added or existing folder, or null if not available.
+	/// </returns>
+	public static MAPIFolder AddFolder(
+		MAPIFolder parentFolder, string folderName)
+	{
+		MAPIFolder folder = AddFolder(parentFolder, folderName, false);
+
+		return folder;
+	}
+
+	/// <summary>
 	/// Add folder in safe context.
 	/// </summary>
 	/// <remarks>If there is a folder already existing with the given
 	/// folder name, this method will return that folder.</remarks>
 	/// <param name="parentFolder">The parent folder.</param>
 	/// <param name="folderName">The new folder name.</param>
-	/// <param name="normalizeFolderName">Indicates whether to attempt the
-	/// folder name or not.</param>
+	/// <param name="normalizeFolderName">Whether to remove recognized
+	/// duplicate-name patterns before creating a new folder.</param>
 	/// <returns>The added or existing folder.</returns>
 	public static MAPIFolder AddFolder(
 		MAPIFolder parentFolder,
