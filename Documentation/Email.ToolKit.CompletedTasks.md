@@ -25,6 +25,21 @@ Partial historical findings do not establish coverage for every input.
   Validation: Debug build and 182 selected tests pass (178 deterministic,
   four real-Outlook cases); production method implementations are unchanged.
 
+- [x] Rebuild the candidate with the reviewed obsolete annotations and
+  pass ApiCompat against published 1.12.62 and 1.14.0.
+- [x] Validate consumer compilation and unchanged-binary binding using the
+  PackageClients EmailToolKitClient on net472, net10.0 (netstandard2.0
+  asset), and net10.0-windows. Nine builds and eighteen successful runs
+  passed. Three negative controls failed as expected: unchanged 1.12.62
+  clients cannot bind the missing methods in published 1.14.0.
+  The candidate restores binding for those clients and preserves binding
+  for unchanged 1.14.0 clients. Recompiled legacy calls emit exactly two
+  intended obsolete warnings per target. Existing unit/integration
+  validation remains 178 deterministic and four focused Outlook cases.
+- [x] Add reusable Current/Legacy API modes and instructions to the private
+  PackageClients repository. No package publication or version bump was
+  performed during validation.
+
 ## Completed or superseded entries
 
 These dispositions do not establish coverage for every historical input.

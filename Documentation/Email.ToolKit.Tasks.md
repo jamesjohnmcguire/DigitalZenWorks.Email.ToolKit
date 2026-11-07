@@ -18,14 +18,7 @@ No affected consumers have been identified. Prepare this patch at a normal
 maintenance pace. Historical release intervals do not establish whether
 those releases addressed bugs or compatibility.
 
-- [ ] Compare the candidate package against 1.12.62 and 1.14.0 with ApiCompat.
-  Check consumer compilation and binary binding; run relevant unit and
-  real-Outlook integration tests.
-  The initial local candidate passed ApiCompat against both baselines;
-  178 deterministic and four focused real-Outlook cases pass after the
-  deprecation review. Recheck the final package and complete external
-  consumer checks before release.
-- [ ] Update release notes. Near release, update application/library versions
+- [ ] Finalize release notes. Near release, update application/library versions
   together in one commit; retain `AssemblyVersion` for compatible changes.
   Follow the maintainer checklist for the separate executable and NuGet
   distributions.
@@ -39,6 +32,10 @@ those releases addressed bugs or compatibility.
 - [ ] Identify real-Outlook fixtures consistently. Keep ordinary integration
   tests in the normal test script; choose `[Explicit]` for manual scenarios
   individually rather than disabling every integration test by default.
+- [ ] Review intended package architecture and transitive dependencies.
+  Published 1.12.62/1.14.0 library DLLs target x64; the local candidate is
+  managed AnyCPU. Consumer checks currently cover 64-bit Windows. Verify
+  actual 32-bit loading before promising support for it.
 - [ ] Test without Outlook installed. Distinguish unavailable-service runtime
   behavior from the separate COM-reference build requirement.
 - [ ] Enable nullable checking project-wide incrementally, with tests for
@@ -156,3 +153,6 @@ Outlook conclusions are consolidated in
 [the lifecycle design](OutlookLifecycle.md#future-sta-ownership-design).
 Release procedures and MsgKit conclusions are in the maintainer notes.
 The old planning and release files point to the maintained documents.
+
+New
+	Organize Test Files	I recommend subject folders—CommandLine, Conversion, Outlook, and Compatibility—and incrementally splitting the large EmailToolKitTests fixture by behavior. Keep methods alphabetical and independent of execution order.
