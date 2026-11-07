@@ -11,6 +11,8 @@ The [historical NuGet API audit](ApiCompatibilityAudit.md) records published
 API changes from 1.4.22 through 1.14.0 and their compatibility implications.
 
 The active backlog is [Email.ToolKit.Tasks.md](Email.ToolKit.Tasks.md).
+Finished entries are kept in
+[Email.ToolKit.CompletedTasks.md](Email.ToolKit.CompletedTasks.md).
 Client-visible hash inputs and initial MAPI mappings are documented in
 [duplicate comparison](Email.ToolKit.DuplicateComparison.md).
 Historical research remains in the adjacent Email repository; architectural
@@ -125,6 +127,54 @@ Version values for `1.14.0` in the application and library:
 Keep `AssemblyVersion` stable for compatible 1.x releases. Update `Version`
 and `FileVersion` together in both application and library project files,
 for example `1.14.1` and `1.14.1.0` for a subsequent patch release.
+
+## Public API deprecation review
+
+The 1.14.1 preparation reviewed all 20 existing obsolete annotations and
+added warning-only annotations to the two restored migration overloads.
+All 22 annotated methods remain callable. No class or member was removed,
+made inaccessible, or changed to an obsolete error.
+
+Messages now identify the replacement accurately, including instance
+properties and the change from a raw folder to a wrapper. Correcting the
+messages does not change the method implementations.
+
+| Legacy API | Migration guidance |
+| --- | --- |
+| MapiItem.DeleteDuplicate | Use OutlookItem.DeleteDuplicate. |
+| MapiItem.DeleteItem | Use OutlookItem.Delete(item). |
+| MapiItem.GetItemHash | Use new OutlookItem(item).Hash. |
+| MapiItem.GetItemHashAsync | Use OutlookItem.GetHashAsync(item). |
+| MapiItem.GetItemSynopses | Use new OutlookItem(item).Synopses. |
+| MapiItem.GetPath | Use OutlookItem.GetPath(item). |
+| MapiItem.MoveItem / MoveItemAsync | Use OutlookItem.Move / MoveAsync with item and destination. |
+| MapiItem.RemoveMimeOleVersion | Use OutlookItem.RemoveMimeOleVersion(header). |
+| OutlookFolder.GetMailItemSynopses | Use new OutlookItem(mailItem).Synopses. |
+| OutlookStore.GetItemSynopses | Get the item with OutlookSession.GetItemFromId, then read OutlookItem.Synopses. |
+| OutlookStore.GetFolderFromID / GetFolderFromId | Use OutlookSession.GetFolderFromId(entryId, store.StoreID); the result is an OutlookFolder wrapper. |
+| Static OutlookFolder.GetSendersCount with path/dictionary | Use GetSendersCount(folder) on an OutlookFolder instance. The legacy signature has no int parameter. |
+| OutlookFolder.RemoveFolder with path | Use RemoveFolder(subFolder, subFolderIndex, force). |
+| OutlookFolder.MergeFolders / MoveFolderContents / RemoveDuplicates with path | Use the corresponding instance overload without path. Preserve dryRun where applicable. |
+| List-based OutlookItem.GetDateTimesBytes / GetDateTimesText | Use the ReadOnlyCollection overloads. Review null handling during conversion. |
+| Migrate.EmlFileToPst(filePath, pstPath) | Supply closeStore explicitly; false preserves the old attached-store behavior. |
+| Migrate.EmlToPst(path, pstPath, adjust) | Supply closeStore explicitly; false preserves the old attached-store behavior. |
+
+The restored two-argument `OutlookFolder.AddFolder` remains supported without
+an obsolete annotation. A useful default-preserving convenience overload
+need not be deprecated merely because it also restores binary compatibility.
+
+New migration annotations produce CS0618 on recompilation. Consumers using
+warnings as errors may need to update their calls. Precompiled callers can
+still bind to the restored signatures; the attributes do not detach stores
+or otherwise change migration behavior. Compatibility tests deliberately
+exercise the warning-producing calls, with CS0618 disabled only at those
+call sites.
+
+Use this inventory to inform version 2 design; removal is not automatic.
+Keep the legacy APIs in 1.x, verify migration paths before adding further
+warnings, and assess raw COM return types and null behavior explicitly.
+`Migrate`, `OutlookAccount`, and account-based constructors were not broadly
+deprecated because their full replacement paths remain design work.
 
 ## Preparing a release
 

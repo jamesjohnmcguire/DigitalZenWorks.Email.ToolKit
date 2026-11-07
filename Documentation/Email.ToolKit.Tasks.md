@@ -8,26 +8,23 @@ See [maintainer notes](DevelopmentNotes.md) for release procedures,
 [Outlook lifecycle](OutlookLifecycle.md) for the design, and the
 [API audit](ApiCompatibilityAudit.md) for compatibility findings.
 
+Completed work and superseded proposals are in
+[Email.ToolKit.CompletedTasks.md](Email.ToolKit.CompletedTasks.md). Keep this
+file focused on unfinished work; move completed entries to that record.
+
 ## Next maintenance patch: 1.14.1
 
 No affected consumers have been identified. Prepare this patch at a normal
 maintenance pace. Historical release intervals do not establish whether
 those releases addressed bugs or compatibility.
 
-- [ ] Add failing tests for the exact released signatures below, including
-  return types; restore forwarding overloads with historical behavior:
-  - `Migrate.EmlFileToPst(string, string)`.
-  - `Migrate.EmlToPst(string, string, bool)`.
-  - `OutlookFolder.AddFolder(MAPIFolder, string)`.
-- [ ] Retain two-argument `AddFolder` as a supported convenience overload,
-  without an obsolete annotation; forward with normalization disabled.
-- [ ] Audit obsolete messages for accurate names, signatures, replacements,
-  and migration guidance. Consider warning-only annotations for restored
-  migration overloads after confirming their replacements. Account for
-  consumers treating warnings as errors.
 - [ ] Compare the candidate package against 1.12.62 and 1.14.0 with ApiCompat.
   Check consumer compilation and binary binding; run relevant unit and
   real-Outlook integration tests.
+  The initial local candidate passed ApiCompat against both baselines;
+  178 deterministic and four focused real-Outlook cases pass after the
+  deprecation review. Recheck the final package and complete external
+  consumer checks before release.
 - [ ] Update release notes. Near release, update application/library versions
   together in one commit; retain `AssemblyVersion` for compatible changes.
   Follow the maintainer checklist for the separate executable and NuGet
@@ -36,8 +33,8 @@ those releases addressed bugs or compatibility.
 ## Testing and maintainability
 
 - [ ] Add focused `NormalizeFolderName` tests, including its regex cases.
-- [ ] Review test naming, remaining `Test` prefixes, and support-file layout.
-  Keep tests alphabetical when editing them.
+- [ ] Review test naming and remaining `Test` prefixes. Group fixtures by
+  subject when useful; keep methods alphabetical and execution independent.
 - [ ] Reuse cleanup helpers where useful without hiding test behavior.
 - [ ] Identify real-Outlook fixtures consistently. Keep ordinary integration
   tests in the normal test script; choose `[Explicit]` for manual scenarios
@@ -46,6 +43,11 @@ those releases addressed bugs or compatibility.
   behavior from the separate COM-reference build requirement.
 - [ ] Enable nullable checking project-wide incrementally, with tests for
   intended input contracts; preserve legacy public contracts in 1.x.
+- [ ] Review exception conventions and when methods should throw versus
+  return a failure result. Preserve established 1.x behavior unless a change
+  is explicitly intended and covered by tests.
+- [ ] Review spacing after file-scoped namespace declarations (the requested
+  wider separation), keeping formatting changes separate from behavior fixes.
 - [ ] Review analyzer warnings and boolean-return documentation. Reevaluate
   interim transitive security references when updating dependencies; remove
   them only after confirming the needed fixes remain.
@@ -123,6 +125,9 @@ Prioritize separately from the compatibility patch.
 - [ ] Review DBX parser coverage in DbxOutlookExpress: file/header validation,
   tree ordering/indexes, iteration, interim folders, and malformed messages.
   Track implementation in that repository.
+- [ ] Deferred: add a client-validation callback to CommandLine.Commands.
+  Once available, consider moving application `--timeout` validation into
+  that callback. Retain current validation until its replacement is tested.
 - [ ] Review old CommandLineCommands bug notes against specific reproductions;
   its publication setup is already established.
 - [ ] Optionally submit the existing MsgKit read-receipt data-loss issue
@@ -134,27 +139,6 @@ Prioritize separately from the compatibility patch.
 [comparison-reference]: Email.ToolKit.DuplicateComparison.md
 
 [msgkit-draft]: DevelopmentNotes.md#unsent-upstream-issue-draft
-
-## Completed or superseded entries
-
-These dispositions do not establish coverage for every historical input.
-
-| Former task | Disposition |
-| --- | --- |
-| Migrate to MsgKit NuGet; remove fork | Completed: public package referenced; fork submodule removed. |
-| Avoid loose-attachment failures without fork | Synthetic conversion coverage exists; archived samples remain follow-up work. |
-| Preserve read-receipt fields | Implemented in `EmlConverter`, with regression tests. |
-| Add RemoveStore tests | Null, missing, unattached, detached, and extensionless paths are covered. |
-| Add common integration cleanup | `OutlookTestContext` provides shared tracking and cleanup. |
-| Is MapiItem deprecated? | All nine public methods already have obsolete annotations. |
-| Replace List-based date/time APIs | Read-only overloads and obsolete wrappers exist; the historical IList gap is documented separately. |
-| Add Outlook requirement to README | Present. |
-| Add PST-path helper | Session helper/tests exist; review other callers separately. |
-| Name imported PST stores | Migration code assigns root-folder names; broader store naming remains unverified. |
-| Refactor Program.cs | Command wrappers moved to `Commands`; further work needs specific objectives. |
-| Old MsgKit project package/XML/build warnings | Superseded by fork removal; current dependency warnings need their own checks. |
-| Review scripts; publish NuGet and ZIP | Procedures documented and 1.14.0 published; verification remains a recurring release responsibility. |
-| Deprecate two-argument AddFolder | Rejected: retain the useful convenience overload. |
 
 ## Historical source and scope
 

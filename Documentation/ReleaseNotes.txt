@@ -1,3 +1,19 @@
+Release 1.14.1 (Unreleased)
+
+Library compatibility
+- Restore Migrate.EmlFileToPst(string, string),
+  Migrate.EmlToPst(string, string, bool), and
+  OutlookFolder.AddFolder(MAPIFolder, string).
+- Preserve the historical defaults: migration leaves the store attached;
+  the two-argument AddFolder does not normalize the name.
+- Mark the two restored migration overloads obsolete with warnings. Supply
+  closeStore explicitly in their replacements; false preserves the old
+  attached-store behavior. Consumers treating warnings as errors may need
+  to update these calls when recompiling. Existing binaries can still bind.
+- Keep the restored two-argument AddFolder overload non-obsolete.
+- Correct existing obsolete messages and clarify their replacement APIs.
+  No APIs are removed. See Public API deprecation review in DevelopmentNotes.md.
+
 Release 1.14.0
 
 Versioning
