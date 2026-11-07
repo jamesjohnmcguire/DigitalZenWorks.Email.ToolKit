@@ -4,12 +4,12 @@
 		<AssemblyName>Det</AssemblyName>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<DebugType>embedded</DebugType>
-		<FileVersion>1.13.65.0</FileVersion>
+		<FileVersion>1.14.0.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net10.0-windows</TargetFramework>
-		<Version>1.13.65</Version>
+		<Version>1.14.0</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
