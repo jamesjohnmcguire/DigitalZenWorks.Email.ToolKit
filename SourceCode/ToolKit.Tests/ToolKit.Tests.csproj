@@ -51,11 +51,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Folders.dbx" />
-		<EmbeddedResource Include="Inbox.dbx" />
-		<EmbeddedResource Include="Offline.dbx" />
-		<EmbeddedResource Include="Outbox.dbx" />
-		<EmbeddedResource Include="TestEmail.eml" />
+		<EmbeddedResource Include="Support/Resources/*.dbx">
+			<LogicalName>$(RootNamespace).%(Filename)%(Extension)</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Support/Resources/*.eml">
+			<LogicalName>$(RootNamespace).%(Filename)%(Extension)</LogicalName>
+		</EmbeddedResource>
 	</ItemGroup>
 
 </Project>
