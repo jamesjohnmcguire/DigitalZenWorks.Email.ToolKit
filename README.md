@@ -89,7 +89,7 @@ Det.exe \<command\> \<source-path\> \<destination-path\>
 | merge-stores          | Merge one store into another    |                | source PST file path, destination PST file path    |
 | move-folder           | Move one folder to another      |                | source PST file path, source folder path           |
 |                       |                                 |                | destination PST file path, destination folder path |
-| remove-duplicates     | Remove duplicate messages       | -n, --dryrun   | PST file path                                      |
+| remove-duplicates     | Remove duplicate Outlook items  | -n, --dryrun   | PST file path                                      |
 |                       |                                 | -s, --flush    |                                                    |
 | remove-empty-folders  | Prune empty folders             |                | PST file path                                      |
 | help                  | Display this information        |                |                                                    |
@@ -148,10 +148,13 @@ If you ever try to move or copy a folder to a place where a folder with that nam
 The third and fifth parameters specify the folder path with Outlook itself, starting with the root folder name.  The root folder name will almost always be the same as the PST file name.  You can also check at the very top folder for the PST within Outlook.
 
 ###### remove-duplicates
-If no PST path is provided, it will attempt to remove all duplicates in all folders in all stores of the default or current Outlook account.
-Use the --dryrun option to see which messages WOULD be deleted.
-Use --flush to empty the deleted items folder at the end.
-For large stores, this can take some time.
+
+Removes duplicate Outlook items. If no PST path is provided, it attempts to
+remove duplicates across all folders and stores in the current Outlook
+account.
+
+Use `--dryrun` to preview which items would be deleted. Use `--flush` to empty
+the Deleted Items folder afterwards. For large stores, this can take time.
 
 ## Library and API usage
 

@@ -14,6 +14,10 @@ Library compatibility
 - Correct existing obsolete messages and clarify their replacement APIs.
   No APIs are removed. See Public API deprecation review in DevelopmentNotes.md.
 
+Command-line help
+- Correct remove-duplicates help to describe removing duplicate Outlook
+  items, rather than merging folders.
+
 Release 1.14.0
 
 Versioning
