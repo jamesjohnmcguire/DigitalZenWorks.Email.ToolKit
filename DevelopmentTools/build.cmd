@@ -56,8 +56,6 @@ CALL :require msbuild
 IF ERRORLEVEL 1 GOTO end
 CALL :require gh
 IF ERRORLEVEL 1 GOTO end
-CALL :require powershell
-IF ERRORLEVEL 1 GOTO end
 IF NOT "%~3"=="" SET "message=API-key arguments are no longer supported. Configure NuGet trusted publishing."
 IF NOT "%~3"=="" GOTO error
 CALL :publicationCheck
@@ -70,10 +68,6 @@ IF /I "%toolkitAction%"=="publish" GOTO publish
 :release
 CALL :require zip.exe
 IF ERRORLEVEL 1 GOTO end
-
-IF EXIST "%toolkitArtifacts%\executable.commit" DEL /Q "%toolkitArtifacts%\executable.commit"
-IF EXIST "%toolkitArtifacts%\executable.commit" SET "message=Unable to invalidate the previous executable build record."
-IF EXIST "%toolkitArtifacts%\executable.commit" GOTO error
 
 :staging
 SET "toolkitStaging=%toolkitArtifacts%\publish-%RANDOM%-%RANDOM%"
@@ -98,37 +92,47 @@ IF NOT "%toolkitBuildExitCode%"=="0" GOTO end
 MOVE /Y "%toolkitStaging%.zip" "%toolkitArchive%" >NUL
 SET "toolkitBuildExitCode=%ERRORLEVEL%"
 IF NOT "%toolkitBuildExitCode%"=="0" GOTO end
-> "%toolkitArtifacts%\executable.commit" ECHO %toolkitCommit%
-SET "toolkitBuildExitCode=%ERRORLEVEL%"
-IF NOT "%toolkitBuildExitCode%"=="0" GOTO end
 
 ECHO Prepared executable archive: %toolkitArchive%
-CALL :publicationCheck executable
+CALL :publicationCheck
 IF ERRORLEVEL 1 GOTO end
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0publishArtifacts.ps1" -Action release -Repository "%toolkitRepository%" -Version "%toolkitVersion%" -Commit "%toolkitCommit%" -Archive "%toolkitArchive%" -Notes "Documentation\ReleaseNotes.txt"
+CALL :uploadArtifact "%toolkitArchive%"
 SET "toolkitBuildExitCode=%ERRORLEVEL%"
 GOTO end
 
 :publish
-IF EXIST "%toolkitArtifacts%\package.commit" DEL /Q "%toolkitArtifacts%\package.commit"
-IF EXIST "%toolkitArtifacts%\package.commit" SET "message=Unable to invalidate the previous package build record."
-IF EXIST "%toolkitArtifacts%\package.commit" GOTO error
-
 msbuild "%toolkitLibrary%" -restore -target:Pack -property:Configuration=Release;GeneratePackageOnBuild=false "-property:PackageOutputPath=%toolkitArtifacts%"
 SET "toolkitBuildExitCode=%ERRORLEVEL%"
 IF NOT "%toolkitBuildExitCode%"=="0" GOTO end
 
 IF NOT EXIST "%toolkitPackage%" SET "message=Pack succeeded but the expected NuGet package was not produced."
 IF NOT EXIST "%toolkitPackage%" GOTO error
-> "%toolkitArtifacts%\package.commit" ECHO %toolkitCommit%
+ECHO Prepared NuGet package: %toolkitPackage%
+CALL :publicationCheck
+IF ERRORLEVEL 1 GOTO end
+CALL :uploadArtifact "%toolkitPackage%"
+IF ERRORLEVEL 1 GOTO end
+gh workflow run build.yml --ref main --repo "%toolkitRepository%" -f version="%toolkitVersion%"
 SET "toolkitBuildExitCode=%ERRORLEVEL%"
 IF NOT "%toolkitBuildExitCode%"=="0" GOTO end
-ECHO Prepared NuGet package: %toolkitPackage%
-CALL :publicationCheck package
-IF ERRORLEVEL 1 GOTO end
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0publishArtifacts.ps1" -Action publish -Repository "%toolkitRepository%" -Version "%toolkitVersion%" -Commit "%toolkitCommit%" -Package "%toolkitPackage%" -CommitRecord "%toolkitArtifacts%\package.commit" -Notes "Documentation\ReleaseNotes.txt"
-SET "toolkitBuildExitCode=%ERRORLEVEL%"
+ECHO NuGet publication requested. Follow the workflow with:
+ECHO gh run watch --repo "%toolkitRepository%" --exit-status
 GOTO end
+
+:uploadArtifact
+gh release view "v%toolkitVersion%" --repo "%toolkitRepository%" >NUL 2>&1
+IF ERRORLEVEL 1 GOTO createGitHubRelease
+gh release upload "v%toolkitVersion%" "%~1" --clobber --repo "%toolkitRepository%"
+SET "toolkitBuildExitCode=%ERRORLEVEL%"
+IF NOT "%toolkitBuildExitCode%"=="0" EXIT /B %toolkitBuildExitCode%
+gh release edit "v%toolkitVersion%" --draft=false --repo "%toolkitRepository%"
+SET "toolkitBuildExitCode=%ERRORLEVEL%"
+EXIT /B %toolkitBuildExitCode%
+
+:createGitHubRelease
+gh release create "v%toolkitVersion%" "%~1" --target "%toolkitCommit%" --notes-file Documentation\ReleaseNotes.txt --repo "%toolkitRepository%"
+SET "toolkitBuildExitCode=%ERRORLEVEL%"
+EXIT /B %toolkitBuildExitCode%
 
 :require
 WHERE "%~1" >NUL 2>&1
@@ -169,11 +173,6 @@ FOR /F "delims=" %%C IN ('git rev-parse HEAD') DO SET "toolkitCurrentCommit=%%C"
 IF NOT "%toolkitCurrentCommit%"=="%toolkitCommit%" ECHO The source commit changed during this command. Retry from a stable commit.
 IF NOT "%toolkitCurrentCommit%"=="%toolkitCommit%" SET "toolkitBuildExitCode=1"
 IF NOT "%toolkitBuildExitCode%"=="0" EXIT /B %toolkitBuildExitCode%
-IF "%~1"=="" EXIT /B 0
-SET "toolkitArtifactCommit="
-IF EXIST "%toolkitArtifacts%\%~1.commit" SET /P "toolkitArtifactCommit="<"%toolkitArtifacts%\%~1.commit"
-IF NOT "%toolkitArtifactCommit%"=="%toolkitCommit%" ECHO Rebuild the %~1 artifact from the current main commit before releasing or publishing.
-IF NOT "%toolkitArtifactCommit%"=="%toolkitCommit%" SET "toolkitBuildExitCode=1"
 EXIT /B %toolkitBuildExitCode%
 
 :error

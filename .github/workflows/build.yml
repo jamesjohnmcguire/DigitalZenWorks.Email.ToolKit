@@ -1,29 +1,13 @@
 name: NuGet Publish
-run-name: NuGet ${{ inputs.version }} / ${{ inputs.request_id }}
+run-name: NuGet ${{ inputs.version }}
 
 on:
   workflow_dispatch:
     inputs:
-      publish:
-        description: Publish the reviewed package to NuGet.org
-        type: boolean
-        default: false
       version:
-        description: Expected package version
+        description: Package version to publish from its GitHub release
         type: string
         required: true
-      commit:
-        description: Full source commit SHA (must match main for this run)
-        type: string
-        required: true
-      sha256:
-        description: SHA-256 of the locally reviewed NuGet package
-        type: string
-        required: true
-      request_id:
-        description: Identifier used by the local script to track this run
-        type: string
-        default: manual
 
 permissions:
   contents: read
@@ -34,90 +18,30 @@ concurrency:
 
 jobs:
   publish:
-    if: github.ref == 'refs/heads/main' && inputs.publish
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      # Draft release discovery requires push access, even for downloads.
-      contents: write
+      contents: read
       id-token: write
     env:
-      EXPECTED_VERSION: ${{ inputs.version }}
-      EXPECTED_COMMIT: ${{ inputs.commit }}
-      EXPECTED_SHA256: ${{ inputs.sha256 }}
-      GH_TOKEN: ${{ github.token }}
+      PACKAGE_VERSION: ${{ inputs.version }}
 
     steps:
-      - name: Check out the requested source commit
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - name: Validate and download the reviewed package
-        shell: python
-        run: |
-          import hashlib
-          import json
-          import os
-          from pathlib import Path
-          import re
-          import subprocess
-          import urllib.error
-          import urllib.request
-          import xml.etree.ElementTree as ET
-          import zipfile
-
-          def require(condition, message):
-              if not condition:
-                  raise SystemExit(message)
-
-          version = os.environ["EXPECTED_VERSION"]
-          commit = os.environ["EXPECTED_COMMIT"]
-          digest = os.environ["EXPECTED_SHA256"].lower()
-          repository = os.environ["GITHUB_REPOSITORY"]
-          require(re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version), "Expected major.minor.patch version.")
-          require(re.fullmatch(r"[0-9a-f]{40}", commit), "Expected full source commit SHA.")
-          require(re.fullmatch(r"[0-9a-f]{64}", digest), "Expected SHA-256 digest.")
-          require(commit == os.environ["GITHUB_SHA"], "Requested commit differs from main at dispatch time.")
-          for project in ["ToolKit.Library", "ToolKit.Application"]:
-              path = Path("SourceCode") / project / (project + ".csproj")
-              require(ET.parse(path).findtext("./PropertyGroup/Version") == version, f"{project} version differs.")
-
-          tag = "v" + version
-          result = subprocess.check_output(["gh", "release", "view", tag, "--repo", repository, "--json", "tagName,targetCommitish"], text=True)
-          release = json.loads(result)
-          require(release["tagName"] == tag, "Unexpected release tag.")
-          # A draft release can exist before GitHub creates its tag.
-          url = os.environ["GITHUB_API_URL"] + "/repos/" + repository + "/commits/" + tag
-          request = urllib.request.Request(url, headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"], "Accept": "application/vnd.github+json"})
-          try:
-              with urllib.request.urlopen(request) as response:
-                  tagged_commit = json.load(response)["sha"]
-              require(tagged_commit == commit, "Release tag points to another commit.")
-          except urllib.error.HTTPError as error:
-              if error.code != 404:
-                  raise
-              require(release["targetCommitish"] == commit, "Draft release target differs from the requested commit.")
-
-          filename = "DigitalZenWorks.Email.ToolKit." + version + ".nupkg"
-          subprocess.run(["gh", "release", "download", tag, "--repo", repository, "--pattern", filename, "--pattern", "package.commit", "--dir", "artifacts"], check=True)
-          require(Path("artifacts/package.commit").read_text().strip() == commit, "Package source commit differs.")
-          package = Path("artifacts") / filename
-          require(hashlib.sha256(package.read_bytes()).hexdigest() == digest, "Package SHA-256 differs from the reviewed file.")
-          with zipfile.ZipFile(package) as archive:
-              manifests = [name for name in archive.namelist() if name.endswith(".nuspec")]
-              require(len(manifests) == 1, "Expected exactly one package manifest.")
-              root = ET.fromstring(archive.read(manifests[0]))
-              metadata = root.find("{*}metadata")
-              require(metadata is not None, "Package metadata is missing.")
-              require(metadata.findtext("{*}id") == "DigitalZenWorks.Email.ToolKit", "Unexpected package ID.")
-              require(metadata.findtext("{*}version") == version, "Package version differs.")
-          print(f"Verified {filename} from {commit}; SHA-256 {digest}")
-
       - name: Set up .NET 10
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
+
+      - name: Download the locally built package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ ! "$PACKAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Expected a major.minor.patch version."
+            exit 1
+          fi
+          gh release download "v$PACKAGE_VERSION" --repo "$GITHUB_REPOSITORY" --pattern "DigitalZenWorks.Email.ToolKit.$PACKAGE_VERSION.nupkg" --dir artifacts
 
       - name: NuGet login
         uses: NuGet/login@v1
@@ -125,7 +49,7 @@ jobs:
         with:
           user: jamesjohnmcguire
 
-      - name: Publish the verified package
+      - name: Publish to NuGet.org
         env:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
-        run: dotnet nuget push "artifacts/DigitalZenWorks.Email.ToolKit.${EXPECTED_VERSION}.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push "artifacts/DigitalZenWorks.Email.ToolKit.$PACKAGE_VERSION.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
