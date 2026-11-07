@@ -1443,7 +1443,7 @@ public class OutlookItem : IContentItem
 		if (property != null)
 		{
 			int typeEnum = (int)property.Type;
-			var propertyValue = property.Value;
+			dynamic propertyValue = property.Value;
 
 			string typeValue =
 				typeEnum.ToString(CultureInfo.InvariantCulture);
