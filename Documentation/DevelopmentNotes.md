@@ -71,6 +71,27 @@ their normal exclusion rules. TRX results are under `artifacts/TestResults`.
 Extra `dotnet test` arguments are forwarded; for example,
 `test.cmd --list-tests` lists discovered tests without running them.
 
+### Test organization
+
+Shared helpers and fakes are in `SourceCode/ToolKit.Tests/Support`, with
+embedded fixtures in `Support/Resources`. The project sets logical resource
+names explicitly so moving a fixture does not change existing lookups.
+Test and helper namespaces remain unchanged. Relocation does not change
+helper contents, so Git records exact renames and history stays easy to follow.
+
+Keep methods alphabetical within each fixture and tests independent of
+execution order. Keep STA and nonparallel requirements for real COM tests.
+The `Compatibility` category selects public API signature checks, for example
+`test.cmd --filter "TestCategory=Compatibility"`. Missing restored overloads
+are expected to fail those checks until the compatibility repair is made.
+
+As the project grows, group fixtures by subject: `CommandLine`, `Conversion`,
+`Outlook`, and `Compatibility`. Keep integration/manual distinctions explicit
+in fixture names and categories rather than imposing execution-order numbers.
+Split the large legacy `EmailToolKitTests` fixture incrementally by behavior,
+preserving setup/cleanup semantics and meaningful real-Outlook coverage.
+These further fixture moves are suggestions, not part of this relocation.
+
 The application and library embed PDB symbols in their Release assemblies.
 The library XML documentation remains in the NuGet package for consumer
 IntelliSense; it is not required to run the application.
