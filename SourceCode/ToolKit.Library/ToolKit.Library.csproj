@@ -48,6 +48,10 @@
 		<!-- Interim Security Fix for Transitive Package -->
 		<!-- Review removal when upstream requires patched versions. -->
 		<PackageReference Include="OpenMcdf" Version="3.3.0" />
+		<PackageReference Include="Roslynator.Analyzers" Version="5.0.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="StyleCop.Analyzers" Version="1.3.151-beta">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
