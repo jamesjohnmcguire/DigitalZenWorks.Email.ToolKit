@@ -1,18 +1,40 @@
 # DigitalZenWorks.Email.ToolKit
 
+[![License](https://img.shields.io/github/license/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](LICENSE)
+[![NuGet Publish](https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit/actions/workflows/build.yml/badge.svg?branch=main&event=workflow_dispatch)](https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit/actions/workflows/build.yml)
+[![Latest Release](https://img.shields.io/github/v/release/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](../../releases)
+[![Last Commit](https://img.shields.io/github/last-commit/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](../../commits)
+[![Open Issues](https://img.shields.io/github/issues/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](../../issues)
+[![.NET](https://img.shields.io/badge/.NET-blueviolet)](https://dotnet.microsoft.com/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](#contributing)
+
 This is a C# application and library for interacting with email messages and storage.
 
 It is a useful utility for converting email storage from Outlook Express, Windows Live Mail and Windows Mail.  It can migrate all .dbx and .eml files to .pst (Outlook) files.
+
+## Documentation
+
+| Purpose | Start here |
+| --- | --- |
+| Using the NuGet library | [API overview](#library-and-api-usage) |
+| Connection behavior | [Outlook lifecycle](Documentation/OutlookLifecycle.md) |
+| Maintaining this repository | [Maintainer notes][maintainer-notes] |
+| Release changes | [Release notes](Documentation/ReleaseNotes.txt) |
+
+[maintainer-notes]: Documentation/DevelopmentNotes.md
 
 ## Installation
 
 ### Prerequisites
 
-Outlook Needs to be installed on the same computer as this program.
+The Windows application requires a working Microsoft Outlook installation
+for Outlook/PST operations. `--help` does not connect to Outlook.
 
 ### Download
 
-If you are just interested in using the program, you can download the latest release for your OS from the Releases page.
+Download the Windows x64 ZIP from the Releases page. Extract `Det.exe` and
+place it in a directory on your PATH.
+
 
 ### Nuget
 PM> Install-Package DigitalZenWorks.Email.ToolKit
@@ -23,7 +45,8 @@ This project includes the [DbxOutlookExpress project](https://github.com/jamesjo
 
 git clone --recurse-submodules https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
 
-Refer to DevelopmentTools Build Scripts for specific build examples.
+See [Maintainer notes](Documentation/DevelopmentNotes.md) for local builds,
+release preparation, and explicit publishing commands.
 
 ### Outlook service lifetime
 
@@ -46,7 +69,7 @@ This is, currently, a command line program to be run from the command line or te
 
 #### Command line usage:
 
-DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
+Det.exe \<command\> \<source-path\> \<destination-path\>
 
 | Commands:             |                                 | options        | parameters                                         |
 | --------------------- | ------------------------------- | -------------- | -------------------------------------------------- |
@@ -58,7 +81,7 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 |                       | folder                          |                |                                                    |
 | list-ids              | List all entry IDs of items in  |                | PST file path, folder path                         |
 |                       | a given folder                  |                |                                                    |
-| list-top-senders      | List the top senders of a given | -cm --count    | PST file path                                      |
+| list-top-senders      | List the top senders of a given | -c, --count    | PST file path                                      |
 |                       | store                           |                |                                                    |
 | list-total-duplicates | List all duplicates in a given  |                | PST file path                                      |
 |                       | store                           |                |                                                    |
@@ -76,7 +99,24 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 ##### Command line usage notes:
 The command is optional if the command can be inferred from the source-path.  For example, if the source path is a directory containing *.eml files, they will processed accordingly.
 If the source-path is a directory, the command will attempt to process the files in directory.  If the source-path is a file, it will process that file directly.
-If the output file is specified, it must include the extension '.pst'.
+Destination PST paths may omit `.pst`; creation appends the suffix
+(for example, `archive` creates `archive.pst`).
+
+###### Outlook connection timeout
+
+All Outlook commands accept `--timeout <seconds>` or `-t <seconds>`. The
+value must be an integer from `0` to `2147483`; the default is `10` seconds.
+Invalid values fail before an Outlook connection is attempted. A value of
+`0` starts or joins the activation probe without waiting for it to finish.
+
+This option bounds the activation-probe wait, including cleanup. It does
+not cancel COM activation or set a deadline for subsequent connection,
+migration, or other Outlook operations. Help does not connect to Outlook.
+
+```shell
+Det.exe merge-stores --timeout 30 source.pst destination.pst
+Det.exe list-folders -t 30 archive.pst
+```
 
 ###### Examples
 Det.exe remove-duplicates --dryrun \path\to\some.pst
@@ -113,22 +153,99 @@ Use the --dryrun option to see which messages WOULD be deleted.
 Use --flush to empty the deleted items folder at the end.
 For large stores, this can take some time.
 
-#### Library and API usage:
-Except for command line argument processing, all of the functionality is located in the main library project.  The main APIs match the command line commands.
+## Library and API usage
 
-The main classes are Migrate, OutlookFolder, OutlookItem and OutlookStore.
-Migrate is for migrating messages in other formats into Outlook.  Some examples:
-```c#
+For new Outlook functionality, start with `OutlookService` through
+`IOutlookService`. A successful connection provides a stable
+`IOutlookSession` for the workflow. Store and folder helpers perform more
+specific operations using that session.
+
+| API | Responsibility |
+| --- | --- |
+| `OutlookService` / `IOutlookService` | Connect, expose a session, disconnect |
+| `OutlookSession` / `IOutlookSession` | Wrap Outlook session operations |
+| `OutlookStore` | Work with PST files and stores |
+| `OutlookFolder` | Work with folders and their items |
+| `OutlookItem` | Inspect and compare message content |
+| `Migrate` | Import DBX and EML messages into PST files |
+| `OutlookAccount` | Legacy singleton retained for existing clients |
+
+This synchronous console example establishes the required STA context and
+shows how the service, session, and store helper fit together:
+
+```csharp
+namespace EmailToolKitExample;
+
+using System;
+using DigitalZenWorks.Email.ToolKit;
+
+internal static class Program
+{
+	[STAThread]
+	private static int Main()
+	{
+		IOutlookService outlook = new OutlookService();
+
+		try
+		{
+			bool connected = outlook.Connect(timeOutSeconds: 30);
+
+			if (connected == false)
+			{
+				Console.Error.WriteLine("Outlook is unavailable.");
+				return 1;
+			}
+
+			IOutlookSession? session = outlook.Session;
+
+			if (session == null)
+			{
+				return 1;
+			}
+
+			OutlookStore stores = OutlookStore.FromSession(session);
+			// Use stores and session for this workflow's operations.
+			return 0;
+		}
+		finally
+		{
+			outlook.Disconnect();
+		}
+	}
+}
+```
+
+Keep the workflow on the same STA thread. Normal callers do not need to
+create factories or connection objects. Create helpers with
+`OutlookStore.FromSession(session)` or `OutlookFolder.FromSession(session)`.
+Both currently require the concrete `OutlookSession` supplied by the
+service; custom session implementations are not yet supported.
+See [Outlook lifecycle][lifecycle]
+for the timeout boundary, ownership rules, and connection diagnostics.
+The NuGet package includes XML documentation for member details through
+IntelliSense and IDE API browsing.
+
+### Existing migration APIs
+
+The static migration entry points remain available:
+
+```csharp
 Migrate.DbxToPst(dbxPath, pstPath);
-Migrate.EmlToPst(dbxPath, pstPath);
+Migrate.EmlToPst(emlPath, pstPath);
 ```
-OutlookAccount acts on the entire default or current Outlook account.  OutlookStore acts on a specific store (PST file).  OutlookFolder acts on a specific folder.
-For cleaning up Outlook, you could use the following:
-```c#
-OutlookAccount outlookAccont = new ();
-outlookAccont.MergeFolders();
-outlookAccont.RemoveDuplicates();
-```
+
+`Migrate` currently obtains Outlook through the legacy
+`OutlookAccount.Instance` infrastructure. Its connection is independent of
+a separately created `OutlookService`. The singleton also remains available
+to existing clients; new Outlook functionality should prefer the service
+and session interfaces.
+
+Read-receipt fields are preserved as ordinary attachments, defaulting to
+`read-receipt.txt`. Conversion leaves the archived EML unchanged and does not
+generate Content-IDs or infer missing HTML relationships. This preserves the
+notification data without creating a native Outlook read-receipt object.
+
+[lifecycle]: Documentation/OutlookLifecycle.md
 
 ## Contributing
 
@@ -137,17 +254,17 @@ If you have found a bug or have a suggestion that would make this better, please
 ### Process:
 
 1. Fork the Project
-2. Create your Bug / Feature Branch (`git checkout -b feature/amazing-feature`)
-3. Commit your Changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the Branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create your Bug / Feature Branch
+3. Commit your Changes
+4. Push to the Branch
+5. Open a Pull Request - Explain the why the request and how the changes are beneficial. Explicitly mention the unit tests used in supporting this change.
 
 ### Coding style
 Please match the current coding style.  Most notably:
 1. One operation per line
 2. Use complete English words in variable and method names
 3. Attempt to declare variable and method names in a self-documenting manner
-4. Add unit tests
+4. Use 4 column tabs and Allman style braces
 
 
 ## License

@@ -20,7 +20,6 @@
 	<Project Path="CommandLineCommands/CommandLineCommands/DigitalZenWorks.CommandLine.Commands.csproj" />
 	<Project Path="DbxOutlookExpress/DbxOutlookExpress/DigitalZenWorks.Email.DbxOutlookExpress.csproj" />
 	<Project Path="DbxOutlookExpress/DbxOutlookExpressTests/DigitalZenWorks.Email.DbxOutlookExpress.Tests.csproj" />
-	<Project Path="MsgKit/MsgKit/MsgKit.csproj" />
 	<Project Path="UtilitiesNet/UtilitiesNetLibrary/DigitalZenWorks.Common.Utilities.csproj" />
 	<Project Path="UtilitiesNet/UtilitiesNetTests/DigitalZenWorks.Common.Utilities.Tests.csproj" />
 

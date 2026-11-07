@@ -1,9 +1,32 @@
 # Outlook connection lifetime and probe timeout
 
+This document is for developers using the NuGet library. It explains class
+relationships, connection behavior, and the implementation constraints that
+affect callers. Build, test, and release procedures are in the
+[maintainer notes](DevelopmentNotes.md).
+
 This is the interim design for `OutlookService`, `OutlookFactory`, and
 `OutlookConnection`. It isolates Outlook COM access while preserving the
 existing public interfaces. It does not replace the legacy `OutlookAccount`
 singleton throughout the library.
+
+## API relationships
+
+Applications normally connect through `IOutlookService`, implemented by
+`OutlookService`, then obtain its `IOutlookSession`. `OutlookSession` is the
+default session wrapper. Create store and folder helpers with
+`OutlookStore.FromSession(session)` and `OutlookFolder.FromSession(session)`.
+Both factories accept `IOutlookSession` but currently require a concrete
+`OutlookSession`, as supplied by `OutlookService`. Other implementations
+are rejected with `NotSupportedException`.
+
+The released account-based constructors remain public. New session and raw
+COM constructors are internal. Some older methods still expose COM types
+for compatibility. Connection infrastructure remains an implementation detail.
+
+`Migrate` and `OutlookAccount.Instance` remain separate legacy entry points
+for compatibility. Creating or configuring a service does not replace the
+singleton used internally by those migration APIs.
 
 ## Why retain this interim design
 
@@ -12,11 +35,10 @@ Outlook left activation blocked. Process detection could not establish
 whether Outlook was usable. The temporary STA probe bounds the caller's
 wait for that activation without returning a wrapper from a dying apartment.
 
-For this branch, acceptance means failed probes publish no connection,
-retries cannot accumulate outstanding probe workers, successful connections
-are reused, and disconnect does not shut down shared Outlook. The second,
-caller-thread acquisition remains unbounded. This is a deliberate interim
-limit pending the larger apartment-ownership redesign.
+Failed probes leave the service disconnected. Retries share an outstanding
+probe worker, successful connections are reused, and disconnect leaves
+shared Outlook running. The second, caller-thread acquisition remains
+unbounded while the larger apartment-ownership redesign is deferred.
 
 ## Reuse a service for one workflow
 
@@ -53,23 +75,16 @@ not an ongoing health check for an external Outlook process.
 
 ## Keep the temporary probe separate from the real connection
 
-The branch history explains why there are two application acquisitions:
+The probe activates Outlook on a temporary STA and releases that thread's
+application reference during cleanup. No Outlook COM object is returned
+from that worker, because its apartment exits when the probe completes.
 
-- `587809c` acquired an application on a temporary STA and returned it.
-- `8922de8` changed this into a boolean availability probe. The probe releases
-  its application reference on its own thread; the real application is
-  acquired on the caller's thread.
-- `814f837` kept the probe reference local to the worker and used
-  `Thread.Join` to avoid a late worker signaling an already-disposed event.
+The real application and session are acquired on the caller's STA. They can
+attach to Outlook activated by the probe, but that acquisition is outside
+the requested probe wait. Reuse that caller thread for the workflow.
 
-Do not optimize this into caching or returning the probe's COM wrapper.
-The temporary STA exits, so that wrapper would depend on an apartment whose
-lifetime has ended. The caller-thread acquisition preserves the reason for
-the earlier RCW fix. It can attach to Outlook that the probe activated.
-
-The probe releases its own application acquisition once, in its worker's
-`finally` block. It does not call `Quit` or force every reference on a
-potentially shared RCW to zero. No Outlook COM object leaves the probe.
+The probe does not call `Quit` or forcibly release other clients' COM
+references. This protects shared Outlook use while checking availability.
 
 ## Ownership and disconnect
 
@@ -150,18 +165,7 @@ callers. Unexpected failures are rethrown to callers that observe
 completion, preserving the exception. Late failures must not become
 unhandled background-thread exceptions that terminate the host process.
 
-## Verification and deferred work
-
-Unit tests use the real coordinator with controlled operations and gates,
-without manufacturing Outlook COM objects. They cover STA execution,
-timeout validation, a blocked operation with a positive timeout, concurrent
-factory callers sharing an outstanding probe, retries during cleanup, late
-failure, and fresh probes after completion. Service tests cover reuse, disposal, failure cleanup,
-reconnection, and compatibility with non-disposable connections.
-
-Tests that activate Outlook or verify that an independent COM reference
-survives disconnection are marked `Integration`. They require Outlook and
-a configured interactive user session.
+## Design limits and future work
 
 A strict overall deadline requires a larger design: a long-lived STA owner,
 dispatch of all COM work to that apartment, and explicit rules for timed-out
@@ -169,72 +173,44 @@ work and cleanup. A deadline still would not make a hung COM call safely
 cancellable. That redesign, deterministic lifetime management of all
 borrowed wrappers, and any verified exclusive-shutdown policy are deferred.
 
-## Stage logging and manual regression checks
+## Future STA ownership design
+
+The earlier `OutlookApplicationModulize.txt` sketches a replacement for the
+probe design. Its useful direction is retained here; its sample code is
+historical and must not be copied as a working design.
+
+A long-lived STA would own the application, namespace, and COM-backed
+wrappers. A request queue would dispatch operations onto that apartment.
+Public callers would continue using library abstractions rather than
+requiring raw COM objects or arbitrary COM delegates.
+
+Returning COM objects from a temporary worker is not an intermediate step:
+the caller must not depend on an apartment that has already exited. A
+future dispatch API must define which results can leave the owner STA.
+
+Before implementation, decide how message pumping, reentrancy, queued versus
+running work, late completion, shutdown, and outstanding references behave.
+A caller deadline cannot safely cancel an already-running COM call. A
+separate worker process is a possible later isolation boundary, not an
+existing feature or a promise to cancel Outlook side effects.
+
+Use fakes at established factory/connection/session boundaries for unit
+tests; do not manufacture fake Outlook COM objects. Validate apartment and
+lifetime behavior with real Outlook integration tests. Keep this redesign
+separate from 1.x compatibility repairs; track it in the
+[version 2 backlog](Email.ToolKit.Tasks.md#version-2-design-candidates).
+
+## Connection diagnostics
 
 Debug logs distinguish probe activation, probe cleanup, caller-thread
 application acquisition, and session acquisition, with start and completion
 messages. The last stage helps locate a hang. A reused connection should
 produce no new acquisition messages.
 
-`ProbeApplication` lets errors propagate to `ProbeAttempt.Run`, which
-captures and logs them even after the caller times out. A local catch that
-only logs and returns would incorrectly report a successful probe.
+For automated coverage, manual regression procedures, implementation history,
+and VM testing guidance, see [maintainer notes][verification].
 
-Before release, exercise these scenarios with debug logging enabled:
-
-| Initial state | Checks |
-| --- | --- |
-| Healthy Outlook running | Connect succeeds; repeated Connect reuses the session; Disconnect leaves Outlook usable. |
-| Outlook closed with a configured profile | Connect activates Outlook and obtains a session; another Connect reuses it. |
-| Original unresponsive Outlook state | Probe wait returns false; service has no connection or session; retries do not start additional blocked probes. |
-| Recovery after a timeout | Restore Outlook and let the outstanding worker finish; retry in the same host succeeds. |
-
-Use the same service and caller STA for each scenario's attempts. The
-ordinary integration fixture starts Outlook during setup, so it cannot
-establish the initially closed or unresponsive scenarios. Those require a
-separate manual caller with no preliminary Outlook activation.
-
-Record the commit, Windows/Outlook versions and bitness, profile setup,
-exact reproduction steps, requested timeout, elapsed time, result,
-`IsConnected`, session presence, and last logged stage. Preserve logs.
-A repeat call after success should have no acquisition stages. Verify
-Outlook remains usable after disconnect.
-
-Use a disposable environment for deliberate failures. Give the manual test
-host an external watchdog so an unbounded caller-thread COM call cannot
-stall the exercise indefinitely. Watchdog expiry is an aborted test, not a
-successful production timeout; terminating the host does not undo Outlook
-side effects. Do not suspend or terminate an everyday Outlook session.
-
-The original hung-Outlook scenario requires its actual reproduction steps.
-A suspended process is a separate test case, not proof of reproducing that
-failure. Unit tests validate coordination; healthy integration tests do not
-validate the original failure. Record these scenarios separately rather
-than treating a green unit suite as complete real-Outlook coverage.
-
-## Optional VM testing
-
-Start with one reusable Windows VM, a dedicated Outlook profile and test
-data, and snapshots for repeatable baselines. Run it on demand before
-releases; add Outlook-version or bitness variants only when useful.
-A snapshot may still need explicit steps to reproduce a particular hang.
-
-Keep the existing NUnit framework. A future CI job can restore the VM,
-prepare a scenario, run explicitly selected integration tests, collect TRX
-results and stage logs, then reset or shut down the VM. Keep an outer job
-timeout and collect partial logs on failure. Implementing the scenario
-runner and VM provisioning is deferred.
-
-Plan for a configured, signed-in interactive desktop and an interactive
-agent, rather than a Windows-service test runner. Microsoft's
-[desktop test guidance](https://learn.microsoft.com/en-us/azure/devops/pipelines/test/ui-testing-considerations?view=azure-devops)
-describes this setup. Its
-[Office automation guidance](https://learn.microsoft.com/en-us/office/client-developer/integration/considerations-unattended-automation-office-microsoft-365-for-unattended-rpa)
-also explains why a VM does not eliminate Office automation limitations.
-
-One VM used on demand limits compute costs. Licensing, snapshot storage,
-Office updates, and profile maintenance still need budgeting. Keep fast,
-deterministic unit tests in normal CI; the VM tier supplements them.
+[verification]: DevelopmentNotes.md#outlook-verification
 
 ## References
 

@@ -15,7 +15,6 @@ using System.Text;
 using DigitalZenWorks.Email.DbxOutlookExpress;
 using global::Common.Logging;
 using Microsoft.Office.Interop.Outlook;
-using MsgKit;
 
 /// <summary>
 /// Migrate Dbx to Pst class.
@@ -208,6 +207,23 @@ public static class Migrate
 	}
 
 	/// <summary>
+	/// Migrates an EML file to a PST, leaving the store attached to Outlook.
+	/// </summary>
+	/// <param name="filePath">The EML file to migrate.</param>
+	/// <param name="pstPath">The destination PST file path.</param>
+	/// <returns>The imported mail item, or null if import fails.</returns>
+	/// <remarks>Retains the released two-argument signature. The caller is
+	/// responsible for releasing the returned COM reference.</remarks>
+	[Obsolete("Use EmlFileToPst(filePath, pstPath, closeStore) instead. " +
+		"Pass false to leave the store attached.")]
+	public static MailItem EmlFileToPst(string filePath, string pstPath)
+	{
+		MailItem mailItem = EmlFileToPst(filePath, pstPath, false);
+
+		return mailItem;
+	}
+
+	/// <summary>
 	/// Eml file to pst.
 	/// </summary>
 	/// <remarks>The caller is responsible for deleting
@@ -291,6 +307,24 @@ public static class Migrate
 	public static bool EmlToPst(string path, string pstPath)
 	{
 		bool result = EmlToPst(path, pstPath, true, false);
+
+		return result;
+	}
+
+	/// <summary>
+	/// Migrates EML data to a PST, leaving the store attached to Outlook.
+	/// </summary>
+	/// <param name="path">The source EML directory or file.</param>
+	/// <param name="pstPath">The destination PST file path.</param>
+	/// <param name="adjust">Whether to exclude interim folders.</param>
+	/// <returns>A value indicating whether migration succeeded.</returns>
+	/// <remarks>Retains the released three-argument signature. Use the
+	/// four-argument overload to request detaching the store.</remarks>
+	[Obsolete("Use EmlToPst(path, pstPath, adjust, closeStore) instead. " +
+		"Pass false to leave the store attached.")]
+	public static bool EmlToPst(string path, string pstPath, bool adjust)
+	{
+		bool result = EmlToPst(path, pstPath, adjust, false);
 
 		return result;
 	}
@@ -441,7 +475,7 @@ public static class Migrate
 
 			try
 			{
-				Converter.ConvertEmlToMsg(emlFile, msgFile);
+				EmlConverter.ConvertEmlToMsg(emlFile, msgFile);
 			}
 			catch (IOException exception)
 			{
@@ -449,7 +483,7 @@ public static class Migrate
 
 				// Hmmmn, try one more time.
 				msgFile = GetTemporaryFileName(".msg");
-				Converter.ConvertEmlToMsg(emlFile, msgFile);
+				EmlConverter.ConvertEmlToMsg(emlFile, msgFile);
 			}
 			catch (System.Exception exception) when
 				(exception is ArgumentException ||
@@ -571,7 +605,7 @@ public static class Migrate
 
 				string msgFile = GetTemporaryFileName(".msg");
 
-				Converter.ConvertEmlToMsg(filePath, msgFile);
+				EmlConverter.ConvertEmlToMsg(filePath, msgFile);
 
 				File.Delete(filePath);
 

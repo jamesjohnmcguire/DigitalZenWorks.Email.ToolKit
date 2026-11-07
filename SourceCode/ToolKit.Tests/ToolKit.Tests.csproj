@@ -1,8 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
-		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<IsTestProject>true</IsTestProject>
 		<LangVersion>Latest</LangVersion>
@@ -33,6 +31,10 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="NUnit3TestAdapter" Version="6.3.1" />
+		<PackageReference Include="Roslynator.Analyzers" Version="5.0.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="StyleCop.Analyzers" Version="1.3.151-beta">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -40,20 +42,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\ToolKit.Library\ToolKit.Library.csproj" />
+		<ProjectReference Include="../ToolKit.Application/ToolKit.Application.csproj" />
+		<ProjectReference Include="../ToolKit.Library/ToolKit.Library.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<AdditionalFiles Include="../stylecop.json" />
-		<None Include="../.editorconfig" Link="../.editorconfig" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Folders.dbx" />
-		<EmbeddedResource Include="Inbox.dbx" />
-		<EmbeddedResource Include="Offline.dbx" />
-		<EmbeddedResource Include="Outbox.dbx" />
-		<EmbeddedResource Include="TestEmail.eml" />
+		<EmbeddedResource Include="Support/Resources/*.dbx">
+			<LogicalName>$(RootNamespace).%(Filename)%(Extension)</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Support/Resources/*.eml">
+			<LogicalName>$(RootNamespace).%(Filename)%(Extension)</LogicalName>
+		</EmbeddedResource>
 	</ItemGroup>
 
 </Project>

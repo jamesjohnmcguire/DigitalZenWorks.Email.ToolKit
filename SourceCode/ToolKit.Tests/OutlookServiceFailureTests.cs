@@ -52,14 +52,19 @@ internal sealed class OutlookServiceFailureTests
 	[TestCase(2, true)]
 	public void ConnectHandlesFailureAndRetries(int stage, bool comFailure)
 	{
-		Exception failure = comFailure ?
-			new COMException("Outlook unavailable") :
-			new InvalidOperationException("Outlook unavailable");
 		OutlookService service = new();
 		FakeOutlookConnection connection = new();
 		FakeOutlookFactory factory = new();
 		factory.IsAvailable = true;
 		factory.Connection = connection;
+
+		Exception failure =
+			new InvalidOperationException("Outlook unavailable");
+
+		if (comFailure == true)
+		{
+			failure = new COMException("Outlook unavailable");
+		}
 
 		if (stage == 0)
 		{
@@ -77,11 +82,26 @@ internal sealed class OutlookServiceFailureTests
 		Assert.That(service.Connect(factory), Is.False);
 		Assert.That(service.IsConnected, Is.False);
 		Assert.That(service.Session, Is.Null);
+
+		int expectedAccessCount = 0;
+		int expectedCallCount = 1;
+		int expectedConnectionCallCount = 2;
+
+		if (stage == 0)
+		{
+			expectedCallCount = 0;
+			expectedConnectionCallCount = 1;
+		}
+
+		if (stage == 2)
+		{
+			expectedAccessCount = 1;
+		}
+
 		Assert.That(
-			factory.CreateConnectionCallCount,
-			Is.EqualTo(stage == 0 ? 0 : 1));
+			factory.CreateConnectionCallCount, Is.EqualTo(expectedCallCount));
 		Assert.That(
-			connection.SessionAccessCount, Is.EqualTo(stage == 2 ? 1 : 0));
+			connection.SessionAccessCount, Is.EqualTo(expectedAccessCount));
 
 		FakeOutlookSession expectedSession = new();
 		factory.AvailabilityException = null;
@@ -94,7 +114,7 @@ internal sealed class OutlookServiceFailureTests
 		Assert.That(factory.IsOutlookAvailableCallCount, Is.EqualTo(2));
 		Assert.That(
 			factory.CreateConnectionCallCount,
-			Is.EqualTo(stage == 0 ? 1 : 2));
+			Is.EqualTo(expectedConnectionCallCount));
 	}
 
 	/// <summary>

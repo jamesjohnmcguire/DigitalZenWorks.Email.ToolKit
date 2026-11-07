@@ -1,19 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<AnalysisMode>All</AnalysisMode>
 		<AssemblyName>DigitalZenWorks.Email.ToolKit.Library</AssemblyName>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<Authors>James John McGuire</Authors>
 		<CheckEolTargetFramework>false</CheckEolTargetFramework>
-		<Company>Digital Zen Works</Company>
-		<Copyright>Copyright © 2021 - 2026</Copyright>
 		<Description>
 			This client library provides functionality to help migrate email messages from dbx (Outlook Express) or eml format to Outlook.  It also contains functionality to help clean up Outlook stores.
 			Additional notes - https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit
 		</Description>
-		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<FileVersion>1.13.65.0</FileVersion>
+		<FileVersion>1.14.0.0</FileVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>Latest</LangVersion>
@@ -23,15 +19,14 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>Digital Zen Works;Email;Dbx;Eml;Outlook;Duplicates</PackageTags>
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-		<Version>1.13.65</Version>
+		<Version>1.14.0</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<OutputPath>$(SolutionDir)\Bin\$(Configuration)\$(Platform)</OutputPath>
 		<TargetFramework>net10.0-windows</TargetFramework>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<DebugType>embedded</DebugType>
 		<TargetFrameworks>netstandard2.0;net472;net5.0-windows;net6.0-windows;net7.0-windows;net8.0-windows;net9.0-windows;net10.0-windows</TargetFrameworks>
 	</PropertyGroup>
 
@@ -48,6 +43,15 @@
 	<ItemGroup>
 		<PackageReference Include="Common.Logging" Version="3.4.1" />
 		<PackageReference Include="Common.Logging.Core" Version="3.4.1" />
+		<PackageReference Include="MimeKit" Version="4.18.2" />
+		<PackageReference Include="MsgKit" Version="3.0.6" />
+		<!-- Interim Security Fix for Transitive Package -->
+		<!-- Review removal when upstream requires patched versions. -->
+		<PackageReference Include="OpenMcdf" Version="3.3.0" />
+		<PackageReference Include="Roslynator.Analyzers" Version="5.0.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="StyleCop.Analyzers" Version="1.3.151-beta">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -58,17 +62,21 @@
 		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
 	</ItemGroup>
 
+	<!-- .NET Framework uses its framework-provided cryptography assembly. -->
+	<ItemGroup Condition="'$(TargetFramework)' != 'net472'">
+		<!-- Interim Security Fix for Transitive Package -->
+		<!-- Review removal when upstream requires patched versions. -->
+		<PackageReference
+			Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+	</ItemGroup>
+
 	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<ProjectReference Include="../DbxOutlookExpress/DbxOutlookExpress/DigitalZenWorks.Email.DbxOutlookExpress.csproj" />
 		<ProjectReference Include="../UtilitiesNet/UtilitiesNetLibrary/DigitalZenWorks.Common.Utilities.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)'=='Release'">
-		<PackageReference Include="DigitalZenWorks.Common.Utilities" Version="1.4.75" />
-		<PackageReference Include="DigitalZenWorks.Email.DbxOutlookExpress" Version="1.3.24" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="../MsgKit/MsgKit/MsgKit.csproj" />
+		<PackageReference Include="DigitalZenWorks.Common.Utilities" Version="1.6.0" />
+		<PackageReference Include="DigitalZenWorks.Email.DbxOutlookExpress" Version="1.3.25" />
 	</ItemGroup>
 
 	<ItemGroup>

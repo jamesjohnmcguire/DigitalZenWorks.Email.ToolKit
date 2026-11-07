@@ -138,16 +138,6 @@ public class OutlookFolder
 	/// Initializes a new instance of the
 	/// <see cref="OutlookFolder"/> class.
 	/// </summary>
-	/// <param name="folder">The Outlook folder to wrap.</param>
-	public OutlookFolder(MAPIFolder folder)
-	{
-		this.folder = folder;
-	}
-
-	/// <summary>
-	/// Initializes a new instance of the
-	/// <see cref="OutlookFolder"/> class.
-	/// </summary>
 	/// <param name="outlookAccount">The outlook account object.</param>
 	public OutlookFolder(OutlookAccount outlookAccount)
 	{
@@ -161,23 +151,33 @@ public class OutlookFolder
 	/// Initializes a new instance of the
 	/// <see cref="OutlookFolder"/> class.
 	/// </summary>
-	/// <param name="outlookSession">The outlook session encapsulation
-	/// object.</param>
-	public OutlookFolder(OutlookSession outlookSession)
-	{
-		this.outlookSession = outlookSession;
-	}
-
-	/// <summary>
-	/// Initializes a new instance of the
-	/// <see cref="OutlookFolder"/> class.
-	/// </summary>
 	/// <param name="outlookAccount">The outlook account object.</param>
 	/// <param name="folder">The folder object.</param>
 	public OutlookFolder(OutlookAccount outlookAccount, MAPIFolder folder)
 		: this(outlookAccount)
 	{
 		this.folder = folder;
+	}
+
+	/// <summary>
+	/// Initializes a new instance of the
+	/// <see cref="OutlookFolder"/> class.
+	/// </summary>
+	/// <param name="folder">The Outlook folder to wrap.</param>
+	internal OutlookFolder(MAPIFolder folder)
+	{
+		this.folder = folder;
+	}
+
+	/// <summary>
+	/// Initializes a new instance of the
+	/// <see cref="OutlookFolder"/> class.
+	/// </summary>
+	/// <param name="outlookSession">The outlook session encapsulation
+	/// object.</param>
+	internal OutlookFolder(OutlookSession outlookSession)
+	{
+		this.outlookSession = outlookSession;
 	}
 
 	/// <summary>
@@ -204,14 +204,29 @@ public class OutlookFolder
 	public int DuplicatesSets { get; set; }
 
 	/// <summary>
+	/// Adds or retrieves a folder without normalizing its name.
+	/// </summary>
+	/// <param name="parentFolder">The parent folder.</param>
+	/// <param name="folderName">The folder name to preserve.</param>
+	/// <returns>The added or existing folder, or null if not available.
+	/// </returns>
+	public static MAPIFolder AddFolder(
+		MAPIFolder parentFolder, string folderName)
+	{
+		MAPIFolder folder = AddFolder(parentFolder, folderName, false);
+
+		return folder;
+	}
+
+	/// <summary>
 	/// Add folder in safe context.
 	/// </summary>
 	/// <remarks>If there is a folder already existing with the given
 	/// folder name, this method will return that folder.</remarks>
 	/// <param name="parentFolder">The parent folder.</param>
 	/// <param name="folderName">The new folder name.</param>
-	/// <param name="normalizeFolderName">Indicates whether to attempt the
-	/// forlder name or not.</param>
+	/// <param name="normalizeFolderName">Whether to remove recognized
+	/// duplicate-name patterns before creating a new folder.</param>
 	/// <returns>The added or existing folder.</returns>
 	public static MAPIFolder AddFolder(
 		MAPIFolder parentFolder,
@@ -247,47 +262,6 @@ public class OutlookFolder
 		}
 
 		return pstFolder;
-	}
-
-	/// <summary>
-	/// Add folder in safe context.
-	/// </summary>
-	/// <remarks>If there is a folder already existing with the given
-	/// folder name, this method will return that folder.</remarks>
-	/// <param name="folderName">The new folder name.</param>
-	/// <returns>The added or existing encapsulated folder.</returns>
-	public OutlookFolder AddFolder(string folderName)
-	{
-		OutlookFolder newFolder = null;
-		MAPIFolder pstFolder = null;
-
-		if (folder != null && !string.IsNullOrWhiteSpace(folderName))
-		{
-			pstFolder = GetSubFolder(folder, folderName);
-
-			if (pstFolder == null)
-			{
-				string parentPath = GetFolderPath(folder);
-				Log.Info("At: " + parentPath + " Adding outlook folder: " +
-					folderName);
-
-				try
-				{
-					pstFolder = folder.Folders.Add(folderName);
-				}
-				catch (COMException exception)
-				{
-					Log.Warn(exception.ToString());
-				}
-			}
-
-			if (pstFolder != null)
-			{
-				newFolder = new(pstFolder);
-			}
-		}
-
-		return newFolder;
 	}
 
 	/// <summary>
@@ -370,6 +344,40 @@ public class OutlookFolder
 		}
 
 		return folderExists;
+	}
+
+	/// <summary>
+	/// Creates an Outlook folder helper from the supplied session.
+	/// </summary>
+	/// <param name="outlookSession">The session reference, which must be an
+	/// <see cref="OutlookSession"/> instance.</param>
+	/// <returns>A helper that uses the supplied session.</returns>
+	/// <exception cref="NotSupportedException">
+	/// <paramref name="outlookSession"/> is null or is not an
+	/// <see cref="OutlookSession"/> instance.
+	/// </exception>
+	/// <remarks>
+	/// The current implementation requires operations not yet exposed by
+	/// <see cref="IOutlookSession"/>. Sessions provided by
+	/// <see cref="OutlookService"/> satisfy this requirement.
+	/// </remarks>
+	public static OutlookFolder FromSession(IOutlookSession outlookSession)
+	{
+		OutlookFolder result;
+
+		if (outlookSession is OutlookSession session)
+		{
+			result = new(session);
+		}
+		else
+		{
+			string message = "OutlookFolder requires a concrete " +
+				"OutlookSession instance. Use the session supplied " +
+				"by OutlookService.";
+			throw new NotSupportedException(message);
+		}
+
+		return result;
 	}
 
 	/// <summary>
@@ -462,8 +470,7 @@ public class OutlookFolder
 	/// </summary>
 	/// <param name="mailItem">The MailItem to check.</param>
 	/// <returns>The synoses of the item.</returns>
-	[Obsolete("GetMailItemSynopses is deprecated, " +
-		"please use OutlookItem.Synopses instead.")]
+	[Obsolete("Use new OutlookItem(mailItem).Synopses instead.")]
 	public static string GetMailItemSynopses(MailItem mailItem)
 	{
 		OutlookItem outlookItem = new(mailItem);
@@ -510,9 +517,8 @@ public class OutlookFolder
 	/// <param name="folder">The folder to check.</param>
 	/// <param name="sendersCounts">The current counts of senders.</param>
 	/// <returns>The count of each sender.</returns>
-	[Obsolete("GetSendersCount(string, int, MAPIFolder, " +
-		"IDictionary<string, int>) is deprecated, " +
-		"please use GetSendersCount(MAPIFolder) instead.")]
+	[Obsolete("Use GetSendersCount(folder) on an OutlookFolder instance " +
+		"instead.")]
 	public static IDictionary<string, int> GetSendersCount(
 		string path,
 		MAPIFolder folder,
@@ -1077,8 +1083,8 @@ public class OutlookFolder
 	/// <param name="subFolderIndex">The index of the sub-folder.</param>
 	/// <param name="subFolder">The sub-folder.</param>
 	/// <param name="force">Whether to force the removal.</param>
-	[Obsolete("RemoveFolder(string, int, MAPIFolder, bool) is deprecated," +
-		" please use RemoveFolder(MAPIFolder, int, bool) instead.")]
+	[Obsolete("Use RemoveFolder(subFolder, subFolderIndex, force) " +
+		"instead.")]
 	public static void RemoveFolder(
 		string path,
 		int subFolderIndex,
@@ -1119,6 +1125,47 @@ public class OutlookFolder
 		}
 
 		return isDeleted;
+	}
+
+	/// <summary>
+	/// Add folder in safe context.
+	/// </summary>
+	/// <remarks>If there is a folder already existing with the given
+	/// folder name, this method will return that folder.</remarks>
+	/// <param name="folderName">The new folder name.</param>
+	/// <returns>The added or existing encapsulated folder.</returns>
+	public OutlookFolder AddFolder(string folderName)
+	{
+		OutlookFolder newFolder = null;
+		MAPIFolder pstFolder = null;
+
+		if (folder != null && !string.IsNullOrWhiteSpace(folderName))
+		{
+			pstFolder = GetSubFolder(folder, folderName);
+
+			if (pstFolder == null)
+			{
+				string parentPath = GetFolderPath(folder);
+				Log.Info("At: " + parentPath + " Adding outlook folder: " +
+					folderName);
+
+				try
+				{
+					pstFolder = folder.Folders.Add(folderName);
+				}
+				catch (COMException exception)
+				{
+					Log.Warn(exception.ToString());
+				}
+			}
+
+			if (pstFolder != null)
+			{
+				newFolder = new(pstFolder);
+			}
+		}
+
+		return newFolder;
 	}
 
 	/// <summary>
@@ -1220,8 +1267,7 @@ public class OutlookFolder
 	/// <param name="folder">The current folder.</param>
 	/// <param name="dryRun">Indicates whether this is a 'dry run'
 	/// or not.</param>
-	[Obsolete("MergeFolders(string, MAPIFolder, bool) is deprecated, " +
-		"please use MergeFolders(MAPIFolder, bool) instead.")]
+	[Obsolete("Use MergeFolders(folder, dryRun) instead.")]
 	public void MergeFolders(string path, MAPIFolder folder, bool dryRun)
 	{
 		if (folder != null)
@@ -1284,9 +1330,7 @@ public class OutlookFolder
 	/// <param name="path">Path of parent folder.</param>
 	/// <param name="source">The source folder.</param>
 	/// <param name="destination">The destination folder.</param>
-	[Obsolete("MoveFolderContents(string, MAPIFolder, MAPIFolder) " +
-		"is deprecated, please use " +
-		"MoveFolderContents(MAPIFolder, MAPIFolder) instead.")]
+	[Obsolete("Use MoveFolderContents(source, destination) instead.")]
 	public void MoveFolderContents(
 		string path, MAPIFolder source, MAPIFolder destination)
 	{
@@ -1354,8 +1398,7 @@ public class OutlookFolder
 	/// <param name="dryRun">Indicates whether this is a 'dry run'
 	/// or not.</param>
 	/// <returns>The total count of duplicates removed.</returns>
-	[Obsolete("RemoveDuplicates(string, MAPIFolder, bool) is deprecated," +
-		" please use RemoveDuplicates(MAPIFolder, bool) instead.")]
+	[Obsolete("Use RemoveDuplicates(folder, dryRun) instead.")]
 	public int RemoveDuplicates(
 		string path, MAPIFolder folder, bool dryRun)
 	{

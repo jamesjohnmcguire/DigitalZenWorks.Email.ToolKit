@@ -22,8 +22,7 @@ public static class MapiItem
 	/// <param name="duplicateId">The duplicate id.</param>
 	/// <param name="keeperSynopses">The keeper synopses.</param>
 	/// <param name="dryRun">Indicates if this is a dry run or not.</param>
-	[Obsolete("DeleteDuplicate is deprecated, " +
-		"please use OutlookItem.DeleteDuplicate instead.")]
+	[Obsolete("Use OutlookItem.DeleteDuplicate instead.")]
 	public static void DeleteDuplicate(
 		NameSpace session,
 		string duplicateId,
@@ -38,8 +37,7 @@ public static class MapiItem
 	/// Deletes the given item.
 	/// </summary>
 	/// <param name="item">The item to delete.</param>
-	[Obsolete("DeleteItem is deprecated, " +
-		"please use OutlookItem.Delete instead.")]
+	[Obsolete("Use OutlookItem.Delete(item) instead.")]
 	public static void DeleteItem(object item)
 	{
 		OutlookItem.Delete(item);
@@ -50,8 +48,7 @@ public static class MapiItem
 	/// </summary>
 	/// <param name="mapiItem">The items to compute.</param>
 	/// <returns>The item's hash encoded in base 64.</returns>
-	[Obsolete("GetItemHash is deprecated, " +
-		"please use OutlookItem.Hash instead.")]
+	[Obsolete("Use new OutlookItem(mapiItem).Hash instead.")]
 	public static string GetItemHash(object mapiItem)
 	{
 		OutlookItem outlookItem = new(mapiItem);
@@ -66,8 +63,7 @@ public static class MapiItem
 	/// </summary>
 	/// <param name="mapiItem">The items to compute.</param>
 	/// <returns>The item's hash encoded in base 64.</returns>
-	[Obsolete("GetItemHashAsync is deprecated, " +
-		"please use OutlookItem.GetHashAsync instead.")]
+	[Obsolete("Use OutlookItem.GetHashAsync(mapiItem) instead.")]
 	public static async Task<string> GetItemHashAsync(object mapiItem)
 	{
 		string hashBase64 = await OutlookItem.GetHashAsync(mapiItem).
@@ -81,8 +77,7 @@ public static class MapiItem
 	/// </summary>
 	/// <param name="mapiItem">The specific MAPI item to check.</param>
 	/// <returns>The synoses of the item.</returns>
-	[Obsolete("GetItemSynopses is deprecated, " +
-		"please use OutlookItem.Synopses instead.")]
+	[Obsolete("Use new OutlookItem(mapiItem).Synopses instead.")]
 	public static string GetItemSynopses(object mapiItem)
 	{
 		OutlookItem outlookItem = new(mapiItem);
@@ -96,8 +91,7 @@ public static class MapiItem
 	/// </summary>
 	/// <param name="mapiItem">The item to check.</param>
 	/// <returns>The current item's folder path.</returns>
-	[Obsolete("GetPath is deprecated, " +
-		"please use OutlookItem.GetPath instead.")]
+	[Obsolete("Use OutlookItem.GetPath(mapiItem) instead.")]
 	public static string GetPath(object mapiItem)
 	{
 		string path = OutlookItem.GetPath(mapiItem);
@@ -110,8 +104,7 @@ public static class MapiItem
 	/// </summary>
 	/// <param name="item">The item to move.</param>
 	/// <param name="destination">The destination folder.</param>
-	[Obsolete("MoveItem is deprecated, " +
-		"please use OutlookItem.Move instead.")]
+	[Obsolete("Use OutlookItem.Move(item, destination) instead.")]
 	public static void MoveItem(object item, MAPIFolder destination)
 	{
 		OutlookItem outlookItem = new(item);
@@ -126,8 +119,7 @@ public static class MapiItem
 	/// <param name="destination">The destination folder.</param>
 	/// <returns>A <see cref="Task"/> representing the asynchronous
 	/// operation.</returns>
-	[Obsolete("MoveItemAsync is deprecated, " +
-		"please use OutlookItem.MoveAsync instead.")]
+	[Obsolete("Use OutlookItem.MoveAsync(item, destination) instead.")]
 	public static async Task MoveItemAsync(
 		object item, MAPIFolder destination)
 	{
@@ -140,8 +132,7 @@ public static class MapiItem
 	/// </summary>
 	/// <param name="header">The header to check.</param>
 	/// <returns>The modified header.</returns>
-	[Obsolete("RemoveMimeOleVersion is deprecated, " +
-		"please use OutlookItem.RemoveMimeOleVersion instead.")]
+	[Obsolete("Use OutlookItem.RemoveMimeOleVersion(header) instead.")]
 	public static string RemoveMimeOleVersion(string header)
 	{
 		header = OutlookItem.RemoveMimeOleVersion(header);
