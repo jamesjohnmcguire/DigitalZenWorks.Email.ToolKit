@@ -42,7 +42,7 @@ DevelopmentTools\build.cmd release
 
 The default command rebuilds Debug. `release` publishes a self-contained,
 single-file Windows x64 application, creates a fresh ZIP with `zip.exe`,
-and uploads only that ZIP to a GitHub draft release. `publish` builds and
+and uploads only that ZIP to a published GitHub release. `publish` builds and
 packs all Release library targets, then publishes the NuGet package through
 GitHub Actions. These commands are independent; neither requires the other
 artifact. Run `DevelopmentTools\clean.cmd` directly for cleanup.
@@ -67,9 +67,7 @@ IntelliSense; it is not required to run the application.
 
 Artifacts are under `artifacts/<version>/`. The ZIP and package names include
 the project version. Each executable build uses a new `publish-*` staging
-directory so old publish files cannot enter the next archive. The `.commit`
-files record the source commit of each prepared artifact. Local builds may
-include uncommitted changes; release rehearsals are not final artifacts.
+directory so old publish files cannot enter the next archive.
 
 ## Versioning
 
@@ -85,7 +83,7 @@ Documentation may name an upcoming release before the project versions are
 changed. Reserve the actual version update for one atomic commit near the
 end of release preparation, before building the final release artifacts.
 
-Target values for `1.14.0`, to apply in that final version commit:
+Version values for `1.14.0` in the application and library:
 
 ```xml
 <AssemblyVersion>1.0.0.0</AssemblyVersion>
@@ -312,7 +310,7 @@ They run through the production adapter without Outlook.
 The permanent baseline had five read-receipt failures. With the workaround,
 all eighteen conversion cases pass against the public package. The valid
 inline-constructor control also passes. No production build references the
-fork project; its checkout is retained pending submodule cleanup.
+fork project; the fork submodule and checkout have been removed.
 
 Real Outlook import and rendering still require a release smoke test. These
 synthetic cases do not establish compatibility with every archived message.
@@ -434,43 +432,39 @@ DevelopmentTools\build.cmd publish
 ```
 
 `release` builds the application, creates the executable ZIP with `zip.exe`,
-and uploads only that ZIP to a draft GitHub release. Review and publish the
-GitHub draft separately when ready. It does not pack the library or request
-NuGet publication.
+and creates or updates a published GitHub release. It does not pack the
+library or request NuGet publication. No separate draft approval is needed.
 
-`publish` builds and packs the library locally. It uploads the NuGet package
-and `package.commit` to the matching GitHub release, creating a draft if
-needed. No executable build or ZIP is required. The GitHub release serves
-as the package transfer location for the publishing workflow.
+`publish` builds and packs the library locally, uploads the NuGet package
+to the matching GitHub release, and dispatches `build.yml` from `main`.
+It does not build the executable or require its ZIP. Either command creates
+the version's GitHub release if needed. Retries replace only that command's
+asset; the other distribution's files are preserved. An existing draft is
+published automatically.
 
-An existing draft must target the same commit. Each command replaces only
-its own assets on retry, preserving the other distribution's artifacts.
-For a published GitHub release, `publish` may add missing package assets
-without replacing existing assets; the version tag must match the source
-commit. Existing package assets are reused and verified by the workflow.
-`release` refuses to replace an executable on a published GitHub release.
+GitHub CLI uses the existing `GH_TOKEN` environment variable. No token
+argument or extra stored secret is required. `GitHubToken` alone is not a
+GitHub CLI variable; your existing `GH_TOKEN` already supplies the token.
+The workflow uses GitHub's automatic token to download the package and
+`NuGet/login@v1` to obtain its short-lived NuGet publishing key. No Office
+installation or COM build occurs on the Ubuntu publishing runner.
 
-After uploading the package, the script dispatches `build.yml` from `main`
-with the local package's SHA-256 and follows that specific run. The Ubuntu
-job downloads the package and verifies the source commit, release target
-or tag, package ID, version, and SHA-256 before obtaining a short-lived key
-with `NuGet/login@v1` and pushing the exact package. No Office installation
-or COM build occurs on the publishing runner. API-key arguments are no
-longer supported.
-
-The workflow runs only on explicit dispatch with `publish=true` from
-`main`. Commit pushes, tags, and GitHub release events do not trigger it.
-Its `contents: write` permission permits draft-release discovery; its steps
-do not create, edit, or publish GitHub releases. Publication requests are
-serialized. The workflow does not rerun tests or prove build provenance.
+The workflow runs only on explicit dispatch from `main`. Commit pushes,
+tags, and GitHub release events do not trigger NuGet publication. The only
+workflow input is the version. The workflow downloads that version's package,
+logs into NuGet, and pushes it; publication requests are serialized.
 
 Both commands require `main` and a clean working tree including submodules.
-They build their own artifact and verify its source commit before upload.
-A build or upload failure stops the command before NuGet dispatch. If the
-source commit changes, rebuild from the intended release commit and review
-any existing draft target and version tag. Do not retarget a published
-version.
+They read project versions automatically and stop on build or upload errors.
+Version and artifact review are team responsibilities; the scripts do not
+maintain commit sidecars, package hashes, or custom workflow polling.
 
-Commands return a nonzero exit code on failure. If dispatch succeeds but
-status tracking fails, inspect that run before retrying. Publication failure
-details are available with `gh run view <run-id> --log-failed`.
+A successful `build.cmd publish` means the workflow request was accepted.
+Use the run link printed by GitHub CLI, or follow completion from the CLI:
+
+```shell
+gh run watch --repo jamesjohnmcguire/DigitalZenWorks.Email.ToolKit --exit-status
+```
+
+For a failed run, inspect `gh run view <run-id> --log-failed` before retrying.
+The workflow must succeed before the package has been published to NuGet.

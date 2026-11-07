@@ -1,6 +1,7 @@
 # DigitalZenWorks.Email.ToolKit
 
 [![License](https://img.shields.io/github/license/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](LICENSE)
+[![NuGet Publish](https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit/actions/workflows/build.yml/badge.svg?branch=main&event=workflow_dispatch)](https://github.com/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit/actions/workflows/build.yml)
 [![Latest Release](https://img.shields.io/github/v/release/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](../../releases)
 [![Last Commit](https://img.shields.io/github/last-commit/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](../../commits)
 [![Open Issues](https://img.shields.io/github/issues/jamesjohnmcguire/DigitalZenWorks.Email.ToolKit)](../../issues)
@@ -26,11 +27,13 @@ It is a useful utility for converting email storage from Outlook Express, Window
 
 ### Prerequisites
 
-Outlook Needs to be installed on the same computer as this program.
+The Windows application requires a working Microsoft Outlook installation
+for Outlook/PST operations. `--help` does not connect to Outlook.
 
 ### Download
 
-If you are just interested in using the program, you can download the latest release for your OS from the Releases page. Unzip the EXE and place somewhere accessible on your PATH.
+Download the Windows x64 ZIP from the Releases page. Extract `Det.exe` and
+place it in a directory on your PATH.
 
 
 ### Nuget
@@ -66,7 +69,7 @@ This is, currently, a command line program to be run from the command line or te
 
 #### Command line usage:
 
-DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
+Det.exe \<command\> \<source-path\> \<destination-path\>
 
 | Commands:             |                                 | options        | parameters                                         |
 | --------------------- | ------------------------------- | -------------- | -------------------------------------------------- |
@@ -78,7 +81,7 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 |                       | folder                          |                |                                                    |
 | list-ids              | List all entry IDs of items in  |                | PST file path, folder path                         |
 |                       | a given folder                  |                |                                                    |
-| list-top-senders      | List the top senders of a given | -cm --count    | PST file path                                      |
+| list-top-senders      | List the top senders of a given | -c, --count    | PST file path                                      |
 |                       | store                           |                |                                                    |
 | list-total-duplicates | List all duplicates in a given  |                | PST file path                                      |
 |                       | store                           |                |                                                    |
@@ -96,7 +99,8 @@ DigitalZenWorks.Email.ToolKit \<command\> \<source-path\> \<destination-path\>
 ##### Command line usage notes:
 The command is optional if the command can be inferred from the source-path.  For example, if the source path is a directory containing *.eml files, they will processed accordingly.
 If the source-path is a directory, the command will attempt to process the files in directory.  If the source-path is a file, it will process that file directly.
-If the output file is specified, it must include the extension '.pst'.
+Destination PST paths may omit `.pst`; creation appends the suffix
+(for example, `archive` creates `archive.pst`).
 
 ###### Outlook connection timeout
 
@@ -212,7 +216,11 @@ internal static class Program
 ```
 
 Keep the workflow on the same STA thread. Normal callers do not need to
-create factories or connection objects. See [Outlook lifecycle][lifecycle]
+create factories or connection objects. Create helpers with
+`OutlookStore.FromSession(session)` or `OutlookFolder.FromSession(session)`.
+Both currently require the concrete `OutlookSession` supplied by the
+service; custom session implementations are not yet supported.
+See [Outlook lifecycle][lifecycle]
 for the timeout boundary, ownership rules, and connection diagnostics.
 The NuGet package includes XML documentation for member details through
 IntelliSense and IDE API browsing.

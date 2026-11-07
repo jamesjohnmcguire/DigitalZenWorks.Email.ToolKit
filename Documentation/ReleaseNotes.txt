@@ -15,6 +15,16 @@ Outlook connection handling
 - The timeout limits the probe wait; it does not cancel COM activation or
   impose a deadline on the entire migration or connection operation.
 
+Library API
+- Add OutlookService/IOutlookService and OutlookSession/IOutlookSession
+  for explicit connection and session handling.
+- Add OutlookStore.FromSession and OutlookFolder.FromSession helpers.
+  The factories currently require the concrete session supplied by
+  OutlookService; new raw COM constructors remain internal.
+- Retain released account-based constructors and migration signatures.
+- Correct lookup path selection when an extensionless file exists and
+  its suffixed .pst counterpart does not.
+
 Message conversion and dependencies
 - Use public MsgKit 3.0.6 instead of building the forked project.
 - Preserve read-receipt fields as ordinary attachments, using
@@ -26,7 +36,7 @@ Message conversion and dependencies
 Diagnostics and release preparation
 - Embed Release debugging symbols in the application and library assemblies.
   Keep library XML documentation for NuGet consumer IntelliSense.
-- Prepare executable archives and NuGet packages locally. Uploading a draft
-  GitHub release and publishing a package are separate explicit commands.
+- Build executable archives and NuGet packages locally. Publishing a GitHub
+  release and publishing a NuGet package are separate explicit commands.
 
 See Documentation/DevelopmentNotes.md for versioning and release commands.
