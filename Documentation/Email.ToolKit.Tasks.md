@@ -70,6 +70,9 @@ fixing them. Original details remain in the historical notes.
 - [ ] Capture intermittent Outlook hangs, PST-load failures, and widespread
   test failures cleared by restarting Outlook. Use stage diagnostics and
   manual procedures; not every failure is a timeout bug.
+
+  Captured 2026-11-07: `TestCreateFolderPath` failed during `EmailToolKitTests.OneTimeSetUp` at `NameSpace.AddStore`, called through `OutlookSession.GetStore` and `OutlookAccount.GetStore`. The COM exception was `0x80004005` (-2147467259): "The Outlook data file (.pst) failed to load for this session." The command-line run also encountered PST-load setup failures. After restarting Outlook, all 42 targeted tests passed. The underlying cause remains unconfirmed.
+
 - [ ] Reproduce deletion failures involving particular item classes,
   reserved/special folders, and read-only calendars; identify actual types.
 - [ ] Investigate attachment filename/save failures and temporary-file cleanup.
