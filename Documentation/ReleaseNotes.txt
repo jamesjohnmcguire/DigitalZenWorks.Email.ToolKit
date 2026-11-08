@@ -1,3 +1,70 @@
-Release 1.13.65 Includes the New Command of add-pst - Usage: Det add-pst <PST File>
+Release 1.14.1 (Unreleased)
 
-Also includes	Package Updates and minor code improvements
+Library compatibility
+- Restore Migrate.EmlFileToPst(string, string),
+  Migrate.EmlToPst(string, string, bool), and
+  OutlookFolder.AddFolder(MAPIFolder, string).
+- Preserve the historical defaults: migration leaves the store attached;
+  the two-argument AddFolder does not normalize the name.
+- Mark the two restored migration overloads obsolete with warnings. Supply
+  closeStore explicitly in their replacements; false preserves the old
+  attached-store behavior. Consumers treating warnings as errors may need
+  to update these calls when recompiling. Existing binaries can still bind.
+- Keep the restored two-argument AddFolder overload non-obsolete.
+- Correct existing obsolete messages and clarify their replacement APIs.
+  No APIs are removed. See Public API deprecation review in DevelopmentNotes.md.
+
+Duplicate comparison
+- Preserve mail string-field boundaries with invariant length prefixes.
+  Distinct metadata combinations can no longer collide merely because
+  their concatenated text matches.
+- Mail hash values change. Recalculate previously stored hashes before
+  comparing them with hashes from this version. Diagnostic text and
+  property selection remain unchanged.
+
+Command-line help
+- Correct remove-duplicates help to describe removing duplicate Outlook
+  items, rather than merging folders.
+
+Release 1.14.0
+
+Versioning
+- Adopt major.minor.patch numbering. The third component is now a patch
+  version rather than a build counter.
+- Compatible fixes will use 1.14.1, 1.14.2, and so on. Compatible feature
+  releases increment the minor version; breaking API releases increment
+  the major version.
+
+Outlook connection handling
+- Add --timeout / -t to configure the activation-probe wait for Outlook
+  commands. The default remains 10 seconds.
+- Validate timeout options before connecting. Help does not connect to
+  Outlook, and a failed connection returns a nonzero command exit status.
+- The timeout limits the probe wait; it does not cancel COM activation or
+  impose a deadline on the entire migration or connection operation.
+
+Library API
+- Add OutlookService/IOutlookService and OutlookSession/IOutlookSession
+  for explicit connection and session handling.
+- Add OutlookStore.FromSession and OutlookFolder.FromSession helpers.
+  The factories currently require the concrete session supplied by
+  OutlookService; new raw COM constructors remain internal.
+- Retain released account-based constructors and migration signatures.
+- Correct lookup path selection when an extensionless file exists and
+  its suffixed .pst counterpart does not.
+
+Message conversion and dependencies
+- Use public MsgKit 3.0.6 instead of building the forked project.
+- Preserve read-receipt fields as ordinary attachments, using
+  read-receipt.txt when no filename is supplied. Original EML files remain
+  unchanged, and no Content-IDs are invented.
+- Retain attachment bytes for the tested missing-ID and unnamed MIME cases.
+- Require patched OpenMcdf and cryptography package dependencies.
+
+Diagnostics and release preparation
+- Embed Release debugging symbols in the application and library assemblies.
+  Keep library XML documentation for NuGet consumer IntelliSense.
+- Build executable archives and NuGet packages locally. Publishing a GitHub
+  release and publishing a NuGet package are separate explicit commands.
+
+See Documentation/DevelopmentNotes.md for versioning and release commands.
