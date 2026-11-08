@@ -160,6 +160,27 @@ public class OutlookMail
 		return synopses;
 	}
 
+	private static string GetTextBoundaryMarker(
+		string text, bool preserveBoundaries)
+	{
+		string boundaryMarker = string.Empty;
+
+		if (preserveBoundaries == true)
+		{
+			int length = 0;
+
+			if (text != null)
+			{
+				length = text.Length;
+			}
+
+			boundaryMarker = length.ToString(CultureInfo.InvariantCulture);
+			boundaryMarker += ":";
+		}
+
+		return boundaryMarker;
+	}
+
 	private static string NormalizeHeaders(string headers)
 	{
 #if NETCOREAPP1_0_OR_GREATER
@@ -473,7 +494,8 @@ public class OutlookMail
 		bool ignoreConversation = true)
 	{
 		string propertiesText =
-			GetStringPropertiesText(strict, ignoreConversation, false);
+			GetStringPropertiesText(
+				strict, ignoreConversation, preserveBoundaries: true);
 
 		Encoding encoding = Encoding.UTF8;
 		byte[] data = encoding.GetBytes(propertiesText);
@@ -484,7 +506,8 @@ public class OutlookMail
 	private string GetStringPropertiesText(
 		bool strict = false,
 		bool ignoreConversation = true,
-		bool formatText = false)
+		bool formatText = false,
+		bool preserveBoundaries = false)
 	{
 		List<string> properties = [];
 
@@ -695,6 +718,10 @@ public class OutlookMail
 
 		foreach (string item in properties)
 		{
+			string boundaryMarker =
+				GetTextBoundaryMarker(item, preserveBoundaries);
+
+			builder.Append(boundaryMarker);
 			builder.Append(item);
 		}
 

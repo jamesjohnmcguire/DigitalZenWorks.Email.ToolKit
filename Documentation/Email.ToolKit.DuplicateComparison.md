@@ -1,8 +1,6 @@
 # Email.ToolKit Duplicate Comparison
 
-This reference describes the mail-hash inputs in 1.14.0 and provides an
-initial MAPI-to-Outlook mapping for clients and the native MAPI work.
-It records current behavior, not a proposal to change comparison rules.
+This reference describes the current mail-hash inputs, including the pending 1.14.1 serialization fix, and provides an initial MAPI-to-Outlook mapping for clients and the native MAPI work. It records implemented behavior rather than proposed comparison rules.
 
 ## What a hash represents
 
@@ -80,9 +78,11 @@ SenderEmailType, SenderName, SentOnBehalfOfName, Subject, TaskSubject,
 To, VotingOptions, VotingResponse
 ```
 
-The strings are concatenated without field delimiters and encoded as UTF-8.
-Mail recipients enter through the display strings `To`, `CC`, and `BCC`;
-this path does not serialize each row of the `Recipients` collection.
+Each mail string is prefixed with its invariant decimal UTF-16 length (`string.Length`) and a colon, then the complete sequence is encoded as UTF-8. Null and empty strings both use `0:`. For example, `AB` / empty / `C` becomes `2:AB0:1:C`, while `A` / empty / `BC` becomes `1:A0:2:BC`. Length prefixes preserve boundaries even when values contain colons. Human-readable details output retains its existing format.
+
+This replaces the unframed string concatenation used in 1.14.0 and earlier, which could assign the same hash to distinct field combinations. Mail hashes change with this fix; recalculate stored hashes before comparing them with hashes from the updated library. The selected properties and normalization rules are unchanged.
+
+Mail recipients enter through the display strings `To`, `CC`, and `BCC`; this path does not serialize each row of the `Recipients` collection.
 
 The default path omits `ConversationID`. Strict string extraction also adds
 `ReceivedByEntryID`, `ReceivedOnBehalfOfEntryID`, and
@@ -203,6 +203,7 @@ Before changing selection or normalization:
 | Release | Documented policy change |
 | --- | --- |
 | 1.14.0 baseline | Initial source-derived mail inventory recorded; no hashing behavior changed by this documentation work. |
+| 1.14.1 (pending) | Prefix mail string fields with invariant lengths to prevent field-boundary false positives. Mail hash values change; stored hashes require recalculation. |
 
 Remaining work is tracked in [Email.ToolKit.Tasks.md](Email.ToolKit.Tasks.md).
 
