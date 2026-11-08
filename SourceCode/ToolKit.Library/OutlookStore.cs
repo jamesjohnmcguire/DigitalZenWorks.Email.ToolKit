@@ -1,11 +1,11 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // <copyright file="OutlookStore.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 
-using Common.Logging;
-using Microsoft.Office.Interop.Outlook;
+namespace DigitalZenWorks.Email.ToolKit;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -13,1269 +13,1358 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using global::Common.Logging;
+using Microsoft.Office.Interop.Outlook;
 
-namespace DigitalZenWorks.Email.ToolKit
+/// <summary>
+/// Provides support for interacting with an Outlook PST file.
+/// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+	"Naming",
+	"CA1708:Identifiers should differ by more than case",
+	Justification = "The Obsolete Versions Are Needed Until the Next Version")]
+public class OutlookStore
 {
+	private static readonly ILog Log = LogManager.GetLogger(
+		System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+	private readonly OutlookAccount outlookAccount;
+	private readonly OutlookSession? outlookSession;
+
+	private readonly Store store;
+	private uint totalFolders;
+
 	/// <summary>
-	/// Provides support for interacting with an Outlook PST file.
+	/// Initializes a new instance of the
+	/// <see cref="OutlookStore"/> class.
 	/// </summary>
-	public class OutlookStore
+	/// <param name="outlookAccount">The outlook account object.</param>
+	public OutlookStore(OutlookAccount outlookAccount)
 	{
-		private static readonly ILog Log = LogManager.GetLogger(
-			System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+		this.outlookAccount = outlookAccount;
 
-		private readonly OutlookAccount outlookAccount;
-
-		private uint totalFolders;
-
-		/// <summary>
-		/// Initializes a new instance of the
-		/// <see cref="OutlookStore"/> class.
-		/// </summary>
-		/// <param name="outlookAccount">The outlook account object.</param>
-		public OutlookStore(OutlookAccount outlookAccount)
+		if (outlookAccount != null)
 		{
-			this.outlookAccount = outlookAccount;
+			outlookSession = outlookAccount.OutlookSession;
 		}
+	}
 
-		/// <summary>
-		/// Gets or sets the total folders.
-		/// </summary>
-		/// <value>The total folders.</value>
-		public uint TotalFolders
+	/// <summary>
+	/// Initializes a new instance of the
+	/// <see cref="OutlookStore"/> class.
+	/// </summary>
+	/// <param name="outlookSession">The outlook session encapsulation
+	/// object.</param>
+	internal OutlookStore(OutlookSession outlookSession)
+	{
+		this.outlookSession = outlookSession;
+	}
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="OutlookStore"/> class
+	/// using a concrete session supplied through its interface.
+	/// </summary>
+	/// <param name="outlookSession">The session reference, which must be an
+	/// <see cref="OutlookSession"/> instance.</param>
+	/// <exception cref="NotSupportedException">
+	/// <paramref name="outlookSession"/> is null or is not an
+	/// <see cref="OutlookSession"/> instance.
+	/// </exception>
+	internal OutlookStore(IOutlookSession outlookSession)
+	{
+		if (outlookSession is OutlookSession session)
 		{
-			get { return totalFolders; }
-			set { totalFolders = value; }
+			this.outlookSession = session;
 		}
-
-		/// <summary>
-		/// Empty deleted items folder.
-		/// </summary>
-		/// <param name="store">The store to access.</param>
-		public static void EmptyDeletedItemsFolder(Store store)
+		else
 		{
-			if (store != null)
+			string message = "OutlookStore requires a concrete " +
+				"OutlookSession instance. Use the session supplied " +
+				"by OutlookService.";
+			throw new NotSupportedException(message);
+		}
+	}
+
+	/// <summary>
+	/// Initializes a new instance of the
+	/// <see cref="OutlookStore"/> class.
+	/// </summary>
+	/// <param name="store">The Store object.</param>
+	internal OutlookStore(Store store)
+	{
+		this.store = store;
+		if (store != null)
+		{
+			this.outlookSession = new(store.Session);
+		}
+	}
+
+	/// <summary>
+	/// Gets or sets the total folders.
+	/// </summary>
+	/// <value>The total folders.</value>
+	public uint TotalFolders
+	{
+		get { return totalFolders; }
+		set { totalFolders = value; }
+	}
+
+	/// <summary>
+	/// Gets the Outlook session associated with this store.
+	/// </summary>
+	public OutlookSession OutlookSession { get { return outlookSession; } }
+
+	/// <summary>
+	/// Creates an Outlook store helper from the supplied session.
+	/// </summary>
+	/// <param name="outlookSession">The session reference, which must be an
+	/// <see cref="OutlookSession"/> instance.</param>
+	/// <returns>A helper that uses the supplied session.</returns>
+	/// <exception cref="NotSupportedException">
+	/// <paramref name="outlookSession"/> is null or is not an
+	/// <see cref="OutlookSession"/> instance.
+	/// </exception>
+	/// <remarks>
+	/// The current implementation requires operations not yet exposed by
+	/// <see cref="IOutlookSession"/>. Sessions provided by
+	/// <see cref="OutlookService"/> satisfy this requirement.
+	/// </remarks>
+	public static OutlookStore FromSession(IOutlookSession outlookSession)
+	{
+		OutlookStore result = new(outlookSession);
+		return result;
+	}
+
+	/// <summary>
+	/// Empty deleted items folder.
+	/// </summary>
+	/// <param name="store">The store to access.</param>
+	public static void EmptyDeletedItemsFolder(Store store)
+	{
+		if (store != null)
+		{
+			MAPIFolder deletedItemsFolder = store.GetDefaultFolder(
+					OlDefaultFolders.olFolderDeletedItems);
+
+			EmptyDeletedItemsFolder(deletedItemsFolder);
+		}
+	}
+
+	/// <summary>
+	/// Get store name.
+	/// </summary>
+	/// <param name="store">The store to access.</param>
+	/// <returns>The store name.</returns>
+	public static string GetStoreName(Store store)
+	{
+		string name = null;
+
+		if (store != null)
+		{
+			name = store.DisplayName;
+
+			if (string.IsNullOrWhiteSpace(name))
 			{
-				MAPIFolder deletedItemsFolder = store.GetDefaultFolder(
-						OlDefaultFolders.olFolderDeletedItems);
-
-				EmptyDeletedItemsFolder(deletedItemsFolder);
+				string path = store.FilePath;
+				name = Path.GetFileNameWithoutExtension(path);
 			}
 		}
 
-		/// <summary>
-		/// Get store name.
-		/// </summary>
-		/// <param name="store">The store to access.</param>
-		/// <returns>The store name.</returns>
-		public static string GetStoreName(Store store)
+		return name;
+	}
+
+	/// <summary>
+	/// Get top level folder by name.
+	/// </summary>
+	/// <param name="store">The store to check.</param>
+	/// <param name="folderName">The folder name.</param>
+	/// <returns>The MAPIFolder object.</returns>
+	public static MAPIFolder GetTopLevelFolder(
+		Store store, string folderName)
+	{
+		MAPIFolder pstFolder = null;
+
+		if (store != null)
 		{
-			string name = null;
+			MAPIFolder rootFolder = store.GetRootFolder();
 
-			if (store != null)
-			{
-				name = store.DisplayName;
+			pstFolder = OutlookFolder.AddFolder(rootFolder, folderName);
 
-				if (string.IsNullOrWhiteSpace(name))
-				{
-					string path = store.FilePath;
-					name = Path.GetFileNameWithoutExtension(path);
-				}
-			}
-
-			return name;
+			Marshal.ReleaseComObject(rootFolder);
 		}
 
-		/// <summary>
-		/// Get top level folder by name.
-		/// </summary>
-		/// <param name="store">The store to check.</param>
-		/// <param name="folderName">The folder name.</param>
-		/// <returns>The MAPIFolder object.</returns>
-		public static MAPIFolder GetTopLevelFolder(
-			Store store, string folderName)
-		{
-			MAPIFolder pstFolder = null;
+		return pstFolder;
+	}
 
-			if (store != null)
+	/// <summary>
+	/// Remove all empty folders.
+	/// </summary>
+	/// <param name="store">The PST store to process.</param>
+	/// <returns>The count of removed folders.</returns>
+	public static int RemoveEmptyFolders(Store store)
+	{
+		int removedFolders = 0;
+
+		if (store != null)
+		{
+			string path = store.FilePath;
+			string extension = Path.GetExtension(path);
+
+			if (!extension.Equals(
+				".ost", StringComparison.OrdinalIgnoreCase))
 			{
+				string storePath = GetStoreName(store);
+
+				Log.Info("Checking for empty folders in: " +
+					storePath);
+
 				MAPIFolder rootFolder = store.GetRootFolder();
 
-				pstFolder = OutlookFolder.AddFolder(rootFolder, folderName);
+				removedFolders = OutlookFolder.RemoveEmptyFolders(
+					rootFolder, true);
 
 				Marshal.ReleaseComObject(rootFolder);
 			}
-
-			return pstFolder;
 		}
 
-		/// <summary>
-		/// Remove all empty folders.
-		/// </summary>
-		/// <param name="store">The PST store to process.</param>
-		/// <returns>The count of removed folders.</returns>
-		public static int RemoveEmptyFolders(Store store)
-		{
-			int removedFolders = 0;
+		Log.Info("Remove empty folder complete - total folders removed: " +
+			removedFolders);
 
-			if (store != null)
+		return removedFolders;
+	}
+
+	/// <summary>
+	/// Remove all empty folders.
+	/// </summary>
+	/// <param name="store">The PST store to process.</param>
+	/// <returns>The count of removed folders.</returns>
+	public static async Task<int> RemoveEmptyFoldersAsync(Store store)
+	{
+		int removedFolders = 0;
+
+		if (store != null)
+		{
+			string path = store.FilePath;
+			string extension = Path.GetExtension(path);
+
+			if (!extension.Equals(
+				".ost", StringComparison.OrdinalIgnoreCase))
 			{
-				string path = store.FilePath;
-				string extension = Path.GetExtension(path);
+				string storePath = GetStoreName(store);
 
-				if (!extension.Equals(
-					".ost", StringComparison.OrdinalIgnoreCase))
-				{
-					string storePath = GetStoreName(store);
+				Log.Info("Checking for empty folders in: " +
+					storePath);
 
-					Log.Info("Checking for empty folders in: " +
-						storePath);
-
-					MAPIFolder rootFolder = store.GetRootFolder();
-
-					removedFolders = OutlookFolder.RemoveEmptyFolders(
-						rootFolder, true);
-
-					Marshal.ReleaseComObject(rootFolder);
-				}
-			}
-
-			Log.Info("Remove empty folder complete - total folders removed: " +
-				removedFolders);
-
-			return removedFolders;
-		}
-
-		/// <summary>
-		/// Remove all empty folders.
-		/// </summary>
-		/// <param name="store">The PST store to process.</param>
-		/// <returns>The count of removed folders.</returns>
-		public static async Task<int> RemoveEmptyFoldersAsync(Store store)
-		{
-			int removedFolders = 0;
-
-			if (store != null)
-			{
-				string path = store.FilePath;
-				string extension = Path.GetExtension(path);
-
-				if (!extension.Equals(
-					".ost", StringComparison.OrdinalIgnoreCase))
-				{
-					string storePath = GetStoreName(store);
-
-					Log.Info("Checking for empty folders in: " +
-						storePath);
-
-					MAPIFolder rootFolder = store.GetRootFolder();
-
-					removedFolders = await
-						OutlookFolder.RemoveEmptyFoldersAsync(
-							rootFolder, true).ConfigureAwait(false);
-
-					Marshal.ReleaseComObject(rootFolder);
-				}
-			}
-
-			Log.Info("Remove empty folder complete - total folders removed: " +
-				removedFolders);
-
-			return removedFolders;
-		}
-
-		/// <summary>
-		/// Remove folder from PST store.
-		/// </summary>
-		/// <param name="path">The path of current folder.</param>
-		/// <param name="subFolder">The sub-folder.</param>
-		/// <param name="force">Whether to force the removal.</param>
-		public static void RemoveFolder(
-			string path,
-			MAPIFolder subFolder,
-			bool force)
-		{
-			if (subFolder != null)
-			{
-				string subFolderName = subFolder.Name;
-				MAPIFolder parentFolder = OutlookFolder.GetParent(subFolder);
-
-				if (parentFolder != null)
-				{
-					int count = parentFolder.Folders.Count;
-					int index;
-					for (index = 1; index <= count; index++)
-					{
-						MAPIFolder folder = parentFolder.Folders[index];
-
-						string name = folder.Name;
-
-						if (name.Equals(
-							subFolderName, StringComparison.OrdinalIgnoreCase))
-						{
-							break;
-						}
-					}
-
-					OutlookFolder.RemoveFolder(subFolder, index, force);
-				}
-			}
-		}
-
-		/// <summary>
-		/// List the folders.
-		/// </summary>
-		/// <param name="pstFilePath">The PST file to check.</param>
-		/// <param name="entryId">The entry id of the item to check.</param>
-		public void Details(string pstFilePath, string entryId)
-		{
-			Store store = outlookAccount.GetStore(pstFilePath);
-
-			if (store != null)
-			{
-				object mapiItem = GetItemFromEntryId(entryId);
-
-				OutlookItem outlookItem = new (mapiItem);
-
-				string details = OutlookItem.GetDetails(mapiItem);
-
-				if (details != null)
-				{
-					string fileName = entryId + ".txt";
-
-					File.WriteAllText(fileName, details);
-					Log.Info("Item Details Saved in " + fileName);
-				}
-				else
-				{
-					Log.Warn("Item Details is NULL!");
-				}
-
-				Marshal.ReleaseComObject(mapiItem);
-			}
-		}
-
-		/// <summary>
-		/// Gets folder from entry id.
-		/// </summary>
-		/// <param name="entryId">The entry id.</param>
-		/// <param name="store">The store to check.</param>
-		/// <returns>The folder.</returns>
-		public MAPIFolder GetFolderFromID(string entryId, Store store)
-		{
-			MAPIFolder folder = null;
-
-			if (store != null)
-			{
-				NameSpace session = outlookAccount.Session;
-				folder = session.GetFolderFromID(entryId, store.StoreID);
-			}
-
-			return folder;
-		}
-
-		/// <summary>
-		/// Get the item by its entry id.
-		/// </summary>
-		/// <param name="entryId">The entryId of the item.</param>
-		/// <returns>The item object.</returns>
-		public object GetItemFromEntryId(string entryId)
-		{
-			NameSpace session = outlookAccount.Session;
-			object item = session.GetItemFromID(entryId);
-
-			return item;
-		}
-
-		/// <summary>
-		/// Get the item's synopses.
-		/// </summary>
-		/// <param name="entryId">The entryId of the MailItem to check.</param>
-		/// <returns>The synoses of the item.</returns>
-		[Obsolete("GetMailItemSynopses is deprecated, " +
-			"please use OutlookItem.Synopses instead.")]
-		public string GetItemSynopses(string entryId)
-		{
-			NameSpace session = outlookAccount.Session;
-			object mapiItem = session.GetItemFromID(entryId);
-
-			OutlookItem outlookItem = new (mapiItem);
-			string synopses = outlookItem.Synopses;
-
-			return synopses;
-		}
-
-		/// <summary>
-		/// Get the item by its entry id.
-		/// </summary>
-		/// <param name="entryId">The entryId of the item.</param>
-		/// <returns>The MailItem object.</returns>
-		public MailItem GetMailItemFromEntryId(string entryId)
-		{
-			MailItem mailItem = GetItemFromEntryId(entryId) as MailItem;
-
-			return mailItem;
-		}
-
-		/// <summary>
-		/// Get the total duplicates in the store.
-		/// </summary>
-		/// <param name="pstFilePath">The PST file to check.</param>
-		/// <returns>A list of total duplicates in the store.</returns>
-		public IDictionary<string, IList<string>> GetTotalDuplicates(
-			string pstFilePath)
-		{
-			IDictionary<string, IList<string>> hashTable =
-				new Dictionary<string, IList<string>>();
-
-			Store store = outlookAccount.GetStore(pstFilePath);
-
-			if (store != null)
-			{
 				MAPIFolder rootFolder = store.GetRootFolder();
-				OutlookFolder outlookFolder = new (outlookAccount);
 
-				hashTable = outlookFolder.GetItemHashes(rootFolder);
+				removedFolders = await
+					OutlookFolder.RemoveEmptyFoldersAsync(
+						rootFolder, true).ConfigureAwait(false);
+
+				Marshal.ReleaseComObject(rootFolder);
 			}
-
-			return hashTable;
 		}
 
-		/// <summary>
-		/// List the folders.
-		/// </summary>
-		/// <param name="pstFilePath">The PST file to check.</param>
-		/// <param name="folderPath">The folder path to check.</param>
-		/// <param name="recurse">Indicates whether to recurse into
-		/// sub-folders or not.</param>
-		/// <returns>The folders.</returns>
-		public IList<string> ListFolders(
-			string pstFilePath, string folderPath, bool recurse)
+		Log.Info("Remove empty folder complete - total folders removed: " +
+			removedFolders);
+
+		return removedFolders;
+	}
+
+	/// <summary>
+	/// Remove folder from PST store.
+	/// </summary>
+	/// <param name="path">The path of current folder.</param>
+	/// <param name="subFolder">The sub-folder.</param>
+	/// <param name="force">Whether to force the removal.</param>
+	public static void RemoveFolder(
+		string path,
+		MAPIFolder subFolder,
+		bool force)
+	{
+		if (subFolder != null)
 		{
-			IList<string> folderNames = [];
+			string subFolderName = subFolder.Name;
+			MAPIFolder parentFolder = OutlookFolder.GetParent(subFolder);
 
-			Store store = outlookAccount.GetStore(pstFilePath);
-
-			if (store != null)
+			if (parentFolder != null)
 			{
-				MAPIFolder folder = OutlookFolder.CreateFolderPath(
-					store, folderPath);
-
-				if (folder != null)
+				int count = parentFolder.Folders.Count;
+				int index;
+				for (index = 1; index <= count; index++)
 				{
-					folderNames = OutlookFolder.ListFolders(
-						folderNames, folderPath, folder, recurse);
+					MAPIFolder folder = parentFolder.Folders[index];
 
-					Marshal.ReleaseComObject(folder);
+					string name = folder.Name;
+
+					if (name.Equals(
+						subFolderName, StringComparison.OrdinalIgnoreCase))
+					{
+						break;
+					}
 				}
+
+				OutlookFolder.RemoveFolder(subFolder, index, force);
 			}
-
-			return folderNames;
 		}
+	}
 
-		/// <summary>
-		/// List the entry IDs of items in a given folder.
-		/// </summary>
-		/// <param name="pstFilePath">The PST file to check.</param>
-		/// <param name="folderPath">The folder path to check.</param>
-		/// <returns>The list of entry IDs.</returns>
-		public IList<string> GetIds(
-			string pstFilePath, string folderPath)
+	/// <summary>
+	/// List the folders.
+	/// </summary>
+	/// <param name="pstFilePath">The PST file to check.</param>
+	/// <param name="entryId">The entry id of the item to check.</param>
+	public void Details(string pstFilePath, string entryId)
+	{
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		if (store != null)
 		{
-			IList<string> entryIds = [];
+			object mapiItem = GetItemFromEntryId(entryId);
 
-			Store store = outlookAccount.GetStore(pstFilePath);
+			OutlookItem outlookItem = new(mapiItem);
 
-			if (store != null)
+			string details = OutlookItem.GetDetails(mapiItem);
+
+			if (details != null)
 			{
-				MAPIFolder folder = OutlookFolder.CreateFolderPath(
-					store, folderPath);
+				string fileName = entryId + ".txt";
 
-				if (folder != null)
-				{
-					entryIds = OutlookFolder.GetEntryIds(folder);
-
-					Marshal.ReleaseComObject(folder);
-				}
+				File.WriteAllText(fileName, details);
+				Log.Info("Item Details Saved in " + fileName);
+			}
+			else
+			{
+				Log.Warn("Item Details is NULL!");
 			}
 
-			return entryIds;
+			Marshal.ReleaseComObject(mapiItem);
+		}
+	}
+
+	/// <summary>
+	/// Gets folder from entry id.
+	/// </summary>
+	/// <param name="entryId">The entry id.</param>
+	/// <param name="store">The store to check.</param>
+	/// <returns>The folder.</returns>
+	[Obsolete("Use OutlookSession.GetFolderFromId(entryId, " +
+		"store.StoreID). It returns an OutlookFolder wrapper.")]
+	public MAPIFolder GetFolderFromId(string entryId, Store store)
+	{
+		MAPIFolder folder = null;
+
+		if (store != null)
+		{
+			folder = outlookSession.GetFolderFromIdInternal(
+				entryId, store.StoreID);
 		}
 
-		/// <summary>
-		/// List the top senders in  the store.
-		/// </summary>
-		/// <param name="pstFilePath">The PST file to check.</param>
-		/// <param name="amount">The amout of senders to list.</param>
-		/// <returns>The top senders.</returns>
-		public IList<KeyValuePair<string, int>> ListTopSenders(
-			string pstFilePath, int amount)
-		{
-			IList<KeyValuePair<string, int>> topSenders = [];
+		return folder;
+	}
 
-			Store store = outlookAccount.GetStore(pstFilePath);
+	/// <summary>
+	/// Gets a folder by entry ID using the released method name.
+	/// </summary>
+	/// <param name="entryId">The folder entry ID.</param>
+	/// <param name="store">The store containing the folder.</param>
+	/// <returns>The matching folder, if found.</returns>
+	[Obsolete("Use OutlookSession.GetFolderFromId(entryId, " +
+		"store.StoreID). It returns an OutlookFolder wrapper.")]
+	public MAPIFolder GetFolderFromID(string entryId, Store store)
+	{
+		return GetFolderFromId(entryId, store);
+	}
+
+	/// <summary>
+	/// Get the item by its entry id.
+	/// </summary>
+	/// <param name="entryId">The entryId of the item.</param>
+	/// <returns>The item object.</returns>
+	public object GetItemFromEntryId(string entryId)
+	{
+		object item = outlookSession.GetItemFromId(entryId);
+
+		return item;
+	}
+
+	/// <summary>
+	/// Get the item's synopses.
+	/// </summary>
+	/// <param name="entryId">The entryId of the MailItem to check.</param>
+	/// <returns>The synopses of the item.</returns>
+	[Obsolete("Use OutlookSession.GetItemFromId(entryId), then new " +
+		"OutlookItem(item).Synopses.")]
+	public string GetItemSynopses(string entryId)
+	{
+		object mapiItem = outlookSession.GetItemFromId(entryId);
+
+		OutlookItem outlookItem = new(mapiItem);
+		string synopses = outlookItem.Synopses;
+
+		return synopses;
+	}
+
+	/// <summary>
+	/// Get the item by its entry id.
+	/// </summary>
+	/// <param name="entryId">The entryId of the item.</param>
+	/// <returns>The MailItem object.</returns>
+	public MailItem GetMailItemFromEntryId(string entryId)
+	{
+		MailItem mailItem = GetItemFromEntryId(entryId) as MailItem;
+
+		return mailItem;
+	}
+
+	/// <summary>
+	/// Get the total duplicates in the store.
+	/// </summary>
+	/// <param name="pstFilePath">The PST file to check.</param>
+	/// <returns>A list of total duplicates in the store.</returns>
+	public IDictionary<string, IList<string>> GetTotalDuplicates(
+		string pstFilePath)
+	{
+		IDictionary<string, IList<string>> hashTable =
+			new Dictionary<string, IList<string>>();
+
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		if (store != null)
+		{
+			MAPIFolder rootFolder = store.GetRootFolder();
+			OutlookFolder outlookFolder = new(outlookSession);
+
+			hashTable = outlookFolder.GetItemHashes(rootFolder);
+		}
+
+		return hashTable;
+	}
+
+	/// <summary>
+	/// List the folders.
+	/// </summary>
+	/// <param name="pstFilePath">The PST file to check.</param>
+	/// <param name="folderPath">The folder path to check.</param>
+	/// <param name="recurse">Indicates whether to recurse into
+	/// sub-folders or not.</param>
+	/// <returns>The folders.</returns>
+	public IList<string> ListFolders(
+		string pstFilePath, string folderPath, bool recurse)
+	{
+		IList<string> folderNames = [];
+
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		if (store != null)
+		{
+			MAPIFolder folder = OutlookFolder.CreateFolderPath(
+				store, folderPath);
+
+			if (folder != null)
+			{
+				folderNames = OutlookFolder.ListFolders(
+					folderNames, folderPath, folder, recurse);
+
+				Marshal.ReleaseComObject(folder);
+			}
+		}
+
+		return folderNames;
+	}
+
+	/// <summary>
+	/// List the entry IDs of items in a given folder.
+	/// </summary>
+	/// <param name="pstFilePath">The PST file to check.</param>
+	/// <param name="folderPath">The folder path to check.</param>
+	/// <returns>The list of entry IDs.</returns>
+	public IList<string> GetIds(
+		string pstFilePath, string folderPath)
+	{
+		IList<string> entryIds = [];
+
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		if (store != null)
+		{
+			MAPIFolder folder = OutlookFolder.CreateFolderPath(
+				store, folderPath);
+
+			if (folder != null)
+			{
+				entryIds = OutlookFolder.GetEntryIds(folder);
+
+				Marshal.ReleaseComObject(folder);
+			}
+		}
+
+		return entryIds;
+	}
+
+	/// <summary>
+	/// List the top senders in  the store.
+	/// </summary>
+	/// <param name="pstFilePath">The PST file to check.</param>
+	/// <param name="amount">The amout of senders to list.</param>
+	/// <returns>The top senders.</returns>
+	public IList<KeyValuePair<string, int>> ListTopSenders(
+		string pstFilePath, int amount)
+	{
+		IList<KeyValuePair<string, int>> topSenders = [];
+
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		MAPIFolder rootFolder = store.GetRootFolder();
+
+		OutlookFolder outlookFolder = new(outlookSession);
+
+		IDictionary<string, int> sendersCounts =
+			outlookFolder.GetSendersCount(rootFolder);
+
+		Marshal.ReleaseComObject(rootFolder);
+		Marshal.ReleaseComObject(store);
+
+		IOrderedEnumerable<KeyValuePair<string, int>> orderedList =
+			sendersCounts.OrderByDescending(pair => pair.Value);
+		IEnumerable<KeyValuePair<string, int>> orderedListTop =
+			orderedList.Take(amount);
+
+		topSenders = orderedListTop.ToList();
+
+		return topSenders;
+	}
+
+	/// <summary>
+	/// Merge duplicate folders.
+	/// </summary>
+	/// <param name="pstFilePath">The PST file to check.</param>
+	/// <param name="dryRun">Indicates whether this is a 'dry run'
+	/// or not.</param>
+	public void MergeFolders(string pstFilePath, bool dryRun)
+	{
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		MergeFolders(store, dryRun);
+
+		Log.Info("Merge folders complete - total folders checked: " +
+			totalFolders);
+	}
+
+	/// <summary>
+	/// Merge duplicate folders.
+	/// </summary>
+	/// <param name="store">The store to check.</param>
+	/// <param name="dryRun">Indicates whether this is a 'dry run'
+	/// or not.</param>
+	/// <returns>The total folders checked.</returns>
+	public uint MergeFolders(Store store, bool dryRun)
+	{
+		if (store != null)
+		{
+			string storePath = GetStoreName(store);
+			Log.Info("Merging folders in: " + storePath);
 
 			MAPIFolder rootFolder = store.GetRootFolder();
 
-			OutlookFolder outlookFolder = new (outlookAccount);
+			OutlookFolder outlookFolder = new(outlookSession);
+			outlookFolder.MergeFolders(rootFolder, dryRun);
 
-			IDictionary<string, int> sendersCounts =
-				outlookFolder.GetSendersCount(rootFolder);
+			totalFolders++;
 
 			Marshal.ReleaseComObject(rootFolder);
 			Marshal.ReleaseComObject(store);
-
-			IOrderedEnumerable<KeyValuePair<string, int>> orderedList =
-				sendersCounts.OrderByDescending(pair => pair.Value);
-			IEnumerable<KeyValuePair<string, int>> orderedListTop =
-				orderedList.Take(amount);
-
-			topSenders = orderedListTop.ToList();
-
-			return topSenders;
 		}
 
-		/// <summary>
-		/// Merge duplicate folders.
-		/// </summary>
-		/// <param name="pstFilePath">The PST file to check.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		public void MergeFolders(string pstFilePath, bool dryRun)
+		return totalFolders;
+	}
+
+	/// <summary>
+	/// Merge duplicate folders.
+	/// </summary>
+	/// <param name="pstFilePath">The PST file to check.</param>
+	/// <param name="dryRun">Indicates whether this is a 'dry run'
+	/// or not.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
+	public async Task MergeFoldersAsync(string pstFilePath, bool dryRun)
+	{
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		await MergeFoldersAsync(store, dryRun).ConfigureAwait(false);
+
+		Log.Info("Merge folders complete - total folders checked: " +
+			totalFolders);
+	}
+
+	/// <summary>
+	/// Merge duplicate folders.
+	/// </summary>
+	/// <param name="store">The store to check.</param>
+	/// <param name="dryRun">Indicates whether this is a 'dry run'
+	/// or not.</param>
+	/// <returns>The total folders checked.</returns>
+	public async Task<uint> MergeFoldersAsync(Store store, bool dryRun)
+	{
+		if (store != null)
 		{
-			Store store = outlookAccount.GetStore(pstFilePath);
+			string storePath = GetStoreName(store);
+			Log.Info("Merging folders in: " + storePath);
 
-			MergeFolders(store, dryRun);
+			MAPIFolder rootFolder = store.GetRootFolder();
 
-			Log.Info("Merge folders complete - total folders checked: " +
-				totalFolders);
+			OutlookFolder outlookFolder = new(outlookSession);
+			await outlookFolder.MergeFoldersAsync(
+				rootFolder, dryRun).ConfigureAwait(false);
+
+			totalFolders++;
+
+			Marshal.ReleaseComObject(rootFolder);
+			Marshal.ReleaseComObject(store);
 		}
 
-		/// <summary>
-		/// Merge duplicate folders.
-		/// </summary>
-		/// <param name="store">The store to check.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <returns>The total folders checked.</returns>
-		public uint MergeFolders(Store store, bool dryRun)
+		return totalFolders;
+	}
+
+	/// <summary>
+	/// Merge 2 stores together.
+	/// </summary>
+	/// <param name="sourcePstPath">The source PST path.</param>
+	/// <param name="destinationPstPath">The desination PST path.</param>
+	public void MergeStores(
+		string sourcePstPath, string destinationPstPath)
+	{
+		bool exists = File.Exists(sourcePstPath);
+
+		if (exists == false)
 		{
-			if (store != null)
+			Log.Error("The source PST path does not exist: " + sourcePstPath);
+		}
+		else
+		{
+			Store source = outlookSession.GetStore(sourcePstPath);
+			Store destination = outlookSession.GetStore(destinationPstPath);
+
+			MergeStores(source, destination);
+		}
+	}
+
+	/// <summary>
+	/// Merge 2 stores together.
+	/// </summary>
+	/// <param name="source">The source store.</param>
+	/// <param name="destination">The desination store.</param>
+	public void MergeStores(Store source, Store destination)
+	{
+		if (source != null && destination != null)
+		{
+			string sourcePath = GetStoreName(source);
+			string destinationPath = GetStoreName(destination);
+
+			LogFormatMessage.Info(
+				"Moving contents of {0} to {1}",
+				sourcePath,
+				destinationPath);
+
+			MAPIFolder sourceRootFolder = source.GetRootFolder();
+			MAPIFolder destinationRootFolder = destination.GetRootFolder();
+
+			int subFolderCount = sourceRootFolder.Folders.Count;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int subIndex = subFolderCount; subIndex > 0; subIndex--)
 			{
-				string storePath = GetStoreName(store);
-				Log.Info("Merging folders in: " + storePath);
+				MAPIFolder subFolder = sourceRootFolder.Folders[subIndex];
+				string folderName = subFolder.Name;
 
-				MAPIFolder rootFolder = store.GetRootFolder();
+				string subPath =
+					destinationPath + "/" + folderName;
 
-				OutlookFolder outlookFolder = new (outlookAccount);
-				outlookFolder.MergeFolders(rootFolder, dryRun);
+				bool folderExists = OutlookFolder.DoesFolderExist(
+					destinationRootFolder, folderName);
 
-				totalFolders++;
-
-				Marshal.ReleaseComObject(rootFolder);
-				Marshal.ReleaseComObject(store);
-			}
-
-			return totalFolders;
-		}
-
-		/// <summary>
-		/// Merge duplicate folders.
-		/// </summary>
-		/// <param name="pstFilePath">The PST file to check.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous
-		/// operation.</returns>
-		public async Task MergeFoldersAsync(string pstFilePath, bool dryRun)
-		{
-			Store store = outlookAccount.GetStore(pstFilePath);
-
-			await MergeFoldersAsync(store, dryRun).ConfigureAwait(false);
-
-			Log.Info("Merge folders complete - total folders checked: " +
-				totalFolders);
-		}
-
-		/// <summary>
-		/// Merge duplicate folders.
-		/// </summary>
-		/// <param name="store">The store to check.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <returns>The total folders checked.</returns>
-		public async Task<uint> MergeFoldersAsync(Store store, bool dryRun)
-		{
-			if (store != null)
-			{
-				string storePath = GetStoreName(store);
-				Log.Info("Merging folders in: " + storePath);
-
-				MAPIFolder rootFolder = store.GetRootFolder();
-
-				OutlookFolder outlookFolder = new (outlookAccount);
-				await outlookFolder.MergeFoldersAsync(
-					rootFolder, dryRun).ConfigureAwait(false);
-
-				totalFolders++;
-
-				Marshal.ReleaseComObject(rootFolder);
-				Marshal.ReleaseComObject(store);
-			}
-
-			return totalFolders;
-		}
-
-		/// <summary>
-		/// Merge 2 stores together.
-		/// </summary>
-		/// <param name="sourcePstPath">The source PST path.</param>
-		/// <param name="destinationPstPath">The desination PST path.</param>
-		public void MergeStores(
-			string sourcePstPath, string destinationPstPath)
-		{
-			bool exists = File.Exists(sourcePstPath);
-
-			if (exists == false)
-			{
-				Log.Error("The source PST path does not exist: " + sourcePstPath);
-			}
-			else
-			{
-				Store source = outlookAccount.GetStore(sourcePstPath);
-				Store destination = outlookAccount.GetStore(destinationPstPath);
-
-				MergeStores(source, destination);
-			}
-		}
-
-		/// <summary>
-		/// Merge 2 stores together.
-		/// </summary>
-		/// <param name="source">The source store.</param>
-		/// <param name="destination">The desination store.</param>
-		public void MergeStores(Store source, Store destination)
-		{
-			if (source != null && destination != null)
-			{
-				string sourcePath = GetStoreName(source);
-				string destinationPath = GetStoreName(destination);
-
-				LogFormatMessage.Info(
-					"Moving contents of {0} to {1}",
-					sourcePath,
-					destinationPath);
-
-				MAPIFolder sourceRootFolder = source.GetRootFolder();
-				MAPIFolder destinationRootFolder = destination.GetRootFolder();
-
-				int subFolderCount = sourceRootFolder.Folders.Count;
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int subIndex = subFolderCount; subIndex > 0; subIndex--)
+				if (folderExists == true)
 				{
-					MAPIFolder subFolder = sourceRootFolder.Folders[subIndex];
-					string folderName = subFolder.Name;
+					// Folder exists, so if just moving it, it will get
+					// renamed something FolderName (2), so need to merge.
+					MAPIFolder destinationSubFolder =
+						OutlookFolder.GetSubFolder(
+							destinationRootFolder, folderName);
 
-					string subPath =
-						destinationPath + "/" + folderName;
+					OutlookFolder outlookFolder = new(outlookSession);
 
-					bool folderExists = OutlookFolder.DoesFolderExist(
-						destinationRootFolder, folderName);
+					outlookFolder.MoveFolderContents(
+						subFolder, destinationSubFolder);
 
-					if (folderExists == true)
+					// Once all the items have been moved,
+					// now remove the folder.
+					bool isReserved =
+						OutlookFolder.IsReservedFolder(subFolder);
+
+					if (isReserved == false)
 					{
-						// Folder exists, so if just moving it, it will get
-						// renamed something FolderName (2), so need to merge.
-						MAPIFolder destinationSubFolder =
-							OutlookFolder.GetSubFolder(
-								destinationRootFolder, folderName);
-
-						OutlookFolder outlookFolder = new (outlookAccount);
-
-						outlookFolder.MoveFolderContents(
-							subFolder, destinationSubFolder);
-
-						// Once all the items have been moved,
-						// now remove the folder.
-						bool isReserved =
-							OutlookFolder.IsReservedFolder(subFolder);
-
-						if (isReserved == false)
-						{
-							OutlookFolder.RemoveFolder(
-								subFolder, subIndex, false);
-						}
+						OutlookFolder.RemoveFolder(
+							subFolder, subIndex, false);
 					}
-					else
-					{
-						// Folder doesn't already exist, so just move it.
-						LogFormatMessage.Info(
-							"at: {0} Moving {1} to {2}",
-							subPath,
-							folderName,
-							destinationPath);
+				}
+				else
+				{
+					// Folder doesn't already exist, so just move it.
+					LogFormatMessage.Info(
+						"at: {0} Moving {1} to {2}",
+						subPath,
+						folderName,
+						destinationPath);
 
-						subFolder.MoveTo(destinationRootFolder);
-					}
+					subFolder.MoveTo(destinationRootFolder);
 				}
 			}
 		}
+	}
 
-		/// <summary>
-		/// Merge 2 stores together.
-		/// </summary>
-		/// <param name="sourcePstPath">The source PST path.</param>
-		/// <param name="destinationPstPath">The desination PST path.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous
-		/// operation.</returns>
-		public async Task MergeStoresAsync(
-			string sourcePstPath, string destinationPstPath)
+	/// <summary>
+	/// Merge 2 stores together.
+	/// </summary>
+	/// <param name="sourcePstPath">The source PST path.</param>
+	/// <param name="destinationPstPath">The desination PST path.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
+	public async Task MergeStoresAsync(
+		string sourcePstPath, string destinationPstPath)
+	{
+		bool exists = File.Exists(sourcePstPath);
+
+		if (exists == false)
 		{
-			bool exists = File.Exists(sourcePstPath);
-
-			if (exists == false)
-			{
-				Log.Error("The source PST path does not exist: " + sourcePstPath);
-			}
-			else
-			{
-				Store source = outlookAccount.GetStore(sourcePstPath);
-				Store destination = outlookAccount.GetStore(destinationPstPath);
-
-				await MergeStoresAsync(source, destination).ConfigureAwait(false);
-			}
+			Log.Error("The source PST path does not exist: " + sourcePstPath);
 		}
-
-		/// <summary>
-		/// Merge 2 stores together.
-		/// </summary>
-		/// <param name="source">The source store.</param>
-		/// <param name="destination">The desination store.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous
-		/// operation.</returns>
-		public async Task MergeStoresAsync(Store source, Store destination)
+		else
 		{
-			if (source != null && destination != null)
+			Store source = outlookSession.GetStore(sourcePstPath);
+			Store destination = outlookSession.GetStore(destinationPstPath);
+
+			await MergeStoresAsync(source, destination).ConfigureAwait(false);
+		}
+	}
+
+	/// <summary>
+	/// Merge 2 stores together.
+	/// </summary>
+	/// <param name="source">The source store.</param>
+	/// <param name="destination">The desination store.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
+	public async Task MergeStoresAsync(Store source, Store destination)
+	{
+		if (source != null && destination != null)
+		{
+			string sourcePath = GetStoreName(source);
+			string destinationPath = GetStoreName(destination);
+
+			LogFormatMessage.Info(
+				"Moving contents of {0} to {1}",
+				sourcePath,
+				destinationPath);
+
+			MAPIFolder sourceRootFolder = source.GetRootFolder();
+			MAPIFolder destinationRootFolder = destination.GetRootFolder();
+
+			int subFolderCount = sourceRootFolder.Folders.Count;
+
+			// Office uses 1 based indexes from VBA.
+			// Iterate in reverse order as the group may change.
+			for (int subIndex = subFolderCount; subIndex > 0; subIndex--)
 			{
-				string sourcePath = GetStoreName(source);
-				string destinationPath = GetStoreName(destination);
+				MAPIFolder subFolder = sourceRootFolder.Folders[subIndex];
+				string folderName = subFolder.Name;
 
-				LogFormatMessage.Info(
-					"Moving contents of {0} to {1}",
-					sourcePath,
-					destinationPath);
+				string subPath =
+					destinationPath + "/" + folderName;
 
-				MAPIFolder sourceRootFolder = source.GetRootFolder();
-				MAPIFolder destinationRootFolder = destination.GetRootFolder();
+				bool folderExists = OutlookFolder.DoesFolderExist(
+					destinationRootFolder, folderName);
 
-				int subFolderCount = sourceRootFolder.Folders.Count;
-
-				// Office uses 1 based indexes from VBA.
-				// Iterate in reverse order as the group may change.
-				for (int subIndex = subFolderCount; subIndex > 0; subIndex--)
+				if (folderExists == true)
 				{
-					MAPIFolder subFolder = sourceRootFolder.Folders[subIndex];
-					string folderName = subFolder.Name;
+					// Folder exists, so if just moving it, it will get
+					// renamed something FolderName (2), so need to merge.
+					MAPIFolder destinationSubFolder =
+						OutlookFolder.GetSubFolder(
+							destinationRootFolder, folderName);
 
-					string subPath =
-						destinationPath + "/" + folderName;
+					OutlookFolder outlookFolder = new(outlookSession);
 
-					bool folderExists = OutlookFolder.DoesFolderExist(
-						destinationRootFolder, folderName);
+					await outlookFolder.MoveFolderContentsAsync(
+						subFolder, destinationSubFolder).
+							ConfigureAwait(false);
 
-					if (folderExists == true)
+					// Once all the items have been moved,
+					// now remove the folder.
+					bool isReserved =
+						OutlookFolder.IsReservedFolder(subFolder);
+
+					if (isReserved == false)
 					{
-						// Folder exists, so if just moving it, it will get
-						// renamed something FolderName (2), so need to merge.
-						MAPIFolder destinationSubFolder =
-							OutlookFolder.GetSubFolder(
-								destinationRootFolder, folderName);
-
-						OutlookFolder outlookFolder = new (outlookAccount);
-
-						await outlookFolder.MoveFolderContentsAsync(
-							subFolder, destinationSubFolder).
-								ConfigureAwait(false);
-
-						// Once all the items have been moved,
-						// now remove the folder.
-						bool isReserved =
-							OutlookFolder.IsReservedFolder(subFolder);
-
-						if (isReserved == false)
-						{
-							OutlookFolder.RemoveFolder(
-								subFolder, subIndex, false);
-						}
+						OutlookFolder.RemoveFolder(
+							subFolder, subIndex, false);
 					}
-					else
-					{
-						// Folder doesn't already exist, so just move it.
-						LogFormatMessage.Info(
-							"at: {0} Moving {1} to {2}",
-							subPath,
-							folderName,
-							destinationPath);
+				}
+				else
+				{
+					// Folder doesn't already exist, so just move it.
+					LogFormatMessage.Info(
+						"at: {0} Moving {1} to {2}",
+						subPath,
+						folderName,
+						destinationPath);
 
-						subFolder.MoveTo(destinationRootFolder);
-					}
+					subFolder.MoveTo(destinationRootFolder);
 				}
 			}
 		}
+	}
 
-		/// <summary>
-		/// Move folder.
-		/// </summary>
-		/// <param name="sourcePstPath">The source PST path.</param>
-		/// <param name="sourceFolderPath">The source folder path.</param>
-		/// <param name="destinationPstPath">The desination PST path.</param>
-		/// <param name="destinationFolderPath">The destination folder path.</param>
-		public void MoveFolder(
-			string sourcePstPath,
-			string sourceFolderPath,
-			string destinationPstPath,
-			string destinationFolderPath)
+	/// <summary>
+	/// Move folder.
+	/// </summary>
+	/// <param name="sourcePstPath">The source PST path.</param>
+	/// <param name="sourceFolderPath">The source folder path.</param>
+	/// <param name="destinationPstPath">The desination PST path.</param>
+	/// <param name="destinationFolderPath">The destination folder path.</param>
+	public void MoveFolder(
+		string sourcePstPath,
+		string sourceFolderPath,
+		string destinationPstPath,
+		string destinationFolderPath)
+	{
+		Store source = outlookSession.GetStore(sourcePstPath);
+		Store destination;
+
+		if (string.IsNullOrWhiteSpace(destinationPstPath) ||
+			destinationPstPath.Equals(
+				sourcePstPath, StringComparison.OrdinalIgnoreCase))
 		{
-			Store source = outlookAccount.GetStore(sourcePstPath);
-			Store destination;
-
-			if (string.IsNullOrWhiteSpace(destinationPstPath) ||
-				destinationPstPath.Equals(
-					sourcePstPath, StringComparison.OrdinalIgnoreCase))
-			{
-				destination = source;
-			}
-			else
-			{
-				destination = outlookAccount.GetStore(destinationPstPath);
-			}
-
-			MoveFolder(
-				source, sourceFolderPath, destination, destinationFolderPath);
+			destination = source;
+		}
+		else
+		{
+			destination = outlookSession.GetStore(destinationPstPath);
 		}
 
-		/// <summary>
-		/// Move folder.
-		/// </summary>
-		/// <param name="source">The source store.</param>
-		/// <param name="sourceFolderPath">The source folder path.</param>
-		/// <param name="destination">The destination store.</param>
-		/// <param name="destinationFolderPath">The destination folder path.</param>
-		public void MoveFolder(
-			Store source,
-			string sourceFolderPath,
-			Store destination,
-			string destinationFolderPath)
+		MoveFolder(
+			source, sourceFolderPath, destination, destinationFolderPath);
+	}
+
+	/// <summary>
+	/// Move folder.
+	/// </summary>
+	/// <param name="source">The source store.</param>
+	/// <param name="sourceFolderPath">The source folder path.</param>
+	/// <param name="destination">The destination store.</param>
+	/// <param name="destinationFolderPath">The destination folder path.</param>
+	public void MoveFolder(
+		Store source,
+		string sourceFolderPath,
+		Store destination,
+		string destinationFolderPath)
+	{
+		if (source != null)
 		{
-			if (source != null)
+			try
 			{
-				try
+				bool folderExists = OutlookFolder.DoesFolderExist(
+					source, sourceFolderPath);
+
+				// If source folder doesn't exist, there is nothing to do.
+				if (folderExists == true)
 				{
-					bool folderExists = OutlookFolder.DoesFolderExist(
+					MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
 						source, sourceFolderPath);
 
-					// If source folder doesn't exist, there is nothing to do.
+					MAPIFolder destinationParent = OutlookFolder.GetPathParent(
+						destination, destinationFolderPath);
+
+					folderExists = OutlookFolder.DoesFolderExist(
+						destination, destinationFolderPath);
+
+					string parentPath =
+						OutlookFolder.GetFolderPath(destinationParent);
+					string folderName = sourceFolder.Name;
+					string destinationName =
+						OutlookFolder.GetBaseFolderName(
+							destinationFolderPath);
+
 					if (folderExists == true)
 					{
-						MAPIFolder sourceFolder = OutlookFolder.CreateFolderPath(
-							source, sourceFolderPath);
-
-						MAPIFolder destinationParent = OutlookFolder.GetPathParent(
-							destination, destinationFolderPath);
-
-						folderExists = OutlookFolder.DoesFolderExist(
-							destination, destinationFolderPath);
-
-						string parentPath =
-							OutlookFolder.GetFolderPath(destinationParent);
-						string folderName = sourceFolder.Name;
-						string destinationName =
-							OutlookFolder.GetBaseFolderName(
-								destinationFolderPath);
-
-						if (folderExists == true)
-						{
-							MAPIFolder destinationFolder =
-								OutlookFolder.CreateFolderPath(
-									destination, destinationFolderPath);
-
-							MoveExistingFolder(
-								sourceFolder, destinationFolder, destinationName);
-						}
-						else
-						{
-							// Folder doesn't already exist, so just move it.
-							LogFormatMessage.Info(
-								"at: {0} Moving {1} to {2}",
-								parentPath,
-								folderName,
-								destinationName);
-
-							bool isRootFolder =
-								OutlookFolder.IsRootFolder(sourceFolder);
-
-							if (isRootFolder == true)
-							{
-								sourceFolder.MoveTo(destinationParent);
-							}
-							else
-							{
-								string destinationParentId =
-									destinationParent.EntryID;
-
-								MAPIFolder sourceParent = OutlookFolder.GetParent(sourceFolder);
-
-								if (sourceParent != null)
-								{
-									string sourceParentId =
-										sourceParent.EntryID;
-
-									if (sourceParentId.Equals(
-										destinationParentId,
-										StringComparison.OrdinalIgnoreCase))
-									{
-										sourceFolder.Name = destinationName;
-									}
-									else
-									{
-										sourceFolder.MoveTo(destinationParent);
-
-										if (!sourceFolder.Name.Equals(
-											destinationName,
-											StringComparison.OrdinalIgnoreCase))
-										{
-											sourceFolder.Name =
-												destinationName;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				catch (COMException exception)
-				{
-					Log.Error(exception.ToString());
-				}
-			}
-		}
-
-		/// <summary>
-		/// Move folder.
-		/// </summary>
-		/// <param name="sourcePstPath">The source PST path.</param>
-		/// <param name="sourceFolderPath">The source folder path.</param>
-		/// <param name="destinationPstPath">The desination PST path.</param>
-		/// <param name="destinationFolderPath">The destination folder path.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous
-		/// operation.</returns>
-		public async Task MoveFolderAsync(
-			string sourcePstPath,
-			string sourceFolderPath,
-			string destinationPstPath,
-			string destinationFolderPath)
-		{
-			Store source = outlookAccount.GetStore(sourcePstPath);
-			Store destination;
-
-			if (string.IsNullOrWhiteSpace(destinationPstPath) ||
-				destinationPstPath.Equals(
-					sourcePstPath, StringComparison.OrdinalIgnoreCase))
-			{
-				destination = source;
-			}
-			else
-			{
-				destination = outlookAccount.GetStore(destinationPstPath);
-			}
-
-			await MoveFolderAsync(
-				source, sourceFolderPath, destination, destinationFolderPath).
-					ConfigureAwait(false);
-		}
-
-		/// <summary>
-		/// Move folder.
-		/// </summary>
-		/// <param name="source">The source store.</param>
-		/// <param name="sourceFolderPath">The source folder path.</param>
-		/// <param name="destination">The destination store.</param>
-		/// <param name="destinationFolderPath">The destination folder path.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous
-		/// operation.</returns>
-		public async Task MoveFolderAsync(
-			Store source,
-			string sourceFolderPath,
-			Store destination,
-			string destinationFolderPath)
-		{
-			if (source != null)
-			{
-				try
-				{
-					bool folderExists = OutlookFolder.DoesFolderExist(
-						source, sourceFolderPath);
-
-					// If source folder doesn't exist, there is nothing to do.
-					if (folderExists == true)
-					{
-						MAPIFolder sourceFolder =
+						MAPIFolder destinationFolder =
 							OutlookFolder.CreateFolderPath(
-								source, sourceFolderPath);
-
-						MAPIFolder destinationParent =
-							OutlookFolder.GetPathParent(
 								destination, destinationFolderPath);
 
-						folderExists = OutlookFolder.DoesFolderExist(
-							destination, destinationFolderPath);
+						MoveExistingFolder(
+							sourceFolder, destinationFolder, destinationName);
+					}
+					else
+					{
+						// Folder doesn't already exist, so just move it.
+						LogFormatMessage.Info(
+							"at: {0} Moving {1} to {2}",
+							parentPath,
+							folderName,
+							destinationName);
 
-						string parentPath =
-							OutlookFolder.GetFolderPath(destinationParent);
-						string folderName = sourceFolder.Name;
-						string destinationName =
-							OutlookFolder.GetBaseFolderName(
-								destinationFolderPath);
+						bool isRootFolder =
+							OutlookFolder.IsRootFolder(sourceFolder);
 
-						if (folderExists == true)
+						if (isRootFolder == true)
 						{
-							MAPIFolder destinationFolder =
-								OutlookFolder.CreateFolderPath(
-									destination, destinationFolderPath);
-
-							await MoveExistingFolderAsync(
-								sourceFolder,
-								destinationFolder,
-								destinationName).ConfigureAwait(false);
+							sourceFolder.MoveTo(destinationParent);
 						}
 						else
 						{
-							// Folder doesn't already exist, so just move it.
-							LogFormatMessage.Info(
-								"at: {0} Moving {1} to {2}",
-								parentPath,
-								folderName,
-								destinationName);
+							string destinationParentId =
+								destinationParent.EntryID;
 
-							bool isRootFolder =
-								OutlookFolder.IsRootFolder(sourceFolder);
+							MAPIFolder sourceParent = OutlookFolder.GetParent(sourceFolder);
 
-							if (isRootFolder == true)
+							if (sourceParent != null)
 							{
-								sourceFolder.MoveTo(destinationParent);
-							}
-							else
-							{
-								string destinationParentId =
-									destinationParent.EntryID;
+								string sourceParentId =
+									sourceParent.EntryID;
 
-								MAPIFolder sourceParent =
-									OutlookFolder.GetParent(sourceFolder);
-
-								if (sourceParent != null)
+								if (sourceParentId.Equals(
+									destinationParentId,
+									StringComparison.OrdinalIgnoreCase))
 								{
-									string sourceParentId =
-										sourceParent.EntryID;
+									sourceFolder.Name = destinationName;
+								}
+								else
+								{
+									sourceFolder.MoveTo(destinationParent);
 
-									if (sourceParentId.Equals(
-										destinationParentId,
+									if (!sourceFolder.Name.Equals(
+										destinationName,
 										StringComparison.OrdinalIgnoreCase))
 									{
-										sourceFolder.Name = destinationName;
-									}
-									else
-									{
-										sourceFolder.MoveTo(destinationParent);
-
-										if (!sourceFolder.Name.Equals(
-											destinationName,
-											StringComparison.OrdinalIgnoreCase))
-										{
-											sourceFolder.Name =
-												destinationName;
-										}
+										sourceFolder.Name =
+											destinationName;
 									}
 								}
 							}
 						}
 					}
 				}
-				catch (COMException exception)
+			}
+			catch (COMException exception)
+			{
+				Log.Error(exception.ToString());
+			}
+		}
+	}
+
+	/// <summary>
+	/// Move folder.
+	/// </summary>
+	/// <param name="sourcePstPath">The source PST path.</param>
+	/// <param name="sourceFolderPath">The source folder path.</param>
+	/// <param name="destinationPstPath">The desination PST path.</param>
+	/// <param name="destinationFolderPath">The destination folder path.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
+	public async Task MoveFolderAsync(
+		string sourcePstPath,
+		string sourceFolderPath,
+		string destinationPstPath,
+		string destinationFolderPath)
+	{
+		Store source = outlookSession.GetStore(sourcePstPath);
+		Store destination;
+
+		if (string.IsNullOrWhiteSpace(destinationPstPath) ||
+			destinationPstPath.Equals(
+				sourcePstPath, StringComparison.OrdinalIgnoreCase))
+		{
+			destination = source;
+		}
+		else
+		{
+			destination = outlookSession.GetStore(destinationPstPath);
+		}
+
+		await MoveFolderAsync(
+			source, sourceFolderPath, destination, destinationFolderPath).
+				ConfigureAwait(false);
+	}
+
+	/// <summary>
+	/// Move folder.
+	/// </summary>
+	/// <param name="source">The source store.</param>
+	/// <param name="sourceFolderPath">The source folder path.</param>
+	/// <param name="destination">The destination store.</param>
+	/// <param name="destinationFolderPath">The destination folder path.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
+	public async Task MoveFolderAsync(
+		Store source,
+		string sourceFolderPath,
+		Store destination,
+		string destinationFolderPath)
+	{
+		if (source != null)
+		{
+			try
+			{
+				bool folderExists = OutlookFolder.DoesFolderExist(
+					source, sourceFolderPath);
+
+				// If source folder doesn't exist, there is nothing to do.
+				if (folderExists == true)
 				{
-					Log.Error(exception.ToString());
+					MAPIFolder sourceFolder =
+						OutlookFolder.CreateFolderPath(
+							source, sourceFolderPath);
+
+					MAPIFolder destinationParent =
+						OutlookFolder.GetPathParent(
+							destination, destinationFolderPath);
+
+					folderExists = OutlookFolder.DoesFolderExist(
+						destination, destinationFolderPath);
+
+					string parentPath =
+						OutlookFolder.GetFolderPath(destinationParent);
+					string folderName = sourceFolder.Name;
+					string destinationName =
+						OutlookFolder.GetBaseFolderName(
+							destinationFolderPath);
+
+					if (folderExists == true)
+					{
+						MAPIFolder destinationFolder =
+							OutlookFolder.CreateFolderPath(
+								destination, destinationFolderPath);
+
+						await MoveExistingFolderAsync(
+							sourceFolder,
+							destinationFolder,
+							destinationName).ConfigureAwait(false);
+					}
+					else
+					{
+						// Folder doesn't already exist, so just move it.
+						LogFormatMessage.Info(
+							"at: {0} Moving {1} to {2}",
+							parentPath,
+							folderName,
+							destinationName);
+
+						bool isRootFolder =
+							OutlookFolder.IsRootFolder(sourceFolder);
+
+						if (isRootFolder == true)
+						{
+							sourceFolder.MoveTo(destinationParent);
+						}
+						else
+						{
+							string destinationParentId =
+								destinationParent.EntryID;
+
+							MAPIFolder sourceParent =
+								OutlookFolder.GetParent(sourceFolder);
+
+							if (sourceParent != null)
+							{
+								string sourceParentId =
+									sourceParent.EntryID;
+
+								if (sourceParentId.Equals(
+									destinationParentId,
+									StringComparison.OrdinalIgnoreCase))
+								{
+									sourceFolder.Name = destinationName;
+								}
+								else
+								{
+									sourceFolder.MoveTo(destinationParent);
+
+									if (!sourceFolder.Name.Equals(
+										destinationName,
+										StringComparison.OrdinalIgnoreCase))
+									{
+										sourceFolder.Name =
+											destinationName;
+									}
+								}
+							}
+						}
+					}
 				}
 			}
-		}
-
-		/// <summary>
-		/// Remove duplicates items from the given store.
-		/// </summary>
-		/// <param name="storePath">The path of the PST file to
-		/// process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <param name="flush">Indicates whether to empty the deleted items
-		/// folder.</param>
-		public void RemoveDuplicates(string storePath, bool dryRun, bool flush)
-		{
-			Store store = outlookAccount.GetStore(storePath);
-
-			if (store != null)
+			catch (COMException exception)
 			{
-				RemoveDuplicates(store, dryRun, flush);
-				Marshal.ReleaseComObject(store);
+				Log.Error(exception.ToString());
 			}
 		}
+	}
 
-		/// <summary>
-		/// Remove duplicates items from the given store.
-		/// </summary>
-		/// <param name="store">The PST store to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <param name="flush">Indicates whether to empty the deleted items
-		/// folder.</param>
-		public void RemoveDuplicates(Store store, bool dryRun, bool flush)
+	/// <summary>
+	/// Remove duplicates items from the given store.
+	/// </summary>
+	/// <param name="storePath">The path of the PST file to
+	/// process.</param>
+	/// <param name="dryRun">Indicates whether this is a 'dry run'
+	/// or not.</param>
+	/// <param name="flush">Indicates whether to empty the deleted items
+	/// folder.</param>
+	public void RemoveDuplicates(string storePath, bool dryRun, bool flush)
+	{
+		Store store = outlookSession.GetStore(storePath);
+
+		if (store != null)
 		{
-			if (store != null)
+			RemoveDuplicates(store, dryRun, flush);
+			Marshal.ReleaseComObject(store);
+		}
+	}
+
+	/// <summary>
+	/// Remove duplicates items from the given store.
+	/// </summary>
+	/// <param name="store">The PST store to process.</param>
+	/// <param name="dryRun">Indicates whether this is a 'dry run'
+	/// or not.</param>
+	/// <param name="flush">Indicates whether to empty the deleted items
+	/// folder.</param>
+	public void RemoveDuplicates(Store store, bool dryRun, bool flush)
+	{
+		if (store != null)
+		{
+			string storePath = GetStoreName(store);
+			Log.Info("Checking for duplicates in: " + storePath);
+
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			OutlookFolder outlookFolder = new(outlookSession);
+			int removedDuplicates =
+				outlookFolder.RemoveDuplicates(rootFolder, dryRun);
+
+			if (flush == true)
 			{
-				string storePath = GetStoreName(store);
-				Log.Info("Checking for duplicates in: " + storePath);
-
-				MAPIFolder rootFolder = store.GetRootFolder();
-
-				OutlookFolder outlookFolder = new (outlookAccount);
-				int removedDuplicates =
-					outlookFolder.RemoveDuplicates(rootFolder, dryRun);
-
-				if (flush == true)
-				{
-					EmptyDeletedItemsFolder(store);
-				}
-
-				LogFormatMessage.Info(
-					"Duplicates Removed in: {0}: {1}",
-					storePath,
-					removedDuplicates.ToString(CultureInfo.InvariantCulture));
-
-				totalFolders++;
-				Marshal.ReleaseComObject(rootFolder);
-			}
-		}
-
-		/// <summary>
-		/// Remove duplicates items from the given store.
-		/// </summary>
-		/// <param name="storePath">The path of the PST file to
-		/// process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <param name="flush">Indicates whether to empty the deleted items
-		/// folder.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous
-		/// operation.</returns>
-		public async Task RemoveDuplicatesAsync(
-			string storePath, bool dryRun, bool flush)
-		{
-			Store store = outlookAccount.GetStore(storePath);
-
-			if (store != null)
-			{
-				await RemoveDuplicatesAsync(store, dryRun, flush).
-					ConfigureAwait(false);
-				Marshal.ReleaseComObject(store);
-			}
-		}
-
-		/// <summary>
-		/// Remove duplicates items from the given store.
-		/// </summary>
-		/// <param name="store">The PST store to process.</param>
-		/// <param name="dryRun">Indicates whether this is a 'dry run'
-		/// or not.</param>
-		/// <param name="flush">Indicates whether to empty the deleted items
-		/// folder.</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous
-		/// operation.</returns>
-		public async Task RemoveDuplicatesAsync(
-			Store store, bool dryRun, bool flush)
-		{
-			if (store != null)
-			{
-				string storePath = GetStoreName(store);
-				Log.Info("Checking for duplicates in: " + storePath);
-
-				MAPIFolder rootFolder = store.GetRootFolder();
-
-				OutlookFolder outlookFolder = new (outlookAccount);
-
-				int removedDuplicates = await
-					outlookFolder.RemoveDuplicatesAsync(
-						rootFolder, dryRun).ConfigureAwait(false);
-
-				if (flush == true)
-				{
-					EmptyDeletedItemsFolder(store);
-				}
-
-				LogFormatMessage.Info(
-					"Duplicates Removed in: {0}: {1}",
-					storePath,
-					removedDuplicates.ToString(CultureInfo.InvariantCulture));
-
-				totalFolders++;
-				Marshal.ReleaseComObject(rootFolder);
-			}
-		}
-
-		/// <summary>
-		/// Remove all empty folders.
-		/// </summary>
-		/// <param name="pstFilePath">The PST file to check.</param>
-		/// <returns>The count of removed folders.</returns>
-		public int RemoveEmptyFolders(string pstFilePath)
-		{
-			Store store = outlookAccount.GetStore(pstFilePath);
-
-			int removedFolders = RemoveEmptyFolders(store);
-
-			return removedFolders;
-		}
-
-		/// <summary>
-		/// Remove all empty folders.
-		/// </summary>
-		/// <param name="pstFilePath">The PST file to check.</param>
-		/// <returns>The count of removed folders.</returns>
-		public async Task<int> RemoveEmptyFoldersAsync(string pstFilePath)
-		{
-			Store store = outlookAccount.GetStore(pstFilePath);
-
-			int removedFolders =
-				await RemoveEmptyFoldersAsync(store).ConfigureAwait(false);
-
-			return removedFolders;
-		}
-
-		/// <summary>
-		/// Create a new pst storage file.
-		/// </summary>
-		/// <param name="store">The store to check.</param>
-		public void RemoveStore(Store store)
-		{
-			if (store != null)
-			{
-				NameSpace session = outlookAccount.Session;
-
-				MAPIFolder rootFolder = store.GetRootFolder();
-
-				session.RemoveStore(rootFolder);
-
-				Marshal.ReleaseComObject(rootFolder);
-				Marshal.ReleaseComObject(store);
-			}
-		}
-
-		private static void EmptyDeletedItemsFolder(
-			MAPIFolder deletedItemsFolder)
-		{
-			Folders folders = deletedItemsFolder.Folders;
-			int totalItems = folders.Count;
-
-			// Office uses 1 based indexes from VBA.
-			// Iterate in reverse order as the group will change.
-			for (int index = totalItems; index > 0; index--)
-			{
-				MAPIFolder folder = folders[index];
-				folder.Delete();
+				EmptyDeletedItemsFolder(store);
 			}
 
-			Items items = deletedItemsFolder.Items;
-			totalItems = items.Count;
+			LogFormatMessage.Info(
+				"Duplicates Removed in: {0}: {1}",
+				storePath,
+				removedDuplicates.ToString(CultureInfo.InvariantCulture));
 
-			// Office uses 1 based indexes from VBA.
-			// Iterate in reverse order as the group will change.
-			for (int index = totalItems; index > 0; index--)
+			totalFolders++;
+			Marshal.ReleaseComObject(rootFolder);
+		}
+	}
+
+	/// <summary>
+	/// Remove duplicates items from the given store.
+	/// </summary>
+	/// <param name="storePath">The path of the PST file to
+	/// process.</param>
+	/// <param name="dryRun">Indicates whether this is a 'dry run'
+	/// or not.</param>
+	/// <param name="flush">Indicates whether to empty the deleted items
+	/// folder.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
+	public async Task RemoveDuplicatesAsync(
+		string storePath, bool dryRun, bool flush)
+	{
+		Store store = outlookSession.GetStore(storePath);
+
+		if (store != null)
+		{
+			await RemoveDuplicatesAsync(store, dryRun, flush).
+				ConfigureAwait(false);
+			Marshal.ReleaseComObject(store);
+		}
+	}
+
+	/// <summary>
+	/// Remove duplicates items from the given store.
+	/// </summary>
+	/// <param name="store">The PST store to process.</param>
+	/// <param name="dryRun">Indicates whether this is a 'dry run'
+	/// or not.</param>
+	/// <param name="flush">Indicates whether to empty the deleted items
+	/// folder.</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous
+	/// operation.</returns>
+	public async Task RemoveDuplicatesAsync(
+		Store store, bool dryRun, bool flush)
+	{
+		if (store != null)
+		{
+			string storePath = GetStoreName(store);
+			Log.Info("Checking for duplicates in: " + storePath);
+
+			MAPIFolder rootFolder = store.GetRootFolder();
+
+			OutlookFolder outlookFolder = new(outlookSession);
+
+			int removedDuplicates = await
+				outlookFolder.RemoveDuplicatesAsync(
+					rootFolder, dryRun).ConfigureAwait(false);
+
+			if (flush == true)
 			{
-				object item = items[index];
-
-				OutlookItem contentItem = new (item);
-				contentItem.Delete();
+				EmptyDeletedItemsFolder(store);
 			}
+
+			LogFormatMessage.Info(
+				"Duplicates Removed in: {0}: {1}",
+				storePath,
+				removedDuplicates.ToString(CultureInfo.InvariantCulture));
+
+			totalFolders++;
+			Marshal.ReleaseComObject(rootFolder);
+		}
+	}
+
+	/// <summary>
+	/// Remove all empty folders.
+	/// </summary>
+	/// <param name="pstFilePath">The PST file to check.</param>
+	/// <returns>The count of removed folders.</returns>
+	public int RemoveEmptyFolders(string pstFilePath)
+	{
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		int removedFolders = RemoveEmptyFolders(store);
+
+		return removedFolders;
+	}
+
+	/// <summary>
+	/// Remove all empty folders.
+	/// </summary>
+	/// <param name="pstFilePath">The PST file to check.</param>
+	/// <returns>The count of removed folders.</returns>
+	public async Task<int> RemoveEmptyFoldersAsync(string pstFilePath)
+	{
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		int removedFolders =
+			await RemoveEmptyFoldersAsync(store).ConfigureAwait(false);
+
+		return removedFolders;
+	}
+
+	/// <summary>
+	/// Removes a Outlook Store (PST).
+	/// </summary>
+	/// <param name="store">The store to remove.</param>
+	public void RemoveStore(Store store)
+	{
+		outlookSession.RemoveStore(store);
+	}
+
+	private static void EmptyDeletedItemsFolder(
+		MAPIFolder deletedItemsFolder)
+	{
+		Folders folders = deletedItemsFolder.Folders;
+		int totalItems = folders.Count;
+
+		// Office uses 1 based indexes from VBA.
+		// Iterate in reverse order as the group will change.
+		for (int index = totalItems; index > 0; index--)
+		{
+			MAPIFolder folder = folders[index];
+			folder.Delete();
 		}
 
-		private void MoveExistingFolder(
-			MAPIFolder sourceFolder,
-			MAPIFolder destinationFolder,
-			string destinationName)
+		Items items = deletedItemsFolder.Items;
+		totalItems = items.Count;
+
+		// Office uses 1 based indexes from VBA.
+		// Iterate in reverse order as the group will change.
+		for (int index = totalItems; index > 0; index--)
 		{
-			if (sourceFolder.EntryID.Equals(
-				destinationFolder.EntryID, StringComparison.OrdinalIgnoreCase))
-			{
-				// Special case: If the names have different case-sensitivity,
-				// rename to requested.
-				if (sourceFolder.Name.Equals(
-						destinationName,
-						StringComparison.OrdinalIgnoreCase) &&
-					!sourceFolder.Name.Equals(
-						destinationName,
-						StringComparison.Ordinal))
-				{
-					sourceFolder.Name = destinationName;
-				}
-				else
-				{
-					Log.Warn("Not moving folder to itself");
-				}
-			}
-			else
-			{
-				OutlookFolder outlookFolder = new (outlookAccount);
+			object item = items[index];
 
-				outlookFolder.MoveFolderContents(
-					sourceFolder, destinationFolder);
-
-				// Once all the items have been moved, remove the folder.
-				OutlookFolder.SafeDelete(sourceFolder);
-			}
+			OutlookItem contentItem = new(item);
+			contentItem.Delete();
 		}
+	}
 
-		private async Task MoveExistingFolderAsync(
-			MAPIFolder sourceFolder,
-			MAPIFolder destinationFolder,
-			string destinationName)
+	private void MoveExistingFolder(
+		MAPIFolder sourceFolder,
+		MAPIFolder destinationFolder,
+		string destinationName)
+	{
+		if (sourceFolder.EntryID.Equals(
+			destinationFolder.EntryID, StringComparison.OrdinalIgnoreCase))
 		{
-			if (sourceFolder.EntryID.Equals(
-				destinationFolder.EntryID, StringComparison.OrdinalIgnoreCase))
-			{
-				// Special case: If the names have different case-sensitivity,
-				// rename to requested.
-				if (sourceFolder.Name.Equals(
-						destinationName,
-						StringComparison.OrdinalIgnoreCase) &&
-					!sourceFolder.Name.Equals(
+			// Special case: If the names have different case-sensitivity,
+			// rename to requested.
+			if (sourceFolder.Name.Equals(
+					destinationName,
+					StringComparison.OrdinalIgnoreCase) &&
+				!sourceFolder.Name.Equals(
 					destinationName,
 					StringComparison.Ordinal))
-				{
-					sourceFolder.Name = destinationName;
-				}
-				else
-				{
-					Log.Warn("Not moving folder to itself");
-				}
+			{
+				sourceFolder.Name = destinationName;
 			}
 			else
 			{
-				OutlookFolder outlookFolder = new (outlookAccount);
-
-				await outlookFolder.MoveFolderContentsAsync(
-					sourceFolder, destinationFolder).ConfigureAwait(false);
-
-				// Once all the items have been moved, remove the folder.
-				OutlookFolder.SafeDelete(sourceFolder);
+				Log.Warn("Not moving folder to itself");
 			}
+		}
+		else
+		{
+			OutlookFolder outlookFolder = new(outlookSession);
+
+			outlookFolder.MoveFolderContents(
+				sourceFolder, destinationFolder);
+
+			// Once all the items have been moved, remove the folder.
+			OutlookFolder.SafeDelete(sourceFolder);
+		}
+	}
+
+	private async Task MoveExistingFolderAsync(
+		MAPIFolder sourceFolder,
+		MAPIFolder destinationFolder,
+		string destinationName)
+	{
+		if (sourceFolder.EntryID.Equals(
+			destinationFolder.EntryID, StringComparison.OrdinalIgnoreCase))
+		{
+			// Special case: If the names have different case-sensitivity,
+			// rename to requested.
+			if (sourceFolder.Name.Equals(
+					destinationName,
+					StringComparison.OrdinalIgnoreCase) &&
+				!sourceFolder.Name.Equals(
+				destinationName,
+				StringComparison.Ordinal))
+			{
+				sourceFolder.Name = destinationName;
+			}
+			else
+			{
+				Log.Warn("Not moving folder to itself");
+			}
+		}
+		else
+		{
+			OutlookFolder outlookFolder = new(outlookSession);
+
+			await outlookFolder.MoveFolderContentsAsync(
+				sourceFolder, destinationFolder).ConfigureAwait(false);
+
+			// Once all the items have been moved, remove the folder.
+			OutlookFolder.SafeDelete(sourceFolder);
 		}
 	}
 }

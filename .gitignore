@@ -28,3 +28,6 @@ TestResult.xml
 packages/
 
 SourceCode\ToolKit.Application/Properties/launchSettings.json
+
+# Locally prepared release artifacts
+/artifacts/

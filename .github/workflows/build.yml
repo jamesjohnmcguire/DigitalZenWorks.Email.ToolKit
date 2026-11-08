@@ -1,0 +1,55 @@
+name: NuGet Publish
+run-name: NuGet ${{ inputs.version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version to publish from its GitHub release
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nuget-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PACKAGE_VERSION: ${{ inputs.version }}
+
+    steps:
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Download the locally built package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ ! "$PACKAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Expected a major.minor.patch version."
+            exit 1
+          fi
+          gh release download "v$PACKAGE_VERSION" --repo "$GITHUB_REPOSITORY" --pattern "DigitalZenWorks.Email.ToolKit.$PACKAGE_VERSION.nupkg" --dir artifacts
+
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: jamesjohnmcguire
+
+      - name: Publish to NuGet.org
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "artifacts/DigitalZenWorks.Email.ToolKit.$PACKAGE_VERSION.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json

@@ -1,0 +1,21 @@
+From: recipient@example.test
+To: sender@example.test
+Date: Thu, 01 Jan 1998 12:00:00 +0000
+Subject: Synthetic read receipt
+MIME-Version: 1.0
+Content-Type: multipart/report; report-type=disposition-notification;
+ boundary="receipt"
+
+--receipt
+Content-Type: text/plain; charset=us-ascii
+
+Your message was displayed.
+--receipt
+Content-Type: message/disposition-notification
+
+Reporting-UA: legacy.example.test; Mail 1998
+Final-Recipient: rfc822; recipient@example.test
+Original-Message-ID: <original@example.test>
+Disposition: manual-action/MDN-sent-manually; displayed
+
+--receipt--

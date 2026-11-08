@@ -8,17 +8,22 @@ indent_size = 4
 indent_style = tab
 insert_final_newline = true
 max_line_length = 80
+spelling_exclusion_path = C:/Users/JamesMc/Data/ProgramData/Configuration/exclusion.dic
 trim_trailing_whitespace = true
 
 [*.{bat, cmd}]
 end_of_line = crlf
 
-[*.{cs, csproj, props, resx}]
+# Development commands stay on one line, regardless of length.
+[*.{cmd,bat,sh,ps1,yml,yaml}]
+max_line_length = off
+
+[*.{cs,csproj,props,md,resx,slnx,yaml,yml}]
 end_of_line = lf
 
 [*.cs]
-# Renove require space after 'new' keyword
-dotnet_diagnostic.SA1000.severity = warning
+# Control-flow and method-call spacing
+csharp_space_after_cast = false
 csharp_space_after_keywords_in_control_flow_statements = true
 csharp_space_between_method_call_empty_parameter_list_parentheses = false
 csharp_space_between_method_call_parameter_list_parentheses = false
@@ -37,13 +42,13 @@ dotnet_style_object_initializer = false
 # IDE0161: Convert to file-scoped namespace
 csharp_style_namespace_declarations = file_scoped:warning
 
-# SA1000: The keyword 'new' should be followed by a space
-dotnet_diagnostic.SA1000.severity = none
+# SA1000: Check keyword spacing; target-typed new() has no space.
+dotnet_diagnostic.SA1000.severity = warning
 
 # SA1010: Opening square brackets should be spaced correctly
 dotnet_diagnostic.SA1010.severity = none
 
-# SA1101: Prefix Local Calls With This
+# SA1101: Prefix local calls with this
 dotnet_diagnostic.SA1101.severity = none
 
 # SA1306: Field Names Must Begin With Lower Case Letter
@@ -57,6 +62,12 @@ dotnet_diagnostic.SA1312.severity = warning
 
 # SA1412: Store files as UTF-8 with byte order mark
 dotnet_diagnostic.SA1412.severity = none
+
+# Trailing commas in multiline lists are optional.
+dotnet_diagnostic.SA1413.severity = none
+
+# SA1502: Element should not be on a single line
+dotnet_diagnostic.SA1502.severity = none
 
 # SA1516: Elements Must Be Separated By Blank Line
 dotnet_diagnostic.SA1516.severity = warning

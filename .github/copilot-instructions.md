@@ -1,0 +1,38 @@
+# Repository Instructions
+
+## General Guidelines
+- Use tabs for indentation.
+- Preserve UTF-8 encoding and LF line endings.
+- Follow the existing `.editorconfig`.
+- Do not suppress analyzer warnings unless there is a clear justification.
+
+## Coding Style
+- Use Allman brace style.
+- Keep one statement per line.
+- Prefer explicit, readable code over clever or overly compact code.
+- Enforce one-class-per-file structure when modifying tests.
+
+## .NET
+- Treat compiler and analyzer warnings as issues to investigate.
+- Prefer existing project abstractions before introducing new ones.
+- Follow existing nullable-reference-type conventions.
+- Avoid unnecessary dependencies.
+- Keep `OutlookConnection` internal and maintain `IOutlookConnection.Session` for now, with intent to remove OOM leakage from `IOutlookSession` soon.
+
+## Error Handling
+- Prefer the repository's existing `Result<T>` pattern where applicable.
+- Do not replace structured error handling with broad exception catching.
+- Prefer catching specific exceptions instead of broad `System.Exception`.
+- Avoid `catch (Exception)` unless specifically justified.
+
+## Testing
+- Add or update tests when changing behavior.
+- Follow existing NUnit conventions for C# tests.
+- Do not weaken tests merely to make them pass.
+- Run the relevant tests after making changes.
+
+## Changes
+- Keep changes narrowly scoped to the requested task.
+- Avoid unrelated cleanup unless it is required for the change.
+- Before making architectural changes, explain the proposed approach.
+- Preserve existing public APIs unless changing them is part of the task.

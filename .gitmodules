@@ -10,10 +10,6 @@
 	path = SourceCode/MapiLibrary/MAPIStubLibrary
 	url = https://github.com/jamesjohnmcguire/MAPIStubLibrary
 	branch = master
-[submodule "MsgKit"]
-	path = SourceCode/MsgKit
-	url = https://github.com/jamesjohnmcguire/MsgKit
-	branch = allow-loose-attachments
 [submodule "UtilitiesNet"]
 	path = SourceCode/UtilitiesNet
 	url = https://github.com/jamesjohnmcguire/UtilitiesNet
