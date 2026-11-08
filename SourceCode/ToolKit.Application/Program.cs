@@ -270,7 +270,7 @@ internal static class Program
 			"remove-duplicates",
 			options,
 			0,
-			"Merge duplicate Outlook folders");
+			"Remove duplicate Outlook items");
 		commands.Add(removeDuplicates);
 
 		Command removeEmptyFolders = new(

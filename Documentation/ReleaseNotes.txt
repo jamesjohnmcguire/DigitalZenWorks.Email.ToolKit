@@ -14,6 +14,18 @@ Library compatibility
 - Correct existing obsolete messages and clarify their replacement APIs.
   No APIs are removed. See Public API deprecation review in DevelopmentNotes.md.
 
+Duplicate comparison
+- Preserve mail string-field boundaries with invariant length prefixes.
+  Distinct metadata combinations can no longer collide merely because
+  their concatenated text matches.
+- Mail hash values change. Recalculate previously stored hashes before
+  comparing them with hashes from this version. Diagnostic text and
+  property selection remain unchanged.
+
+Command-line help
+- Correct remove-duplicates help to describe removing duplicate Outlook
+  items, rather than merging folders.
+
 Release 1.14.0
 
 Versioning

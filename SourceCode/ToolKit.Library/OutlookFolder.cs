@@ -419,7 +419,7 @@ public class OutlookFolder
 
 			for (int index = 1; index <= count; index++)
 			{
-				var item = items[index];
+				dynamic item = items[index];
 				OutlookItem contentItem = new(item);
 
 				string synopses = contentItem.Synopses;
