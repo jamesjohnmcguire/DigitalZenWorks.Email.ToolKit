@@ -25,6 +25,7 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 internal sealed class OutlookTestContext : IDisposable
 {
 	private readonly List<object> references = new();
+	private readonly string storeFilePrefix = Guid.NewGuid().ToString("N");
 	private readonly HashSet<string> storePaths =
 		new(StringComparer.OrdinalIgnoreCase);
 
@@ -87,14 +88,17 @@ internal sealed class OutlookTestContext : IDisposable
 	}
 
 	/// <summary>
-	/// Registers a test-owned PST path before attempting to attach it.
+	/// Registers a uniquely named PST before attempting to attach it.
 	/// </summary>
-	/// <param name="fileName">The PST file name.</param>
+	/// <param name="fileName">The logical PST file name. Repeated requests
+	/// within this context return the same path.</param>
 	/// <returns>The absolute PST path.</returns>
 	public string StorePath(string fileName)
 	{
-		string path = Path.Combine(DirectoryPath, fileName);
-		storePaths.Add(path);
+		string directory = Path.GetDirectoryName(fileName) ?? string.Empty;
+		string name = storeFilePrefix + "-" + Path.GetFileName(fileName);
+		string path = Path.Combine(DirectoryPath, directory, name);
+		storePaths.Add(Path.GetFullPath(path));
 
 		return path;
 	}
@@ -152,6 +156,7 @@ internal sealed class OutlookTestContext : IDisposable
 		}
 
 		disposed = true;
+		bool storesDetached = false;
 
 		try
 		{
@@ -189,6 +194,8 @@ internal sealed class OutlookTestContext : IDisposable
 			{
 				Marshal.ReleaseComObject(stores);
 			}
+
+			storesDetached = true;
 		}
 		finally
 		{
@@ -199,15 +206,25 @@ internal sealed class OutlookTestContext : IDisposable
 
 			references.Clear();
 
-			try
+			if (storesDetached)
 			{
-				Directory.Delete(DirectoryPath, true);
+				try
+				{
+					Directory.Delete(DirectoryPath, true);
+				}
+				catch (IOException exception)
+				{
+					TestContext.Progress.WriteLine(
+						"Outlook retained a lock on test data at " +
+						DirectoryPath + ": " + exception.Message);
+				}
 			}
-			catch (IOException exception)
+			else
 			{
+				// An attached store must keep its backing files intact.
 				TestContext.Progress.WriteLine(
-					"Outlook retained a lock on test data at " +
-					DirectoryPath + ": " + exception.Message);
+					"Store cleanup failed; retaining test data at " +
+					DirectoryPath);
 			}
 		}
 	}

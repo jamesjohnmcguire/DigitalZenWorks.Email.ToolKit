@@ -42,27 +42,9 @@ internal sealed class EmailToolKitTests
 
 		testFolder = Directory.CreateDirectory("TestFolder");
 
-		string fileName = Path.GetTempFileName();
-
-		// A 0 byte sized file is created.  Need to remove it.
-		File.Delete(fileName);
-		storePath = Path.ChangeExtension(fileName, ".pst");
-
-		// PST provider in Outlook keeps the PST file open for 30 minutes
-		// after closing it for the performance reasons. So, try to delete
-		// it now, as it may be more than 30 minutes since last access.
-		bool exists = File.Exists(storePath);
-
-		if (exists == true)
-		{
-			try
-			{
-				File.Delete(storePath);
-			}
-			catch (IOException)
-			{
-			}
-		}
+		// Detached PSTs can remain locked; never reuse a test filename.
+		string fileName = Guid.NewGuid().ToString("N") + ".pst";
+		storePath = Path.Combine(Path.GetTempPath(), fileName);
 
 		store = outlookAccount.GetStore(storePath);
 	}
@@ -201,11 +183,8 @@ internal sealed class EmailToolKitTests
 	[Test]
 	public void TestEmlFileToPstCloseStoreSuccess()
 	{
-		string fileName = Path.GetTempFileName();
-
-		// A 0 byte sized file is created.  Need to remove it.
-		File.Delete(fileName);
-		string temporaryStorePath = Path.ChangeExtension(fileName, ".pst");
+		string fileName = Guid.NewGuid().ToString("N") + ".pst";
+		string temporaryStorePath = Path.Combine(Path.GetTempPath(), fileName);
 
 		string path = GetTempoaryEmlFilePath();
 		bool result = FileUtils.CreateFileFromEmbeddedResource(

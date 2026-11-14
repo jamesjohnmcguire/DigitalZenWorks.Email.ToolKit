@@ -197,7 +197,7 @@ internal sealed class OutlookSessionIntegrationTests
 		OutlookSession session = new(context.NameSpace);
 
 		string expectedPath = context.StorePath(expectedName);
-		string suppliedPath = Path.Combine(context.DirectoryPath, fileName);
+		string suppliedPath = context.StorePath(fileName);
 
 		Outlook.Store? store = session.GetStore(suppliedPath);
 		context.TrackIfNotNull(store);
@@ -335,8 +335,7 @@ internal sealed class OutlookSessionIntegrationTests
 		using OutlookTestContext context = new();
 		OutlookSession session = new(context.NameSpace);
 		string path = context.StorePath("round-trip.pst");
-		string extensionlessPath = Path.Combine(
-			context.DirectoryPath, "round-trip");
+		string extensionlessPath = Path.ChangeExtension(path, null);
 
 		if (withCollidingFile)
 		{
