@@ -70,13 +70,13 @@ internal sealed class FakeOutlookFactory : IOutlookFactory
 	/// <summary>
 	/// Determines if Outlook is available.
 	/// </summary>
-	/// <param name="timeoutSeconds">The timeout in seconds.</param>
+	/// <param name="timeOutSeconds">The timeout in seconds.</param>
 	/// <returns>A boolean value indicating whether Outlook is available.
 	/// </returns>
-	public bool CanCreateApplication(int timeoutSeconds)
+	public bool CanCreateApplication(int timeOutSeconds)
 	{
 		IsOutlookAvailableCallCount++;
-		LastTimeoutSeconds = timeoutSeconds;
+		LastTimeoutSeconds = timeOutSeconds;
 
 		if (AvailabilityException != null)
 		{
