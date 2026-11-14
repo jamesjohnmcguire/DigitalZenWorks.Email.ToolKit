@@ -258,3 +258,11 @@ deprecation/obsolete path over immediate removal.
 
 Breaking API redesigns should normally be reserved for an intentional major
 version change.
+
+## Documentation Maintenance
+
+- Keep only unfinished, actionable work in the task list; delete completed entries.
+- Preserve significant changes in `Documentation/ReleaseNotes.txt`.
+- Retain important decisions and architectural findings in existing reference documents; avoid routine validation diaries and additional small notes files.
+- Preserve existing contributor text when amending documentation.
+- Keep Markdown paragraphs on one source line; the 80-column preference is for code.

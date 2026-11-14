@@ -1,161 +1,69 @@
 # Email.ToolKit Tasks
 
-Nuget 1.14.1
-Add Profile Support	Profile Info Begun in branch profile-info
-Is it currently possible to have a Local Release Build with build.cmd?
-SymLink Issue?	[2026-11-07 13:07:41 WRN] Store not found: C:\Users\JamesMc\Data\ProgramData\Outlook\Admin.pst
+This backlog contains unfinished work, not release commitments. Remove completed entries after recording significant changes in [release notes](ReleaseNotes.txt) and durable decisions in the existing reference documents. Routine validation logs do not need a permanent task record.
 
-This is the active backlog. Checkboxes identify remaining work, not release commitments.
+See [maintainer notes](DevelopmentNotes.md), [Outlook lifecycle](OutlookLifecycle.md), the [API audit](ApiCompatibilityAudit.md), and [duplicate comparison](Email.ToolKit.DuplicateComparison.md).
 
-See [maintainer notes](DevelopmentNotes.md) for release procedures,
-[Outlook lifecycle](OutlookLifecycle.md) for the design, and the
-[API audit](ApiCompatibilityAudit.md) for compatibility findings.
+## Release tooling
 
-Completed work and superseded proposals are in
-[Email.ToolKit.CompletedTasks.md](Email.ToolKit.CompletedTasks.md). Keep this
-file focused on unfinished work; move completed entries to that record.
-
-## Next maintenance patch: 1.14.1
-
-No affected consumers have been identified. Prepare this patch at a normal
-maintenance pace. Historical release intervals do not establish whether
-those releases addressed bugs or compatibility.
-
-- [ ] Near release, update application/library versions together in one commit; retain `AssemblyVersion` for compatible changes. Follow the maintainer checklist for the separate executable and NuGet distributions. Candidate validation and release-note preparation are recorded in the completed tasks.
+- [ ] Keep automatic tagging consistent between `build.cmd release` and `build.cmd publish`. Verify an existing tag identifies the intended commit; never move a published tag. Ensure release notes are finalized before upload.
+- [ ] Decide whether `build.cmd` needs a local-only Release build option; the current `release` command also uploads the executable.
+- [ ] Evaluate removing `IncludeAllContentForSelfExtract` to resolve NETSDK1244. Validate the published executable's Outlook operations before changing extraction behavior.
 
 ## Testing and maintainability
 
-- [ ] Add focused `NormalizeFolderName` tests, including its regex cases.
-- [ ] Review test naming and remaining `Test` prefixes. Group fixtures by
-  subject when useful; keep methods alphabetical and execution independent.
-- [ ] Reuse cleanup helpers where useful without hiding test behavior.
-- [ ] Identify real-Outlook fixtures consistently. Keep ordinary integration
-  tests in the normal test script; choose `[Explicit]` for manual scenarios
-  individually rather than disabling every integration test by default.
-- [ ] Review intended package architecture and transitive dependencies.
-  Published 1.12.62/1.14.0 library DLLs target x64; the local candidate is
-  managed AnyCPU. Consumer checks currently cover 64-bit Windows. Verify
-  actual 32-bit loading before promising support for it.
-- [ ] Test without Outlook installed. Distinguish unavailable-service runtime
-  behavior from the separate COM-reference build requirement.
-- [ ] Enable nullable checking project-wide incrementally, with tests for
-  intended input contracts; preserve legacy public contracts in 1.x.
-- [ ] Review exception conventions and when methods should throw versus
-  return a failure result. Preserve established 1.x behavior unless a change
-  is explicitly intended and covered by tests.
-- [ ] Review spacing after file-scoped namespace declarations (the requested
-  wider separation), keeping formatting changes separate from behavior fixes.
-- [ ] Review analyzer warnings and boolean-return documentation. Reevaluate
-  interim transitive security references when updating dependencies; remove
-  them only after confirming the needed fixes remain.
-- [ ] Review PST-path handling outside `OutlookSession`. Its existing helper
-  and tests cover session path selection; identify inconsistent callers
-  before introducing another normalization helper.
-- [ ] Clarify delayed merge/move processing, folder paths, merge rules, and
-  command defaults. Check version output for invalid-input help as well as
-  explicit help.
-- [ ] Maintain the [duplicate comparison reference][comparison-reference],
-  extending appointment/contact inventories and MAPI mappings. Evaluate body
-  normalization, read/unread differences, and repeated-message send times
-  with regression cases before changing duplicate detection.
+- [ ] Add focused `NormalizeFolderName` tests, including regex cases.
+- [ ] Organize fixtures by subject (`CommandLine`, `Conversion`, `Outlook`, `Compatibility`), splitting `EmailToolKitTests` incrementally without changing setup/cleanup behavior. Review remaining `Test` prefixes; keep methods alphabetical and execution independent.
+- [ ] Reuse cleanup helpers where useful without hiding test behavior. Identify real-Outlook fixtures consistently; keep ordinary integration tests in `test.cmd`, with `[Explicit]` reserved for individual manual scenarios.
+- [ ] Review package architecture and transitive dependencies. Published 1.12.62/1.14.0 library DLLs target x64; the 1.14.1 candidate was managed AnyCPU, with consumer checks on 64-bit Windows. Verify actual 32-bit loading before promising support.
+- [ ] Test runtime behavior without Outlook installed, separately from the COM-reference build requirement.
+- [ ] Enable project-wide nullable checking incrementally, testing intended input contracts and preserving legacy public contracts in 1.x.
+- [ ] Review exception-versus-failure-result conventions. Preserve established 1.x behavior unless changes are intentional and tested.
+- [ ] Review the requested wider spacing after file-scoped namespaces separately from behavior changes.
+- [ ] Review analyzer warnings and boolean-return documentation. Remove interim security references only when upstream dependencies retain the required fixes.
+- [ ] Review PST-path handling outside `OutlookSession` before introducing another normalization helper.
+- [ ] Clarify delayed merge/move processing, folder paths, merge rules, command defaults, and version output for invalid-input versus explicit help.
+- [ ] Extend appointment/contact hash inventories and MAPI mappings in the duplicate comparison reference. Test body normalization, read-state differences, and repeated-message send times before changing comparison rules.
 
 ## Investigations needing reproduction
 
-These are retained reports, not confirmed defects in 1.14.0. Record the
-version, input, Outlook state, steps, and expected result before closing or
-fixing them. Original details remain in the historical notes.
+Record the version, input, Outlook state, reproduction steps, and expected result before treating these reports as confirmed defects.
 
-- [ ] Recheck attaching to running Outlook, including elevated versus normal
-  execution, profiles, and installation/bitness details.
-- [ ] Investigate cumulative Outlook/PST resource retention during repeated integration-test runs. Reduce PST churn where test isolation permits, keep creation/attachment tests independent, and review COM ownership. Detached PST locks can persist; a short delay is not an established fix.
-
-  Captured 2026-11-07: `TestCreateFolderPath` failed during `EmailToolKitTests.OneTimeSetUp` at `NameSpace.AddStore`, called through `OutlookSession.GetStore` and `OutlookAccount.GetStore`. The COM exception was `0x80004005` (-2147467259): "The Outlook data file (.pst) failed to load for this session." The command-line run also encountered PST-load setup failures. After restarting Outlook, all 42 targeted tests passed. The underlying cause remains unconfirmed.
-
-  Captured 2026-11-14: full-suite runs failed at Outlook store access with `0x80040119`, then `0x80040111` naming invalid temporary `duplicates.pst` paths. Restarting Outlook alone did not clear the failures. After the maintainer closed stale temporary stores, all 488 solution tests and all 289 Release ToolKit tests passed; three explicit/manual cases were not run. Investigate cleanup after detach failures: `OutlookTestContext.Dispose` can attempt directory deletion from `finally` even when store cleanup throws. This is a follow-up finding, not a confirmed fix to the broader Outlook reliability issue.
-
-- [ ] Reproduce deletion failures involving particular item classes,
-  reserved/special folders, and read-only calendars; identify actual types.
+- [ ] Investigate cumulative Outlook/PST resource retention during repeated integration runs. Review COM ownership and reduce PST churn where isolation permits; retain independent creation/attachment tests. See [operational findings](DevelopmentNotes.md#outlookpst-resource-retention). Persistent locks are not evidence that a short pause will fix the issue.
+- [ ] Recheck attaching to running Outlook across elevation levels, profiles, and installation/bitness combinations.
+- [ ] Reproduce store lookup through symlink aliases: `C:\Users\JamesMc\Data` aliases the data directory, but an attached `Admin.pst` was reported missing through that path.
+- [ ] Reproduce deletion failures involving particular item classes, special folders, and read-only calendars.
 - [ ] Investigate attachment filename/save failures and temporary-file cleanup.
-- [ ] Obtain sanitized historical EML samples alongside synthetic attachment
-  tests; verify real Outlook import and rendering.
-- [ ] Recheck slash-containing folder names, relative PST paths, repeated or
-  digit-suffixed names, and merges that appear to do nothing.
-- [ ] Investigate mangled-message and missing-recipient reports using the
-  original DBX data; unrelated MIME tests do not establish a fix.
-- [ ] Improve confusing merge/progress output with useful item/folder counts,
-  skipped item types, and cases with nothing to process.
-- [ ] Revisit old missing-method/test failures with current reproductions;
-  distinguish stale assemblies from actual API changes using the API audit.
-- [ ] Review logger behavior when a consuming application supplies no setup.
+- [ ] Obtain sanitized historical EML samples to supplement synthetic attachment tests; verify real Outlook import and rendering.
+- [ ] Recheck slash-containing folder names, relative PST paths, repeated/digit-suffixed names, and merges that appear to do nothing.
+- [ ] Investigate mangled-message and missing-recipient reports using original DBX data.
+- [ ] Improve merge/progress output with item/folder counts, skipped types, and cases with nothing to process.
+- [ ] Reproduce remaining missing-method/test reports; distinguish stale assemblies from API changes using the historical audit.
+- [ ] Review logging when a consuming application supplies no configuration.
 
 ## Version 2 design candidates
 
-These require design review, not automatic implementation or removal in 1.x.
+These require design review; they do not authorize breaking changes in 1.x.
 
-- [ ] Design a long-lived Outlook STA owner and dispatch all COM work onto it.
-  Define shutdown, reentrancy, timeouts, and late-work behavior; stopping a
-  wait must not imply cancellation of the COM operation.
-- [ ] Reduce public COM exposure; consider an Outlook-specific library.
-  Review class names after deciding package boundaries.
-- [ ] Redesign migration around explicit dependencies and possible non-PST
-  destinations. Do not force constructor injection into the existing static
-  `Migrate` contract during a compatibility patch.
-- [ ] Untangle EML migration/copy helpers and folder/store/session duties.
-  Review `AddMsgFile` layering, directory enumeration, and any proposed
-  newly public helpers individually.
-- [ ] Consider a success result for `DbxDirectoryToPst` as an intentional
-  major-version change; keep released void signatures throughout 1.x.
-- [ ] Review obsolete wrappers, account-based constructors, singleton use,
-  store-removal methods, and ID naming for replacement/removal. Require a
-  usable migration path before deprecating additional APIs.
-- [ ] Review Outlook profiles and ownership/lifetime of returned objects.
+- [ ] Design a long-lived Outlook STA owner with COM dispatch, shutdown, reentrancy, timeout, and late-work rules. Stopping a wait does not cancel COM work.
+- [ ] Reduce public COM exposure; consider an Outlook-specific library and review class names after deciding package boundaries.
+- [ ] Redesign migration around explicit dependencies and possible non-PST destinations without forcing that redesign through the legacy static `Migrate` contract.
+- [ ] Separate EML migration/copy helpers and folder/store/session responsibilities. Review `AddMsgFile` layering, directory enumeration, and proposed public helpers individually.
+- [ ] Consider a success result for `DbxDirectoryToPst` as an intentional major-version change; retain released void signatures in 1.x.
+- [ ] Review obsolete wrappers, account-based constructors, singleton use, store-removal methods, and ID naming. Require usable migration paths before further deprecation/removal.
+- [ ] Define profile selection and ownership/lifetime of returned Outlook objects.
 
-## Other feature candidates and related projects
+## Feature candidates and related projects
 
-Prioritize separately from the compatibility patch.
+- [ ] Continue profile support exploration from branch `profile-info`; determine its release scope separately from the version 2 ownership design.
+- [ ] Broaden contacts/calendar/report migration and duplicate detection.
+- [ ] Evaluate MBOX, Novell, MsMail, and EMC import requirements; some belong to other email projects.
+- [ ] Consider configurable reserved folders, sender-based moves, attachment export, folder sorting, and Outlook rules.
+- [ ] Evaluate UI, installer, add-in, configuration, and promotion work against demand. Justify native MAPI/performance work with measurements.
+- [ ] Review DBX file/header validation, tree ordering/indexes, iteration, interim folders, and malformed-message coverage in DbxOutlookExpress; track implementation there.
+- [ ] Revisit a client-validation callback in CommandLine.Commands. Move `--timeout` validation only after a tested replacement exists; check old command-line bug notes against specific reproductions.
+- [ ] Optionally submit the [MsgKit read-receipt issue draft](DevelopmentNotes.md#unsent-upstream-issue-draft). Retire the local adapter workaround only after a suitable upstream fix passes regression tests.
 
-- [ ] Broaden contacts/calendar/report handling, including migration and
-  duplicate detection.
-- [ ] Evaluate MBOX, Novell, MsMail, and EMC import requirements separately;
-  some belong to other email projects.
-- [ ] Consider configurable reserved folders, sender-based message moves,
-  attachment export, folder sorting, and Outlook rules.
-- [ ] Evaluate UI, installer, add-in, configuration, and promotion work
-  against demand. Justify native MAPI/performance work with measurements.
-- [ ] Review DBX parser coverage in DbxOutlookExpress: file/header validation,
-  tree ordering/indexes, iteration, interim folders, and malformed messages.
-  Track implementation in that repository.
-- [ ] Deferred: add a client-validation callback to CommandLine.Commands.
-  Once available, consider moving application `--timeout` validation into
-  that callback. Retain current validation until its replacement is tested.
-- [ ] Review old CommandLineCommands bug notes against specific reproductions;
-  its publication setup is already established.
-- [ ] Optionally submit the existing MsgKit read-receipt data-loss issue
-  draft in [maintainer notes][msgkit-draft]. It remains unsent; the local
-  workaround does not depend on upstream action.
-- [ ] Reevaluate the adapter after a suitable upstream fix and passing tests.
-  Former fork-maintenance PRs are not prerequisites for releases.
+## Historical research
 
-[comparison-reference]: Email.ToolKit.DuplicateComparison.md
-
-[msgkit-draft]: DevelopmentNotes.md#unsent-upstream-issue-draft
-
-## Historical source and scope
-
-The original list remains an inactive snapshot in the adjacent Email
-repository at `Email/Support/Email.ToolKit.Tasks.txt`. Unreviewed entries are
-not assumed resolved merely because they are absent from this curated list.
-
-`EmailDevelopmentNotes.txt` also covers EMC, MsMail, MAPI/C++, debugging, and
-research. `MapiCompareMessagesSnippets.txt`, `MapiProperties.txt`,
-`Properties.txt` remain research inputs for the maintained duplicate
-comparison reference. `Dbx2Pst.txt` remains broader historical reference
-material there; none of these files alone specifies current hash behavior.
-
-Outlook conclusions are consolidated in
-[the lifecycle design](OutlookLifecycle.md#future-sta-ownership-design).
-Release procedures and MsgKit conclusions are in the maintainer notes.
-The old planning and release files point to the maintained documents.
-
-New
-	Organize Test Files	I recommend subject folders—CommandLine, Conversion, Outlook, and Compatibility—and incrementally splitting the large EmailToolKitTests fixture by behavior. Keep methods alphabetical and independent of execution order.
+The adjacent Email repository retains the original `Email/Support/Email.ToolKit.Tasks.txt` snapshot and broader email/native-MAPI research. Unreviewed entries are not assumed resolved. The maintained duplicate comparison reference contains the curated property inventory and mappings; historical snippets do not specify current hash behavior.

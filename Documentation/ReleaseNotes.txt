@@ -31,6 +31,10 @@ Command-line help
 - Correct remove-duplicates help to describe removing duplicate Outlook
   items, rather than merging folders.
 
+Integration test reliability
+- Give test PST files unique names and preserve their backing files when
+  detachment fails. Persistent Outlook file locks remain under investigation.
+
 Release 1.14.0
 
 Versioning

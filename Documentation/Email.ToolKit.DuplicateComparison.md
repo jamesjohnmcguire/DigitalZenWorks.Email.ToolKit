@@ -1,6 +1,6 @@
 # Email.ToolKit Duplicate Comparison
 
-This reference describes the current mail-hash inputs, including the pending 1.14.1 serialization fix, and provides an initial MAPI-to-Outlook mapping for clients and the native MAPI work. It records implemented behavior rather than proposed comparison rules.
+This reference describes the current mail-hash inputs, including the serialization fix released in 1.14.1, and provides an initial MAPI-to-Outlook mapping for clients and the native MAPI work. It records implemented behavior rather than proposed comparison rules.
 
 ## What a hash represents
 
@@ -203,7 +203,7 @@ Before changing selection or normalization:
 | Release | Documented policy change |
 | --- | --- |
 | 1.14.0 baseline | Initial source-derived mail inventory recorded; no hashing behavior changed by this documentation work. |
-| 1.14.1 (pending) | Prefix mail string fields with invariant lengths to prevent field-boundary false positives. Mail hash values change; stored hashes require recalculation. |
+| 1.14.1 | Prefix mail string fields with invariant lengths to prevent field-boundary false positives. Mail hash values change; stored hashes require recalculation. |
 
 Remaining work is tracked in [Email.ToolKit.Tasks.md](Email.ToolKit.Tasks.md).
 

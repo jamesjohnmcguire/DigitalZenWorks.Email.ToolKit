@@ -31,7 +31,8 @@ inventory, not evidence of widespread failures or an emergency repair list.
 
 Only three signatures are missing from the most recent prior NuGet package,
 **1.12.62**, when compared directly with **1.14.0**. Those are the most
-focused candidates for a future compatibility patch.
+focused candidates identified by this historical audit. Version 1.14.1 restored
+all three with their historical defaults; see [release notes](ReleaseNotes.txt).
 
 ## Method and evidence
 
@@ -321,8 +322,8 @@ With no reported failures and an expected small casual-client base, these
 metadata findings alone do not justify an emergency rollback or recreating
 every historical API.
 
-1. Consider the three 1.12.62 overloads for the next convenient compatibility
-   patch, with tests preserving the old signatures and defaults/behavior.
+1. Completed in 1.14.1: restore the three 1.12.62 overloads with tests
+   preserving their exact signatures and historical defaults/behavior.
 2. Document older removals. Restore an inexpensive alias/overload when useful
    or when an actual consumer needs it; do not expand the API automatically.
 3. Do not blindly restore old return types or the old FolderAction signature.
