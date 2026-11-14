@@ -15,12 +15,17 @@ Library compatibility
   No APIs are removed. See Public API deprecation review in DevelopmentNotes.md.
 
 Duplicate comparison
-- Preserve mail string-field boundaries with invariant length prefixes.
-  Distinct metadata combinations can no longer collide merely because
-  their concatenated text matches.
+- Prevent false duplicate matches and deletion when distinct combinations
+  of mail string properties concatenate to the same text. Preserve field
+  boundaries with invariant length prefixes before hashing.
 - Mail hash values change. Recalculate previously stored hashes before
   comparing them with hashes from this version. Diagnostic text and
   property selection remain unchanged.
+
+Dependency compatibility
+- Keep MimeKit at 4.18.2 with MsgKit 3.0.6. MimeKit 5 uses split assemblies
+  that the current MsgKit binary cannot load.
+- Update OpenMcdf to 3.4.0 and the explicit cryptography package to 11.0.0.
 
 Command-line help
 - Correct remove-duplicates help to describe removing duplicate Outlook

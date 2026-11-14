@@ -40,6 +40,10 @@ Partial historical findings do not establish coverage for every input.
   PackageClients repository. No package publication or version bump was
   performed during validation.
 
+- [x] Finalize 1.14.1 release notes and validate the candidate on 2026-11-14: 488 full-solution tests, 289 Release ToolKit tests, and 38 packaged MIME regression cases passed. Three explicit/manual Outlook cases were not run. The local package built for all eight target frameworks with embedded PDBs and XML documentation; ApiCompat passed against 1.12.62 and 1.14.0. Twelve consumer target builds and eighteen runtime checks passed, including six unchanged-binary checks. The extracted executable ZIP passed help and invalid-timeout smoke checks. Validation artifacts used command-line 1.14.1 version overrides; project version tags remain unchanged. No distribution was published.
+
+- [x] Complete the final dependency refresh and release-day test hardening: retain MimeKit 4.18.2 for MsgKit 3.0.6 compatibility, give real test PSTs GUID-unique filenames, and preserve backing files if detachment fails. The refreshed candidate passed all 488 solution tests from a fresh non-admin Outlook session, 38 packaged MIME cases, both API baselines, twelve consumer target builds, eighteen runtime checks, executable ZIP smoke checks, and the eight-framework vulnerability audit. Three explicit/manual tests were not run. No sleeps, automatic Outlook restarts, library API changes, project version bump, or publication were introduced by this test-support work. Repeated-run resource retention remains follow-up work.
+
 ## Completed or superseded entries
 
 These dispositions do not establish coverage for every historical input.

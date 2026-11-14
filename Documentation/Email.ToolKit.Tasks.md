@@ -1,8 +1,11 @@
 # Email.ToolKit Tasks
 
-This is the active backlog after 1.14.0. Checkboxes identify remaining work,
-not release commitments. Historical reports are not assumed fixed merely
-because their implementation changed.
+Nuget 1.14.1
+Add Profile Support	Profile Info Begun in branch profile-info
+Is it currently possible to have a Local Release Build with build.cmd?
+SymLink Issue?	[2026-11-07 13:07:41 WRN] Store not found: C:\Users\JamesMc\Data\ProgramData\Outlook\Admin.pst
+
+This is the active backlog. Checkboxes identify remaining work, not release commitments.
 
 See [maintainer notes](DevelopmentNotes.md) for release procedures,
 [Outlook lifecycle](OutlookLifecycle.md) for the design, and the
@@ -18,10 +21,7 @@ No affected consumers have been identified. Prepare this patch at a normal
 maintenance pace. Historical release intervals do not establish whether
 those releases addressed bugs or compatibility.
 
-- [ ] Finalize release notes. Near release, update application/library versions
-  together in one commit; retain `AssemblyVersion` for compatible changes.
-  Follow the maintainer checklist for the separate executable and NuGet
-  distributions.
+- [ ] Near release, update application/library versions together in one commit; retain `AssemblyVersion` for compatible changes. Follow the maintainer checklist for the separate executable and NuGet distributions. Candidate validation and release-note preparation are recorded in the completed tasks.
 
 ## Testing and maintainability
 
@@ -67,11 +67,11 @@ fixing them. Original details remain in the historical notes.
 
 - [ ] Recheck attaching to running Outlook, including elevated versus normal
   execution, profiles, and installation/bitness details.
-- [ ] Capture intermittent Outlook hangs, PST-load failures, and widespread
-  test failures cleared by restarting Outlook. Use stage diagnostics and
-  manual procedures; not every failure is a timeout bug.
+- [ ] Investigate cumulative Outlook/PST resource retention during repeated integration-test runs. Reduce PST churn where test isolation permits, keep creation/attachment tests independent, and review COM ownership. Detached PST locks can persist; a short delay is not an established fix.
 
   Captured 2026-11-07: `TestCreateFolderPath` failed during `EmailToolKitTests.OneTimeSetUp` at `NameSpace.AddStore`, called through `OutlookSession.GetStore` and `OutlookAccount.GetStore`. The COM exception was `0x80004005` (-2147467259): "The Outlook data file (.pst) failed to load for this session." The command-line run also encountered PST-load setup failures. After restarting Outlook, all 42 targeted tests passed. The underlying cause remains unconfirmed.
+
+  Captured 2026-11-14: full-suite runs failed at Outlook store access with `0x80040119`, then `0x80040111` naming invalid temporary `duplicates.pst` paths. Restarting Outlook alone did not clear the failures. After the maintainer closed stale temporary stores, all 488 solution tests and all 289 Release ToolKit tests passed; three explicit/manual cases were not run. Investigate cleanup after detach failures: `OutlookTestContext.Dispose` can attempt directory deletion from `finally` even when store cleanup throws. This is a follow-up finding, not a confirmed fix to the broader Outlook reliability issue.
 
 - [ ] Reproduce deletion failures involving particular item classes,
   reserved/special folders, and read-only calendars; identify actual types.
