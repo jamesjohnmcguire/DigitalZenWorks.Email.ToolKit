@@ -31,6 +31,7 @@ optional service rather than as an always-available application dependency.
 ## C# Style
 
 - Use Allman braces.
+- Keep each class in its own file.
 - Use tabs for indentation.
 - Prefer one statement per line.
 - Use UTF-8 and LF line endings.
