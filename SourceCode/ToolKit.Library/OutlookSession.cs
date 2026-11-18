@@ -267,7 +267,7 @@ public class OutlookSession : IOutlookSession
 	}
 
 	private static Store? CheckStore(
-		Stores stores, string? storePath, int index)
+		Stores stores, string storePath, int index)
 	{
 		Store? store = null;
 		Store? checkStore = null;
@@ -292,8 +292,7 @@ public class OutlookSession : IOutlookSession
 				string filePath = checkStore.FilePath;
 
 				if (!string.IsNullOrWhiteSpace(filePath) &&
-					filePath.Equals(
-						storePath, StringComparison.OrdinalIgnoreCase))
+					StorePath.AreEqual(filePath, storePath))
 				{
 					// Transfer this reference to the caller.
 					store = checkStore;

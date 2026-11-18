@@ -1,3 +1,10 @@
+Unreleased
+
+Outlook store paths
+- Match PST paths through symbolic links and directory junctions, including
+  links in parent directories. Store lookup and path-based removal accept
+  either the alias or the resolved path.
+
 Release 1.14.1
 
 Library compatibility

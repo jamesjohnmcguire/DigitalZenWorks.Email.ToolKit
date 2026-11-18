@@ -323,6 +323,35 @@ internal sealed class OutlookSessionIntegrationTests
 	}
 
 	/// <summary>
+	/// Verifies an alias of an ancestor directory finds the attached PST
+	/// without attaching it a second time.
+	/// </summary>
+	/// <param name="createIfMissing">Whether creation is allowed.</param>
+	[TestCase(false)]
+	[TestCase(true)]
+	public void GetStoreReusesExistingStoreThroughDirectoryLink(
+		bool createIfMissing)
+	{
+		using OutlookTestContext context = new();
+		OutlookSession session = new(context.NameSpace);
+		string path = context.StorePath("linked.pst");
+		Outlook.Store first = session.GetStore(path)!;
+		context.Track(first);
+		string expectedId = first.StoreID;
+
+		using DirectoryJunction junction = new(context.DirectoryPath);
+		string alias = Path.Combine(junction.Path, Path.GetFileName(path));
+		Assert.That(File.Exists(alias), Is.True);
+
+		Outlook.Store? second = session.GetStore(alias, createIfMissing);
+		context.TrackIfNotNull(second);
+
+		Assert.That(second, Is.Not.Null);
+		Assert.That(second!.StoreID, Is.EqualTo(expectedId));
+		Assert.That(context.CountStores(path), Is.EqualTo(1));
+	}
+
+	/// <summary>
 	/// Verifies removal accepts the same extensionless path used to create a PST.
 	/// </summary>
 	/// <param name="withCollidingFile">Whether a file without the PST suffix
@@ -440,6 +469,29 @@ internal sealed class OutlookSessionIntegrationTests
 		Assert.That(opened.Body, Does.Contain("saved MSG"));
 		opened.Close(Outlook.OlInspectorClose.olDiscard);
 		original.Close(Outlook.OlInspectorClose.olDiscard);
+	}
+
+	/// <summary>
+	/// Verifies removal through a directory alias detaches the real PST
+	/// without deleting its backing file.
+	/// </summary>
+	[Test]
+	public void RemoveStoreAcceptsDirectoryLink()
+	{
+		using OutlookTestContext context = new();
+		OutlookSession session = new(context.NameSpace);
+		string path = context.StorePath("linked-removal.pst");
+		Outlook.Store store = session.GetStore(path)!;
+		context.Track(store);
+
+		using DirectoryJunction junction = new(context.DirectoryPath);
+		string alias = Path.Combine(junction.Path, Path.GetFileName(path));
+
+		bool removed = session.RemoveStore(alias);
+
+		Assert.That(removed, Is.True);
+		Assert.That(context.CountStores(path), Is.Zero);
+		Assert.That(File.Exists(path), Is.True);
 	}
 
 	/// <summary>

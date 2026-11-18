@@ -31,7 +31,6 @@ Record the version, input, Outlook state, reproduction steps, and expected resul
 
 - [ ] Investigate cumulative Outlook/PST resource retention during repeated integration runs. Review COM ownership and reduce PST churn where isolation permits; retain independent creation/attachment tests. See [operational findings](DevelopmentNotes.md#outlookpst-resource-retention). Persistent locks are not evidence that a short pause will fix the issue.
 - [ ] Recheck attaching to running Outlook across elevation levels, profiles, and installation/bitness combinations.
-- [ ] Reproduce store lookup through symlink aliases: `C:\Users\JamesMc\Data` aliases the data directory, but an attached `Admin.pst` was reported missing through that path.
 - [ ] Reproduce deletion failures involving particular item classes, special folders, and read-only calendars.
 - [ ] Investigate attachment filename/save failures and temporary-file cleanup.
 - [ ] Obtain sanitized historical EML samples to supplement synthetic attachment tests; verify real Outlook import and rendering.
