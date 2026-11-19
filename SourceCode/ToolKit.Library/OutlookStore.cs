@@ -406,6 +406,39 @@ public class OutlookStore
 	}
 
 	/// <summary>
+	/// Exports the selected folder's mail bodies to UTF-8 files.
+	/// </summary>
+	/// <param name="pstFilePath">The existing .pst file path.</param>
+	/// <param name="folderPath">The path within the Outlook store.</param>
+	/// <param name="outputDirectory">The output directory.</param>
+	/// <returns>True if no item failed; otherwise false.
+	/// Existing output files and non-mail items are skipped.</returns>
+	/// <remarks>Store and folder lookup or output-directory errors propagate
+	/// to the caller. The source store remains attached.</remarks>
+	public bool GetMailBodies(
+		string pstFilePath, string folderPath, string outputDirectory)
+	{
+		bool result = false;
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		if (store != null)
+		{
+			MAPIFolder folder = OutlookFolder.GetExistingFolder(
+				store, folderPath);
+
+			if (folder != null)
+			{
+				Directory.CreateDirectory(outputDirectory);
+				result = OutlookFolder.ExportMailBodies(folder, outputDirectory);
+
+				Marshal.ReleaseComObject(folder);
+			}
+		}
+
+		return result;
+	}
+
+	/// <summary>
 	/// Get the item by its entry id.
 	/// </summary>
 	/// <param name="entryId">The entryId of the item.</param>

@@ -1,5 +1,16 @@
 Unreleased
 
+Experimental mail-body export
+- Add get-mail-bodies with separate PST, folder, and output-directory arguments,
+  plus the existing --timeout / -t option.
+- Export UTF-8 text and available HTML bodies using entry IDs as filenames,
+  with sent-time and sender metadata. Skip existing exports and non-mail items.
+- Process the selected folder without creating missing source folders or
+  changing message bodies/read state. Leave the source store attached,
+  consistent with other store commands.
+- Expose export through OutlookStore.GetMailBodies and OutlookMail.ExportBodies;
+  keep command-line argument handling in the application.
+
 Outlook store paths
 - Match PST paths through symbolic links and directory junctions, including
   links in parent directories. Store lookup and path-based removal accept

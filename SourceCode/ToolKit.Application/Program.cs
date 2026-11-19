@@ -108,6 +108,9 @@ internal static class Program
 				case "eml-to-pst":
 					result = Commands.EmlToPst(outlook, command);
 					break;
+				case "get-mail-bodies":
+					result = Commands.GetMailBodies(outlook, command);
+					break;
 				case "list-folders":
 					result = Commands.ListFolders(outlook, command);
 					break;
@@ -280,6 +283,13 @@ internal static class Program
 		Command details = new(
 			"details", null, 2, "Show details of given item");
 		commands.Add(details);
+
+		Command getMailBodies = new(
+			"get-mail-bodies",
+			null,
+			3,
+			"Export text/HTML mail bodies (experimental)");
+		commands.Add(getMailBodies);
 
 		foreach (Command command in commands)
 		{

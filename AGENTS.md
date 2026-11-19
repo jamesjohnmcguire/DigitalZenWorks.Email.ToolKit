@@ -19,6 +19,7 @@ optional service rather than as an always-available application dependency.
 - Follow existing nullable-reference-type conventions.
 - Avoid unnecessary dependencies.
 - Keep changes narrowly scoped to the task being performed.
+- Keep the application thin: parse and validate command arguments before calling library processing through the existing Outlook abstractions.
 - Do not combine unrelated architectural refactoring with a focused bug fix
   or feature unless required.
 - Investigate compiler and analyzer warnings rather than suppressing them
@@ -34,6 +35,8 @@ optional service rather than as an always-available application dependency.
 - Keep each class in its own file.
 - Use tabs for indentation.
 - Prefer one statement per line.
+- Use explicit boolean comparisons, such as `valid == false`, instead of `!valid`.
+- Prefer one return statement per method.
 - Use UTF-8 and LF line endings.
 - Follow `.editorconfig` where applicable.
 - Prefer explicit, readable code over unnecessarily compact code.

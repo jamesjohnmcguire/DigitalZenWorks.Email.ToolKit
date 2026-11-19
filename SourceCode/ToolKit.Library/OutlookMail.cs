@@ -6,14 +6,19 @@
 
 namespace DigitalZenWorks.Email.ToolKit;
 
+using DigitalZenWorks.Common.Utilities;
+using Microsoft.Office.Interop.Outlook;
+using MsgKit;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
-using DigitalZenWorks.Common.Utilities;
-using Microsoft.Office.Interop.Outlook;
+using static System.Collections.Specialized.BitVector32;
+using static System.Net.Mime.MediaTypeNames;
 
 /// <summary>
 /// Outlook Mail Class.
@@ -65,6 +70,38 @@ public class OutlookMail
 		}
 
 		return synopses;
+	}
+
+	/// <summary>
+	/// Exports this mail item's text and available HTML bodies.
+	/// </summary>
+	/// <param name="outputDirectory">The directory for entry-ID-named files.
+	/// </param>
+	/// <returns>True if files were written; false if output already exists or
+	/// this wrapper does not contain a mail item.</returns>
+	/// <remarks>This experimental export preserves the body text supplied by
+	/// Outlook. File-system and Outlook errors propagate to the caller.
+	/// </remarks>
+	public bool ExportBodies(string outputDirectory)
+	{
+		bool result = false;
+
+		if (mailItem != null)
+		{
+			string sentOn = mailItem.SentOn.ToString(
+				"O", CultureInfo.InvariantCulture);
+			string sender = GetSenderLine();
+
+			result = WriteBodiesWrapper(
+				mailItem.EntryID,
+				sentOn,
+				sender,
+				mailItem.Body,
+				mailItem.HTMLBody,
+				outputDirectory);
+		}
+
+		return result;
 	}
 
 	/// <summary>
@@ -158,6 +195,89 @@ public class OutlookMail
 		string synopses = GetSynopses(mailItem);
 
 		return synopses;
+	}
+
+	/// <summary>
+	/// Writes text and available HTML unless either export already exists.
+	/// </summary>
+	/// <param name="entryId">The entry ID used for output filenames.</param>
+	/// <param name="sentOn">The formatted sent date and time.</param>
+	/// <param name="sender">The sender metadata.</param>
+	/// <param name="text">The plain-text body.</param>
+	/// <param name="html">The available HTML body.</param>
+	/// <param name="directory">The output directory.</param>
+	/// <returns>True if files were written; false if output exists.</returns>
+	internal static bool WriteBodiesWrapper(
+		string entryId,
+		string sentOn,
+		string sender,
+		string text,
+		string html,
+		string directory)
+	{
+		bool result = false;
+
+		string textPath = Path.Combine(directory, entryId + ".txt");
+		string htmlPath = Path.Combine(directory, entryId + ".html");
+		bool textExists = File.Exists(textPath);
+		bool htmlExists = File.Exists(htmlPath);
+
+		if (textExists == false && htmlExists == false)
+		{
+			Directory.CreateDirectory(directory);
+			WriteFile(textPath, sentOn, sender, text, false);
+
+			bool exists = !string.IsNullOrEmpty(html);
+
+			if (string.IsNullOrEmpty(html) == false)
+			{
+				WriteFile(htmlPath, sentOn, sender, html, true);
+			}
+
+			result = true;
+		}
+
+		return result;
+	}
+
+	/// <summary>
+	/// Writes a UTF-8 body file with sent-time and sender metadata.
+	/// </summary>
+	/// <param name="path">The new output file path.</param>
+	/// <param name="sentOn">The formatted sent date and time.</param>
+	/// <param name="sender">The sender metadata.</param>
+	/// <param name="body">The body content to preserve.</param>
+	/// <param name="html">Whether to write metadata as an HTML comment.</param>
+	internal static void WriteFile(
+		string path, string sentOn, string sender, string body, bool html)
+	{
+		// Keep sender metadata on one line in both output formats.
+		sender = sender.Replace('\r', ' ');
+		sender = sender.Replace('\n', ' ');
+
+		using FileStream stream =
+			new(path, FileMode.CreateNew, FileAccess.Write);
+		UTF8Encoding encoding = new(false);
+		using StreamWriter writer = new(stream, encoding);
+		writer.NewLine = "\n";
+
+		if (html == true)
+		{
+			sender = WebUtility.HtmlEncode(sender);
+			StringBuilder escapedSender = new(sender);
+			escapedSender.Replace("--", "&#45;&#45;");
+			sender = escapedSender.ToString();
+			writer.WriteLine("<!-- Sent: " + sentOn);
+			writer.WriteLine("Sender: " + sender + " -->");
+		}
+		else
+		{
+			writer.WriteLine("Sent: " + sentOn);
+			writer.WriteLine("Sender: " + sender);
+		}
+
+		writer.WriteLine();
+		writer.Write(body);
 	}
 
 	private static string GetTextBoundaryMarker(
@@ -487,6 +607,36 @@ public class OutlookMail
 			"Sensitivity", mailItem.Sensitivity);
 
 		return enumsText;
+	}
+
+	private string GetSenderLine()
+	{
+		string senderLine = null;
+
+		if (mailItem != null)
+		{
+			string name = mailItem.SenderName ?? string.Empty;
+			string address = mailItem.SenderEmailAddress ?? string.Empty;
+			senderLine = name;
+
+			bool exists = !string.IsNullOrEmpty(address);
+
+			if (exists == true)
+			{
+				exists = !string.IsNullOrEmpty(name);
+
+				if (exists == false)
+				{
+					senderLine = address;
+				}
+				else
+				{
+					senderLine = name + " <" + address + ">";
+				}
+			}
+		}
+
+		return senderLine;
 	}
 
 	private byte[] GetStringProperties(

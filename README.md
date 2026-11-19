@@ -77,6 +77,7 @@ Det.exe \<command\> \<source-path\> \<destination-path\>
 | dbx-to-pst            | Migrate dbx files to pst file   | -e, --encoding | dbx files path, PST file path                      |
 | details               | Show details of given item      |                | PST file path, entry id                            |
 | eml-to-pst            | Migrate eml files to pst file   | -a, --adjust   | eml files path, PST file path                      |
+| get-mail-bodies       | Export mail bodies (experimental) | -t, --timeout | PST file path, folder path, output directory |
 | list-folders          | List all sub folders of a given | -r, --recurse  | PST file path, folder path                         |
 |                       | folder                          |                |                                                    |
 | list-ids              | List all entry IDs of items in  |                | PST file path, folder path                         |
@@ -134,6 +135,20 @@ If a PST file location is not specified, it will use the base location of the DB
 
 ###### eml-to-pst
 Some applications, like 'Windows Live Mail' often include interim folders, such as 'Imported Folders', 'Local Folders' and 'Storage Folders', creating unnecessary levels of nested folders.  Using the --adjust option will remove these interim folders in the PST file.
+
+###### get-mail-bodies (experimental)
+
+Exports mail bodies from one existing Outlook folder into UTF-8 files. Supply the PST filename, internal folder path, and output directory as three separate arguments:
+
+```cmd
+Det.exe get-mail-bodies "%USERPROFILE%\Data\ProgramData\Outlook\Employment.pst" "Employment\Employment" "D:\Exports\Employment"
+```
+
+Each mail item produces `<EntryID>.txt` and, when Outlook supplies a nonempty HTML body, `<EntryID>.html`. The first two text-file lines contain `Sent:` (ISO 8601) and `Sender:` (name/address as supplied by Outlook), followed by a blank line and the body. HTML files carry those two lines in a leading HTML comment. Body text is preserved as Outlook exposes it; attachments are not extracted.
+
+Only the selected folder is processed. Missing source files/folders are reported rather than created. Non-mail items and messages with existing output files are skipped. Individual export failures are logged, processing continues, and the command returns a nonzero status if any message fails. The source store remains attached, consistent with other store commands. Store/folder lookup and output-directory errors propagate through the existing command flow. `--timeout` / `-t` retains its activation-probe meaning.
+
+The library entry points are `OutlookStore.GetMailBodies(pstFilePath, folderPath, outputDirectory)` and `OutlookMail.ExportBodies(outputDirectory)`. Both return a boolean result; the application handles command-line parsing and connection setup.
 
 ###### merge-folders
 Sometimes, folders get duplicated, like in the following manner:

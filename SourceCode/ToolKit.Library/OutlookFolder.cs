@@ -1425,6 +1425,135 @@ public class OutlookFolder
 		return RemovedDuplicates;
 	}
 
+	/// <summary>
+	/// Exports mail bodies while retaining per-item failure reporting.
+	/// </summary>
+	/// <param name="folder">The existing source folder.</param>
+	/// <param name="directory">The output directory.</param>
+	/// <returns>True if no item failed; existing exports and non-mail items
+	/// are skipped.</returns>
+	internal static bool ExportMailBodies(MAPIFolder folder, string directory)
+	{
+		bool result = false;
+
+		int exported = 0;
+		int failed = 0;
+		int skipped = 0;
+		Items items = folder.Items;
+
+		try
+		{
+			int count = items.Count;
+			for (int index = 1; index <= count; index++)
+			{
+				object item = null;
+
+				try
+				{
+					item = items[index];
+
+					if (item is MailItem mail)
+					{
+						OutlookMail message = new(mail);
+						bool written = message.ExportBodies(directory);
+
+						if (written == true)
+						{
+							exported++;
+						}
+						else
+						{
+							skipped++;
+						}
+					}
+					else
+					{
+						skipped++;
+					}
+				}
+				catch (System.Exception exception) when
+				(
+					exception is COMException ||
+					exception is IOException ||
+					exception is UnauthorizedAccessException ||
+					exception is ArgumentException)
+				{
+					failed++;
+					Log.Error("Cannot export item " + index + ": " + exception);
+				}
+				finally
+				{
+					if (item != null)
+					{
+						Marshal.ReleaseComObject(item);
+					}
+				}
+			}
+		}
+		finally
+		{
+			Marshal.ReleaseComObject(items);
+		}
+
+		string summary = $"Exported: {exported}; skipped: {skipped}; " +
+			$"failed: {failed}.";
+		Log.Info(summary);
+
+		if (failed == 0)
+		{
+			result = true;
+		}
+
+		return result;
+	}
+
+	/// <summary>
+	/// Finds a folder without creating missing path components.
+	/// </summary>
+	/// <param name="store">The source store.</param>
+	/// <param name="path">The root-relative or root-prefixed folder
+	/// path.</param>
+	/// <returns>The acquired folder, which the caller must release.</returns>
+	internal static MAPIFolder GetExistingFolder(
+		Store store, string path)
+	{
+		MAPIFolder folder = store.GetRootFolder();
+		try
+		{
+			string[] parts = GetPathParts(path);
+			for (int index = 0; index < parts.Length; index++)
+			{
+				string part = parts[index];
+				if (index == 0 && part.Equals(
+					folder.Name, StringComparison.OrdinalIgnoreCase) == true)
+				{
+					continue;
+				}
+
+				MAPIFolder next;
+				Folders folders = folder.Folders;
+				try
+				{
+					next = folders[part];
+				}
+				finally
+				{
+					Marshal.ReleaseComObject(folders);
+				}
+
+				Marshal.ReleaseComObject(folder);
+				folder = next;
+			}
+		}
+		catch
+		{
+			Marshal.ReleaseComObject(folder);
+			throw;
+		}
+
+		return folder;
+	}
+
 	private static IDictionary<string, IList<string>> AddHashToTable(
 		IDictionary<string, IList<string>> hashTable,
 		string hash,

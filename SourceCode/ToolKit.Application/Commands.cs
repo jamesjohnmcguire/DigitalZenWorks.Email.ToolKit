@@ -167,6 +167,54 @@ internal static class Commands
 	}
 
 	/// <summary>
+	/// Exports the selected folder's text and HTML mail bodies.
+	/// </summary>
+	/// <param name="outlook">The service used to connect to Outlook.</param>
+	/// <param name="command">The source paths and output directory.</param>
+	/// <returns>Zero for a complete export; otherwise -1.</returns>
+	internal static int GetMailBodies(IOutlookService outlook, Command command)
+	{
+		int result = -1;
+
+		bool valid = CommandsOptions.ValidateMailBodyExport(
+			command,
+			command.Parameters,
+			out string errorMessage);
+
+		if (valid == false)
+		{
+			Log.Error(errorMessage);
+		}
+		else
+		{
+			string storePath =
+				CommandsOptions.GetStorePath(command.Parameters);
+			string folderPath =
+				CommandsOptions.GetFolderPath(command.Parameters);
+			string outputDirectory =
+				CommandsOptions.GetOutputDirectory(command.Parameters);
+
+			bool connected = OutlookConnect(outlook, command);
+
+			if (connected == true)
+			{
+				IOutlookSession session = outlook.Session;
+				OutlookStore store = OutlookStore.FromSession(session);
+
+				bool success = store.GetMailBodies(
+					storePath, folderPath, outputDirectory);
+
+				if (success == true)
+				{
+					result = 0;
+				}
+			}
+		}
+
+		return result;
+	}
+
+	/// <summary>
 	/// Writes folder names in alphabetical order to the console.
 	/// </summary>
 	/// <param name="outlook">The service used to connect to Outlook.</param>
