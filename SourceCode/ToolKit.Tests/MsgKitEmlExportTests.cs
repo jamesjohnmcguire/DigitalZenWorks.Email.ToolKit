@@ -52,6 +52,21 @@ internal sealed class MsgKitEmlExportTests
 			DuplicateTestData.Release(item);
 		}
 
+		Outlook.MailItem saved =
+			(Outlook.MailItem)data.NameSpace.OpenSharedItem(msgPath);
+
+		try
+		{
+			Assert.That(
+				saved.HTMLBody ?? string.Empty,
+				Does.Contain(link),
+				"HTML link after reopening the saved MSG in Outlook");
+		}
+		finally
+		{
+			DuplicateTestData.Release(saved);
+		}
+
 		Converter.ConvertMsgToEml(msgPath, emlPath);
 
 		using MimeMessage exported = MimeMessage.Load(emlPath);
