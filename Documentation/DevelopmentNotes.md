@@ -265,3 +265,9 @@ Email.ToolKit has a local workaround that represents these fields as an ordinary
 - [RFC 2298 example](https://www.rfc-editor.org/rfc/rfc2298.html#section-9)
 - [MsgKit package](https://www.nuget.org/packages/MsgKit/3.0.6)
 - [Current converter source](https://github.com/Sicos1977/MsgKit/blob/master/MsgKit/Converter.cs)
+
+# Additional Notes
+
+## Export EML Files
+	Example Usage:
+		Det.exe export-eml %USERPROFILE%\Data\ProgramData\Outlook\Employment.pst Employment\Employment %USERPROFILE%\Data\Clients\DigitalZenWorks\JobsDb\Emails
