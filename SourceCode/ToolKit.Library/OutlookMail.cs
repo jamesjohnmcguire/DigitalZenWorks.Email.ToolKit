@@ -6,9 +6,6 @@
 
 namespace DigitalZenWorks.Email.ToolKit;
 
-using DigitalZenWorks.Common.Utilities;
-using Microsoft.Office.Interop.Outlook;
-using MsgKit;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,8 +14,8 @@ using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
-using static System.Collections.Specialized.BitVector32;
-using static System.Net.Mime.MediaTypeNames;
+using DigitalZenWorks.Common.Utilities;
+using Microsoft.Office.Interop.Outlook;
 
 /// <summary>
 /// Outlook Mail Class.
@@ -280,6 +277,34 @@ public class OutlookMail
 		writer.Write(body);
 	}
 
+	/// <summary>
+	/// Exports the Outlook item to an entry-ID-named EML file.
+	/// </summary>
+	/// <param name="outputDirectory">The destination directory.</param>
+	/// <returns>True if an EML was written, or false if the item has no entry
+	/// ID or the output file already exists.</returns>
+	/// <remarks>Outlook and file-system errors propagate to the caller.
+	/// </remarks>
+	internal bool ExportEml(string outputDirectory)
+	{
+		bool exported = false;
+		string entryId = mailItem?.EntryID;
+
+		if (string.IsNullOrEmpty(entryId) == false)
+		{
+			string outputPath = Path.Combine(outputDirectory, entryId + ".eml");
+
+			if (File.Exists(outputPath) == false)
+			{
+				Directory.CreateDirectory(outputDirectory);
+				WriteEml(outputDirectory, outputPath);
+				exported = true;
+			}
+		}
+
+		return exported;
+	}
+
 	private static string GetTextBoundaryMarker(
 		string text, bool preserveBoundaries)
 	{
@@ -320,6 +345,41 @@ public class OutlookMail
 #endif
 
 		return headers;
+	}
+
+	private void WriteEml(string outputDirectory, string outputPath)
+	{
+		string temporaryName = Guid.NewGuid().ToString("N");
+		string msgPath = Path.Combine(
+			Path.GetTempPath(), temporaryName + ".msg");
+		string stagingPath = Path.Combine(
+			outputDirectory, temporaryName + ".tmp");
+
+		try
+		{
+			string htmlBody = mailItem.HTMLBody;
+			mailItem.SaveAs(msgPath, OlSaveAsType.olMSGUnicode);
+
+			using (FileStream input = File.OpenRead(msgPath))
+			using (FileStream output = new(stagingPath, FileMode.CreateNew))
+			{
+				EmlConverter.ConvertMsgToEml(input, output, htmlBody);
+			}
+
+			// Publish the complete file without replacing an existing export.
+			File.Move(stagingPath, outputPath);
+		}
+		finally
+		{
+			try
+			{
+				File.Delete(stagingPath);
+			}
+			finally
+			{
+				File.Delete(msgPath);
+			}
+		}
 	}
 
 	private ushort GetBooleans()

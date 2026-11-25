@@ -102,4 +102,93 @@ internal sealed class MsgKitEmlExportTests
 				"HTML listing and link");
 		}
 	}
+
+	/// <summary>
+	/// Verifies a failed move cleans up the staged export.
+	/// </summary>
+	/// <remarks>
+	/// A directory at the final filename blocks the move after conversion.
+	/// The failed export should leave only that directory at the destination.
+	/// </remarks>
+	[Test]
+	public void ExportEmlCleansUpWhenDestinationIsBlocked()
+	{
+		using DuplicateTestData data = new();
+		string directory = Path.GetDirectoryName(data.StorePath)!;
+		string outputDirectory = Path.Combine(directory, "exports");
+		Outlook.MailItem item = data.CreateMail();
+
+		try
+		{
+			string outputPath = Path.Combine(
+				outputDirectory, item.EntryID + ".eml");
+			Directory.CreateDirectory(outputPath);
+			OutlookMail mail = new(item);
+
+			Assert.That(
+				() => mail.ExportEml(outputDirectory),
+				Throws.InstanceOf<IOException>().Or
+					.InstanceOf<UnauthorizedAccessException>());
+			Assert.That(Directory.Exists(outputPath), Is.True);
+			Assert.That(
+				Directory.GetFileSystemEntries(outputDirectory),
+				Is.EqualTo(new[] { outputPath }));
+		}
+		finally
+		{
+			DuplicateTestData.Release(item);
+		}
+	}
+
+	/// <summary>
+	/// Verifies the export preserves HTML and skips existing files.
+	/// </summary>
+	/// <remarks>
+	/// Parses the exported EML to verify the source link survived. A second
+	/// export targets the same entry ID after sentinel content is placed in
+	/// the destination, making an accidental overwrite observable.
+	/// </remarks>
+	[Test]
+	public void ExportEmlWritesHtmlAndPreservesExistingFile()
+	{
+		const string link = "https://example.com/jobs/developer";
+		const string existing = "Existing export";
+
+		using DuplicateTestData data = new();
+		string directory = Path.GetDirectoryName(data.StorePath)!;
+		string outputDirectory = Path.Combine(directory, "exports");
+		Outlook.MailItem item = data.CreateMail();
+
+		try
+		{
+			item.HTMLBody = $"<html><body><a href=\"{link}\">" +
+				"Developer position</a></body></html>";
+			string outputPath = Path.Combine(
+				outputDirectory, item.EntryID + ".eml");
+			OutlookMail mail = new(item);
+
+			bool exported = mail.ExportEml(outputDirectory);
+			Assert.That(exported, Is.True);
+
+			using (MimeMessage message = MimeMessage.Load(outputPath))
+			{
+				Assert.That(
+					message.HtmlBody ?? string.Empty,
+					Does.Contain(link));
+			}
+
+			File.WriteAllText(outputPath, existing);
+			bool exportedAgain = mail.ExportEml(outputDirectory);
+
+			Assert.That(exportedAgain, Is.False);
+			Assert.That(File.ReadAllText(outputPath), Is.EqualTo(existing));
+			Assert.That(
+				Directory.GetFiles(outputDirectory),
+				Is.EqualTo(new[] { outputPath }));
+		}
+		finally
+		{
+			DuplicateTestData.Release(item);
+		}
+	}
 }
