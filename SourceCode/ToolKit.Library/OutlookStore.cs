@@ -418,22 +418,11 @@ public class OutlookStore
 	public bool GetMailBodies(
 		string pstFilePath, string folderPath, string outputDirectory)
 	{
-		bool result = false;
-		Store store = outlookSession.GetStore(pstFilePath);
-
-		if (store != null)
-		{
-			MAPIFolder folder = OutlookFolder.GetExistingFolder(
-				store, folderPath);
-
-			if (folder != null)
-			{
-				Directory.CreateDirectory(outputDirectory);
-				result = OutlookFolder.ExportMailBodies(folder, outputDirectory);
-
-				Marshal.ReleaseComObject(folder);
-			}
-		}
+		bool result = ExportFolder(
+			pstFilePath,
+			folderPath,
+			outputDirectory,
+			OutlookFolder.ExportMailBodies);
 
 		return result;
 	}
@@ -1301,6 +1290,23 @@ public class OutlookStore
 		outlookSession.RemoveStore(store);
 	}
 
+	/// <summary>
+	/// Exports mail in one Outlook folder to entry-ID-named EML files.
+	/// </summary>
+	/// <param name="pstFilePath">The existing PST file path.</param>
+	/// <param name="folderPath">The path within the Outlook store.</param>
+	/// <param name="outputDirectory">The destination directory.</param>
+	/// <returns>True if export completed without item failures.</returns>
+	/// <remarks>Only the selected folder is processed.</remarks>
+	internal bool ExportEml(
+		string pstFilePath, string folderPath, string outputDirectory)
+	{
+		bool result = ExportFolder(
+			pstFilePath, folderPath, outputDirectory, OutlookFolder.ExportEml);
+
+		return result;
+	}
+
 	private static void EmptyDeletedItemsFolder(
 		MAPIFolder deletedItemsFolder)
 	{
@@ -1327,6 +1333,32 @@ public class OutlookStore
 			OutlookItem contentItem = new(item);
 			contentItem.Delete();
 		}
+	}
+
+	private bool ExportFolder(
+		string pstFilePath,
+		string folderPath,
+		string outputDirectory,
+		Func<MAPIFolder, string, bool> export)
+	{
+		bool result = false;
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		if (store != null)
+		{
+			MAPIFolder folder = OutlookFolder.GetExistingFolder(
+				store, folderPath);
+
+			if (folder != null)
+			{
+				Directory.CreateDirectory(outputDirectory);
+				result = export(folder, outputDirectory);
+
+				Marshal.ReleaseComObject(folder);
+			}
+		}
+
+		return result;
 	}
 
 	private void MoveExistingFolder(

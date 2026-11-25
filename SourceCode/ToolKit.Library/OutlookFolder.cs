@@ -1434,75 +1434,23 @@ public class OutlookFolder
 	/// are skipped.</returns>
 	internal static bool ExportMailBodies(MAPIFolder folder, string directory)
 	{
-		bool result = false;
+		bool result = ExportMessages(
+			folder, directory, static (mail, path) => mail.ExportBodies(path));
 
-		int exported = 0;
-		int failed = 0;
-		int skipped = 0;
-		Items items = folder.Items;
+		return result;
+	}
 
-		try
-		{
-			int count = items.Count;
-			for (int index = 1; index <= count; index++)
-			{
-				object item = null;
-
-				try
-				{
-					item = items[index];
-
-					if (item is MailItem mail)
-					{
-						OutlookMail message = new(mail);
-						bool written = message.ExportBodies(directory);
-
-						if (written == true)
-						{
-							exported++;
-						}
-						else
-						{
-							skipped++;
-						}
-					}
-					else
-					{
-						skipped++;
-					}
-				}
-				catch (System.Exception exception) when
-				(
-					exception is COMException ||
-					exception is IOException ||
-					exception is UnauthorizedAccessException ||
-					exception is ArgumentException)
-				{
-					failed++;
-					Log.Error("Cannot export item " + index + ": " + exception);
-				}
-				finally
-				{
-					if (item != null)
-					{
-						Marshal.ReleaseComObject(item);
-					}
-				}
-			}
-		}
-		finally
-		{
-			Marshal.ReleaseComObject(items);
-		}
-
-		string summary = $"Exported: {exported}; skipped: {skipped}; " +
-			$"failed: {failed}.";
-		Log.Info(summary);
-
-		if (failed == 0)
-		{
-			result = true;
-		}
+	/// <summary>
+	/// Exports mail in the selected folder to EML files.
+	/// </summary>
+	/// <param name="folder">The existing source folder.</param>
+	/// <param name="directory">The output directory.</param>
+	/// <returns>True if no item failed. Non-mail items and existing exports
+	/// are skipped.</returns>
+	internal static bool ExportEml(MAPIFolder folder, string directory)
+	{
+		bool result = ExportMessages(
+			folder, directory, static (mail, path) => mail.ExportEml(path));
 
 		return result;
 	}
@@ -1594,6 +1542,85 @@ public class OutlookFolder
 		}
 
 		return folderExists;
+	}
+
+	private static bool ExportMessages(
+		MAPIFolder folder,
+		string directory,
+		Func<OutlookMail, string, bool> export)
+	{
+		bool result = false;
+
+		int exported = 0;
+		int failed = 0;
+		int skipped = 0;
+		Items items = folder.Items;
+
+		try
+		{
+			int count = items.Count;
+			for (int index = 1; index <= count; index++)
+			{
+				object item = null;
+
+				try
+				{
+					item = items[index];
+
+					if (item is MailItem mail)
+					{
+						OutlookMail message = new(mail);
+						bool written = export(message, directory);
+
+						if (written == true)
+						{
+							exported++;
+						}
+						else
+						{
+							skipped++;
+						}
+					}
+					else
+					{
+						skipped++;
+					}
+				}
+				catch (System.Exception exception) when
+				(
+					exception is COMException ||
+					exception is IOException ||
+					exception is UnauthorizedAccessException ||
+					exception is ArgumentException ||
+					exception is FormatException)
+				{
+					failed++;
+					Log.Error("Cannot export item " + index + ": " + exception);
+				}
+				finally
+				{
+					if (item != null)
+					{
+						Marshal.ReleaseComObject(item);
+					}
+				}
+			}
+		}
+		finally
+		{
+			Marshal.ReleaseComObject(items);
+		}
+
+		string summary = $"Exported: {exported}; skipped: {skipped}; " +
+			$"failed: {failed}.";
+		Log.Info(summary);
+
+		if (failed == 0)
+		{
+			result = true;
+		}
+
+		return result;
 	}
 
 	private static MAPIFolder GetPathFolder(

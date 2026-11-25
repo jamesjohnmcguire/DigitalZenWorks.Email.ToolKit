@@ -191,4 +191,68 @@ internal sealed class MsgKitEmlExportTests
 			DuplicateTestData.Release(item);
 		}
 	}
+
+	/// <summary>
+	/// Verifies folder export writes only mail from the selected folder.
+	/// </summary>
+	/// <remarks>
+	/// A post in the selected folder and a mail item in a child folder make
+	/// type filtering and nonrecursive traversal independently observable.
+	/// </remarks>
+	[Test]
+	public void ExportFolderWritesOnlyMailFromSelectedFolder()
+	{
+		using DuplicateTestData data = new();
+		string directory = Path.GetDirectoryName(data.StorePath)!;
+		string outputDirectory = Path.Combine(directory, "exports");
+		Outlook.MailItem mail = data.CreateMail();
+		Outlook.MAPIFolder folder = data.OpenFolder();
+		Outlook.Folders folders = folder.Folders;
+		Outlook.Items items = folder.Items;
+
+		try
+		{
+			Outlook.MAPIFolder child = folders.Add("Child");
+			Outlook.MailItem copy = DuplicateTestData.Copy(mail);
+			Outlook.PostItem post = (Outlook.PostItem)items.Add(
+				Outlook.OlItemType.olPostItem);
+
+			try
+			{
+				Outlook.MailItem moved = (Outlook.MailItem)copy.Move(child);
+				DuplicateTestData.Release(moved);
+				post.Subject = "Non-mail fixture";
+				post.Save();
+			}
+			finally
+			{
+				DuplicateTestData.Release(post, copy, child);
+			}
+
+			mail.UnRead = true;
+			mail.Save();
+			string entryId = mail.EntryID;
+			string body = mail.Body;
+			string expected = Path.Combine(outputDirectory, entryId + ".eml");
+			OutlookStore store = OutlookStore.FromSession(data.Session);
+
+			bool exported = store.ExportEml(
+				data.StorePath, "Candidates", outputDirectory);
+
+			using (Assert.EnterMultipleScope())
+			{
+				Assert.That(exported, Is.True);
+				Assert.That(
+					Directory.GetFiles(outputDirectory),
+					Is.EqualTo(new[] { expected }));
+				Assert.That(mail.UnRead, Is.True);
+				Assert.That(mail.EntryID, Is.EqualTo(entryId));
+				Assert.That(mail.Body, Is.EqualTo(body));
+			}
+		}
+		finally
+		{
+			DuplicateTestData.Release(items, folders, folder, mail);
+		}
+	}
 }
