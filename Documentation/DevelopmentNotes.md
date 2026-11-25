@@ -259,3 +259,9 @@ Email.ToolKit has a local workaround that represents these fields as an ordinary
 - [RFC 2298 example](https://www.rfc-editor.org/rfc/rfc2298.html#section-9)
 - [MsgKit package](https://www.nuget.org/packages/MsgKit/3.0.6)
 - [Current converter source](https://github.com/Sicos1977/MsgKit/blob/master/MsgKit/Converter.cs)
+
+# Additional Notes
+
+## Building
+	For one-off builds, use:
+		MSBuild.exe -p:Configuration=Release;DebugType=embedded;IncludeNativeLibrariesForSelfExtract=true;PublishDir=%CD%\Release\win-x64;PublishDocumentationFiles=false;PublishReadyToRun=true;PublishSingleFile=true;RuntimeIdentifier=win-x64;SelfContained=true -restore -t:Publish ToolKit.Application
