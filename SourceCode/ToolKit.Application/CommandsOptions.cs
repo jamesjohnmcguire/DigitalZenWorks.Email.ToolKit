@@ -15,7 +15,7 @@ using System.IO;
 using DigitalZenWorks.CommandLine.Commands;
 
 /// <summary>
-/// Validates and reads arguments used by the mail-body export command.
+/// Validates and reads arguments used by the EML export command.
 /// </summary>
 internal static class CommandsOptions
 {
@@ -133,9 +133,8 @@ internal static class CommandsOptions
 	internal static bool IsValidPstFile(string? path)
 	{
 		bool result = false;
-		bool validPath = TryGetFullPath(path, out string? fullPath);
 
-		if (validPath == true)
+		if (TryGetFullPath(path, out string? fullPath) == true)
 		{
 			bool pstExtension = HasFileExtension(fullPath, ".pst");
 			bool fileExists = File.Exists(fullPath);
@@ -182,7 +181,7 @@ internal static class CommandsOptions
 	}
 
 	/// <summary>
-	/// Validates body-export arguments before any Outlook connection.
+	/// Validates EML export arguments before any Outlook connection.
 	/// </summary>
 	/// <param name="command">The command metadata and parsed options.</param>
 	/// <param name="arguments">The unmodified positional arguments supplied by
@@ -190,7 +189,7 @@ internal static class CommandsOptions
 	/// <param name="errorMessage">The validation error, or null on success.
 	/// </param>
 	/// <returns>True when export arguments identify an existing PST.</returns>
-	internal static bool ValidateMailBodyExport(
+	internal static bool ValidateEmlExport(
 		Command command,
 		IList<string> arguments,
 		out string? errorMessage)

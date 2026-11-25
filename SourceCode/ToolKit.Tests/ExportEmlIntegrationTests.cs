@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// <copyright file="GetMailBodiesIntegrationTests.cs"
+// <copyright file="ExportEmlIntegrationTests.cs"
 // company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
@@ -15,17 +15,18 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using DigitalZenWorks.CommandLine.Commands;
 using DigitalZenWorks.Email.ToolKit.Application;
+using MimeKit;
 using NUnit.Framework;
 using Outlook = Microsoft.Office.Interop.Outlook;
 using Program = DigitalZenWorks.Email.ToolKit.Application.Program;
 
 /// <summary>
-/// Exercises body export against real mail in isolated test-owned PSTs.
+/// Exercises EML export against real mail in isolated test-owned PSTs.
 /// </summary>
 [Apartment(ApartmentState.STA)]
 [Category("Integration")]
 [NonParallelizable]
-internal sealed class GetMailBodiesIntegrationTests
+internal sealed class ExportEmlIntegrationTests
 {
 	private DirectoryInfo directory = null!;
 
@@ -41,13 +42,13 @@ internal sealed class GetMailBodiesIntegrationTests
 		Assert.That(data.Session.RemoveStore(data.StorePath), Is.True);
 		string output = Path.Combine(directory.FullName, "output");
 		string[] parameters = [data.StorePath, "Candidates", output];
-		Command command = new("get-mail-bodies", [], parameters);
+		Command command = new("export-eml", [], parameters);
 		OutlookService service = CreateConnectedService(data);
 
-		int result = Commands.GetMailBodies(service, command);
+		int result = Commands.ExportEml(service, command);
 
 		Assert.That(result, Is.Zero);
-		Assert.That(Directory.GetFiles(output), Has.Length.EqualTo(2));
+		Assert.That(Directory.GetFiles(output), Has.Length.EqualTo(1));
 		Outlook.Store? attached = data.Session.GetStore(data.StorePath, false);
 		if (attached != null)
 		{
@@ -72,11 +73,11 @@ internal sealed class GetMailBodiesIntegrationTests
 			string output = Path.Combine(directory.FullName, "output");
 			string[] parameters =
 				[data.StorePath, "Candidates/Missing", output];
-			Command command = new("get-mail-bodies", [], parameters);
+			Command command = new("export-eml", [], parameters);
 			OutlookService service = CreateConnectedService(data);
 
 			Assert.Throws<COMException>(() =>
-				Commands.GetMailBodies(service, command));
+				Commands.ExportEml(service, command));
 			Assert.That(children.Count, Is.EqualTo(originalCount));
 			Assert.That(Directory.Exists(output), Is.False);
 			Assert.That(service.IsConnected, Is.True);
@@ -103,7 +104,7 @@ internal sealed class GetMailBodiesIntegrationTests
 		startInfo.UseShellExecute = false;
 		startInfo.CreateNoWindow = true;
 		startInfo.ArgumentList.Add(typeof(Program).Assembly.Location);
-		startInfo.ArgumentList.Add("get-mail-bodies");
+		startInfo.ArgumentList.Add("export-eml");
 		startInfo.ArgumentList.Add(data.StorePath);
 		startInfo.ArgumentList.Add("Candidates");
 		startInfo.ArgumentList.Add(output);
@@ -114,14 +115,17 @@ internal sealed class GetMailBodiesIntegrationTests
 			// Terminate only this test's CLI host, never Outlook.
 			process.Kill();
 			process.WaitForExit();
-			Assert.Fail("The body-export CLI exceeded its test watchdog.");
+			Assert.Fail("The EML export CLI exceeded its test watchdog.");
 		}
 
 		Assert.That(process.ExitCode, Is.Zero);
-		string textPath = Path.Combine(output, entryId + ".txt");
-		string htmlPath = Path.Combine(output, entryId + ".html");
-		Assert.That(File.Exists(textPath), Is.True);
-		Assert.That(File.Exists(htmlPath), Is.True);
+		string emlPath = Path.Combine(output, entryId + ".eml");
+		using MimeMessage message = MimeMessage.Load(emlPath);
+
+		Assert.That(message.Subject, Is.EqualTo("Duplicate safety fixture"));
+		Assert.That(
+			message.HtmlBody ?? string.Empty,
+			Does.Contain("Original body."));
 	}
 
 	/// <summary>
@@ -142,7 +146,7 @@ internal sealed class GetMailBodiesIntegrationTests
 			string output = Path.Combine(directory.FullName, "output");
 			OutlookStore store = OutlookStore.FromSession(data.Session);
 
-			bool result = store.GetMailBodies(
+			bool result = store.ExportEml(
 				data.StorePath, "Candidates", output);
 
 			Assert.That(result, Is.True);
@@ -155,11 +159,11 @@ internal sealed class GetMailBodiesIntegrationTests
 	}
 
 	/// <summary>
-	/// Verifies body export resolves identical root/child names and preserves
+	/// Verifies EML export resolves identical root/child names and preserves
 	/// the source mail and an already-attached Outlook store.
 	/// </summary>
 	[Test]
-	public void ExportWritesBodiesAndPreservesSource()
+	public void ExportWritesEmlAndPreservesSource()
 	{
 		using DuplicateTestData data = new();
 		SetEmploymentFolderNames(data);
@@ -175,22 +179,23 @@ internal sealed class GetMailBodiesIntegrationTests
 			string[] parameters =
 				[data.StorePath, "Employment/Employment", output];
 
-			Command command = new("get-mail-bodies", [], parameters);
+			Command command = new("export-eml", [], parameters);
 			OutlookService service = CreateConnectedService(data);
 
-			int result = Commands.GetMailBodies(service, command);
+			int result = Commands.ExportEml(service, command);
 
 			Assert.That(result, Is.Zero);
-			string textPath = Path.Combine(output, entryId + ".txt");
-			string htmlPath = Path.Combine(output, entryId + ".html");
-			string textOutput = File.ReadAllText(textPath);
-			string htmlOutput = File.ReadAllText(htmlPath);
-			Assert.That(textOutput, Does.StartWith("Sent: "));
-			Assert.That(textOutput, Does.Contain("Safety Sender"));
-			Assert.That(textOutput, Does.EndWith(text));
-			Assert.That(htmlOutput, Does.StartWith("<!-- Sent: "));
-			Assert.That(htmlOutput, Does.EndWith(html));
-			Assert.That(Directory.GetFiles(output), Has.Length.EqualTo(2));
+			string emlPath = Path.Combine(output, entryId + ".eml");
+			using MimeMessage message = MimeMessage.Load(emlPath);
+
+			Assert.That(message.From.ToString(), Does.Contain("Safety Sender"));
+			Assert.That(
+				message.TextBody ?? string.Empty,
+				Does.Contain("Original body."));
+			Assert.That(
+				message.HtmlBody ?? string.Empty,
+				Does.Contain("Original body."));
+			Assert.That(Directory.GetFiles(output), Has.Length.EqualTo(1));
 			Assert.That(mail.Body, Is.EqualTo(text));
 			Assert.That(mail.HTMLBody, Is.EqualTo(html));
 			Assert.That(mail.UnRead, Is.True);

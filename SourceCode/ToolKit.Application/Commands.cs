@@ -167,16 +167,16 @@ internal static class Commands
 	}
 
 	/// <summary>
-	/// Exports the selected folder's text and HTML mail bodies.
+	/// Exports the selected folder's mail as EML files.
 	/// </summary>
 	/// <param name="outlook">The service used to connect to Outlook.</param>
 	/// <param name="command">The source paths and output directory.</param>
 	/// <returns>Zero for a complete export; otherwise -1.</returns>
-	internal static int GetMailBodies(IOutlookService outlook, Command command)
+	internal static int ExportEml(IOutlookService outlook, Command command)
 	{
 		int result = -1;
 
-		bool valid = CommandsOptions.ValidateMailBodyExport(
+		bool valid = CommandsOptions.ValidateEmlExport(
 			command,
 			command.Parameters,
 			out string errorMessage);
@@ -201,7 +201,7 @@ internal static class Commands
 				IOutlookSession session = outlook.Session;
 				OutlookStore store = OutlookStore.FromSession(session);
 
-				bool success = store.GetMailBodies(
+				bool success = store.ExportEml(
 					storePath, folderPath, outputDirectory);
 
 				if (success == true)

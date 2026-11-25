@@ -274,18 +274,18 @@ internal sealed class CommandsOptionsTests
 	/// without mutating them or requiring a second command-line parse.
 	/// </summary>
 	[Test]
-	public void ValidateMailBodyExportAcceptsCommandAndPositionalValues()
+	public void ValidateEmlExportAcceptsCommandAndPositionalValues()
 	{
 		string store = Path.GetTempFileName();
 		string pst = Path.ChangeExtension(store, ".pst");
 		File.Move(store, pst);
 		try
 		{
-			Command command = new("get-mail-bodies", [], []);
+			Command command = new("export-eml", [], []);
 			string[] arguments =
 				[pst, "Employment\\Employment", Path.GetTempPath()];
 
-			bool valid = CommandsOptions.ValidateMailBodyExport(
+			bool valid = CommandsOptions.ValidateEmlExport(
 				command, arguments, out var error);
 
 			Assert.That(valid, Is.True);
@@ -303,12 +303,12 @@ internal sealed class CommandsOptionsTests
 	/// Verifies combined source syntax does not replace separate arguments.
 	/// </summary>
 	[Test]
-	public void ValidateMailBodyExportRejectsCombinedSource()
+	public void ValidateEmlExportRejectsCombinedSource()
 	{
-		Command command = new("get-mail-bodies", [], []);
+		Command command = new("export-eml", [], []);
 		string[] arguments = ["archive.pst::Employment", "output"];
 
-		bool valid = CommandsOptions.ValidateMailBodyExport(
+		bool valid = CommandsOptions.ValidateEmlExport(
 			command, arguments, out var error);
 
 		Assert.That(valid, Is.False);
@@ -319,9 +319,9 @@ internal sealed class CommandsOptionsTests
 	/// Verifies missing, blank, and excess arguments fail validation.
 	/// </summary>
 	[Test]
-	public void ValidateMailBodyExportRejectsIncompleteParameters()
+	public void ValidateEmlExportRejectsIncompleteParameters()
 	{
-		Command command = new("get-mail-bodies", [], []);
+		Command command = new("export-eml", [], []);
 		string[][] invalid =
 		[
 			Array.Empty<string>(),
@@ -334,7 +334,7 @@ internal sealed class CommandsOptionsTests
 
 		foreach (string[] arguments in invalid)
 		{
-			bool valid = CommandsOptions.ValidateMailBodyExport(
+			bool valid = CommandsOptions.ValidateEmlExport(
 				command, arguments, out var error);
 			Assert.That(valid, Is.False);
 			Assert.That(error, Is.Not.Null);
@@ -345,7 +345,7 @@ internal sealed class CommandsOptionsTests
 	/// Verifies an invalid output path receives a specific validation error.
 	/// </summary>
 	[Test]
-	public void ValidateMailBodyExportRejectsInvalidOutputPath()
+	public void ValidateEmlExportRejectsInvalidOutputPath()
 	{
 		DirectoryInfo directory =
 			Directory.CreateTempSubdirectory("Email.ToolKit.Options.");
@@ -354,10 +354,10 @@ internal sealed class CommandsOptionsTests
 		{
 			string path = Path.Combine(directory.FullName, "Employment.pst");
 			File.WriteAllText(path, "Source path fixture.");
-			Command command = new("get-mail-bodies", [], []);
+			Command command = new("export-eml", [], []);
 			string[] arguments = [path, "Employment", "bad\0path"];
 
-			bool valid = CommandsOptions.ValidateMailBodyExport(
+			bool valid = CommandsOptions.ValidateEmlExport(
 				command, arguments, out var error);
 
 			Assert.That(valid, Is.False);
@@ -374,15 +374,15 @@ internal sealed class CommandsOptionsTests
 	/// Verifies missing source files return a validation error.
 	/// </summary>
 	[Test]
-	public void ValidateMailBodyExportRejectsMissingSource()
+	public void ValidateEmlExportRejectsMissingSource()
 	{
-		Command command = new("get-mail-bodies", [], []);
+		Command command = new("export-eml", [], []);
 		Guid identifier = Guid.NewGuid();
 		string name = identifier.ToString("N") + ".pst";
 		string store = Path.Combine(Path.GetTempPath(), name);
 		string[] arguments = [store, "Employment", Path.GetTempPath()];
 
-		bool valid = CommandsOptions.ValidateMailBodyExport(
+		bool valid = CommandsOptions.ValidateEmlExport(
 			command, arguments, out var error);
 
 		Assert.That(valid, Is.False);
@@ -393,14 +393,14 @@ internal sealed class CommandsOptionsTests
 	/// Verifies usage errors use the supplied command's name.
 	/// </summary>
 	[Test]
-	public void ValidateMailBodyExportReportsCommandUsage()
+	public void ValidateEmlExportReportsCommandUsage()
 	{
-		Command command = new("body-export-alias", [], []);
+		Command command = new("eml-export-alias", [], []);
 
-		bool valid = CommandsOptions.ValidateMailBodyExport(
+		bool valid = CommandsOptions.ValidateEmlExport(
 			command, [], out var error);
 
 		Assert.That(valid, Is.False);
-		Assert.That(error, Does.StartWith("Usage: body-export-alias "));
+		Assert.That(error, Does.StartWith("Usage: eml-export-alias "));
 	}
 }

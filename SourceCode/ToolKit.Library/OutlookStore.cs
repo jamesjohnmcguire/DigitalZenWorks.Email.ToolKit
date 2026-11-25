@@ -406,23 +406,32 @@ public class OutlookStore
 	}
 
 	/// <summary>
-	/// Exports the selected folder's mail bodies to UTF-8 files.
+	/// Exports mail in one Outlook folder to entry-ID-named EML files.
 	/// </summary>
-	/// <param name="pstFilePath">The existing .pst file path.</param>
+	/// <param name="pstFilePath">The existing PST file path.</param>
 	/// <param name="folderPath">The path within the Outlook store.</param>
-	/// <param name="outputDirectory">The output directory.</param>
-	/// <returns>True if no item failed; otherwise false.
-	/// Existing output files and non-mail items are skipped.</returns>
-	/// <remarks>Store and folder lookup or output-directory errors propagate
-	/// to the caller. The source store remains attached.</remarks>
-	public bool GetMailBodies(
+	/// <param name="outputDirectory">The destination directory.</param>
+	/// <returns>True if export completed without item failures.</returns>
+	/// <remarks>Only the selected folder is processed.</remarks>
+	public bool ExportEml(
 		string pstFilePath, string folderPath, string outputDirectory)
 	{
-		bool result = ExportFolder(
-			pstFilePath,
-			folderPath,
-			outputDirectory,
-			OutlookFolder.ExportMailBodies);
+		bool result = false;
+		Store store = outlookSession.GetStore(pstFilePath);
+
+		if (store != null)
+		{
+			MAPIFolder folder = OutlookFolder.GetExistingFolder(
+				store, folderPath);
+
+			if (folder != null)
+			{
+				Directory.CreateDirectory(outputDirectory);
+				result = OutlookFolder.ExportEml(folder, outputDirectory);
+
+				Marshal.ReleaseComObject(folder);
+			}
+		}
 
 		return result;
 	}
@@ -1290,23 +1299,6 @@ public class OutlookStore
 		outlookSession.RemoveStore(store);
 	}
 
-	/// <summary>
-	/// Exports mail in one Outlook folder to entry-ID-named EML files.
-	/// </summary>
-	/// <param name="pstFilePath">The existing PST file path.</param>
-	/// <param name="folderPath">The path within the Outlook store.</param>
-	/// <param name="outputDirectory">The destination directory.</param>
-	/// <returns>True if export completed without item failures.</returns>
-	/// <remarks>Only the selected folder is processed.</remarks>
-	internal bool ExportEml(
-		string pstFilePath, string folderPath, string outputDirectory)
-	{
-		bool result = ExportFolder(
-			pstFilePath, folderPath, outputDirectory, OutlookFolder.ExportEml);
-
-		return result;
-	}
-
 	private static void EmptyDeletedItemsFolder(
 		MAPIFolder deletedItemsFolder)
 	{
@@ -1333,32 +1325,6 @@ public class OutlookStore
 			OutlookItem contentItem = new(item);
 			contentItem.Delete();
 		}
-	}
-
-	private bool ExportFolder(
-		string pstFilePath,
-		string folderPath,
-		string outputDirectory,
-		Func<MAPIFolder, string, bool> export)
-	{
-		bool result = false;
-		Store store = outlookSession.GetStore(pstFilePath);
-
-		if (store != null)
-		{
-			MAPIFolder folder = OutlookFolder.GetExistingFolder(
-				store, folderPath);
-
-			if (folder != null)
-			{
-				Directory.CreateDirectory(outputDirectory);
-				result = export(folder, outputDirectory);
-
-				Marshal.ReleaseComObject(folder);
-			}
-		}
-
-		return result;
 	}
 
 	private void MoveExistingFolder(

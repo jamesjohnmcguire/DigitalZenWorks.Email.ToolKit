@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// <copyright file="GetMailBodiesCommandTests.cs" company="James John McGuire">
+// <copyright file="ExportEmlCommandTests.cs" company="James John McGuire">
 // Copyright © 2021 - 2026 James John McGuire. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
@@ -14,9 +14,9 @@ using NUnit.Framework;
 using Program = DigitalZenWorks.Email.ToolKit.Application.Program;
 
 /// <summary>
-/// Tests body-export command parsing without starting Outlook.
+/// Tests EML export command parsing without starting Outlook.
 /// </summary>
-internal sealed class GetMailBodiesCommandTests
+internal sealed class ExportEmlCommandTests
 {
 	private DirectoryInfo directory = null!;
 	private string outputPath = string.Empty;
@@ -29,14 +29,14 @@ internal sealed class GetMailBodiesCommandTests
 	/// <returns>The asynchronous test operation.</returns>
 	[TestCase("-t")]
 	[TestCase("--timeout")]
-	public async Task GetMailBodiesAcceptsSeparateArguments(string option)
+	public async Task ExportEmlAcceptsSeparateArguments(string option)
 	{
 		FakeOutlookService outlook = new();
 		string[] parameters =
 			[storePath, "Employment/Employment", outputPath];
 
 		string[] arguments =
-			["get-mail-bodies", option, "37", .. parameters];
+			["export-eml", option, "37", .. parameters];
 
 		int result = await Program.RunAsync(arguments, outlook).
 			ConfigureAwait(false);
@@ -56,12 +56,12 @@ internal sealed class GetMailBodiesCommandTests
 	[TestCase("-1")]
 	[TestCase("invalid")]
 	[TestCase("2147484")]
-	public async Task GetMailBodiesRejectsInvalidTimeout(string value)
+	public async Task ExportEmlRejectsInvalidTimeout(string value)
 	{
 		FakeOutlookService outlook = new();
 		string[] arguments =
 		[
-			"get-mail-bodies", storePath, "Employment", outputPath,
+			"export-eml", storePath, "Employment", outputPath,
 			"--timeout", value
 		];
 
@@ -81,10 +81,10 @@ internal sealed class GetMailBodiesCommandTests
 	[TestCase("archive.pst::")]
 	[TestCase("archive.pst::Employment")]
 	[TestCase("archive.pst")]
-	public async Task GetMailBodiesRejectsMalformedSource(string source)
+	public async Task ExportEmlRejectsMalformedSource(string source)
 	{
 		FakeOutlookService outlook = new();
-		string[] arguments = ["get-mail-bodies", source, outputPath];
+		string[] arguments = ["export-eml", source, outputPath];
 
 		int result = await Program.RunAsync(arguments, outlook).
 			ConfigureAwait(false);
@@ -98,12 +98,12 @@ internal sealed class GetMailBodiesCommandTests
 	/// </summary>
 	/// <returns>The asynchronous test operation.</returns>
 	[Test]
-	public async Task GetMailBodiesRejectsMissingStore()
+	public async Task ExportEmlRejectsMissingStore()
 	{
 		File.Delete(storePath);
 		FakeOutlookService outlook = new();
 		string[] arguments =
-			["get-mail-bodies", storePath, "Employment", outputPath];
+			["export-eml", storePath, "Employment", outputPath];
 
 		int result = await Program.RunAsync(arguments, outlook).
 			ConfigureAwait(false);
