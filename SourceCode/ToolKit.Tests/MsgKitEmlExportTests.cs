@@ -33,6 +33,7 @@ internal sealed class MsgKitEmlExportTests
 		const string listing = "Developer position";
 		const string link = "https://example.com/jobs/developer";
 		DateTime expectedSent = new(2002, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+
 		using DuplicateTestData data = new();
 		string directory = Path.GetDirectoryName(data.StorePath)!;
 		string msgPath = Path.Combine(directory, "job-listing.msg");
@@ -70,16 +71,21 @@ internal sealed class MsgKitEmlExportTests
 		Converter.ConvertMsgToEml(msgPath, emlPath);
 
 		using MimeMessage exported = MimeMessage.Load(emlPath);
+
 		using (Assert.EnterMultipleScope())
 		{
 			Assert.That(exported.From.ToString(), Does.Contain(
 				"sender@example.com"));
 			Assert.That(exported.Date.UtcDateTime, Is.EqualTo(expectedSent));
 			Assert.That(exported.Subject, Is.EqualTo(listing));
-			Assert.That(exported.TextBody ?? string.Empty,
-				Does.Contain(listing), "Plain-text listing content");
-			Assert.That(exported.HtmlBody ?? string.Empty,
-				Does.Contain(listing).And.Contain(link), "HTML listing and link");
+			Assert.That(
+				exported.TextBody ?? string.Empty,
+				Does.Contain(listing),
+				"Plain-text listing content");
+			Assert.That(
+				exported.HtmlBody ?? string.Empty,
+				Does.Contain(listing).And.Contain(link),
+				"HTML listing and link");
 		}
 	}
 }
