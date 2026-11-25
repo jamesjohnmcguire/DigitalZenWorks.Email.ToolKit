@@ -13,7 +13,7 @@ using MimeKit;
 using MsgKit;
 
 /// <summary>
-/// Preserves notification data when converting EML through upstream MsgKit.
+/// Converts between EML and MSG while preserving selected message content.
 /// </summary>
 internal static class EmlConverter
 {
@@ -52,6 +52,84 @@ internal static class EmlConverter
 		{
 			using MemoryStream normalized = new(conversionCopy, false);
 			Converter.ConvertEmlToMsg(normalized, msgFile);
+		}
+	}
+
+	/// <summary>
+	/// Converts MSG to EML and fills in missing HTML from Outlook.
+	/// </summary>
+	/// <param name="msgFile">The readable, seekable MSG input stream.</param>
+	/// <param name="emlFile">The writable EML output stream.</param>
+	/// <param name="outlookHtml">The HTML Outlook exposes for the item.</param>
+	internal static void ConvertMsgToEml(
+		Stream msgFile, Stream emlFile, string? outlookHtml)
+	{
+		if (outlookHtml == null || outlookHtml.Length == 0)
+		{
+			Converter.ConvertMsgToEml(msgFile, emlFile);
+		}
+		else
+		{
+			using MemoryStream converted = new();
+			Converter.ConvertMsgToEml(msgFile, converted);
+			converted.Position = 0;
+
+			using MimeMessage message = MimeMessage.Load(converted);
+			bool htmlMissing = string.IsNullOrEmpty(message.HtmlBody);
+
+			if (htmlMissing == true)
+			{
+				AddHtmlBody(message, outlookHtml);
+				message.WriteTo(emlFile);
+			}
+			else
+			{
+				converted.Position = 0;
+				converted.CopyTo(emlFile);
+			}
+		}
+	}
+
+	private static void AddHtmlBody(MimeMessage message, string html)
+	{
+		TextPart? htmlPart = null;
+
+		try
+		{
+			htmlPart = new TextPart("html");
+			htmlPart.Text = html;
+
+			if (message.Body is Multipart mixed &&
+				mixed.ContentType.IsMimeType("multipart", "mixed") == true)
+			{
+				// Keep attachments in the outer MIME container.
+				if (mixed.Count > 0 && mixed[0] is TextPart mixedText &&
+					mixedText.IsPlain == true && mixedText.IsAttachment == false)
+				{
+					mixed[0] = new MultipartAlternative { mixedText, htmlPart };
+				}
+				else
+				{
+					mixed.Insert(0, htmlPart);
+				}
+
+				htmlPart = null;
+			}
+			else if (message.Body is TextPart { IsPlain: true } text)
+			{
+				message.Body = new MultipartAlternative { text, htmlPart };
+				htmlPart = null;
+			}
+			else if (message.Body == null)
+			{
+				message.Body = htmlPart;
+				htmlPart = null;
+			}
+		}
+		finally
+		{
+			// The MIME message owns the part once it is added to the tree.
+			htmlPart?.Dispose();
 		}
 	}
 

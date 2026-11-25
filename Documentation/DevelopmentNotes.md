@@ -35,6 +35,8 @@ Please match the current coding style.  Most notably:
 
 Shared helpers/fakes are in `SourceCode/ToolKit.Tests/Support`, with embedded fixtures in `Support/Resources`. Explicit logical resource names preserve fixture lookups. Keep methods alphabetical and execution independent; retain STA and nonparallel requirements for real COM tests. Move files separately from content edits when preserving clear Git rename history.
 
+Group test setup, actions, and assertions with blank lines where they help scanning. When a call wraps across lines, put each argument on its own line for longer assertions. Use XML `<remarks>` to explain the purpose and verification method of tests that need context. Add inline comments for non-obvious intent and skip comments that restate a statement. Fix analyzer warnings in touched code when the correction is clear and within scope.
+
 The application and library embed Release PDB symbols. Library XML documentation remains in the NuGet package for consumer IntelliSense. Artifacts are under `artifacts/<version>/`; fresh `publish-*` staging directories prevent stale files entering executable archives.
 
 ## Versioning

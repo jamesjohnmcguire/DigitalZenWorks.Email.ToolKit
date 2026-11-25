@@ -12,7 +12,6 @@ using System;
 using System.IO;
 using System.Threading;
 using MimeKit;
-using MsgKit;
 using NUnit.Framework;
 using Outlook = Microsoft.Office.Interop.Outlook;
 
@@ -27,6 +26,13 @@ internal sealed class MsgKitEmlExportTests
 	/// <summary>
 	/// Verifies headers, both bodies, and a job link survive conversion.
 	/// </summary>
+	/// <remarks>
+	/// Saves a synthetic listing as Unicode MSG, then reopens it in Outlook
+	/// to verify the link survived the save. Outlook can recover HTML from
+	/// the MSG's compressed RTF body even when MsgKit omits HTML. The test
+	/// supplies the recovered HTML and parses the exported EML with MimeKit
+	/// to verify that the fallback preserves the listing and its metadata.
+	/// </remarks>
 	[Test]
 	public void ConvertOutlookMsgPreservesJobListing()
 	{
@@ -53,13 +59,17 @@ internal sealed class MsgKitEmlExportTests
 			DuplicateTestData.Release(item);
 		}
 
+		// Reopening distinguishes save-time loss from conversion-time loss.
 		Outlook.MailItem saved =
 			(Outlook.MailItem)data.NameSpace.OpenSharedItem(msgPath);
 
+		string htmlBody;
+
 		try
 		{
+			htmlBody = saved.HTMLBody ?? string.Empty;
 			Assert.That(
-				saved.HTMLBody ?? string.Empty,
+				htmlBody,
 				Does.Contain(link),
 				"HTML link after reopening the saved MSG in Outlook");
 		}
@@ -68,7 +78,11 @@ internal sealed class MsgKitEmlExportTests
 			DuplicateTestData.Release(saved);
 		}
 
-		Converter.ConvertMsgToEml(msgPath, emlPath);
+		using (FileStream input = File.OpenRead(msgPath))
+		using (FileStream output = File.Create(emlPath))
+		{
+			EmlConverter.ConvertMsgToEml(input, output, htmlBody);
+		}
 
 		using MimeMessage exported = MimeMessage.Load(emlPath);
 
